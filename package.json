@@ -1,5 +1,19 @@
 {
   "name":    "netvest-backend",
   "version": "0.0.0",
-  "private":  true
+  "private":  true,
+
+  "scripts":
+  {
+    "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/"
+  },
+
+  "devDependencies":
+  {
+    "eslint":
+      "^2.8",
+
+    "js-outlander":
+      "StrangeTransistor/js-outlander#2.0.0"
+  }
 }
