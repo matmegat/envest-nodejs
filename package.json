@@ -3,9 +3,19 @@
   "version": "0.0.0",
   "private":  true,
 
+  "main": "src/",
+
   "scripts":
   {
+    "start": "node .",
+
     "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/"
+  },
+
+  "dependencies":
+  {
+    "express":
+      "^4.13"
   },
 
   "devDependencies":
