@@ -15,7 +15,10 @@
   "dependencies":
   {
     "express":
-      "^4.13"
+      "^4.13",
+
+    "console-ultimate":
+      "^2.8"
   },
 
   "devDependencies":
