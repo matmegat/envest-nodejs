@@ -1,6 +1,7 @@
 
 var rootpath = require('rootpath')
 
+var Config = require('./Config')
 var Http = require('./api/Http')
 
 module.exports = function App ()
@@ -9,6 +10,8 @@ module.exports = function App ()
 
 	app.root = rootpath(__dirname, '..')
 	console.info('Running at `%s`', app.root())
+
+	app.cfg = Config(app)
 
 	app.http = Http(app)
 

@@ -3,7 +3,7 @@ var express = require('express')
 
 var Feed = require('./Feed')
 
-module.exports = function Http ()
+module.exports = function Http (app)
 {
 	var http = {}
 
@@ -12,7 +12,7 @@ module.exports = function Http ()
 	http.feed = Feed()
 	http.express.use('/api/feed', http.feed.express)
 
-	var port = 8080
+	var port = app.cfg.port
 
 	http.express.listen(port, () => console.info('NetVest backend at :%s', port))
 
