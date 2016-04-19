@@ -1,0 +1,5 @@
+#! /bin/sh
+
+R=git@github.com:WeezLabs/NetVest.git
+
+git push $R master:backend/master
