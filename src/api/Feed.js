@@ -1,4 +1,5 @@
 
+var times = require('lodash/times')
 var Router = require('express').Router
 
 module.exports = function Feed ()
@@ -7,11 +8,20 @@ module.exports = function Feed ()
 
 	feed.express = Router()
 
+	var dummy_id = Id()
+	var feed_length = 10
+
 	feed.express.get('/latest', (rq, rs) =>
 	{
-		var dummy = [ dummy_post() ]
+		var data = times(feed_length, dummy_post)
+		.map(function (post)
+		{
+			post.id = dummy_id()
 
-		rs.json(dummy)
+			return post
+		})
+
+		rs.json(data)
 	})
 
 	return feed
@@ -19,7 +29,7 @@ module.exports = function Feed ()
 
 function dummy_post ()
 {
-	var response =
+	var post =
 	{
 		id: 1,
 		timestamp: dummy_date(),
@@ -60,11 +70,23 @@ function dummy_post ()
 		}
 	}
 
-	return response
+	return post
 }
 
 
 function dummy_date ()
 {
 	return (new Date).toISOString()
+}
+
+function Id ()
+{
+	var id = 0
+
+	return function dummy_id ()
+	{
+		id = id + 1
+
+		return id
+	}
 }
