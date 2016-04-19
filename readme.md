@@ -13,3 +13,8 @@ cd netvest-backend-dir
 npm install --production --no-optional
 npm start
 ```
+
+## API stub
+```sh
+curl localhost:8080/api/feed/latest
+```
