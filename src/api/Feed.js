@@ -67,7 +67,9 @@ function dummy_post ()
 					'Growth Potential'
 				]
 			}
-		}
+		},
+
+		comments: 0
 	}
 
 	return post
