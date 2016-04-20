@@ -1,9 +1,18 @@
 
 var load = require('fs-sync').readJSON
 
-module.exports = function Config (app)
+var Config = module.exports = function Config (app)
 {
-	var cfg = load(app.root('cfg/dev.json'))
+	var root = app.root.partial('cfg')
+
+	var cfg = Config.process(root)
+
+	return cfg
+}
+
+Config.process = function (cfg_rootpath)
+{
+	var cfg = load(cfg_rootpath('dev.json'))
 
 	if (cfg.dev)
 	{
