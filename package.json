@@ -10,7 +10,11 @@
     "start": "node .",
     "dev":   "nodemon --watch src/ .",
 
-    "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/"
+    "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/",
+
+    "knex": "knex --knexfile=db/knexfile.js --env=dev",
+    "db-migrate":  "npm run knex -- migrate:latest",
+    "db-rollback": "npm run knex -- migrate:rollback"
   },
 
   "dependencies":
