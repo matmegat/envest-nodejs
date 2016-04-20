@@ -1,5 +1,18 @@
 {
-  "dev": true,
+  "dev":  true,
+  "env": "dev",
 
-  "port": 8080
+  "port": 8080,
+
+  "pg":
+  {
+    "dev":
+    {
+      "host": "localhost",
+      "port":  32774,
+
+      "database": "netvest",
+      "user": "netvest"
+    }
+  }
 }
