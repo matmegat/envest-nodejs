@@ -1,5 +1,3 @@
 #! /bin/sh
 
-R=git@github.com:WeezLabs/NetVest.git
-
-git push $R master:backend/master
+git push weez master:backend/master ${@}
