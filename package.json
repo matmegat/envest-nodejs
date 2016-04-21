@@ -7,7 +7,11 @@
 
   "scripts":
   {
-    "start": "node .",
+    "start": "forever start --uid netv --append .",
+    "stop":  "forever  stop netv",
+    "restart": "npm stop 2> /dev/null || true; npm start",
+    "start-node": "node .",
+
     "dev":   "nodemon --watch src/ .",
 
     "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/ db/",
@@ -19,6 +23,9 @@
 
   "dependencies":
   {
+    "forever":
+      "^0.15",
+
     "express":
       "^4.13",
 

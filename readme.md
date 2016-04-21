@@ -10,8 +10,11 @@ Maintainer: Ivan Puhtin
 ## npm scripts
 `npm run <script>` to run a script.
 
-* `start` — start bare server process
+* `start-node` — start bare node server process
 * `dev` — start development server with auto-reload
+* `start` — start server with monitor
+* `stop` — stop monitored server
+* `restart` — stop if any, then start
 * `st` — check styles against js-outlander style
 * `db-migrate` — migrates local DB on latest revision
 * `db-rollback` — rollbacks local DB last migration group
