@@ -14,9 +14,29 @@ module.exports = function name (app)
 		connection: conn
 	})
 
-	db.knex('x').select()
-	.then(console.dir)
-	.catch(console.error)
+	db.knex.client.pool.on('error', () =>
+	{
+		process.exit(1)
+	})
+
+	db.ready = Promise.resolve()
+	.then(() =>
+	{
+		return db.knex.select(knex.raw('NOW()'))
+	})
+	.then(() =>
+	{
+		return db.knex('email_confirms').select().limit(0)
+	})
+	.catch(e =>
+	{
+		console.error(e)
+		process.exit(1)
+	})
+	.then(() =>
+	{
+		console.info('DB: ok')
+	})
 
 	return db
 }
