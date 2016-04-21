@@ -7,7 +7,7 @@
 
   "scripts":
   {
-    "start": "forever start --uid netv --append .",
+    "start": "forever start --uid netv -l \"$PWD/var/netv.forever.log\" --append .",
     "stop":  "forever  stop netv",
     "restart": "npm stop 2> /dev/null || true; npm start",
     "start-node": "node .",
