@@ -18,5 +18,15 @@ module.exports = function App ()
 
 	app.http = Http(app)
 
+	Promise.all(
+	[
+		app.db.ready,
+		app.http.ready
+	])
+	.then(() =>
+	{
+		console.info('NetVest backend at :%s', app.cfg.port)
+	})
+
 	return app
 }

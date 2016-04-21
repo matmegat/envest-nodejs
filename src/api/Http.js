@@ -14,7 +14,10 @@ module.exports = function Http (app)
 
 	var port = app.cfg.port
 
-	http.express.listen(port, () => console.info('NetVest backend at :%s', port))
+	http.ready = new Promise(rs =>
+	{
+		http.express.listen(port, rs)
+	})
 
 	return http
 }
