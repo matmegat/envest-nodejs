@@ -10,12 +10,10 @@ module.exports = function App ()
 	var app = {}
 
 	app.root = rootpath(__dirname, '..')
-	console.info('Running at `%s`', app.root())
+	console.info('package at `%s`', app.root())
 
-	app.cfg = Config(app)
-
-	app.db = Db(app)
-
+	app.cfg  = Config(app)
+	app.db   = Db(app)
 	app.http = Http(app)
 
 	Promise.all(
