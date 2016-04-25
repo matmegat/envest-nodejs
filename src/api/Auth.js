@@ -16,14 +16,13 @@ module.exports = function Auth (db)
 		var salt = generate_salt(8)
 		var password = hash(data.password, salt, 18)
 
-		db.knex('netvest').insert({
+		db.knex('users').insert({
 			first_name: first_name,
 			last_name: last_name,
 			email: email,
 			password: password,
 			salt: salt
 		})
-		.table('users')
 		.then(() => {
 			res.sendStatus(200)
 		})
