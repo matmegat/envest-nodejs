@@ -15,7 +15,7 @@ module.exports = function Auth (db)
 		var last_name = data.last_name
 		var email = data.email
 		var salt = generate_salt(8)
-		var password = hash(data.password, salt, 18)
+		var password = encrypt_pass(data.password, salt, 18)
 
 		db.knex('users')
 		.insert({
@@ -55,4 +55,10 @@ function hash (password, salt, size)
 	return Crypto
 			.pbkdf2Sync(password, salt, 100000, size, 'sha512')
 			.toString('hex')
+}
+
+function encrypt_pass (password, salt, size)
+{
+	var pass_hash = hash(password, '', size)
+	return hash(pass_hash, salt, size)
 }
