@@ -14,7 +14,7 @@
 
     "dev":   "nodemon --watch src/ .",
 
-    "st": "eslint -c node_modules/js-outlander/outlander.eslint.js src/ db/",
+    "st": "eslint src/ db/",
 
     "knex": "knex --knexfile=db/knexfile.js --env=dev",
     "db-migrate":  "npm run knex -- migrate:latest",
