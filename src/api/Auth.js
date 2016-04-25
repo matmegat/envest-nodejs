@@ -7,7 +7,8 @@ module.exports = function Auth (db)
 
 	auth.express = Router()
 
-	auth.express.post('/register', (req, res) => {
+	auth.express.post('/register', (req, res) =>
+	{
 		var data = req.body
 
 		var first_name = data.first_name
@@ -16,22 +17,26 @@ module.exports = function Auth (db)
 		var salt = generate_salt(8)
 		var password = hash(data.password, salt, 18)
 
-		db.knex('users').insert({
+		db.knex('users')
+		.insert({
 			first_name: first_name,
 			last_name: last_name,
 			email: email,
 			password: password,
 			salt: salt
 		})
-		.then(() => {
+		.then(() =>
+		{
 			res.sendStatus(200)
 		})
-		.catch((error) => {
+		.catch((error) =>
+		{
 			res.status(500).send(error)
 		})
 	})
 
-	auth.express.post('/login', (req, res) => {
+	auth.express.post('/login', (req, res) =>
+	{
 		res.json(req.body)
 	})
 
@@ -40,10 +45,14 @@ module.exports = function Auth (db)
 
 function generate_salt (size)
 {
-	return Crypto.randomBytes(size).toString('hex')
+	return Crypto
+			.randomBytes(size)
+			.toString('hex')
 }
 
 function hash (password, salt, size)
 {
-	return Crypto.pbkdf2Sync(password, salt, 100000, size, 'sha512').toString('hex')
+	return Crypto
+			.pbkdf2Sync(password, salt, 100000, size, 'sha512')
+			.toString('hex')
 }
