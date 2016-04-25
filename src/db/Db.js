@@ -14,9 +14,9 @@ module.exports = function name (app)
 		connection: conn
 	})
 
-	db.knex('x').select()
-	.then(console.dir)
-	.catch(console.error)
+	// db.knex('user').select()
+	// .then(console.dir)
+	// .catch(console.error)
 
 	return db
 }
