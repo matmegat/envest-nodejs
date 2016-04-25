@@ -18,6 +18,7 @@ Maintainer: Ivan Puhtin
 * `st` — check styles against js-outlander style
 * `db-migrate` — migrates local DB on latest revision
 * `db-rollback` — rollbacks local DB last migration group
+* `swagger` — open swagger GUI with docs
 
 ## deploy
 ```sh

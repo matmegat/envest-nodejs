@@ -18,7 +18,9 @@
 
     "knex": "knex --knexfile=db/knexfile.js --env=dev",
     "db-migrate":  "npm run knex -- migrate:latest",
-    "db-rollback": "npm run knex -- migrate:rollback"
+    "db-rollback": "npm run knex -- migrate:rollback",
+
+    "swagger": "swagger-project edit"
   },
 
   "dependencies":
@@ -57,6 +59,9 @@
       "StrangeTransistor/js-outlander#2.0.0",
 
     "nodemon":
-      "^1.9.1"
+      "^1.9.1",
+
+    "swagger":
+      "^0.7"
   }
 }
