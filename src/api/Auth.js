@@ -60,5 +60,6 @@ function hash (password, salt, size)
 function encrypt_pass (password, salt, size)
 {
 	var pass_hash = hash(password, '', size)
+
 	return hash(pass_hash, salt, size)
 }
