@@ -34,6 +34,8 @@ function dummy_post ()
 		id: 1,
 		timestamp: dummy_date(),
 
+		comments: 0,
+
 		investor:
 		{
 			id: 1,
@@ -67,9 +69,7 @@ function dummy_post ()
 					'Growth Potential'
 				]
 			}
-		},
-
-		comments: 0
+		}
 	}
 
 	return post

@@ -12,7 +12,66 @@ paths:
         200:
           description: user Feed
           schema:
-            type: object
-            properties:
-              id:
-                type: number
+            $ref: '#/definitions/Feed'
+
+definitions:
+  Feed:
+    type: array
+    items:
+      $ref: '#/definitions/FeedItem'
+
+  FeedItem:
+    type: object
+    properties:
+      id:
+        type: number
+        description: Feed event id
+      timestamp:
+        type: string
+        format: date-time
+        description: when event occurs
+      investor:
+        $ref: '#/definitions/Investor'
+      event:
+        $ref: '#/definitions/FeedEvent'
+
+  FeedEvent:
+    #oneOf:
+    allOf:
+      - type: object
+      #- $ref: '#/definitions/Symbol'
+      #- type: array
+      #  - type: object
+      #  - type: array
+      # crap
+      #
+      # the idea: allOf(type = object, oneOf(events...))
+      #
+      # descriminator ?
+
+  # note:
+  # the more accurate term for this Type is "Security" (as a tradeable financial asset),
+  # but for not to be mixed up with Informational Security
+  # this is called Symbol
+  Symbol:
+    type: object
+    properties:
+      ticker:
+        type: string
+        description: Symbol ticker
+      company:
+        type: string
+        description: company name corresponding to that symbol
+
+  Investor:
+    type: object
+    properties:
+      id:
+        type: number
+        description: Investor id
+      name:
+        type: string
+        description: Investor name
+      pic:
+        type: string
+        description: backend-related URI to Investor userpic

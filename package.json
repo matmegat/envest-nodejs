@@ -20,7 +20,8 @@
     "db-migrate":  "npm run knex -- migrate:latest",
     "db-rollback": "npm run knex -- migrate:rollback",
 
-    "swagger": "swagger-project edit"
+    "swagger": "swagger-project edit",
+    "swagger-val": "swagger validate api/swagger/swagger.yaml"
   },
 
   "dependencies":
