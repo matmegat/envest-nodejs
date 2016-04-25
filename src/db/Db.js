@@ -26,7 +26,9 @@ module.exports = function name (app)
 	})
 	.then(() =>
 	{
-		return db.knex('email_confirms').select().limit(0)
+		return db.knex('email_confirms')
+		.select()
+		.limit(0)
 	})
 	.catch(e =>
 	{
