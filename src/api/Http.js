@@ -4,6 +4,7 @@ var body_parser = require('body-parser')
 
 var Feed = require('./Feed')
 var Auth = require('./Auth')
+var Passport = require('../Passport')
 
 module.exports = function Http (app)
 {
@@ -11,6 +12,8 @@ module.exports = function Http (app)
 
 	http.express = express()
 	http.express.use(body_parser.json())
+
+	http.passport = Passport(http.express, app.db)
 
 	http.feed = Feed()
 	http.express.use('/api/feed', http.feed.express)
