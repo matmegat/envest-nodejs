@@ -1,3 +1,4 @@
+
 const crypto = require('crypto')
 
 const promisify = require('promisify-node')
@@ -9,10 +10,6 @@ module.exports = function Auth (db)
 {
 	var auth = {}
 
-	// DB salt size = 16(8 bytes), DB password size = 36(18 bytes)
-	const SALT_SIZE = 8
-	const PASSWORD_SIZE = 18
-
 	auth.db = db
 
 	var knex = db.knex
@@ -22,10 +19,10 @@ module.exports = function Auth (db)
 
 	auth.register = function (user)
 	{
-		return generate_salt(SALT_SIZE)
+		return generate_salt()
 		.then(salt =>
 		{
-			return encrypt_pass(user.password, salt, PASSWORD_SIZE)
+			return encrypt_pass(user.password, salt)
 		})
 		.then(obj =>
 		{
@@ -58,11 +55,24 @@ module.exports = function Auth (db)
 		})
 	}
 
+	auth.helpers =
+	{
+		generate_salt: generate_salt,
+		hash: hash,
+		encrypt_pass: encrypt_pass
+	}
+
 	return auth
 }
 
+// DB salt size = 16(8 bytes), DB password size = 36(18 bytes)
+const SALT_SIZE = 8
+const PASSWORD_SIZE = 18
+
 function generate_salt (size)
 {
+	size = size || SALT_SIZE
+
 	return random_bytes(size)
 	.then(buf =>
 	{
@@ -76,6 +86,8 @@ function generate_salt (size)
 
 function hash (password, salt, size)
 {
+	size = size || PASSWORD_SIZE
+
 	return create_hash(password, salt, 100000, size, 'sha512')
 	.then(buf =>
 	{
@@ -89,6 +101,8 @@ function hash (password, salt, size)
 
 function encrypt_pass (password, salt, size)
 {
+	size = size || PASSWORD_SIZE
+
 	return hash(password, '', size)
 	.then(pass_hash =>
 	{
