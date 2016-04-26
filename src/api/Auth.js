@@ -1,65 +1,39 @@
 const router = require('express').Router
-const crypto = require('crypto')
 
 module.exports = function Auth (db)
 {
 	var auth = {}
-
+	auth.model = require('../db/Auth')(db)
 	auth.express = router()
 
 	auth.express.post('/register', (req, res) =>
 	{
 		var data = req.body
 
-		var first_name = data.first_name
-		var last_name = data.last_name
-		var email = data.email
-		var salt = generate_salt(8)
-		var password = encrypt_pass(data.password, salt, 18)
-
-		db.knex('users')
-		.insert({
-			first_name: first_name,
-			last_name: last_name,
-			email: email,
-			password: password,
-			salt: salt
-		})
-		.then(() =>
-		{
+		auth.model.register(data.first_name, data.last_name, data.email, data.password)
+		.then(() => {
 			res.sendStatus(200)
 		})
-		.catch((error) =>
-		{
+		.catch(error => {
 			res.status(500).send(error)
 		})
 	})
 
 	auth.express.post('/login', (req, res) =>
 	{
-		res.json(req.body)
+		var data = req.body
+
+		var email = data.email
+		var password = data.password
+
+		res.json(data)
+	})
+
+	auth.express.get('/logout', (req, res) =>
+	{
+		req.logout()
+		res.sendStatus(200)
 	})
 
 	return auth
-}
-
-function generate_salt (size)
-{
-	return crypto
-			.randomBytes(size)
-			.toString('hex')
-}
-
-function hash (password, salt, size)
-{
-	return crypto
-			.pbkdf2Sync(password, salt, 100000, size, 'sha512')
-			.toString('hex')
-}
-
-function encrypt_pass (password, salt, size)
-{
-	var pass_hash = hash(password, '', size)
-
-	return hash(pass_hash, salt, size)
 }
