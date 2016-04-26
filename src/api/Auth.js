@@ -3,18 +3,27 @@ const router = require('express').Router
 module.exports = function Auth (db)
 {
 	var auth = {}
+
 	auth.model = require('../db/Auth')(db)
 	auth.express = router()
 
 	auth.express.post('/register', (req, res) =>
 	{
 		var data = req.body
+		var user_data = {
+			first_name: data.first_name,
+			last_name: data.last_name,
+			email: data.email,
+			password: data.password
+		}
 
-		auth.model.register(data.first_name, data.last_name, data.email, data.password)
-		.then(() => {
+		auth.model.register(user_data)
+		.then(() =>
+		{
 			res.sendStatus(200)
 		})
-		.catch(error => {
+		.catch(error =>
+		{
 			res.status(500).send(error)
 		})
 	})
@@ -22,9 +31,6 @@ module.exports = function Auth (db)
 	auth.express.post('/login', (req, res) =>
 	{
 		var data = req.body
-
-		var email = data.email
-		var password = data.password
 
 		res.json(data)
 	})

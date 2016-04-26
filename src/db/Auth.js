@@ -20,28 +20,31 @@ module.exports = function Auth (db)
 	auth.users = knex('users')
 	auth.email_confirms = knex('email_confirms')
 
-	auth.register = function(first_name, last_name, email, password)
+	auth.register = function (user)
 	{
 		return generate_salt(SALT_SIZE)
-		.then(salt => {
-			return encrypt_pass(password, salt, PASSWORD_SIZE)
+		.then(salt =>
+		{
+			return encrypt_pass(user.password, salt, PASSWORD_SIZE)
 		})
-		.then(obj => {
+		.then(obj =>
+		{
 			return auth.users
 			.insert({
-				first_name: first_name,
-				last_name: last_name,
-				email: email,
+				first_name: user.first_name,
+				last_name: user.last_name,
+				email: user.email,
 				password: obj.encrypted_pass,
 				salt: obj.salt
 			})
 		})
-		.catch(error => {
+		.catch(error =>
+		{
 			console.log('Insert error' + error)
 		})
 	}
 
-	auth.select_user = function(email)
+	auth.select_user = function (email)
 	{
 		return auth.users
 		.select('password', 'salt')
@@ -49,7 +52,8 @@ module.exports = function Auth (db)
 		{
 			email: email
 		})
-		.then((user) => {
+		.then((user) =>
+		{
 			return user
 		})
 	}
@@ -60,10 +64,12 @@ module.exports = function Auth (db)
 function generate_salt (size)
 {
 	return random_bytes(size)
-	.then(buf => {
+	.then(buf =>
+	{
 		return buf.toString('hex')
 	})
-	.catch(error => {
+	.catch(error =>
+	{
 		console.log('Generate salt error:' + error)
 	})
 }
@@ -71,10 +77,12 @@ function generate_salt (size)
 function hash (password, salt, size)
 {
 	return create_hash(password, salt, 100000, size, 'sha512')
-	.then(buf => {
+	.then(buf =>
+	{
 		return buf.toString('hex')
 	})
-	.catch(error => {
+	.catch(error =>
+	{
 		console.log('Hash error:' + error)
 	})
 }
@@ -82,16 +90,19 @@ function hash (password, salt, size)
 function encrypt_pass (password, salt, size)
 {
 	return hash(password, '', size)
-	.then(pass_hash => {
+	.then(pass_hash =>
+	{
 		return hash(pass_hash, salt, size)
 	})
-	.then(buff => {
+	.then(buff =>
+	{
 		return {
 			encrypted_pass: buff,
 			salt: salt
 		}
 	})
-	.catch(error => {
-		console.log('Encrypt error' + error)
+	.catch(error =>
+	{
+		console.log('Encrypt error:' + error)
 	})
 }
