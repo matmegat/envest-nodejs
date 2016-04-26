@@ -1,11 +1,11 @@
-const Router = require('express').Router
-const Crypto = require('crypto')
+const router = require('express').Router
+const crypto = require('crypto')
 
 module.exports = function Auth (db)
 {
 	var auth = {}
 
-	auth.express = Router()
+	auth.express = router()
 
 	auth.express.post('/register', (req, res) =>
 	{
@@ -45,14 +45,14 @@ module.exports = function Auth (db)
 
 function generate_salt (size)
 {
-	return Crypto
+	return crypto
 			.randomBytes(size)
 			.toString('hex')
 }
 
 function hash (password, salt, size)
 {
-	return Crypto
+	return crypto
 			.pbkdf2Sync(password, salt, 100000, size, 'sha512')
 			.toString('hex')
 }
