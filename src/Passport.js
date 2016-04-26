@@ -35,14 +35,18 @@ function init_local_strat (model)
 		{
 			if (user)
 			{
-				if (model.helpers.encrypt_pass === user.password)
+				model.helpers.encrypt_pass(password)
+				then(password => 
 				{
-					done(null, user)
-				}
-				else
-				{
-					done(null, false, { message: 'Incorrect password.' })
-				}
+					if (password === user.password)
+					{
+						done(null, user)
+					}
+					else
+					{
+						done(null, false, { message: 'Incorrect password.' })
+					}
+				})
 			}
 			else
 			{
