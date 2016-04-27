@@ -63,6 +63,12 @@
     "nodemon":
       "^1.9.1",
 
+    "minimist":
+      "^1.2",
+
+    "command-promise":
+      "^2",
+
     "swagger":
       "^0.7"
   }
