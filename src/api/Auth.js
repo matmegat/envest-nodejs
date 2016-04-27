@@ -35,7 +35,14 @@ module.exports = function Auth (db, passport)
 			//if (err) { return next(err) }
 			if (! user)
 			{
-				res.status(401).send(info ? info.message : 'Authentication error')
+				var message = 'Authentication error'
+
+				if (info)
+				{
+					message = info.message
+				}
+
+				res.status(401).send(message)
 			}
 			req.logIn(user, function ()
 			{

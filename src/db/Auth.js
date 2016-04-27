@@ -61,7 +61,7 @@ module.exports = function Auth (db)
 
 	auth.comparePasswords = function (dbPass, formPass, salt)
 	{
-		return encrypt_pass (formPass, salt)
+		return encrypt_pass(formPass, salt)
 		.then(result =>
 		{
 			if (result.encrypted_pass === dbPass)
@@ -70,7 +70,7 @@ module.exports = function Auth (db)
 			}
 			else
 			{
-				return false				
+				return false
 			}
 		})
 	}
