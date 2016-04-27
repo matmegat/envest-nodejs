@@ -33,10 +33,11 @@ module.exports = function Auth (db, passport)
 		passport.authenticate('local', (err, user, info) =>
 		{
 			//if (err) { return next(err) }
-			if (! user) {
-				res.status(500).send(info ? info.message : 'Authentication error')
+			if (! user)
+			{
+				res.status(401).send(info ? info.message : 'Authentication error')
 			}
-			req.logIn(user, function (err)
+			req.logIn(user, function ()
 			{
 			    //if (err) { return next(err) }
 			    return res.sendStatus(200)
