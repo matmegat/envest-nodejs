@@ -32,14 +32,13 @@ module.exports = function Auth (db, passport)
 	{
 		passport.authenticate('local', (err, user, info) =>
 		{
-			if (err) { return next(err) }
+			//if (err) { return next(err) }
 			if (! user) {
 				res.status(500).send(info ? info.message : 'Authentication error')
 			}
 			req.logIn(user, function (err)
 			{
-			    if (err) { return next(err) }
-
+			    //if (err) { return next(err) }
 			    return res.sendStatus(200)
 			})
 		})(req, res, next)
