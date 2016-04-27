@@ -37,7 +37,7 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.select_user = function (email)
+	auth.selectUser = function (email)
 	{
 		return auth.users
 		.where('email', email)
@@ -48,7 +48,7 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.get_by_id = function (id)
+	auth.getById = function (id)
 	{
 		return auth.users
 		.where('id', id)
