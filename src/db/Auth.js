@@ -37,26 +37,18 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.selectUser = function (email)
+	auth.byEmail = function (email)
 	{
 		return auth.users
 		.where('email', email)
 		.first()
-		.then(user =>
-		{
-			return user
-		})
 	}
 
-	auth.getById = function (id)
+	auth.byId = function (id)
 	{
 		return auth.users
 		.where('id', id)
 		.first()
-		.then(user =>
-		{
-			return user
-		})
 	}
 
 	auth.comparePasswords = function (dbPass, formPass, salt)
@@ -81,7 +73,7 @@ module.exports = function Auth (db)
 // DB salt size = 16(8 bytes), DB password size = 36(18 bytes)
 const SALT_SIZE = 8
 const PASSWORD_SIZE = 18
-const ITERATIONS = 50000
+const ITERATIONS = 100000
 
 function generate_salt ()
 {

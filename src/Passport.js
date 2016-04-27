@@ -28,7 +28,7 @@ module.exports = function (express, db)
 
 	passport.deserializeUser((id, done) =>
 	{
-	  auth_model.getById(id)
+	  auth_model.byId(id)
 	  .then(user =>
 	  {
 		done(null, user)
@@ -48,7 +48,7 @@ function init_local_strat (model)
 		passwordField: 'password',
 	}, (username, password, done) =>
 	{
-		model.selectUser(username)
+		model.byEmail(username)
 		.then(user =>
 		{
 			if (user)
