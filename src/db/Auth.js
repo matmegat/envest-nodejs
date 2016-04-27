@@ -55,6 +55,16 @@ module.exports = function Auth (db)
 		})
 	}
 
+	auth.get_by_id = function (id)
+	{
+		return auth.users
+		.where({id: id})
+		.then(user =>
+		{
+			return user
+		})
+	}
+
 	auth.helpers =
 	{
 		generate_salt: generate_salt,

@@ -1,6 +1,6 @@
 const router = require('express').Router
 
-module.exports = function Auth (db)
+module.exports = function Auth (db, passport)
 {
 	var auth = {}
 
@@ -32,8 +32,17 @@ module.exports = function Auth (db)
 	{
 		var data = req.body
 
-		res.json(data)
+		passport.authenticate('local', { failureFlash: 'Invalid username or password.' }, function (req, res)
+		{
+			res.sendStatus(200)
+		})
 	})
+
+	auth.express.get('/logout', function (req, res)
+	{
+	  req.logout()
+	  res.sendStatus(200)
+	});
 
 	auth.express.get('/logout', (req, res) =>
 	{

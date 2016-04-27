@@ -19,7 +19,23 @@ module.exports = function (express, db)
 	express.use(passport.initialize())
 	express.use(passport.session())
 
+	passport.serializeUser((user, done) =>
+	{
+	  done(null, user.id);
+	});
+
+	passport.deserializeUser((id, done) =>
+	{
+	  model.get_by_id(id)
+	  .then((user) =>
+	  {
+	  	done(null, user)
+	  })
+	});
+
 	init_local_strat(auth_model)
+
+	return passport
 }
 
 function init_local_strat (model)
