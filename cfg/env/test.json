@@ -1,0 +1,15 @@
+{
+  "dev":  true,
+  "env": "test",
+
+  "port": 8080,
+
+  "pg":
+  {
+    "dev":
+    {
+      "database": "netvest_test",
+      "password": "ovjms3lmzf"
+    }
+  }
+}

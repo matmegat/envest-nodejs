@@ -1,0 +1,15 @@
+{
+  "dev":  false,
+  "env": "staging",
+
+  "port": 80,
+
+  "pg":
+  {
+    "dev":
+    {
+      "database": "netvest_staging",
+      "password": "ovjms3lmzf"
+    }
+  }
+}
