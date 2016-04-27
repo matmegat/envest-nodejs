@@ -21,13 +21,13 @@ module.exports = function (express, db)
 
 	passport.serializeUser((user, done) =>
 	{
-	  done(null, user)
+	  done(null, user.id)
 	})
 
-	passport.deserializeUser((user, done) =>
+	passport.deserializeUser((id, done) =>
 	{
-	  auth_model.get_by_id(user.id)
-	  .then((user) =>
+	  auth_model.get_by_id(id)
+	  .then(user =>
 	  {
 		done(null, user)
 	  })
