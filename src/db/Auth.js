@@ -35,32 +35,27 @@ module.exports = function Auth (db)
 				salt: obj.salt
 			})
 		})
-		.catch(error =>
-		{
-			console.log('Insert error' + error)
-		})
 	}
 
 	auth.select_user = function (email)
 	{
 		return auth.users
-		.where(
+		.where('email', email)
+		.first()
+		.then(user =>
 		{
-			email: email
-		})
-		.then((user) =>
-		{
-			return user[0]
+			return user
 		})
 	}
 
 	auth.get_by_id = function (id)
 	{
 		return auth.users
-		.where({ id: id })
+		.where('id', id)
+		.first()
 		.then(user =>
 		{
-			return user[0]
+			return user
 		})
 	}
 
@@ -78,9 +73,9 @@ module.exports = function Auth (db)
 const SALT_SIZE = 8
 const PASSWORD_SIZE = 18
 
-function generate_salt (size)
+function generate_salt ()
 {
-	size = size || SALT_SIZE
+	var size = SALT_SIZE
 
 	return random_bytes(size)
 	.then(buf =>
@@ -93,9 +88,9 @@ function generate_salt (size)
 	})
 }
 
-function hash (password, salt, size)
+function hash (password, salt)
 {
-	size = size || PASSWORD_SIZE
+	var size = PASSWORD_SIZE
 
 	return create_hash(password, salt, 100000, size, 'sha512')
 	.then(buf =>
@@ -108,9 +103,9 @@ function hash (password, salt, size)
 	})
 }
 
-function encrypt_pass (password, salt, size)
+function encrypt_pass (password, salt)
 {
-	size = size || PASSWORD_SIZE
+	var size = PASSWORD_SIZE
 
 	return hash(password, '', size)
 	.then(pass_hash =>

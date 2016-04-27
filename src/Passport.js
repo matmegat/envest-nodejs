@@ -8,10 +8,12 @@ module.exports = function (express, db)
 {
 	var auth_model = require('./db/Auth')(db)
 
+	const SESSION_SECRET = 'aoor91xck0'
+
 	express.use(session(
 	{
 		name: 'sid',
-		secret: 'aoor91xck0',
+		secret: SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false
 	}))
@@ -52,9 +54,9 @@ function init_local_strat (model)
 			if (user)
 			{
 				model.helpers.encrypt_pass(password, user.salt)
-				.then(res =>
+				.then(result =>
 				{
-					if (res.encrypted_pass === user.password)
+					if (result.encrypted_pass === user.password)
 					{
 						return done(null, user)
 					}
