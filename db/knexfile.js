@@ -7,7 +7,7 @@ module.exports =
 	dev:
 	{
 		client: 'pg',
-		connection: Config.process(cfg_rootpath).pg.dev,
+		connection: Config.process(cfg_rootpath).pg,
 
 		/*pool:
 		{

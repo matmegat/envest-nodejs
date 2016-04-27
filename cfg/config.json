@@ -6,13 +6,10 @@
 
   "pg":
   {
-    "dev":
-    {
-      "host": "localhost",
-      "port":  5432,
+    "host": "localhost",
+    "port":  5432,
 
-      "database": "netvest",
-      "user": "netvest"
-    }
+    "database": "netvest",
+    "user": "netvest"
   }
 }

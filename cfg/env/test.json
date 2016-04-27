@@ -6,10 +6,7 @@
 
   "pg":
   {
-    "dev":
-    {
-      "database": "netvest_test",
-      "password": "ovjms3lmzf"
-    }
+    "database": "netvest_test",
+    "password": "ovjms3lmzf"
   }
 }

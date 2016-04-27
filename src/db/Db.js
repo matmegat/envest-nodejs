@@ -6,8 +6,7 @@ module.exports = function name (app)
 	var db = {}
 
 	var cfg  = app.cfg
-	var env  = cfg.env
-	var conn = cfg.pg[env]
+	var conn = cfg.pg
 
 	db.knex = knex({
 		client: 'pg',

@@ -7,11 +7,8 @@ but with all fields optional, to setup your dev exceptions (like different DB po
 {
   "pg":
   {
-    "dev":
-    {
-      "port":  5433,
-      "password": "secret"
-    }
+    "port":  5433,
+    "password": "secret"
   }
 }
 ```
