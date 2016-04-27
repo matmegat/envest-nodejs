@@ -60,7 +60,7 @@ module.exports = function Auth (db)
 		.where({ id: id })
 		.then(user =>
 		{
-			return user
+			return user[0]
 		})
 	}
 
