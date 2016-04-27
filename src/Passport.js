@@ -36,7 +36,7 @@ function init_local_strat (model)
 			if (user)
 			{
 				model.helpers.encrypt_pass(password)
-				then(password => 
+				.then(password =>
 				{
 					if (password === user.password)
 					{
