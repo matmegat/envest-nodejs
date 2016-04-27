@@ -16,6 +16,7 @@ var env = args.env
 if (! env)
 {
 	console.error('--env must be present')
+	process.exit(1)
 }
 
 var cmd = require('command-promise')
@@ -32,6 +33,66 @@ if (key)
 	scp = partial(scp, [ '-i', key ])
 }
 
-ssh('ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com', '"uptime"')
+var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
+
+
+var f = require('util').format
+var load = require('fs-sync').readJSON
+var write = require('fs-sync').write
+var rootpath = require('rootpath')(__dirname, '..')
+var merge = require('lodash').merge
+
+
+function remote_rootpath (path)
+{
+	return 'netvest/' + env + '/' + (path || '')
+}
+
+function target (path)
+{
+	return remote + ':' + remote_rootpath(path)
+}
+
+function dump (path, config)
+{
+	config = JSON.stringify(config, null, '  ')
+
+	write(path, config)
+}
+
+
+Promise.resolve()
+.then(() =>
+{
+	return scp(rootpath('package.json'), target())
+})
+.then(() =>
+{
+	return scp('-r', rootpath('api'), target())
+})
+.then(() =>
+{
+	return scp('-r', rootpath('db'), target())
+})
+.then(() =>
+{
+	return scp('-r', rootpath('src'), target())
+})
+.then(() =>
+{
+	return ssh(remote, f('"mkdir -p %s"', remote_rootpath('cfg/')))
+})
+.then(() =>
+{
+	var base = load(rootpath('cfg/config.json'))
+	var cenv = load(rootpath('cfg/env', env + '.json'))
+
+	var config = merge({}, base, cenv)
+
+	var tmp = rootpath('var/deploy-config.json')
+	dump(tmp, config)
+
+	return scp(tmp, target('cfg/config.json'))
+})
 .then(console.log)
 .catch(console.error)
