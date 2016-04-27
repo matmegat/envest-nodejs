@@ -94,5 +94,17 @@ Promise.resolve()
 
 	return scp(tmp, target('cfg/config.json'))
 })
+.then(() =>
+{
+	return ssh(remote, f('"mkdir -p %s"', remote_rootpath('var/')))
+})
+.then(() =>
+{
+	return ssh(remote,
+		f( '"cd %s;'
+		 + ' npm install --production --no-optional;'
+		 + 'sudo npm run restart"', remote_rootpath()
+	))
+})
 .then(console.log)
 .catch(console.error)
