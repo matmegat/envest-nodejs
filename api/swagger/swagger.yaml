@@ -37,8 +37,7 @@ definitions:
 
   FeedEvent:
     #oneOf:
-    allOf:
-      - type: object
+    type: object
       #- $ref: '#/definitions/Symbol'
       #- type: array
       #  - type: object

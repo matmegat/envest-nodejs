@@ -1,0 +1,10 @@
+#! /bin/sh
+
+cd $(dirname $0)
+pwd
+
+git clone https://github.com/swagger-api/swagger-codegen
+
+cd swagger-codegen
+
+mvn clean package

@@ -1,0 +1,6 @@
+#! /bin/sh
+
+java -jar ./run/swagger-codegen/modules/swagger-codegen-cli/target/swagger-codegen-cli.jar generate \
+   -i ./api/swagger/swagger.yaml \
+   -l nodejs-server \
+   -o ./var/docs
