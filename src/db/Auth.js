@@ -59,11 +59,20 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.helpers =
+	auth.comparePasswords = function (dbPass, formPass, salt)
 	{
-		generate_salt: generate_salt,
-		hash: hash,
-		encrypt_pass: encrypt_pass
+		return encrypt_pass (formPass, salt)
+		.then(result =>
+		{
+			if (result.encrypted_pass === dbPass)
+			{
+				return true
+			}
+			else
+			{
+				return false				
+			}
+		})
 	}
 
 	return auth

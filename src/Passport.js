@@ -49,14 +49,14 @@ function init_local_strat (model)
 	}, (username, password, done) =>
 	{
 		model.selectUser(username)
-		.then((user) =>
+		.then(user =>
 		{
 			if (user)
 			{
-				model.helpers.encrypt_pass(password, user.salt)
+				return model.comparePasswords(user.password, password, user.salt)
 				.then(result =>
 				{
-					if (result.encrypted_pass === user.password)
+					if (result)
 					{
 						return done(null, user)
 					}
