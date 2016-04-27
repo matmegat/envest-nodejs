@@ -21,6 +21,7 @@
     "db-rollback": "npm run knex -- migrate:rollback",
 
     "swagger": "swagger-project edit",
+    "swagger-ver": "swagger-project verify",
     "swagger-val": "swagger validate api/swagger/swagger.yaml"
   },
 
