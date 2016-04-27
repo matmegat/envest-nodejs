@@ -28,21 +28,20 @@ module.exports = function Auth (db, passport)
 		})
 	})
 
-	auth.express.post('/login', (req, res) =>
+	auth.express.post('/login', (req, res, next) =>
 	{
-		var data = req.body
-
-		passport.authenticate('local', { failureFlash: 'Invalid username or password.' }, function (req, res)
+		passport.authenticate('local', (err, user) =>
 		{
-			res.sendStatus(200)
-		})
-	})
+			if (err) { return next(err) }
+			if (! user) { res.sendStatus(500) }
+			req.logIn(user, function (err)
+			{
+			    if (err) { return next(err) }
 
-	auth.express.get('/logout', function (req, res)
-	{
-	  req.logout()
-	  res.sendStatus(200)
-	});
+			    return res.sendStatus(200)
+			})
+		})(req, res, next)
+	})
 
 	auth.express.get('/logout', (req, res) =>
 	{

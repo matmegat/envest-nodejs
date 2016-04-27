@@ -13,7 +13,7 @@ module.exports = function (express, db)
 		name: 'sid',
 		secret: 'aoor91xck0',
 		resave: false,
-		saveUninitialized: true
+		saveUninitialized: false
 	}))
 
 	express.use(passport.initialize())
@@ -21,17 +21,17 @@ module.exports = function (express, db)
 
 	passport.serializeUser((user, done) =>
 	{
-	  done(null, user.id);
-	});
+	  done(null, user.id)
+	})
 
 	passport.deserializeUser((id, done) =>
 	{
-	  model.get_by_id(id)
+	  auth_model.get_by_id(id)
 	  .then((user) =>
 	  {
-	  	done(null, user)
+		done(null, user)
 	  })
-	});
+	})
 
 	init_local_strat(auth_model)
 
@@ -40,10 +40,10 @@ module.exports = function (express, db)
 
 function init_local_strat (model)
 {
-	passport.use(new LocalStrategy(
+	passport.use( new LocalStrategy(
 	{
 		usernameField: 'email',
-		passwordField: 'password'
+		passwordField: 'password',
 	}, (username, password, done) =>
 	{
 		model.select_user(username)
@@ -51,27 +51,27 @@ function init_local_strat (model)
 		{
 			if (user)
 			{
-				model.helpers.encrypt_pass(password)
-				.then(password =>
+				model.helpers.encrypt_pass(password, user.salt)
+				.then(res =>
 				{
-					if (password === user.password)
+					if (res.encrypted_pass === user.password)
 					{
-						done(null, user)
+						return done(null, user)
 					}
 					else
 					{
-						done(null, false, { message: 'Incorrect password.' })
+						return done(null, false, { message: 'Incorrect password.' })
 					}
 				})
 			}
 			else
 			{
-				done(null, false, { message: 'Incorrect username.' })
+				return done(null, false, { message: 'Incorrect username.' })
 			}
 		})
 		.catch(error =>
 		{
-			done(error)
+			return done(error)
 		})
 	}))
 }

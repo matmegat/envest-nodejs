@@ -44,21 +44,20 @@ module.exports = function Auth (db)
 	auth.select_user = function (email)
 	{
 		return auth.users
-		.select('password', 'salt')
 		.where(
 		{
 			email: email
 		})
 		.then((user) =>
 		{
-			return user
+			return user[0]
 		})
 	}
 
 	auth.get_by_id = function (id)
 	{
 		return auth.users
-		.where({id: id})
+		.where({ id: id })
 		.then(user =>
 		{
 			return user
