@@ -81,6 +81,7 @@ module.exports = function Auth (db)
 // DB salt size = 16(8 bytes), DB password size = 36(18 bytes)
 const SALT_SIZE = 8
 const PASSWORD_SIZE = 18
+const ITERATIONS = 50000
 
 function generate_salt ()
 {
@@ -101,7 +102,7 @@ function hash (password, salt)
 {
 	var size = PASSWORD_SIZE
 
-	return create_hash(password, salt, 100000, size, 'sha512')
+	return create_hash(password, salt, ITERATIONS, size, 'sha512')
 	.then(buf =>
 	{
 		return buf.toString('hex')
