@@ -58,9 +58,9 @@ module.exports = function Auth (db)
 
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
-var SALT_SIZE     = 16 / 2
-var PASSWORD_SIZE = 36 / 2
-var ITERATIONS    = 100000
+var salt_size     = 16 / 2
+var password_size = 36 / 2
+var iterations    = 100000
 
 var promisify = require('promisify-node')
 
@@ -73,22 +73,22 @@ var hex = method('toString', 'hex')
 
 function generate_salt ()
 {
-	return randomBytes(SALT_SIZE)
+	return randomBytes(salt_size)
 	.then(hex)
 }
 
 function hash (password, salt)
 {
-	return genHash(password, salt, ITERATIONS, PASSWORD_SIZE, 'sha512')
+	return genHash(password, salt, iterations, password_size, 'sha512')
 	.then(hex)
 }
 
 function encrypt_pass (password, salt)
 {
-	return hash(password, '', PASSWORD_SIZE)
+	return hash(password, '', password_size)
 	.then(pass_hash =>
 	{
-		return hash(pass_hash, salt, PASSWORD_SIZE)
+		return hash(pass_hash, salt, password_size)
 	})
 	.then(str =>
 	{
