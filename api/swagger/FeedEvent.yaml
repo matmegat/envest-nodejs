@@ -1,0 +1,10 @@
+type: object
+  #- $ref: '#/definitions/Symbol'
+  #- type: array
+  #  - type: object
+  #  - type: array
+  # crap
+  #
+  # the idea: allOf(type = object, oneOf(events...))
+  #
+  # descriminator ?

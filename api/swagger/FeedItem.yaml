@@ -1,0 +1,13 @@
+type: object
+properties:
+  id:
+    type: number
+    description: Feed event id
+  timestamp:
+    type: string
+    format: date-time
+    description: when event occurs
+  investor:
+    $ref: ./Investor.yaml
+  event:
+    $ref: ./FeedEvent.yaml

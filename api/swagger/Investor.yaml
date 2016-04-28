@@ -1,0 +1,11 @@
+type: object
+properties:
+  id:
+    type: number
+    description: Investor id
+  name:
+    type: string
+    description: Investor name
+  pic:
+    type: string
+    description: backend-related URI to Investor userpic

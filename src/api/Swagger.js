@@ -1,6 +1,5 @@
 var swaggerTools = require('swagger-tools')
-var jsyaml = require('js-yaml')
-var fs = require('fs')
+var SwaggerParser = require('swagger-parser')
 
 module.exports = function Swagger (app, expressApp)
 {
@@ -10,24 +9,27 @@ module.exports = function Swagger (app, expressApp)
 		swaggerUi: '/swagger.json',	// copied from generated app
 	}
 
-	// The Swagger document (require it, build it programmatically, fetch it
-	// from a URL, ...)
-	var spec = fs.readFileSync(app.root('var/docs/swagger.yaml'), 'utf8')
-	var swaggerDoc = jsyaml.safeLoad(spec)
+	SwaggerParser.bundle(app.root('api/swagger/swagger.yaml'))
+		.then((swaggerDoc) =>
+		{
+			swaggerTools.initializeMiddleware(swaggerDoc, (middleware) =>
+			{
+				// Interpret Swagger resources and attach metadata to request -
+				// must be first in swagger-tools middleware chain
+				expressApp.use(middleware.swaggerMetadata())
 
-	swaggerTools.initializeMiddleware(swaggerDoc, (middleware) =>
-	{
-		// Interpret Swagger resources and attach metadata to request - must be
-		// first in swagger-tools middleware chain
-		expressApp.use(middleware.swaggerMetadata())
+				// Validate Swagger requests
+				expressApp.use(middleware.swaggerValidator())
 
-		// Validate Swagger requests
-		expressApp.use(middleware.swaggerValidator())
+				// Route validated requests to appropriate controller
+				expressApp.use(middleware.swaggerRouter(options))
 
-		// Route validated requests to appropriate controller
-		expressApp.use(middleware.swaggerRouter(options))
-
-		// Serve the Swagger documents and Swagger UI
-		expressApp.use(middleware.swaggerUi())
-	})
+				// Serve the Swagger documents and Swagger UI
+				expressApp.use(middleware.swaggerUi())
+			})
+		})
+		.catch((err) =>
+		{
+			console.error('SwaggerParser', err)
+		})
 }

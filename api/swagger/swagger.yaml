@@ -21,32 +21,13 @@ definitions:
       $ref: '#/definitions/FeedItem'
 
   FeedItem:
-    type: object
-    properties:
-      id:
-        type: number
-        description: Feed event id
-      timestamp:
-        type: string
-        format: date-time
-        description: when event occurs
-      investor:
-        $ref: '#/definitions/Investor'
-      event:
-        $ref: '#/definitions/FeedEvent'
+    $ref: ./FeedItem.yaml
+
+  Investor:
+    $ref: ./Investor.yaml
 
   FeedEvent:
-    #oneOf:
-    type: object
-      #- $ref: '#/definitions/Symbol'
-      #- type: array
-      #  - type: object
-      #  - type: array
-      # crap
-      #
-      # the idea: allOf(type = object, oneOf(events...))
-      #
-      # descriminator ?
+    $ref: ./FeedEvent.yaml
 
   # note:
   # the more accurate term for this Type is "Security" (as a tradeable financial asset),
@@ -61,16 +42,3 @@ definitions:
       company:
         type: string
         description: company name corresponding to that symbol
-
-  Investor:
-    type: object
-    properties:
-      id:
-        type: number
-        description: Investor id
-      name:
-        type: string
-        description: Investor name
-      pic:
-        type: string
-        description: backend-related URI to Investor userpic

@@ -3,3 +3,6 @@
 
 # JetBrains IDE
 .idea
+
+# exclude *.logs from root
+*.log
