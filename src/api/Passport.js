@@ -47,29 +47,7 @@ function useLocal (auth)
 	}
 	, (username, password, done) =>
 	{
-		auth.byEmail(username)
-		.then(user =>
-		{
-			if (user)
-			{
-				return auth.comparePasswords(user.password, password, user.salt)
-				.then(result =>
-				{
-					if (result)
-					{
-						return done(null, user)
-					}
-					else
-					{
-						return done(null, false, { message: 'Incorrect password.' })
-					}
-				})
-			}
-			else
-			{
-				return done(null, false, { message: 'Incorrect username.' })
-			}
-		})
+		auth.login(username, password, done)
 		.catch(error =>
 		{
 			return done(error)

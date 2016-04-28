@@ -30,6 +30,33 @@ module.exports = function Auth (db)
 		})
 	}
 
+	auth.login = function (username, password, cb)
+	{
+		return auth.byEmail(username)
+		.then(user =>
+		{
+			if (user)
+			{
+				return auth.comparePasswords(user.password, password, user.salt)
+				.then(result =>
+				{
+					if (result)
+					{
+						return cb(null, user)
+					}
+					else
+					{
+						return cb(null, false, { message: 'Incorrect password.' })
+					}
+				})
+			}
+			else
+			{
+				return cb(null, false, { message: 'Incorrect username.' })
+			}
+		})
+	}
+
 	auth.byEmail = function (email)
 	{
 		return auth.users
