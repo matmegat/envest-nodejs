@@ -12,7 +12,7 @@ module.exports = function Swagger (app, expressApp)
 
 	// The Swagger document (require it, build it programmatically, fetch it
 	// from a URL, ...)
-	var spec = fs.readFileSync(app.root('var/docs/swagger.yaml'), 'utf8')
+	var spec = fs.readFileSync(app.root('api/swagger/swagger.yaml'), 'utf8')
 	var swaggerDoc = jsyaml.safeLoad(spec)
 
 	swaggerTools.initializeMiddleware(swaggerDoc, (middleware) =>
