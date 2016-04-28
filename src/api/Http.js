@@ -5,7 +5,7 @@ var cookie_parser = require('cookie-parser')
 
 var Feed = require('./Feed')
 var Auth = require('./Auth')
-var Passport = require('../Passport')
+var Passport = require('./Passport')
 
 module.exports = function Http (app)
 {
