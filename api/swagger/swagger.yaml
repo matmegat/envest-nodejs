@@ -1,10 +1,18 @@
 swagger: '2.0'
 info:
   title: NetVest backend
-  version: '0.0.0'
+  version: '0.0.1'
 
+schemes:
+  - http
+  - https
+
+produces:
+  - application/json
+
+basePath: /api
 paths:
-  '/api/feed/latest':
+  '/feed/latest':
     get:
       description: latest 10 Feed posts for current user
       parameters: []
@@ -13,6 +21,8 @@ paths:
           description: user Feed
           schema:
             $ref: '#/definitions/Feed'
+      tags:
+      - feed
 
 definitions:
   Feed:
@@ -23,22 +33,26 @@ definitions:
   FeedItem:
     $ref: ./FeedItem.yaml
 
+  Event:
+    $ref: ./Event.yaml
+
+  TradeEvent:
+    $ref: ./TradeEvent.yaml
+
+  WhatchlistEvent:
+    $ref: ./WhatchlistEvent.yaml
+
+  UpdateEvent:
+    $ref: ./UpdateEvent.yaml
+
   Investor:
     $ref: ./Investor.yaml
 
-  FeedEvent:
-    $ref: ./FeedEvent.yaml
+
 
   # note:
   # the more accurate term for this Type is "Security" (as a tradeable financial asset),
   # but for not to be mixed up with Informational Security
   # this is called Symbol
   Symbol:
-    type: object
-    properties:
-      ticker:
-        type: string
-        description: Symbol ticker
-      company:
-        type: string
-        description: company name corresponding to that symbol
+    $ref: ./Symbol.yaml

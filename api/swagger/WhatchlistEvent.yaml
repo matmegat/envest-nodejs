@@ -1,0 +1,23 @@
+type: object
+description: '"Whatchlist" type of event'
+allOf:
+- $ref: ./Event.yaml
+- type: object
+  properties:
+    data:
+      type: object
+      properties:
+        dir:
+          description: Type of whatchlist operation
+          type: string
+          enum:
+          - added
+          - removed
+        symbol:
+          $ref: ./Symbol.yaml
+        text:
+          type: string
+        motivations:
+          type: array
+          items:
+            type: string

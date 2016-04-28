@@ -1,0 +1,15 @@
+type: object
+description: '"Update" type of event'
+allOf:
+- $ref: ./Event.yaml
+- type: object
+  properties:
+    data:
+      type: object
+      properties:
+        stocks:
+          type: array
+          items:
+            $ref: ./Symbol.yaml
+        text:
+          type: string
