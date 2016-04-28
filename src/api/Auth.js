@@ -30,25 +30,20 @@ module.exports = function Auth (db, passport)
 
 	auth.express.post('/login', (req, res, next) =>
 	{
-		passport.authenticate('local', (err, user, info) =>
+		passport.authenticate('local', (err, user) =>
 		{
 			if (err) { return next(err) }
+
 			if (! user)
 			{
-				var message = 'Authentication error'
-
-				if (info)
-				{
-					message = info.message
-				}
-
 				return res.sendStatus(401)
 			}
+
 			req.logIn(user, function (err)
 			{
-			    if (err) { return next(err) }
+				if (err) { return next(err) }
 
-			    return res.sendStatus(200)
+				return res.sendStatus(200)
 			})
 		})(req, res, next)
 	})

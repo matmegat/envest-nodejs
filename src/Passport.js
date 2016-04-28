@@ -23,16 +23,16 @@ module.exports = function (express, db)
 
 	passport.serializeUser((user, done) =>
 	{
-	  done(null, user.id)
+		done(null, user.id)
 	})
 
 	passport.deserializeUser((id, done) =>
 	{
-	  auth_model.byId(id)
-	  .then(user =>
-	  {
-		done(null, user)
-	  })
+		auth_model.byId(id)
+		.then(user =>
+		{
+			done(null, user)
+		})
 	})
 
 	init_local_strat(auth_model)
@@ -42,7 +42,7 @@ module.exports = function (express, db)
 
 function init_local_strat (model)
 {
-	passport.use( new LocalStrategy(
+	passport.use(new LocalStrategy(
 	{
 		usernameField: 'email',
 		passwordField: 'password',
