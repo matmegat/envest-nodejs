@@ -55,7 +55,9 @@ module.exports = function Auth (db, passport)
 
 	auth.express.post('/session-check', (req, res) =>
 	{
+		console.log('user:')
 		console.log(req.user)
+		console.log(req.isAuthenticated())
 		res.sendStatus(200)
 	})
 
