@@ -32,7 +32,7 @@ module.exports = function Auth (db, passport)
 	{
 		passport.authenticate('local', (err, user, info) =>
 		{
-			//if (err) { return next(err) }
+			if (err) { return next(err) }
 			if (! user)
 			{
 				var message = 'Authentication error'
@@ -42,14 +42,21 @@ module.exports = function Auth (db, passport)
 					message = info.message
 				}
 
-				res.status(401).send(message)
+				return res.sendStatus(401)
 			}
-			req.logIn(user, function ()
+			req.logIn(user, function (err)
 			{
-			    //if (err) { return next(err) }
+			    if (err) { return next(err) }
+
 			    return res.sendStatus(200)
 			})
 		})(req, res, next)
+	})
+
+	auth.express.post('/session-check', (req, res) =>
+	{
+		console.log(req.user)
+		res.sendStatus(200)
 	})
 
 	auth.express.get('/logout', (req, res) =>
