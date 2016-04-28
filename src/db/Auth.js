@@ -1,11 +1,4 @@
 
-const crypto = require('crypto')
-
-const promisify = require('promisify-node')
-
-const random_bytes = promisify(crypto.randomBytes)
-const create_hash = promisify(crypto.pbkdf2)
-
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -56,73 +49,52 @@ module.exports = function Auth (db)
 		return encrypt_pass(formPass, salt)
 		.then(result =>
 		{
-			if (result.encrypted_pass === dbPass)
-			{
-				return true
-			}
-			else
-			{
-				return false
-			}
+			return result.encrypted_pass === dbPass
 		})
 	}
 
 	return auth
 }
 
-// DB salt size = 16(8 bytes), DB password size = 36(18 bytes)
-const SALT_SIZE = 8
-const PASSWORD_SIZE = 18
-const ITERATIONS = 100000
+
+// DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
+var SALT_SIZE     = 16 / 2
+var PASSWORD_SIZE = 36 / 2
+var ITERATIONS    = 100000
+
+var promisify = require('promisify-node')
+
+var crypto = require('crypto')
+var randomBytes = promisify(crypto.randomBytes)
+var genHash = promisify(crypto.pbkdf2)
+
+var method = require('lodash/method')
+var hex = method('toString', 'hex')
 
 function generate_salt ()
 {
-	var size = SALT_SIZE
-
-	return random_bytes(size)
-	.then(buf =>
-	{
-		return buf.toString('hex')
-	})
-	.catch(error =>
-	{
-		console.log('Generate salt error:' + error)
-	})
+	return randomBytes(SALT_SIZE)
+	.then(hex)
 }
 
 function hash (password, salt)
 {
-	var size = PASSWORD_SIZE
-
-	return create_hash(password, salt, ITERATIONS, size, 'sha512')
-	.then(buf =>
-	{
-		return buf.toString('hex')
-	})
-	.catch(error =>
-	{
-		console.log('Hash error:' + error)
-	})
+	return genHash(password, salt, ITERATIONS, PASSWORD_SIZE, 'sha512')
+	.then(hex)
 }
 
 function encrypt_pass (password, salt)
 {
-	var size = PASSWORD_SIZE
-
-	return hash(password, '', size)
+	return hash(password, '', PASSWORD_SIZE)
 	.then(pass_hash =>
 	{
-		return hash(pass_hash, salt, size)
+		return hash(pass_hash, salt, PASSWORD_SIZE)
 	})
-	.then(buff =>
+	.then(str =>
 	{
 		return {
-			encrypted_pass: buff,
+			encrypted_pass: str,
 			salt: salt
 		}
-	})
-	.catch(error =>
-	{
-		console.log('Encrypt error:' + error)
 	})
 }
