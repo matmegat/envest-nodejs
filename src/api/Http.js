@@ -20,7 +20,7 @@ module.exports = function Http (app)
 	http.feed = Feed()
 	http.express.use('/api/feed', http.feed.express)
 
-	http.auth = Auth(app.db, http.passport)
+	http.auth = Auth(app.db.auth, http.passport)
 	http.express.use('/api/auth', http.auth.express)
 
 	var port = app.cfg.port
