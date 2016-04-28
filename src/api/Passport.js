@@ -48,6 +48,17 @@ function useLocal (auth)
 	, (username, password, done) =>
 	{
 		auth.login(username, password, done)
+		.then(result =>
+		{
+			if (result.status)
+			{
+				return done(null, result.user)
+			}
+			else
+			{
+				return done(null, false, { message: result.message } )
+			}
+		})
 		.catch(error =>
 		{
 			return done(error)

@@ -30,7 +30,7 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.login = function (username, password, cb)
+	auth.login = function (username, password)
 	{
 		return auth.byEmail(username)
 		.then(user =>
@@ -42,17 +42,26 @@ module.exports = function Auth (db)
 				{
 					if (result)
 					{
-						return cb(null, user)
+						return {
+							status: true,
+							user: user
+						}
 					}
 					else
 					{
-						return cb(null, false, { message: 'Incorrect password.' })
+						return {
+							status: false,
+							message: 'Incorrect password.'
+						}
 					}
 				})
 			}
 			else
 			{
-				return cb(null, false, { message: 'Incorrect username.' })
+				return {
+					status: false,
+					message: 'Incorrect username.'
+				}
 			}
 		})
 	}
