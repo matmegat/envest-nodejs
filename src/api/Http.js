@@ -23,6 +23,11 @@ module.exports = function Http (app)
 	http.auth = Auth(app.db.auth, http.passport)
 	http.express.use('/api/auth', http.auth.express)
 
+	if (app.cfg.env !== 'prod')
+	{
+		require('./Swagger')(app, http.express)
+	}
+
 	var port = app.cfg.port
 
 	http.ready = new Promise(rs =>

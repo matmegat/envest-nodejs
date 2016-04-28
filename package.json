@@ -67,7 +67,13 @@
       "^2.8",
 
     "rootpath":
-      "StreetStrider/rootpath#v1.4.0"
+      "StreetStrider/rootpath#v1.4.0",
+
+    "js-yaml":
+      "^3.3",
+
+    "swagger-tools":
+      "0.9"
   },
 
   "devDependencies":
