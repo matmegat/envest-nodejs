@@ -15,7 +15,7 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
-	http.passport = Passport(http.express, app.db)
+	http.passport = Passport(http.express, app.db.auth)
 
 	http.feed = Feed()
 	http.express.use('/api/feed', http.feed.express)

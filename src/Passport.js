@@ -1,19 +1,16 @@
 
-const passport = require('passport')
-const session = require('express-session')
+var session = require('express-session')
+var secret  = 'aoor91xck0'
 
-const LocalStrategy = require('passport-local').Strategy
+var passport = require('passport')
+var LocalStrategy = require('passport-local')
 
-module.exports = function (express, db)
+module.exports = function (express, auth)
 {
-	var auth_model = require('./db/Auth')(db)
-
-	const SESSION_SECRET = 'aoor91xck0'
-
 	express.use(session(
 	{
-		name: 'sid',
-		secret: SESSION_SECRET,
+		name:  'sid',
+		secret: secret,
 		resave: false,
 		saveUninitialized: false
 	}))
@@ -28,32 +25,34 @@ module.exports = function (express, db)
 
 	passport.deserializeUser((id, done) =>
 	{
-		auth_model.byId(id)
+		auth.byId(id)
 		.then(user =>
 		{
 			done(null, user)
-		})
+		}
+		, done)
 	})
 
-	init_local_strat(auth_model)
+	useLocal(auth)
 
 	return passport
 }
 
-function init_local_strat (model)
+function useLocal (auth)
 {
 	passport.use(new LocalStrategy(
 	{
 		usernameField: 'email',
 		passwordField: 'password',
-	}, (username, password, done) =>
+	}
+	, (username, password, done) =>
 	{
-		model.byEmail(username)
+		auth.byEmail(username)
 		.then(user =>
 		{
 			if (user)
 			{
-				return model.comparePasswords(user.password, password, user.salt)
+				return auth.comparePasswords(user.password, password, user.salt)
 				.then(result =>
 				{
 					if (result)
