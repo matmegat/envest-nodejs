@@ -14,6 +14,11 @@ module.exports = function Http (app)
 	http.express = express()
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
+	http.express.use(body_parser.urlencoded(
+		{
+			extended: true
+		}
+	))
 
 	http.passport = Passport(http.express, app.db.auth)
 

@@ -12,7 +12,11 @@ module.exports = function Auth (db)
 
 	auth.register = function (user)
 	{
-		return generate_salt()
+		return validate_email(user.email)
+		.then(() =>
+		{
+			return generate_salt()
+		})
 		.then(salt =>
 		{
 			return encrypt_pass(user.password, salt)
@@ -26,7 +30,11 @@ module.exports = function Auth (db)
 				email: user.email,
 				password: obj.encrypted_pass,
 				salt: obj.salt
-			})
+			}, 'id')
+		})
+		.catch((error) =>
+		{
+			throw error
 		})
 	}
 
@@ -131,6 +139,23 @@ function encrypt_pass (password, salt)
 		return {
 			encrypted_pass: str,
 			salt: salt
+		}
+	})
+}
+
+function validate_email (email)
+{
+	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+
+	return new Promise(() =>
+	{
+		if (re.test(email))
+		{
+			return true
+		}
+		else
+		{
+			throw Error('Invalid email')
 		}
 	})
 }

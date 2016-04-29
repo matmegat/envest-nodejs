@@ -1,5 +1,6 @@
 
 var Router = require('express').Router
+var merge = require('lodash/merge')
 
 module.exports = function Auth (auth_model, passport)
 {
@@ -19,14 +20,32 @@ module.exports = function Auth (auth_model, passport)
 			password: data.password
 		}
 
+
 		auth.model.register(user_data)
-		.then(() =>
+		.then((id) =>
 		{
-			rs.sendStatus(200)
+			rs.status(200).send(merge(user_data,
+			{
+				id: id,
+				password: null
+			}))
 		})
 		.catch(error =>
 		{
-			rs.status(500).send(error)
+			if (error.constraint === 'users_email_unique')
+			{
+				return rs.status(403).send(
+				{
+					status: false,
+					message: 'User with this email already exists'
+				})
+			}
+
+			return rs.status(500).send(
+			{
+				status: false,
+				message: error.message
+			})
 		})
 	})
 
