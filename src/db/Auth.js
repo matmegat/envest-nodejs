@@ -50,6 +50,9 @@ module.exports = function Auth (db)
 				{
 					if (result)
 					{
+						delete user.password
+						delete user.salt
+
 						return {
 							status: true,
 							user: user
@@ -68,7 +71,7 @@ module.exports = function Auth (db)
 			{
 				return {
 					status: false,
-					message: 'Incorrect username.'
+					message: 'Incorrect email.'
 				}
 			}
 		})

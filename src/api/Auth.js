@@ -1,6 +1,5 @@
 
 var Router = require('express').Router
-var merge = require('lodash/merge')
 
 module.exports = function Auth (auth_model, passport)
 {
@@ -24,11 +23,13 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then((id) =>
 		{
-			rs.status(200).send(merge(user_data,
-			{
-				id: id,
-				password: null
-			}))
+			user_data.id = id[0]
+			delete user_data.password
+
+			rs.status(200)
+				.set('access-token', 'will be here')
+				.set('token-type', 'bearer')
+				.send(user_data)
 		})
 		.catch(error =>
 		{
@@ -57,14 +58,22 @@ module.exports = function Auth (auth_model, passport)
 
 			if (! user)
 			{
-				return rs.sendStatus(401)
+				return rs.status(401).send(
+				{
+					status: false,
+					message: 'Email and password doesn\'t match'
+				})
 			}
 
 			rq.login(user, function (err)
 			{
 				if (err) { return next(err) }
 
-				return rs.sendStatus(200)
+				return rs
+					.status(200)
+					.set('access-token', 'will be here')
+					.set('token-type', 'bearer')
+					.send(user)
 			})
 		})(rq, rs, next)
 	})
