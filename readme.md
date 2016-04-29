@@ -24,8 +24,7 @@ Maintainer: Ivan Puhtin
 ## deploy
 ```sh
 cd netvest-backend-dir
-npm install --production --no-optional
-npm start
+run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 ```
 
 ## API
