@@ -12,7 +12,7 @@ module.exports = function Auth (db)
 
 	auth.register = function (user)
 	{
-		return validate_email(user.email)
+		return validate(user)
 		.then(() =>
 		{
 			return generate_salt()
@@ -143,19 +143,31 @@ function encrypt_pass (password, salt)
 	})
 }
 
-function validate_email (email)
+function validate (credentials)
 {
-	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+	var emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-	return new Promise(() =>
+	return new Promise((resolve, reject) =>
 	{
-		if (re.test(email))
+		if (! credentials.first_name || ! credentials.last_name)
 		{
-			return true
+			return reject(Error('"first_name" and "last_name" ' +
+				'fields are required'))
 		}
-		else
+		if (! credentials.email)
 		{
-			throw Error('Invalid email')
+			return reject(Error('"email" field is required'))
 		}
+		if (! credentials.password)
+		{
+			return reject(Error('"password" field is required'))
+		}
+
+		if ( ! emailRe.test(credentials.email) )
+		{
+			return reject(Error('Invalid email'))
+		}
+
+		return resolve()
 	})
 }
