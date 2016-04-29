@@ -41,6 +41,6 @@ module.exports = function name (app)
 	})
 
 	db.auth = Auth(db)
-	
+
 	return db
 }
