@@ -28,12 +28,10 @@ npm install --production --no-optional
 npm start
 ```
 
-## API stub
-```sh
-curl localhost:8080/api/feed/latest
+## API
 ```
-
-## Auth routes
+GET - /api/feed/latest
 POST - /api/auth/register - { "first_name": "Alex", "last_name": "Grind", "email": "test@mail.ru", "password": "dummy-pass" }
 POST - /api/auth/login - POST { "email": "test@mail.ru", "password": "dummy-pass" }
 GET - /api/auth/logout
+```
