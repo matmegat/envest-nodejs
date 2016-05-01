@@ -14,7 +14,7 @@
 
     "dev":   "nodemon --watch src/ .",
 
-    "st": "eslint src/ db/",
+    "st": "eslint src/ run/ db/",
 
     "knex": "knex --knexfile=db/knexfile.js --env=dev",
     "db-migrate":  "npm run knex -- migrate:latest",
