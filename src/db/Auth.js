@@ -37,7 +37,7 @@ module.exports = function Auth (db)
 		{
 			if (user)
 			{
-				return auth.comparePasswords(user.password, password, user.salt)
+				return compare_passwords(user.password, password, user.salt)
 				.then(result =>
 				{
 					if (result)
@@ -80,15 +80,6 @@ module.exports = function Auth (db)
 		.first()
 	}
 
-	auth.comparePasswords = function (dbPass, formPass, salt)
-	{
-		return encrypt_pass(formPass, salt)
-		.then(result =>
-		{
-			return result.encrypted_pass === dbPass
-		})
-	}
-
 	return auth
 }
 
@@ -113,12 +104,6 @@ function generate_salt ()
 	.then(hex)
 }
 
-function hash (password, salt)
-{
-	return genHash(password, salt, iterations, password_size, 'sha512')
-	.then(hex)
-}
-
 function encrypt_pass (password, salt)
 {
 	return hash(password, '', password_size)
@@ -132,5 +117,20 @@ function encrypt_pass (password, salt)
 			encrypted_pass: str,
 			salt: salt
 		}
+	})
+}
+
+function hash (password, salt)
+{
+	return genHash(password, salt, iterations, password_size, 'sha512')
+	.then(hex)
+}
+
+function compare_passwords (dbPass, formPass, salt)
+{
+	return encrypt_pass(formPass, salt)
+	.then(result =>
+	{
+		return result.encrypted_pass === dbPass
 	})
 }
