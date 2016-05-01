@@ -1,7 +1,6 @@
 
 exports.up = function (knex, Promise)
 {
-	/* eslint-disable newline-per-chained-call */
 	return Promise.resolve()
 	.then(() =>
 	{
@@ -25,7 +24,6 @@ exports.up = function (knex, Promise)
 			table.string('code', 16).notNullable()
 		})
 	})
-	/* eslint-enable newline-per-chained-call */
 }
 
 exports.down = function (knex, Promise)

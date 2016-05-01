@@ -82,7 +82,7 @@
       "^2.8",
 
     "js-outlander":
-      "StrangeTransistor/js-outlander#2.0.0",
+      "StrangeTransistor/js-outlander#2.0.1",
 
     "nodemon":
       "^1.9.1",
