@@ -29,8 +29,8 @@ run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 
 ## API
 ```
-GET - /api/feed/latest
+GET  - /api/feed/latest
 POST - /api/auth/register - { "first_name": "Alex", "last_name": "Grind", "email": "test@mail.ru", "password": "dummy-pass" }
 POST - /api/auth/login - POST { "email": "test@mail.ru", "password": "dummy-pass" }
-GET - /api/auth/logout
+GET  - /api/auth/logout
 ```
