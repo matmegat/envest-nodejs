@@ -5,34 +5,31 @@ module.exports = function Auth (db)
 
 	auth.db = db
 
-	var knex = db.knex
+	var user = db.user
 
-	auth.users = knex('users')
-	auth.email_confirms = knex('email_confirms')
-
-	auth.register = function (user)
+	auth.register = function (userdata)
 	{
-		return generate_salt()
+		return validate(user)
+		.then(() =>
+		{
+			return generate_salt()
+		})
 		.then(salt =>
 		{
-			return encrypt_pass(user.password, salt)
+			return encrypt_pass(userdata.password, salt)
 		})
 		.then(obj =>
 		{
-			return auth.users
-			.insert({
-				first_name: user.first_name,
-				last_name: user.last_name,
-				email: user.email,
-				password: obj.encrypted_pass,
-				salt: obj.salt
-			})
+			userdata.password = obj.encrypted_pass
+			userdata.salt = obj.salt
+
+			user.create(userdata)
 		})
 	}
 
 	auth.login = function (username, password)
 	{
-		return auth.byEmail(username)
+		return user.byEmail(username)
 		.then(user =>
 		{
 			if (user)
@@ -42,6 +39,9 @@ module.exports = function Auth (db)
 				{
 					if (result)
 					{
+						delete user.password
+						delete user.salt
+
 						return {
 							status: true,
 							user: user
@@ -60,24 +60,10 @@ module.exports = function Auth (db)
 			{
 				return {
 					status: false,
-					message: 'Incorrect username.'
+					message: 'Incorrect email.'
 				}
 			}
 		})
-	}
-
-	auth.byEmail = function (email)
-	{
-		return auth.users
-		.where('email', email)
-		.first()
-	}
-
-	auth.byId = function (id)
-	{
-		return auth.users
-		.where('id', id)
-		.first()
 	}
 
 	return auth
@@ -133,4 +119,33 @@ function compare_passwords (dbPass, formPass, salt)
 	{
 		return result.encrypted_pass === dbPass
 	})
+}
+
+function validate (credentials)
+{
+	var emailRe = /@/
+
+	return new Promise((rs, rj) =>
+	{
+		validate_required(credentials, 'first_name')
+		validate_required(credentials, 'last_name')
+		validate_required(credentials, 'email')
+		validate_required(credentials, 'password')
+
+		if (! emailRe.test(credentials.email))
+		{
+			return rj(new Error('Invalid email'))
+		}
+
+		return rs()
+	})
+}
+var format = require('util').format
+
+function validate_required (credentials, field)
+{
+	if (! (field in credentials))
+	{
+		throw new Error(format('field `%s` is required', field))
+	}
 }
