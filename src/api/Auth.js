@@ -26,8 +26,6 @@ module.exports = function Auth (auth_model, passport)
 			delete user_data.password
 
 			rs.status(200)
-			.set('access-token', 'will be here')
-			.set('token-type', 'bearer')
 			.send(user_data)
 		})
 		.catch(error =>
@@ -70,8 +68,6 @@ module.exports = function Auth (auth_model, passport)
 
 				return rs
 				.status(200)
-				.set('access-token', 'will be here')
-				.set('token-type', 'bearer')
 				.send(user)
 			})
 		})(rq, rs, next)
