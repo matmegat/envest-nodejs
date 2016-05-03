@@ -6,33 +6,31 @@ module.exports = function Auth (db)
 	auth.db = db
 
 	var knex = db.knex
+	var user = db.user
 
-	auth.users = knex('users')
-	auth.email_confirms = knex('email_confirms')
-
-	auth.register = function (user)
+	auth.register = function (userdata)
 	{
 		return generate_salt()
 		.then(salt =>
 		{
-			return encrypt_pass(user.password, salt)
+			return encrypt_pass(userdata.password, salt)
 		})
 		.then(obj =>
 		{
-			return auth.users
-			.insert({
-				first_name: user.first_name,
-				last_name: user.last_name,
-				email: user.email,
-				password: obj.encrypted_pass,
-				salt: obj.salt
-			})
+			userdata.password = obj.encrypted_pass
+			userdata.salt = obj.salt
+
+			user.create(userdata)
+		})
+		.catch(err =>
+		{
+			console.log(err)
 		})
 	}
 
 	auth.login = function (username, password)
 	{
-		return auth.byEmail(username)
+		return user.byEmail(username)
 		.then(user =>
 		{
 			if (user)
@@ -64,20 +62,6 @@ module.exports = function Auth (db)
 				}
 			}
 		})
-	}
-
-	auth.byEmail = function (email)
-	{
-		return auth.users
-		.where('email', email)
-		.first()
-	}
-
-	auth.byId = function (id)
-	{
-		return auth.users
-		.where('id', id)
-		.first()
 	}
 
 	auth.comparePasswords = function (dbPass, formPass, salt)

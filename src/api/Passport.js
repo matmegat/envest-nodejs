@@ -5,8 +5,11 @@ var secret  = 'aoor91xck0'
 var passport = require('passport')
 var LocalStrategy = require('passport-local')
 
-module.exports = function (express, auth)
+module.exports = function (express, db)
 {
+	var user = db.user
+	var auth = db.auth
+
 	express.use(session(
 	{
 		name:  'sid',
@@ -25,7 +28,7 @@ module.exports = function (express, auth)
 
 	passport.deserializeUser((id, done) =>
 	{
-		auth.byId(id)
+		user.byId(id)
 		.then(user =>
 		{
 			done(null, user)
