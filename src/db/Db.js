@@ -43,6 +43,6 @@ module.exports = function name (app)
 
 	db.user = User(db)
 	db.auth = Auth(db)
-	
+
 	return db
 }

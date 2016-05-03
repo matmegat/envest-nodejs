@@ -5,7 +5,6 @@ module.exports = function Auth (db)
 
 	auth.db = db
 
-	var knex = db.knex
 	var user = db.user
 
 	auth.register = function (userdata)
