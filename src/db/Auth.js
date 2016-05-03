@@ -9,7 +9,11 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
-		return generate_salt()
+		return validate(user)
+		.then(() =>
+		{
+			return generate_salt()
+		})
 		.then(salt =>
 		{
 			return encrypt_pass(userdata.password, salt)
@@ -20,10 +24,6 @@ module.exports = function Auth (db)
 			userdata.salt = obj.salt
 
 			user.create(userdata)
-		})
-		.catch(err =>
-		{
-			console.log(err)
 		})
 	}
 
@@ -39,6 +39,9 @@ module.exports = function Auth (db)
 				{
 					if (result)
 					{
+						delete user.password
+						delete user.salt
+
 						return {
 							status: true,
 							user: user
@@ -57,7 +60,7 @@ module.exports = function Auth (db)
 			{
 				return {
 					status: false,
-					message: 'Incorrect username.'
+					message: 'Incorrect email.'
 				}
 			}
 		})
@@ -116,4 +119,35 @@ function compare_passwords (dbPass, formPass, salt)
 	{
 		return result.encrypted_pass === dbPass
 	})
+}
+
+function validate (credentials)
+{
+	var emailRe = /@/
+
+	return new Promise((rs, rj) =>
+	{
+		validate_required(credentials, 'first_name')
+		validate_required(credentials, 'last_name')
+		validate_required(credentials, 'email')
+		validate_required(credentials, 'password')
+
+		if (! emailRe.test(credentials.email))
+		{
+			return rj(new Error('Invalid email'))
+		}
+
+		return rs()
+	})
+}
+
+
+var format = require('util').format
+
+function validate_required (credentials, field)
+{
+	if (! (field in credentials))
+	{
+		throw new Error(format('field `%s` is required', field))
+	}
 }
