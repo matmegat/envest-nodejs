@@ -150,27 +150,29 @@ function validate (credentials)
 {
 	var emailRe = /@/
 
-	return new Promise((resolve, reject) =>
+	return new Promise((rs, rj) =>
 	{
-		if (! credentials.first_name || ! credentials.last_name)
+		validate_required(credentials, 'first_name')
+		validate_required(credentials, 'last_name')
+		validate_required(credentials, 'email')
+		validate_required(credentials, 'password')
+
+		if (! emailRe.test(credentials.email))
 		{
-			return reject(Error('"first_name" and "last_name" ' +
-				'fields are required'))
-		}
-		if (! credentials.email)
-		{
-			return reject(Error('"email" field is required'))
-		}
-		if (! credentials.password)
-		{
-			return reject(Error('"password" field is required'))
+			return rj(new Error('Invalid email'))
 		}
 
-		if ( ! emailRe.test(credentials.email) )
-		{
-			return reject(Error('Invalid email'))
-		}
-
-		return resolve()
+		return rs()
 	})
+}
+
+
+var format = require('util').format
+
+function validate_required (credentials, field)
+{
+	if (! (field in credentials))
+	{
+		throw new Error(format('field `%s` is required', field))
+	}
 }
