@@ -33,6 +33,24 @@ if (key)
 	scp = partial(scp, [ '-i', key ])
 }
 
+function outputify (name, fn)
+{
+	return () =>
+	{
+		console.info('START', name)
+
+		var r = fn.apply(this, arguments)
+
+		return r.then(() =>
+		{
+			console.info('READY', name)
+
+			return r
+		})
+	}
+}
+
+
 var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
 
@@ -62,27 +80,27 @@ function dump (path, config)
 
 
 Promise.resolve()
-.then(() =>
+.then(outputify('copy package.json', () =>
 {
 	return scp(rootpath('package.json'), target())
-})
-.then(() =>
+}))
+.then(outputify('copy api/', () =>
 {
 	return scp('-r', rootpath('api'), target())
-})
-.then(() =>
+}))
+.then(outputify('copy db/', () =>
 {
 	return scp('-r', rootpath('db'), target())
-})
-.then(() =>
+}))
+.then(outputify('copy src/', () =>
 {
 	return scp('-r', rootpath('src'), target())
-})
+}))
 .then(() =>
 {
 	return ssh(remote, f('"mkdir -p %s"', remote_rootpath('cfg/')))
 })
-.then(() =>
+.then(outputify('compile config, copy cfg/', () =>
 {
 	var base = load(rootpath('cfg/config.json'))
 	var cenv = load(rootpath('cfg/env', env + '.json'))
@@ -93,18 +111,18 @@ Promise.resolve()
 	dump(tmp, config)
 
 	return scp(tmp, target('cfg/config.json'))
-})
+}))
 .then(() =>
 {
 	return ssh(remote, f('"mkdir -p %s"', remote_rootpath('var/')))
 })
-.then(() =>
+.then(outputify('start remote', () =>
 {
 	return ssh(remote,
 		f( '"cd %s;'
 		 + ' npm install --production --no-optional;'
 		 + 'sudo npm run restart"', remote_rootpath()
 	))
-})
-.then(console.log)
+}))
+.then(() => console.info('OK'))
 .catch(console.error)
