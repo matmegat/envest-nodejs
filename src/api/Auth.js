@@ -19,7 +19,6 @@ module.exports = function Auth (auth_model, passport)
 			password: data.password
 		}
 
-
 		auth.model.register(user_data)
 		.then((id) =>
 		{
@@ -27,9 +26,9 @@ module.exports = function Auth (auth_model, passport)
 			delete user_data.password
 
 			rs.status(200)
-				.set('access-token', 'will be here')
-				.set('token-type', 'bearer')
-				.send(user_data)
+			.set('access-token', 'will be here')
+			.set('token-type', 'bearer')
+			.send(user_data)
 		})
 		.catch(error =>
 		{
@@ -70,10 +69,10 @@ module.exports = function Auth (auth_model, passport)
 				if (err) { return next(err) }
 
 				return rs
-					.status(200)
-					.set('access-token', 'will be here')
-					.set('token-type', 'bearer')
-					.send(user)
+				.status(200)
+				.set('access-token', 'will be here')
+				.set('token-type', 'bearer')
+				.send(user)
 			})
 		})(rq, rs, next)
 	})
