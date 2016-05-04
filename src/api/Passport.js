@@ -31,7 +31,7 @@ module.exports = function (express, db)
 		user.byId(id)
 		.then(user =>
 		{
-			if (!user)
+			if (! user)
 			{
 				user = false
 			}
