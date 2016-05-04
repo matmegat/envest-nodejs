@@ -22,7 +22,27 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then((id) =>
 		{
+			var loginData = 
+			{
+				id: id[0],
+				email: data.email,
+				password: data.password
+			}
+
 			user_data.id = id[0]
+
+			rq.login(loginData, err =>
+			{
+				if (err)
+				{
+					return rs.status(500).send(
+					{
+						status: false,
+						message: 'Login failed'
+					})
+				}
+			})
+
 			delete user_data.password
 			delete user_data.salt
 
