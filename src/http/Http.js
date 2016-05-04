@@ -3,8 +3,8 @@ var express = require('express')
 var body_parser = require('body-parser')
 var cookie_parser = require('cookie-parser')
 
-var Feed = require('./Feed')
-var Auth = require('./Auth')
+var Feed = require('./api/Feed')
+var Auth = require('./api/Auth')
 var Passport = require('./Passport')
 
 module.exports = function Http (app)
