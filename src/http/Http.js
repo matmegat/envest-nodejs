@@ -6,6 +6,7 @@ var cookie_parser = require('cookie-parser')
 var Feed = require('./api/Feed')
 var Auth = require('./api/Auth')
 var Passport = require('./Passport')
+var Swagger = require('./Swagger')
 
 module.exports = function Http (app)
 {
@@ -40,23 +41,18 @@ module.exports = function Http (app)
 	mount(Feed(), 'feed', 'feed')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 
-	if (app.cfg.env !== 'prod')
-	{
-		/* eslint-disable max-len */
-		// didn't find declaration of using 'body' schema of parameters
-		// swagger.io/specification/#parameterObject
-		// github.com/apigee-127/swagger-tools/blob/master/schemas/2.0/schema.json#L887-L908
-		// http.express.use(body_parser.urlencoded({ extended: true }))
-		/* eslint-enable */
-		require('./Swagger')(app, http.express)
-	}
+	app.swagger = Swagger(app, http.express)
 
 	var port = app.cfg.port
 
-	http.ready = new Promise(rs =>
-	{
-		http.express.listen(port, rs)
-	})
+	http.ready = Promise.all([
+		new Promise(rs =>
+		{
+			http.express.listen(port, rs)
+		}),
+
+		app.swagger
+	])
 
 	return http
 }
