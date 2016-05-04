@@ -14,7 +14,7 @@ allOf:
           - added
           - removed
         symbol:
-          $ref: ./Symbol.yaml
+          $ref: ../Symbol.yaml
         text:
           type: string
         motivations:

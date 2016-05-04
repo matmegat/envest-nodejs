@@ -8,7 +8,7 @@ properties:
     format: date-time
     description: when event occurs
   investor:
-    $ref: ./Investor.yaml
+    $ref: ../Investor.yaml
   event:
     type: object
     description: One of Events
