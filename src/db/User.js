@@ -32,8 +32,7 @@ module.exports = function User (db)
 		return user.users_table
 		.clone()
 		.insert({
-			first_name: data.first_name,
-			last_name: data.last_name,
+			full_name: data.full_name,
 			email: data.email,
 			password: data.password,
 			salt: data.salt

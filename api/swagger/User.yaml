@@ -2,9 +2,7 @@ type: object
 properties:
   id:
     type: integer
-  first_name:
-    type: string
-  last_name:
+  full_name:
     type: string
   email:
     type: string

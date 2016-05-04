@@ -30,16 +30,11 @@ paths:
     post:
       description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
       parameters:
-      - name: first_name
+      - name: full_name
         in: formData
         required: true
         type: string
-        description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
-      - name: last_name
-        in: formData
-        required: true
-        type: string
-        description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
       - name: email
         in: formData
         required: true

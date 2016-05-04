@@ -13,8 +13,7 @@ module.exports = function Auth (auth_model, passport)
 		var data = rq.body
 		var user_data =
 		{
-			first_name: data.first_name,
-			last_name: data.last_name,
+			full_name: data.full_name,
 			email: data.email,
 			password: data.password
 		}
