@@ -29,6 +29,7 @@ module.exports = function App ()
 	{
 		console.error('NetVest backend init error')
 		console.error(error)
+		process.exit(1)
 	})
 
 	return app

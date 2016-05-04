@@ -45,7 +45,8 @@ module.exports = function Http (app)
 
 	var port = app.cfg.port
 
-	http.ready = Promise.all([
+	http.ready = Promise.all(
+	[
 		new Promise(rs =>
 		{
 			http.express.listen(port, rs)
