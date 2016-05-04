@@ -94,14 +94,6 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
-	auth.express.post('/session-check', (rq, rs) =>
-	{
-		console.log('user:')
-		console.log(rq.user)
-		console.log(rq.isAuthenticated())
-		rs.sendStatus(200)
-	})
-
 	auth.express.get('/logout', (rq, rs) =>
 	{
 		rq.logout()
