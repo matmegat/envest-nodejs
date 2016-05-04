@@ -131,7 +131,7 @@ function validate_register (credentials)
 	{
 		validate_required(credentials.full_name, 'full_name')
 		validate_required(credentials.email,     'email')
-		validate_required(credentials.password,  'password')
+		validate_password(credentials.password)
 
 		validate_email(credentials.email)
 
@@ -143,8 +143,8 @@ function validate_login (email, password)
 {
 	return new Promise((rs, rj) =>
 	{
-		validate_required(email,    'email')
-		validate_required(password, 'password')
+		validate_required(email, 'email')
+		validate_password(password)
 
 		validate_email(email)
 
@@ -170,5 +170,19 @@ function validate_email (email)
 	if (! emailRe.test(email))
 	{
 		throw new Error('invalid email')
+	}
+}
+
+function validate_password (password)
+{
+	validate_required(password, 'password')
+
+	if (password.length < 6)
+	{
+		throw new Error('password is too short')
+	}
+	if (password.length > 100)
+	{
+		throw new Error('password is too long')
 	}
 }
