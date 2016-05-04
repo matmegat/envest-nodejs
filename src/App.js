@@ -23,11 +23,11 @@ module.exports = function App ()
 	])
 	.then(() =>
 	{
-		console.info('NetVest backend at :%s', app.cfg.port)
+		console.info('READY')
 	})
 	.catch(error =>
 	{
-		console.error('NetVest backend init error')
+		console.error('NetVest backend init error:')
 		console.error(error)
 		process.exit(1)
 	})

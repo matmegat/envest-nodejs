@@ -50,6 +50,10 @@ module.exports = function Http (app)
 		new Promise(rs =>
 		{
 			http.express.listen(port, rs)
+		})
+		.then(() =>
+		{
+			console.info('http at :%s', app.cfg.port)
 		}),
 
 		app.swagger
