@@ -121,10 +121,6 @@ definitions:
   Investor:
     $ref: ./Investor.yaml
 
-  # note:
-  # the more accurate term for this Type is "Security" (as a tradeable financial asset),
-  # but for not to be mixed up with Informational Security
-  # this is called Symbol
   Symbol:
     $ref: ./Symbol.yaml
 
