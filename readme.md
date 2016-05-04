@@ -39,9 +39,8 @@ run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 ```
 
 ## API
-```
-GET  - /api/feed/latest
-POST - /api/auth/register - { "full_name": "Alex Grind", "email": "test@mail.ru", "password": "dummy-pass" }
-POST - /api/auth/login - POST { "email": "test@mail.ru", "password": "dummy-pass" }
-GET  - /api/auth/logout
-```
+**Swagger** DOC: open in browser `/docs/`.
+
+Like:
+* [test /docs/](http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com:8080/docs/)
+* [staging /docs/](http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com/docs/)
