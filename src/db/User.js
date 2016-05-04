@@ -6,7 +6,7 @@ module.exports = function User (db)
 	user.db = db
 
 	var knex = db.knex
-	var oneMaybe = user.db.oneMaybe
+	var oneMaybe = db.oneMaybe
 
 	user.users_table = knex('users')
 	user.email_confirms = knex('email_confirms')

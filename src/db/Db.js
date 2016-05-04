@@ -10,6 +10,9 @@ module.exports = function name (app)
 	var cfg  = app.cfg
 	var conn = cfg.pg
 
+	db.one = one
+	db.oneMaybe = oneMaybe
+
 	db.knex = knex({
 		client: 'pg',
 		connection: conn
@@ -43,9 +46,6 @@ module.exports = function name (app)
 
 	db.user = User(db)
 	db.auth = Auth(db)
-
-	db.one = one
-	db.oneMaybe = oneMaybe
 
 	return db
 }
