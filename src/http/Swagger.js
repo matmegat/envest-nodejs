@@ -12,7 +12,6 @@ module.exports = function Swagger (app, express)
 		// github.com/apigee-127/swagger-tools/blob/master/schemas/2.0/schema.json#L887-L908
 		// http.express.use(body_parser.urlencoded({ extended: true }))
 		/* eslint-enable */
-
 		return swaggerParser.bundle(app.root('api/swagger/swagger.yaml'))
 		.then((swaggerDoc) =>
 		{
