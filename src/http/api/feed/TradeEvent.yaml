@@ -14,7 +14,7 @@ allOf:
           - sold
           - bought
         symbol:
-          $ref: ../Symbol.yaml
+          $ref: ../../swagger/Symbol.yaml
         price:
           type: integer
           minimum: 0

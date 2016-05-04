@@ -104,19 +104,19 @@ definitions:
       $ref: '#/definitions/FeedItem'
 
   FeedItem:
-    $ref: ./feed/FeedItem.yaml
+    $ref: ../api/feed/FeedItem.yaml
 
   Event:
-    $ref: ./feed/Event.yaml
+    $ref: ../api/feed/Event.yaml
 
   TradeEvent:
-    $ref: ./feed/TradeEvent.yaml
+    $ref: ../api/feed/TradeEvent.yaml
 
   WatchlistEvent:
-    $ref: ./feed/WatchlistEvent.yaml
+    $ref: ../api/feed/WatchlistEvent.yaml
 
   UpdateEvent:
-    $ref: ./feed/UpdateEvent.yaml
+    $ref: ../api/feed/UpdateEvent.yaml
 
   Investor:
     $ref: ./Investor.yaml
