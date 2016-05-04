@@ -4,7 +4,7 @@ var body_parser = require('body-parser')
 var cookie_parser = require('cookie-parser')
 
 var Feed = require('./api/feed/Feed')
-var Auth = require('./api/Auth')
+var Auth = require('./api/auth/Auth')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 

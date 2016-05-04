@@ -27,75 +27,13 @@ paths:
       - feed
 
   '/auth/register':
-    post:
-      description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
-      parameters:
-      - name: full_name
-        in: formData
-        required: true
-        type: string
-        description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
-      - name: email
-        in: formData
-        required: true
-        type: string
-        description: Email
-      - name: password
-        in: formData
-        required: true
-        type: string
-        format: password
-        description: Password
-      responses:
-        200:
-          description: user model
-          schema:
-            $ref: '#/definitions/User'
-        403:
-          description: Errors of registration.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - auth
+    $ref: ../api/auth/Register.yaml
+
   '/auth/login':
-    post:
-      description: Authenticates user by email and password
-      parameters:
-      - name: email
-        in: formData
-        required: true
-        type: string
-        description: Email
-      - name: password
-        in: formData
-        required: true
-        type: string
-        format: password
-        description: Password
-      responses:
-        200:
-          description: user model
-          schema:
-            $ref: '#/definitions/User'
-        403:
-          description: Errors of authentication.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: User not exists
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - auth
+    $ref: ../api/auth/Login.yaml
+
   '/auth/logout':
-    post:
-      description: Logouts user
-      parameters: []
-      responses:
-        200:
-          description: logout successful
-      tags:
-      - auth
+    $ref: ../api/auth/Logout.yaml
 
 definitions:
   # Put here only COMMON definitions

@@ -1,0 +1,8 @@
+post:
+  description: Logouts user
+  parameters: []
+  responses:
+    200:
+      description: logout successful
+  tags:
+  - auth
