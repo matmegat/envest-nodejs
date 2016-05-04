@@ -112,8 +112,8 @@ definitions:
   TradeEvent:
     $ref: ./feed/TradeEvent.yaml
 
-  WhatchlistEvent:
-    $ref: ./feed/WhatchlistEvent.yaml
+  WatchlistEvent:
+    $ref: ./feed/WatchlistEvent.yaml
 
   UpdateEvent:
     $ref: ./feed/UpdateEvent.yaml

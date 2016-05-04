@@ -14,5 +14,5 @@ properties:
     description: One of Events
     enum:
     - $ref: ./TradeEvent.yaml
-    - $ref: ./WhatchlistEvent.yaml
+    - $ref: ./WatchlistEvent.yaml
     - $ref: ./UpdateEvent.yaml
