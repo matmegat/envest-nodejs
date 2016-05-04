@@ -9,7 +9,7 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
-		return validate(user)
+		return validate(userdata)
 		.then(() =>
 		{
 			return generate_salt()
@@ -23,7 +23,7 @@ module.exports = function Auth (db)
 			userdata.password = obj.encrypted_pass
 			userdata.salt = obj.salt
 
-			user.create(userdata)
+			return user.create(userdata)
 		})
 	}
 

@@ -33,7 +33,8 @@ module.exports = function User (db)
 			email: data.email,
 			password: data.password,
 			salt: data.salt
-		})
+		}
+		, 'id')
 	}
 
 	return user
