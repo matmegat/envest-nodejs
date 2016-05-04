@@ -6,6 +6,7 @@ module.exports = function User (db)
 	user.db = db
 
 	var knex = db.knex
+	var oneMaybe = user.db.oneMaybe
 
 	user.users_table = knex('users')
 	user.email_confirms = knex('email_confirms')
@@ -14,14 +15,14 @@ module.exports = function User (db)
 	{
 		return user.users_table
 		.where('email', email)
-		.first()
+		.then(oneMaybe)
 	}
 
 	user.byId = function (id)
 	{
 		return user.users_table
 		.where('id', id)
-		.first()
+		.then(oneMaybe)
 	}
 
 	user.create = function (data)
