@@ -87,6 +87,15 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - auth
+  '/auth/logout':
+    post:
+      description: Logouts user
+      parameters: []
+      responses:
+        200:
+          description: logout successful
+      tags:
+      - auth
 
 definitions:
   Feed:
