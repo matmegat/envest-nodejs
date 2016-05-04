@@ -25,11 +25,20 @@ module.exports = function Http (app)
 
 	http.passport = Passport(http.express, app.db)
 
-	http.feed = Feed()
-	http.express.use('/api/feed', http.feed.express)
+	http.api = {}
 
-	http.auth = Auth(app.db.auth, http.passport)
-	http.express.use('/api/auth', http.auth.express)
+	function mount (subsystem, route, name)
+	{
+		http.api[name] = subsystem
+
+		route = '/api/' + route
+		http.express.use(route, subsystem.express)
+
+		console.info('API: mount %s at %s', name, route)
+	}
+
+	mount(Feed(), 'feed', 'feed')
+	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 
 	if (app.cfg.env !== 'prod')
 	{
