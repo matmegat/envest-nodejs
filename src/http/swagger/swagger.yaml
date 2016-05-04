@@ -98,13 +98,12 @@ paths:
       - auth
 
 definitions:
-  # this should be moved to feed
-  Feed:
-    type: array
-    items:
-      $ref: ../api/feed/FeedItem.yaml
-
   # Put here only COMMON definitions
+
+  Feed:
+    type: object
+    $ref: ../api/feed/Feed.yaml
+
   Investor:
     $ref: ./Investor.yaml
 
