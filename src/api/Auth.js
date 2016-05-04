@@ -20,13 +20,31 @@ module.exports = function Auth (auth_model, passport)
 		}
 
 		auth.model.register(user_data)
-		.then(() =>
+		.then((id) =>
 		{
-			rs.sendStatus(200)
+			user_data.id = id[0]
+			delete user_data.password
+			delete user_data.salt
+
+			rs.status(200)
+			.send(user_data)
 		})
 		.catch(error =>
 		{
-			rs.status(500).send(error)
+			if (error.constraint === 'users_email_unique')
+			{
+				return rs.status(403).send(
+				{
+					status: false,
+					message: 'User with this email already exists'
+				})
+			}
+
+			return rs.status(500).send(
+			{
+				status: false,
+				message: error.message
+			})
 		})
 	})
 
@@ -38,14 +56,20 @@ module.exports = function Auth (auth_model, passport)
 
 			if (! user)
 			{
-				return rs.sendStatus(401)
+				return rs.status(401).send(
+				{
+					status: false,
+					message: 'Email and password doesn\'t match'
+				})
 			}
 
 			rq.login(user, function (err)
 			{
 				if (err) { return next(err) }
 
-				return rs.sendStatus(200)
+				return rs
+				.status(200)
+				.send(user)
 			})
 		})(rq, rs, next)
 	})

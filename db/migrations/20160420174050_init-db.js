@@ -1,7 +1,6 @@
 
 exports.up = function (knex, Promise)
 {
-	/* eslint-disable newline-per-chained-call */
 	return Promise.resolve()
 	.then(() =>
 	{
@@ -12,7 +11,7 @@ exports.up = function (knex, Promise)
 			table.string('first_name').notNullable()
 			table.string('last_name').notNullable()
 
-			table.string('email')
+			table.string('email').unique()
 			table.string('password', 36).notNullable()
 			table.string('salt', 16).notNullable()
 		})
@@ -25,7 +24,6 @@ exports.up = function (knex, Promise)
 			table.string('code', 16).notNullable()
 		})
 	})
-	/* eslint-enable newline-per-chained-call */
 }
 
 exports.down = function (knex, Promise)

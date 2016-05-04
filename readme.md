@@ -2,10 +2,21 @@
 
 > Node.js
 
-Maintainer: Ivan Puhtin
+**Lead**: Ivan Puhtin
 
 * [message in Slack](https://weezlabs.slack.com/messages/@strider/)
-* [WeezLabs Jira](https://weezlabs.atlassian.net/secure/ViewProfile.jspa?name=teamfortresslife)
+* [WeezLabs Jira](https://weezlabs.atlassian.net/wiki/display/~teamfortresslife)
+
+**Developer**: Valentin Zlydnev
+
+* [message in Slack](https://weezlabs.slack.com/messages/@jettary/)
+* [WeezLabs Jira](https://weezlabs.atlassian.net/wiki/display/~vzlydnev)
+
+**Developer**: Artem Tumin
+
+* [message in Slack](https://weezlabs.slack.com/messages/@artem/)
+* [WeezLabs Jira](https://weezlabs.atlassian.net/wiki/display/~arttumin)
+
 
 ## npm scripts
 `npm run <script>` to run a script.
@@ -29,8 +40,8 @@ run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 
 ## API
 ```
-GET - /api/feed/latest
+GET  - /api/feed/latest
 POST - /api/auth/register - { "first_name": "Alex", "last_name": "Grind", "email": "test@mail.ru", "password": "dummy-pass" }
 POST - /api/auth/login - POST { "email": "test@mail.ru", "password": "dummy-pass" }
-GET - /api/auth/logout
+GET  - /api/auth/logout
 ```

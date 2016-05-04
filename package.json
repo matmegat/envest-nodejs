@@ -14,7 +14,7 @@
 
     "dev":   "nodemon --watch src/ .",
 
-    "st": "eslint src/ db/",
+    "st": "eslint src/ run/ db/",
 
     "knex": "knex --knexfile=db/knexfile.js --env=dev",
     "db-migrate":  "npm run knex -- migrate:latest",
@@ -82,7 +82,7 @@
       "^2.8",
 
     "js-outlander":
-      "StrangeTransistor/js-outlander#2.0.0",
+      "StrangeTransistor/js-outlander#2.0.1",
 
     "nodemon":
       "^1.9.1",
