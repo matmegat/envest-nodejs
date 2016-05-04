@@ -8,29 +8,26 @@ module.exports = function User (db)
 	var knex = db.knex
 	var oneMaybe = db.oneMaybe
 
-	user.users_table = knex('users')
-	user.email_confirms = knex('email_confirms')
+	user.users_table    = () => knex('users')
+	user.email_confirms = () => knex('email_confirms')
 
 	user.byEmail = function (email)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.where('email', email)
 		.then(oneMaybe)
 	}
 
 	user.byId = function (id)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.where('id', id)
 		.then(oneMaybe)
 	}
 
 	user.create = function (data)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.insert({
 			first_name: data.first_name,
 			last_name: data.last_name,
