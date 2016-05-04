@@ -52,9 +52,9 @@ function useLocal (auth)
 		usernameField: 'email',
 		passwordField: 'password',
 	}
-	, (username, password, done) =>
+	, (email, password, done) =>
 	{
-		auth.login(username, password, done)
+		auth.login(email, password, done)
 		.then(result =>
 		{
 			if (result.status)
@@ -63,12 +63,9 @@ function useLocal (auth)
 			}
 			else
 			{
-				return done(null, false, { message: result.message } )
+				return done(null, false, { message: result.message })
 			}
-		})
-		.catch(error =>
-		{
-			return done(error)
-		})
+		}
+		, done)
 	}))
 }

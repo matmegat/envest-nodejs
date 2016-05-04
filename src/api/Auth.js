@@ -22,7 +22,7 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then((id) =>
 		{
-			var loginData = 
+			var loginData =
 			{
 				id: id[0],
 				email: data.email,

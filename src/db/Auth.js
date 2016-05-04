@@ -27,9 +27,9 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.login = function (username, password)
+	auth.login = function (email, password)
 	{
-		return user.byEmail(username)
+		return user.byEmail(email)
 		.then(user =>
 		{
 			if (user)
