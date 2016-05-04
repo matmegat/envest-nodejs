@@ -3,7 +3,7 @@ var rootpath = require('rootpath')
 
 var Config = require('./Config')
 var Db = require('./db/Db')
-var Http = require('./api/Http')
+var Http = require('./http/Http')
 
 module.exports = function App ()
 {
