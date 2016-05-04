@@ -127,8 +127,7 @@ function validate (credentials)
 
 	return new Promise((rs, rj) =>
 	{
-		validate_required(credentials, 'first_name')
-		validate_required(credentials, 'last_name')
+		validate_required(credentials, 'full_name')
 		validate_required(credentials, 'email')
 		validate_required(credentials, 'password')
 
