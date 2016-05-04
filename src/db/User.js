@@ -14,6 +14,7 @@ module.exports = function User (db)
 	user.byEmail = function (email)
 	{
 		return user.users_table
+		.clone()
 		.where('email', email)
 		.then(oneMaybe)
 	}
@@ -21,6 +22,7 @@ module.exports = function User (db)
 	user.byId = function (id)
 	{
 		return user.users_table
+		.clone()
 		.where('id', id)
 		.then(oneMaybe)
 	}
@@ -28,6 +30,7 @@ module.exports = function User (db)
 	user.create = function (data)
 	{
 		return user.users_table
+		.clone()
 		.insert({
 			first_name: data.first_name,
 			last_name: data.last_name,
