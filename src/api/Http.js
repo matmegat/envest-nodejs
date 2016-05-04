@@ -36,7 +36,7 @@ module.exports = function Http (app)
 		// didn't find declaration of using 'body' schema of parameters
 		// swagger.io/specification/#parameterObject
 		// github.com/apigee-127/swagger-tools/blob/master/schemas/2.0/schema.json#L887-L908
-		http.express.use(body_parser.urlencoded({ extended: true }))
+		// http.express.use(body_parser.urlencoded({ extended: true }))
 		require('./Swagger')(app, http.express)
 	}
 
