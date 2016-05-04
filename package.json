@@ -69,8 +69,8 @@
     "rootpath":
       "StreetStrider/rootpath#v1.4.0",
 
-    "js-yaml":
-      "^3.3",
+    "swagger-parser":
+      "^3.4.1",
 
     "swagger-tools":
       "0.9"

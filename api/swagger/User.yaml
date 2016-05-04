@@ -1,0 +1,10 @@
+type: object
+properties:
+  id:
+    type: integer
+  first_name:
+    type: string
+  last_name:
+    type: string
+  email:
+    type: string

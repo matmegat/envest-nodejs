@@ -1,0 +1,18 @@
+type: object
+properties:
+  id:
+    type: number
+    description: Feed event id
+  timestamp:
+    type: string
+    format: date-time
+    description: when event occurs
+  investor:
+    $ref: ./Investor.yaml
+  event:
+    type: object
+    description: One of Events
+    enum:
+    - $ref: ./TradeEvent.yaml
+    - $ref: ./WhatchlistEvent.yaml
+    - $ref: ./UpdateEvent.yaml

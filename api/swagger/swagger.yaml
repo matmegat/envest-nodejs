@@ -1,10 +1,20 @@
 swagger: '2.0'
 info:
   title: NetVest backend
-  version: '0.0.0'
+  version: '0.0.2'
 
+schemes:
+  - http
+  - https
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
 paths:
-  '/api/feed/latest':
+  '/feed/latest':
     get:
       description: latest 10 Feed posts for current user
       parameters: []
@@ -13,6 +23,75 @@ paths:
           description: user Feed
           schema:
             $ref: '#/definitions/Feed'
+      tags:
+      - feed
+
+  '/auth/register':
+    post:
+      description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+      parameters:
+      - name: first_name
+        in: formData
+        required: true
+        type: string
+        description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+      - name: last_name
+        in: formData
+        required: true
+        type: string
+        description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+      - name: email
+        in: formData
+        required: true
+        type: string
+        description: Email
+      - name: password
+        in: formData
+        required: true
+        type: string
+        format: password
+        description: Password
+      responses:
+        200:
+          description: user model
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: Errors of registration.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - auth
+  '/auth/login':
+    post:
+      description: Authenticates user by email and password
+      parameters:
+      - name: email
+        in: formData
+        required: true
+        type: string
+        description: Email
+      - name: password
+        in: formData
+        required: true
+        type: string
+        format: password
+        description: Password
+      responses:
+        200:
+          description: user model
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: Errors of authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: User not exists
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - auth
 
 definitions:
   Feed:
@@ -21,56 +100,32 @@ definitions:
       $ref: '#/definitions/FeedItem'
 
   FeedItem:
-    type: object
-    properties:
-      id:
-        type: number
-        description: Feed event id
-      timestamp:
-        type: string
-        format: date-time
-        description: when event occurs
-      investor:
-        $ref: '#/definitions/Investor'
-      event:
-        $ref: '#/definitions/FeedEvent'
+    $ref: ./FeedItem.yaml
 
-  FeedEvent:
-    #oneOf:
-    type: object
-      #- $ref: '#/definitions/Symbol'
-      #- type: array
-      #  - type: object
-      #  - type: array
-      # crap
-      #
-      # the idea: allOf(type = object, oneOf(events...))
-      #
-      # descriminator ?
+  Event:
+    $ref: ./Event.yaml
+
+  TradeEvent:
+    $ref: ./TradeEvent.yaml
+
+  WhatchlistEvent:
+    $ref: ./WhatchlistEvent.yaml
+
+  UpdateEvent:
+    $ref: ./UpdateEvent.yaml
+
+  Investor:
+    $ref: ./Investor.yaml
 
   # note:
   # the more accurate term for this Type is "Security" (as a tradeable financial asset),
   # but for not to be mixed up with Informational Security
   # this is called Symbol
   Symbol:
-    type: object
-    properties:
-      ticker:
-        type: string
-        description: Symbol ticker
-      company:
-        type: string
-        description: company name corresponding to that symbol
+    $ref: ./Symbol.yaml
 
-  Investor:
-    type: object
-    properties:
-      id:
-        type: number
-        description: Investor id
-      name:
-        type: string
-        description: Investor name
-      pic:
-        type: string
-        description: backend-related URI to Investor userpic
+  Error:
+    $ref: ./Error.yaml
+
+  User:
+    $ref: ./User.yaml
