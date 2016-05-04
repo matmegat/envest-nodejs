@@ -98,26 +98,13 @@ paths:
       - auth
 
 definitions:
+  # this should be moved to feed
   Feed:
     type: array
     items:
-      $ref: '#/definitions/FeedItem'
+      $ref: ../api/feed/FeedItem.yaml
 
-  FeedItem:
-    $ref: ../api/feed/FeedItem.yaml
-
-  Event:
-    $ref: ../api/feed/Event.yaml
-
-  TradeEvent:
-    $ref: ../api/feed/TradeEvent.yaml
-
-  WatchlistEvent:
-    $ref: ../api/feed/WatchlistEvent.yaml
-
-  UpdateEvent:
-    $ref: ../api/feed/UpdateEvent.yaml
-
+  # Put here only COMMON definitions
   Investor:
     $ref: ./Investor.yaml
 
