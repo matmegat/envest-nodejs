@@ -22,7 +22,7 @@ paths:
         200:
           description: user Feed
           schema:
-            $ref: '#/definitions/Feed'
+            $ref: ../api/feed/Feed.yaml
       tags:
       - feed
 
