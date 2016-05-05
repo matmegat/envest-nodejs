@@ -21,26 +21,13 @@ module.exports = function User (db)
 
 	user.byEmail = function (email)
 	{
-		return user.email_confirms
-		.clone()
-		.where('new_email', email)
-		.then(user_data =>
-		{
-			if(user_data[0])
-			{
-				return user.users_table
-				.clone()
-				.where('id', user_data[0].user_id)
-				.then(oneMaybe)
-			}
-			else
-			{
-				return user.users_table
-				.clone()
-				.where('email', email)
-				.then(oneMaybe)
-			}
+		return knex.select('*')
+		.from(function() {this.select('users.id AS id', 'password', 'salt', 'full_name', knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'))
+		.from('users')
+		.leftJoin('email_confirms', 'users.id', 'email_confirms.user_id').as('ignored_alias')
 		})
+		.where('email', email)
+		.then(oneMaybe)
 	}
 
 	user.byId = function (id)
@@ -88,7 +75,7 @@ module.exports = function User (db)
 	{
 		return user.email_confirms
 		.clone()
-		.where('user_id', '=', data.user_id)
+		.where('user_id', data.user_id)
 		.update({
 			new_email: data.new_email
 		}, 'user_id')
@@ -106,7 +93,7 @@ module.exports = function User (db)
 	{
 		return user.users_table
 		.clone()
-		.where('id', '=', data.user_id)
+		.where('id', data.user_id)
 		.update({
 			email: data.new_email
 		}, 'id')
