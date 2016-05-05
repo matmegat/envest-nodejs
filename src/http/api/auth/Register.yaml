@@ -1,0 +1,30 @@
+post:
+  description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+  parameters:
+  - name: full_name
+    in: formData
+    required: true
+    type: string
+    description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+  - name: email
+    in: formData
+    required: true
+    type: string
+    description: Email
+  - name: password
+    in: formData
+    required: true
+    type: string
+    format: password
+    description: Password
+  responses:
+    200:
+      description: user model
+      schema:
+        $ref: ../../swagger/User.yaml
+    403:
+      description: Errors of registration.
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - auth

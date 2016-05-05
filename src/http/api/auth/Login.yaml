@@ -1,0 +1,29 @@
+post:
+  description: Authenticates user by email and password
+  parameters:
+  - name: email
+    in: formData
+    required: true
+    type: string
+    description: Email
+  - name: password
+    in: formData
+    required: true
+    type: string
+    format: password
+    description: Password
+  responses:
+    200:
+      description: user model
+      schema:
+        $ref: ../../swagger/User.yaml
+    403:
+      description: Errors of authentication.
+      schema:
+        $ref: ../../swagger/Error.yaml
+    404:
+      description: User not exists
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - auth

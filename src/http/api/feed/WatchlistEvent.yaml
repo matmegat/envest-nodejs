@@ -1,5 +1,5 @@
 type: object
-description: '"Whatchlist" type of event'
+description: '"Watchlist" type of event'
 allOf:
 - $ref: ./Event.yaml
 - type: object
@@ -8,13 +8,13 @@ allOf:
       type: object
       properties:
         dir:
-          description: Type of whatchlist operation
+          description: Type of watchlist operation
           type: string
           enum:
           - added
           - removed
         symbol:
-          $ref: ./Symbol.yaml
+          $ref: ../../swagger/Symbol.yaml
         text:
           type: string
         motivations:
