@@ -19,6 +19,7 @@
     "knex": "knex --knexfile=db/knexfile.js --env=dev",
     "db-migrate":  "npm run knex -- migrate:latest",
     "db-rollback": "npm run knex -- migrate:rollback",
+    "db-version": "npm run knex -- migrate:currentVersion",
 
     "swagger": "swagger-project edit",
     "swagger-ver": "swagger-project verify",
