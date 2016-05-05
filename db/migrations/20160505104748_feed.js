@@ -4,14 +4,15 @@ exports.up = function (knex, Promise)
 	return Promise.resolve()
 		.then(() =>
 		{
-			console.info('Create Table for Motivations')
+			console.info('Create Table for Investors')
 
-			return knex.schema.createTable('motivations', (table) =>
+			return knex.schema.createTable('investors', (table) =>
 			{
 				table.increments('id').primary()
 
-				table.string('category_name').notNullable()
-				table.string('title').notNullable()
+				table.timestamps()	//	created_at, updated_at
+
+				table.string('full_name').notNullable()
 				table.string('icon', 512).notNullable()
 			})
 		})
@@ -19,14 +20,13 @@ exports.up = function (knex, Promise)
 		{
 			console.info('Create Table for Feed')
 
-			return knex.schema.createTable('posts', (table) =>
+			return knex.schema.createTable('feed_items', (table) =>
 			{
 				table.increments('id').primary()
 
 				table.timestamp('timestamp').defaultTo(knex.fn.now())
-				table.integer('invetor_id').notNullable()
-				// TODO: update on adding table for Investor
-				// table.foreign('invetor_id').references('investor.id')
+				table.integer('investor_id').notNullable()
+				table.foreign('investor_id').references('investors.id')
 				table.jsonb('event').notNullable()
 				/* TODO: should follow notation
 				* {
@@ -53,14 +53,19 @@ exports.up = function (knex, Promise)
 			{
 				table.increments('id').primary()
 
+				table.timestamp('timestamp').defaultTo(knex.fn.now())
 				table.integer('user_id').notNullable()
 				table.foreign('user_id').references('users.id')
 
-				table.integer('post_id').notNullable()
-				table.foreign('post_id').references('posts.id')
+				table.integer('feed_id').notNullable()
+				table.foreign('feed_id').references('feed_items.id')
 
 				table.text('text').notNullable()
 			})
+		})
+		.then(() =>
+		{
+			knex.seed.run()
 		})
 }
 
@@ -69,7 +74,7 @@ exports.down = function (knex, Promise)
 	return Promise.all(
 	[
 		knex.schema.dropTableIfExists('comments'),
-		knex.schema.dropTableIfExists('posts'),
-		knex.schema.dropTableIfExists('motivations')
+		knex.schema.dropTableIfExists('feed_items'),
+		knex.schema.dropTableIfExists('investors')
 	])
 }
