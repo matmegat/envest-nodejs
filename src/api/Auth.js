@@ -81,6 +81,16 @@ module.exports = function Auth (auth_model, passport)
 		rs.sendStatus(200)
 	})
 
+	auth.express.get('/email-confirm', (rq, rs) =>
+	{
+		auth.model.emailConfirm(rq.query.code)
+		.then((data) =>
+		{
+			rs.status(200)
+			.send(data)
+		})
+	})
+
 	auth.express.get('/logout', (rq, rs) =>
 	{
 		rq.logout()

@@ -19,7 +19,9 @@ exports.up = function (knex, Promise)
 	{
 		return knex.schema.createTable('email_confirms', (table) =>
 		{
-			table.string('new_email').primary()
+			table.integer('user_id').primary()
+
+			table.string('new_email').notNullable()
 			table.string('code', 16).notNullable()
 		})
 	})

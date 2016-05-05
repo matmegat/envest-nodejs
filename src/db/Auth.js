@@ -25,26 +25,41 @@ module.exports = function Auth (db)
 
 			return user.create(userdata)
 		})
+		.then(user_id =>
+		{
+			return generate_code()
+			.then(code =>
+			{
+				var new_email_data =
+				{
+					user_id:   user_id[0],
+					new_email: userdata.email,
+					code:      code
+				}
+
+				return user.newEmailCreate(new_email_data)
+			})
+		})
 	}
 
 	auth.login = function (username, password)
 	{
 		return user.byEmail(username)
-		.then(user =>
+		.then(user_data =>
 		{
-			if (user)
+			if (user_data)
 			{
-				return compare_passwords(user.password, password, user.salt)
+				return compare_passwords(user_data.password, password, user_data.salt)
 				.then(result =>
 				{
 					if (result)
 					{
-						delete user.password
-						delete user.salt
+						delete user_data.password
+						delete user_data.salt
 
 						return {
 							status: true,
-							user: user
+							user: user_data
 						}
 					}
 					else
@@ -66,12 +81,50 @@ module.exports = function Auth (db)
 		})
 	}
 
+	auth.emailConfirm = function (code)
+	{
+		return user.newEmailByCode(code)
+		.then(email_confirms =>
+		{
+			if (email_confirms)
+			{
+				return user.byConfimedEmail(email_confirms.new_email)
+				.then(user_data =>
+				{
+					if(user_data)
+					{
+						return {
+							status: false,
+							message: 'This email is already used.'
+						}
+					}
+					else
+					{
+						user.emailConfirm(email_confirms)
+						return {
+							status: true,
+							message: 'Email confirmation.'
+						}
+					}
+				})
+			}
+			else
+			{
+				return {
+					status: false,
+					message: 'Not correct confirmation code.'
+				}
+			}
+		})
+	}
+
 	return auth
 }
 
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
 var salt_size     = 16 / 2
+var code_size     = 16 / 2
 var password_size = 36 / 2
 var iterations    = 100000
 
@@ -87,6 +140,12 @@ var hex = method('toString', 'hex')
 function generate_salt ()
 {
 	return randomBytes(salt_size)
+	.then(hex)
+}
+
+function generate_code ()
+{
+	return randomBytes(code_size)
 	.then(hex)
 }
 
