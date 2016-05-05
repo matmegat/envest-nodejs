@@ -50,6 +50,8 @@ module.exports = function Auth (auth_model, passport)
 		})
 		.catch(error =>
 		{
+			console.log(error)
+
 			if (error.constraint === 'users_email_unique')
 			{
 				return rs.status(403).send(

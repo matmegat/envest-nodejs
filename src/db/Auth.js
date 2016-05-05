@@ -125,6 +125,8 @@ function compare_passwords (dbPass, formPass, salt)
 	})
 }
 
+
+/* validations */
 function validate_register (credentials)
 {
 	return new Promise((rs, rj) =>
@@ -154,12 +156,16 @@ function validate_login (email, password)
 
 
 var format = require('util').format
+var Err = require('../Err')
+
+var FieldRequired = Err('field_required', 'Field is required')
 
 function validate_required (field, name)
 {
 	if (field == null)
 	{
-		throw new Error(format('field `%s` is required', name))
+		throw FieldRequired({ field: name })
+		// throw new Error(format('field `%s` is required', name))
 	}
 }
 
