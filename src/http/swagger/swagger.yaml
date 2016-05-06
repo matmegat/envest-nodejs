@@ -1,0 +1,55 @@
+swagger: '2.0'
+info:
+  title: NetVest backend
+  version: '0.1.0'
+
+schemes:
+  - http
+  - https
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+paths:
+  '/feed/latest':
+    get:
+      description: latest 10 Feed posts for current user
+      parameters: []
+      responses:
+        200:
+          description: user Feed
+          schema:
+            $ref: ../api/feed/Feed.yaml
+      tags:
+      - feed
+
+  '/auth/register':
+    $ref: ../api/auth/Register.yaml
+
+  '/auth/login':
+    $ref: ../api/auth/Login.yaml
+
+  '/auth/logout':
+    $ref: ../api/auth/Logout.yaml
+
+definitions:
+  # Put here only COMMON definitions
+
+  Feed:
+    type: object
+    $ref: ../api/feed/Feed.yaml
+
+  Investor:
+    $ref: ./Investor.yaml
+
+  Symbol:
+    $ref: ./Symbol.yaml
+
+  Error:
+    $ref: ./Error.yaml
+
+  User:
+    $ref: ./User.yaml

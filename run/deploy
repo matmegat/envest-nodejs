@@ -84,10 +84,6 @@ Promise.resolve()
 {
 	return scp(rootpath('package.json'), target())
 }))
-.then(outputify('copy api/', () =>
-{
-	return scp('-r', rootpath('api'), target())
-}))
 .then(outputify('copy db/', () =>
 {
 	return scp('-r', rootpath('db'), target())

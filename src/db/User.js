@@ -9,13 +9,12 @@ module.exports = function User (db)
 	var oneMaybe = db.oneMaybe
 	var one = db.one
 
-	user.users_table = knex('users')
-	user.email_confirms = knex('email_confirms')
+	user.users_table    = () => knex('users')
+	user.email_confirms = () => knex('email_confirms')
 
 	user.byConfirmedEmail = function (email)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.where('email', email)
 		.then(oneMaybe)
 	}
@@ -46,16 +45,14 @@ module.exports = function User (db)
 
 	user.byId = function (id)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.where('id', id)
 		.then(oneMaybe)
 	}
 
 	user.create = function (data)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.insert({
 			full_name: data.full_name,
 			email: null,
@@ -68,32 +65,28 @@ module.exports = function User (db)
 
 	user.newEmailCreate = function (data)
 	{
-		return user.email_confirms
-		.clone()
+		return user.email_confirms()
 		.insert(data, 'user_id')
 		.then(one)
 	}
 
 	user.newEmailDrop = function (user_id)
 	{
-		return user.email_confirms
-		.clone()
+		return user.email_confirms()
 		.where('user_id', user_id)
 		.del()
 	}
 
 	user.newEmailByCode = function (code)
 	{
-		return user.email_confirms
-		.clone()
+		return user.email_confirms()
 		.where('code', code)
 		.then(oneMaybe)
 	}
 
 	user.emailConfirm = function (user_id, new_email)
 	{
-		return user.users_table
-		.clone()
+		return user.users_table()
 		.where('id', user_id)
 		.update({
 			email: new_email

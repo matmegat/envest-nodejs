@@ -1,0 +1,11 @@
+#! /bin/sh
+
+JSON='{}'
+ROUTE="auth/register"
+
+curl \
+  -H "Content-Type: application/json" \
+  -X POST \
+  -d "${JSON}" \
+\
+  "http://localhost:8080/api/${ROUTE}"

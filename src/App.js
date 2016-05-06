@@ -3,7 +3,7 @@ var rootpath = require('rootpath')
 
 var Config = require('./Config')
 var Db = require('./db/Db')
-var Http = require('./api/Http')
+var Http = require('./http/Http')
 
 module.exports = function App ()
 {
@@ -23,7 +23,13 @@ module.exports = function App ()
 	])
 	.then(() =>
 	{
-		console.info('NetVest backend at :%s', app.cfg.port)
+		console.info('READY')
+	})
+	.catch(error =>
+	{
+		console.error('NetVest backend init error:')
+		console.error(error)
+		process.exit(1)
 	})
 
 	return app

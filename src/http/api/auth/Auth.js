@@ -21,7 +21,27 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then((id) =>
 		{
+			var loginData =
+			{
+				id: id,
+				email: data.email,
+				password: data.password
+			}
+
 			user_data.id = id
+
+			rq.login(loginData, err =>
+			{
+				if (err)
+				{
+					return rs.status(500).send(
+					{
+						status: false,
+						message: 'Login failed'
+					})
+				}
+			})
+
 			delete user_data.password
 			delete user_data.salt
 
@@ -73,14 +93,6 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
-	auth.express.post('/session-check', (rq, rs) =>
-	{
-		console.log('user:')
-		console.log(rq.user)
-		console.log(rq.isAuthenticated())
-		rs.sendStatus(200)
-	})
-
 	auth.express.post('/confirm-email', (rq, rs) =>
 	{
 		var code = rq.body.code
@@ -92,7 +104,7 @@ module.exports = function Auth (auth_model, passport)
 		})
 	})
 
-	auth.express.get('/logout', (rq, rs) =>
+	auth.express.post('/logout', (rq, rs) =>
 	{
 		rq.logout()
 		rs.sendStatus(200)

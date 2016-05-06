@@ -20,6 +20,8 @@ module.exports = function name (app)
 
 	db.knex.client.pool.on('error', () =>
 	{
+		/* we actually can't catch that type of errors */
+		/* we can't do anything here */
 		process.exit(1)
 	})
 
@@ -33,11 +35,6 @@ module.exports = function name (app)
 		return db.knex('email_confirms')
 		.select()
 		.limit(0)
-	})
-	.catch(e =>
-	{
-		console.error(e)
-		process.exit(1)
 	})
 	.then(() =>
 	{

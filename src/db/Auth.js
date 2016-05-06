@@ -9,7 +9,7 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
-		return validate(userdata)
+		return validate_register(userdata)
 		.then(() =>
 		{
 			return generate_salt()
@@ -42,9 +42,13 @@ module.exports = function Auth (db)
 		})
 	}
 
-	auth.login = function (username, password)
+	auth.login = function (email, password)
 	{
-		return user.byEmail(username)
+		return validate_login(email, password)
+		.then(() =>
+		{
+			return user.byEmail(email)
+		})
 		.then(user_data =>
 		{
 			if (user_data)
@@ -186,30 +190,64 @@ function compare_passwords (dbPass, formPass, salt)
 	})
 }
 
-function validate (credentials)
+function validate_register (credentials)
 {
-	var emailRe = /@/
-
 	return new Promise((rs, rj) =>
 	{
-		validate_required(credentials, 'full_name')
-		validate_required(credentials, 'email')
-		validate_required(credentials, 'password')
+		validate_required(credentials.full_name, 'full_name')
+		validate_required(credentials.email,     'email')
+		validate_password(credentials.password)
 
-		if (! emailRe.test(credentials.email))
-		{
-			return rj(new Error('Invalid email'))
-		}
+		validate_email(credentials.email)
 
 		return rs()
 	})
 }
+
+function validate_login (email, password)
+{
+	return new Promise((rs, rj) =>
+	{
+		validate_required(email, 'email')
+		validate_password(password)
+
+		validate_email(email)
+
+		return rs()
+	})
+}
+
+
 var format = require('util').format
 
-function validate_required (credentials, field)
+function validate_required (field, name)
 {
-	if (! (field in credentials))
+	if (field == null)
 	{
-		throw new Error(format('field `%s` is required', field))
+		throw new Error(format('field `%s` is required', name))
+	}
+}
+
+function validate_email (email)
+{
+	var emailRe = /@/
+
+	if (! emailRe.test(email))
+	{
+		throw new Error('invalid email')
+	}
+}
+
+function validate_password (password)
+{
+	validate_required(password, 'password')
+
+	if (password.length < 6)
+	{
+		throw new Error('password is too short')
+	}
+	if (password.length > 100)
+	{
+		throw new Error('password is too long')
 	}
 }
