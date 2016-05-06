@@ -23,7 +23,7 @@ Err.fromDb = function (constraint, fn)
 		if (error.constraint !== constraint) throw error
 
 		/* upgrade to ErrInst */
-		error = fn(error)
+		error = fn(/* error */)
 
 		throw error
 	}

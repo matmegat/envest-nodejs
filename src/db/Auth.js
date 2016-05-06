@@ -1,4 +1,8 @@
 
+var Err  = require('../Err')
+
+var EmailAlreadyExists = Err('email_already_exists', 'User with this email already exists')
+
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -25,6 +29,7 @@ module.exports = function Auth (db)
 
 			return user.create(userdata)
 		})
+		.catch(Err.fromDb('users_email_unique', EmailAlreadyExists))
 	}
 
 	auth.login = function (email, password)

@@ -51,10 +51,6 @@ module.exports = function Auth (auth_model, passport)
 			rs.status(200)
 			.send(user_data)
 		})
-		.catch(Err.fromDb('users_email_unique', () =>
-		{
-			return Err('email_already_exists', 'User with this email already exists')()
-		}))
 		.catch(toss.err(rs))
 	})
 
