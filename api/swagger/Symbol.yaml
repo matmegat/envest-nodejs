@@ -1,8 +1,0 @@
-type: object
-properties:
-  ticker:
-    type: string
-    description: Symbol ticker
-  company:
-    type: string
-    description: company name corresponding to that symbol

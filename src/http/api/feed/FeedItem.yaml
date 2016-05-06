@@ -8,11 +8,11 @@ properties:
     format: date-time
     description: when event occurs
   investor:
-    $ref: ./Investor.yaml
+    $ref: ../../swagger/Investor.yaml
   event:
     type: object
     description: One of Events
     enum:
     - $ref: ./TradeEvent.yaml
-    - $ref: ./WhatchlistEvent.yaml
+    - $ref: ./WatchlistEvent.yaml
     - $ref: ./UpdateEvent.yaml

@@ -12,7 +12,7 @@
     "restart": "npm stop 2> /dev/null || true; npm start",
     "start-node": "node .",
 
-    "dev":   "nodemon --watch src/ .",
+    "dev": "nodemon --ext js,yaml --watch src/ .",
 
     "st": "eslint src/ run/ db/",
 
