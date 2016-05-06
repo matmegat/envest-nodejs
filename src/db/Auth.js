@@ -12,7 +12,7 @@ module.exports = function Auth (db)
 		return validate(userdata)
 		.then(() =>
 		{
-			return gen_rand_str(salt_size)
+			return generate_salt(salt_size)
 		})
 		.then(salt =>
 		{
@@ -27,7 +27,7 @@ module.exports = function Auth (db)
 		})
 		.then(user_id =>
 		{
-			return gen_rand_str(code_size)
+			return generate_code(code_size)
 			.then(code =>
 			{
 				var new_email_data =
@@ -137,6 +137,16 @@ var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
 var gen_rand_str = require('../GenRandStr')
+
+function generate_salt ()
+{
+	return gen_rand_str(salt_size)
+}
+
+function generate_code ()
+{
+	return gen_rand_str(code_size)
+}
 
 function encrypt_pass (password, salt)
 {
