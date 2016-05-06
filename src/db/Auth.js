@@ -165,9 +165,10 @@ function validate_required (field, name)
 	if (field == null)
 	{
 		throw FieldRequired({ field: name })
-		// throw new Error(format('field `%s` is required', name))
 	}
 }
+
+var WrongEmail    = Err('wrong_email_format', 'Wrong email format')
 
 function validate_email (email)
 {
@@ -175,9 +176,12 @@ function validate_email (email)
 
 	if (! emailRe.test(email))
 	{
-		throw new Error('invalid email')
+		throw WrongEmail()
 	}
 }
+
+var TooShortPassword = Err('too_short_password', 'Password is too short, 6 symbols at least required')
+var TooLongPassword  = Err('too_short_password', 'Password is too short, 6 symbols at least required')
 
 function validate_password (password)
 {
@@ -185,10 +189,10 @@ function validate_password (password)
 
 	if (password.length < 6)
 	{
-		throw new Error('password is too short')
+		throw TooShortPassword()
 	}
 	if (password.length > 100)
 	{
-		throw new Error('password is too long')
+		throw TooLongPassword()
 	}
 }
