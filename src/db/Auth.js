@@ -91,7 +91,7 @@ module.exports = function Auth (db)
 		{
 			if (email_confirms)
 			{
-				return user.byConfimedEmail(email_confirms.new_email)
+				return user.byConfirmedEmail(email_confirms.new_email)
 				.then(user_data =>
 				{
 					if (user_data)

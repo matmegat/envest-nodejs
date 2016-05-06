@@ -12,7 +12,7 @@ module.exports = function User (db)
 	user.users_table = knex('users')
 	user.email_confirms = knex('email_confirms')
 
-	user.byConfimedEmail = function (email)
+	user.byConfirmedEmail = function (email)
 	{
 		return user.users_table
 		.clone()
