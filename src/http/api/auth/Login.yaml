@@ -1,17 +1,29 @@
 post:
   description: Authenticates user by email and password
   parameters:
-  - name: email
-    in: formData
+  - name: payload
+    description: |
+      JSON payload to register / signup.
+      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+    in: body
     required: true
-    type: string
-    description: Email
-  - name: password
-    in: formData
-    required: true
-    type: string
-    format: password
-    description: Password
+    schema:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        email:
+          type: string
+          description: Email
+        password:
+          type: string
+          description: Password
+          format: password
+      required:
+      - full_name
+      - email
+      - password
   responses:
     200:
       description: user model
