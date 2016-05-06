@@ -7,6 +7,7 @@ module.exports = function User (db)
 
 	var knex = db.knex
 	var oneMaybe = db.oneMaybe
+	var one = db.one
 
 	user.users_table = knex('users')
 	user.email_confirms = knex('email_confirms')
@@ -62,18 +63,15 @@ module.exports = function User (db)
 			salt: data.salt
 		}
 		, 'id')
+		.then(one)
 	}
 
 	user.newEmailCreate = function (data)
 	{
 		return user.email_confirms
 		.clone()
-		.insert({
-			user_id:   data.user_id,
-			new_email: data.new_email,
-			code:      data.code,
-		}
-		, 'user_id')
+		.insert(data, 'user_id')
+		.then(one)
 	}
 
 	user.newEmailDrop = function (user_id)
@@ -92,17 +90,18 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
-	user.emailConfirm = function (data)
+	user.emailConfirm = function (user_id, new_email)
 	{
 		return user.users_table
 		.clone()
-		.where('id', data.user_id)
+		.where('id', user_id)
 		.update({
-			email: data.new_email
+			email: new_email
 		}, 'id')
+		.then(one)
 		.then(user_id =>
 		{
-			return user.newEmailDrop(user_id[0])
+			return user.newEmailDrop(user_id)
 		})
 	}
 

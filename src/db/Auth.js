@@ -32,7 +32,7 @@ module.exports = function Auth (db)
 			{
 				var new_email_data =
 				{
-					user_id:   user_id[0],
+					user_id:   user_id,
 					new_email: userdata.email,
 					code:      code
 				}
@@ -104,7 +104,9 @@ module.exports = function Auth (db)
 					}
 					else
 					{
-						user.emailConfirm(email_confirms)
+						user.emailConfirm(
+							email_confirms.user_id,
+							email_confirms.new_email)
 
 						return {
 							status: true,

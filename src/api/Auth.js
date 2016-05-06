@@ -21,7 +21,7 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then((id) =>
 		{
-			user_data.id = id[0]
+			user_data.id = id
 			delete user_data.password
 			delete user_data.salt
 
