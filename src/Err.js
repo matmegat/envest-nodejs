@@ -1,5 +1,5 @@
 
-module.exports = function Err (code, message)
+var Err = module.exports = function Err (code, message)
 {
 	return function ErrInst (data)
 	{
@@ -12,5 +12,19 @@ module.exports = function Err (code, message)
 		data && (err.data = data)
 
 		return err
+	}
+}
+
+Err.fromDb = function (constraint, fn)
+{
+	return (error) =>
+	{
+		if (! error.constraint) throw error
+		if (error.constraint !== constraint) throw error
+
+		/* upgrade to ErrInst */
+		error = fn(error)
+
+		throw error
 	}
 }
