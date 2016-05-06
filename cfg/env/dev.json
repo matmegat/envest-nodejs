@@ -1,0 +1,12 @@
+{
+  "dev": false,
+  "env": "dev",
+  "port": 8000,
+  "pg": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "netvest_dev",
+    "user": "netvest",
+    "password": "ovjms3lmzf"
+  }
+}
