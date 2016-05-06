@@ -81,9 +81,10 @@ module.exports = function Auth (auth_model, passport)
 		rs.sendStatus(200)
 	})
 
-	auth.express.get('/email-confirm', (rq, rs) =>
+	auth.express.post('/confirm-email', (rq, rs) =>
 	{
-		auth.model.emailConfirm(rq.query.code)
+		var code = rq.body.code
+		auth.model.emailConfirm(code)
 		.then((data) =>
 		{
 			rs.status(200)
