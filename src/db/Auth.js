@@ -12,7 +12,7 @@ module.exports = function Auth (db)
 		return validate(userdata)
 		.then(() =>
 		{
-			return generate_salt()
+			return gen_rand_str(salt_size)
 		})
 		.then(salt =>
 		{
@@ -27,7 +27,7 @@ module.exports = function Auth (db)
 		})
 		.then(user_id =>
 		{
-			return generate_code()
+			return gen_rand_str(code_size)
 			.then(code =>
 			{
 				var new_email_data =
@@ -131,23 +131,12 @@ var iterations    = 100000
 var promisify = require('promisify-node')
 
 var crypto = require('crypto')
-var randomBytes = promisify(crypto.randomBytes)
 var genHash = promisify(crypto.pbkdf2)
 
 var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
-function generate_salt ()
-{
-	return randomBytes(salt_size)
-	.then(hex)
-}
-
-function generate_code ()
-{
-	return randomBytes(code_size)
-	.then(hex)
-}
+var gen_rand_str = require('../GenRandStr')
 
 function encrypt_pass (password, salt)
 {
