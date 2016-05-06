@@ -136,7 +136,7 @@ var genHash = promisify(crypto.pbkdf2)
 var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
-var gen_rand_str = require('../GenRandStr')
+var gen_rand_str = require('../genRandStr')
 
 function generate_salt ()
 {
