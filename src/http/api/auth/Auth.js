@@ -55,10 +55,7 @@ module.exports = function Auth (auth_model, passport)
 		{
 			return Err('email_already_exists', 'User with this email already exists')()
 		}))
-		.catch(error =>
-		{
-			return toss.err(rs, error)
-		})
+		.catch(toss.err(rs))
 	})
 
 	auth.express.post('/login', (rq, rs, next) =>
