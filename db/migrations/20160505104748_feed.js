@@ -65,7 +65,12 @@ exports.up = function (knex, Promise)
 		})
 		.then(() =>
 		{
-			knex.seed.run()
+			console.info('Running Seed Data')
+
+			return knex.seed.run(
+			{
+				directory: './seeds/20160505'
+			})
 		})
 }
 
