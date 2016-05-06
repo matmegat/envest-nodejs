@@ -22,9 +22,20 @@ module.exports = function User (db)
 	user.byEmail = function (email)
 	{
 		return knex.select('*')
-		.from(function() {this.select('users.id AS id', 'password', 'salt', 'full_name', knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'))
-		.from('users')
-		.leftJoin('email_confirms', 'users.id', 'email_confirms.user_id').as('ignored_alias')
+		.from( function ()
+		{
+			this.select(
+			'users.id AS id',
+			'password',
+			'salt',
+			'full_name',
+			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'))
+			.from('users')
+			.leftJoin(
+			'email_confirms',
+			'users.id',
+			'email_confirms.user_id')
+			.as('ignored_alias')
 		})
 		.where('email', email)
 		.then(oneMaybe)
