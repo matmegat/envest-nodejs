@@ -1,22 +1,24 @@
 post:
   description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
   parameters:
-  - name: full_name
-    in: formData
-    required: true
-    type: string
-    description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
-  - name: email
-    in: formData
-    required: true
-    type: string
-    description: Email
-  - name: password
-    in: formData
-    required: true
-    type: string
-    format: password
-    description: Password
+  - name: payload
+    in: body
+    description: |
+      JSON payload to log in.
+      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+    schema:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email
+        password:
+          type: string
+          format: password
+          description: Passweord
+      required:
+      - email
+      - password
   responses:
     200:
       description: user model

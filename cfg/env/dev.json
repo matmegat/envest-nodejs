@@ -1,0 +1,12 @@
+{
+  "dev":  false,
+  "env": "dev",
+
+  "port": 8000,
+
+  "pg":
+  {
+    "database": "netvest_dev",
+    "password": "ovjms3lmzf"
+  }
+}
