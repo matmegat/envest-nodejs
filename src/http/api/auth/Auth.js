@@ -1,5 +1,6 @@
 
 var Router = require('express').Router
+var toss = require('../../toss')
 
 module.exports = function Auth (auth_model, passport)
 {
@@ -50,8 +51,6 @@ module.exports = function Auth (auth_model, passport)
 		})
 		.catch(error =>
 		{
-			console.log(error)
-
 			if (error.constraint === 'users_email_unique')
 			{
 				return rs.status(403).send(
@@ -60,12 +59,10 @@ module.exports = function Auth (auth_model, passport)
 					message: 'User with this email already exists'
 				})
 			}
-
-			return rs.status(500).send(
+			else
 			{
-				status: false,
-				message: error.message
-			})
+				return toss.err(rs, error)
+			}
 		})
 	})
 
