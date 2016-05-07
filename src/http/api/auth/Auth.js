@@ -43,7 +43,6 @@ module.exports = function Auth (auth_model, passport)
 			})
 
 			delete user_data.password
-			delete user_data.salt
 
 			rs.status(200)
 			.send(user_data)

@@ -85,9 +85,10 @@ module.exports = function User (db)
 		.then(one)
 	}
 
-	user.newEmailDrop = function (user_id)
+	user.newEmailDrop = function (user_id, trx)
 	{
 		return user.email_confirms()
+		.transacting(trx)
 		.where('user_id', user_id)
 		.del()
 	}
@@ -101,15 +102,21 @@ module.exports = function User (db)
 
 	user.emailConfirm = function (user_id, new_email)
 	{
-		return user.users_table()
-		.where('id', user_id)
-		.update({
-			email: new_email
-		}, 'id')
-		.then(one)
-		.then(user_id =>
+		return knex.transaction(function (trx)
 		{
-			return user.newEmailDrop(user_id)
+			user.users_table()
+			.transacting(trx)
+			.where('id', user_id)
+			.update({
+				email: new_email
+			}, 'id')
+			.then(one)
+			.then(function (id)
+			{
+				return user.newEmailDrop(id, trx)
+			})
+			.then(trx.commit)
+			.catch(trx.rollback)
 		})
 	}
 

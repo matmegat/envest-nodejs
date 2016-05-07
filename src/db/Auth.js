@@ -1,3 +1,4 @@
+var clone = require('lodash/clone')
 
 module.exports = function Auth (db)
 {
@@ -9,6 +10,8 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
+		userdata = clone(userdata)
+
 		return validate_register(userdata)
 		.then(() =>
 		{
