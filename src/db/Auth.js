@@ -190,9 +190,8 @@ function validate_register (credentials)
 	return new Promise(rs =>
 	{
 		validate_required(credentials.full_name, 'full_name')
-		validate_required(credentials.email,     'email')
-		validate_password(credentials.password)
 
+		validate_password(credentials.password)
 		validate_email(credentials.email)
 
 		return rs()
@@ -203,9 +202,7 @@ function validate_login (email, password)
 {
 	return new Promise(rs =>
 	{
-		validate_required(email, 'email')
 		validate_password(password)
-
 		validate_email(email)
 
 		return rs()
@@ -227,10 +224,12 @@ function validate_required (field, name)
 	}
 }
 
-var WrongEmail    = Err('wrong_email_format', 'Wrong email format')
+var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 
 function validate_email (email)
 {
+	validate_required(email, 'email')
+
 	var emailRe = /@/
 
 	if (! emailRe.test(email))
