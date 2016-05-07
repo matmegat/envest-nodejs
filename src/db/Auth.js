@@ -23,21 +23,12 @@ module.exports = function Auth (db)
 			userdata.password = obj.encrypted_pass
 			userdata.salt = obj.salt
 
-			return user.create(userdata)
-		})
-		.then(user_id =>
-		{
 			return generate_code()
 			.then(code =>
 			{
-				var new_email_data =
-				{
-					user_id:   user_id,
-					new_email: userdata.email,
-					code:      code
-				}
+				userdata.code = code
 
-				return user.newEmailCreate(new_email_data)
+				return user.create(userdata)
 			})
 		})
 	}

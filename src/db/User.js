@@ -52,15 +52,29 @@ module.exports = function User (db)
 
 	user.create = function (data)
 	{
-		return user.users_table()
-		.insert({
-			full_name: data.full_name,
-			email: null,
-			password: data.password,
-			salt: data.salt
-		}
-		, 'id')
-		.then(one)
+		return knex.transaction(function(trx)
+		{
+			user.users_table()
+			.transacting(trx)
+			.insert({
+				full_name: data.full_name,
+				email: null,
+				password: data.password,
+				salt: data.salt
+			}
+			, 'id')
+			.then(one)
+			.then(function(id) 
+			{
+				return user.newEmailCreate({
+					user_id: id,
+					new_email: data.email,
+					code: data.code
+				})
+			})
+			.then(trx.commit)
+			.catch(trx.rollback)
+		})
 	}
 
 	user.newEmailCreate = function (data)
