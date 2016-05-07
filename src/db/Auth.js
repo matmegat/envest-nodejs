@@ -249,7 +249,7 @@ function validate_email (email)
 }
 
 var TooShortPassword = Err('too_short_password', 'Password is too short')
-var TooLongPassword  = Err('too_short_password', 'Password is too long')
+var TooLongPassword  = Err('too_long_password', 'Password is too long')
 
 function validate_password (password)
 {
