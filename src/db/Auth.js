@@ -1,3 +1,4 @@
+
 var clone = require('lodash/clone')
 
 module.exports = function Auth (db)
@@ -20,18 +21,18 @@ module.exports = function Auth (db)
 		.then(salt =>
 		{
 			return encrypt_pass(userdata.password, salt)
-		})
-		.then(obj =>
-		{
-			userdata.password = obj.encrypted_pass
-			userdata.salt = obj.salt
-
-			return generate_code()
-			.then(code =>
+			.then(encrypted_pass =>
 			{
-				userdata.code = code
+				userdata.password = encrypted_pass
+				userdata.salt     = salt
 
-				return user.create(userdata)
+				return generate_code()
+				.then(code =>
+				{
+					userdata.code = code
+
+					return user.create(userdata)
+				})
 			})
 		})
 	}
@@ -48,9 +49,10 @@ module.exports = function Auth (db)
 			if (user_data)
 			{
 				return compare_passwords(
-				user_data.password,
-				password,
-				user_data.salt)
+					user_data.password,
+					password,
+					user_data.salt
+				)
 				.then(result =>
 				{
 					if (result)
@@ -155,17 +157,10 @@ function generate_code ()
 
 function encrypt_pass (password, salt)
 {
-	return hash(password, '', password_size)
+	return hash(password, '')
 	.then(pass_hash =>
 	{
-		return hash(pass_hash, salt, password_size)
-	})
-	.then(str =>
-	{
-		return {
-			encrypted_pass: str,
-			salt: salt
-		}
+		return hash(pass_hash, salt)
 	})
 }
 
@@ -178,9 +173,9 @@ function hash (password, salt)
 function compare_passwords (dbPass, formPass, salt)
 {
 	return encrypt_pass(formPass, salt)
-	.then(result =>
+	.then(encrypted_pass =>
 	{
-		return result.encrypted_pass === dbPass
+		return encrypted_pass === dbPass
 	})
 }
 
