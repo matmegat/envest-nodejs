@@ -220,7 +220,8 @@ var FieldRequired = Err('field_required', 'Field is required')
 
 function validate_required (field, name)
 {
-	if (field === null)
+	// eslint-disable-next-line eqeqeq
+	if (field == null)
 	{
 		throw FieldRequired({ field: name })
 	}
