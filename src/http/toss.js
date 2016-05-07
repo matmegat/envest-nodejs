@@ -1,5 +1,6 @@
 
 var curry = require('lodash/curry')
+var Err = require('../Err')
 
 var toss = module.exports = curry((rs, data) =>
 {
@@ -14,7 +15,15 @@ toss.ok = curry((rs, data) =>
 
 toss.err = curry((rs, err) =>
 {
-	if (! err.code || ! err.message) console.warn('using wrong error object')
+	if (Err.is(err))
+	{
+		return rs.status(400).send(err)
+	}
+	else
+	{
+		console.warn('using wrong error object')
+		console.error(err)
 
-	return rs.status(400).send(err)
+		return rs.status(500).send({})
+	}
 })
