@@ -96,6 +96,7 @@ module.exports = function Auth (auth_model, passport)
 	auth.express.post('/confirm-email', (rq, rs) =>
 	{
 		var code = rq.body.code
+
 		auth.model.emailConfirm(code)
 		.then((data) =>
 		{

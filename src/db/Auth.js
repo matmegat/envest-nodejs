@@ -183,7 +183,7 @@ function compare_passwords (dbPass, formPass, salt)
 
 function validate_register (credentials)
 {
-	return new Promise((rs, rj) =>
+	return new Promise(rs =>
 	{
 		validate_required(credentials.full_name, 'full_name')
 		validate_required(credentials.email,     'email')
@@ -197,7 +197,7 @@ function validate_register (credentials)
 
 function validate_login (email, password)
 {
-	return new Promise((rs, rj) =>
+	return new Promise(rs =>
 	{
 		validate_required(email, 'email')
 		validate_password(password)
@@ -213,7 +213,7 @@ var format = require('util').format
 
 function validate_required (field, name)
 {
-	if (field == null)
+	if (field === null)
 	{
 		throw new Error(format('field `%s` is required', name))
 	}

@@ -52,7 +52,7 @@ module.exports = function User (db)
 
 	user.create = function (data)
 	{
-		return knex.transaction(function(trx)
+		return knex.transaction(function (trx)
 		{
 			user.users_table()
 			.transacting(trx)
@@ -64,7 +64,7 @@ module.exports = function User (db)
 			}
 			, 'id')
 			.then(one)
-			.then(function(id) 
+			.then(function (id)
 			{
 				return user.newEmailCreate({
 					user_id: id,
