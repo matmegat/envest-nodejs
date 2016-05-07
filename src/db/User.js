@@ -66,7 +66,7 @@ module.exports = function User (db)
 			.then(one)
 			.then(function (id)
 			{
-				return user.newEmailCreate({
+				return newEmailCreate({
 					user_id: id,
 					new_email: data.email,
 					code: data.code
@@ -77,20 +77,12 @@ module.exports = function User (db)
 		})
 	}
 
-	user.newEmailCreate = function (data, trx)
+	function newEmailCreate (data, trx)
 	{
 		return user.email_confirms()
 		.transacting(trx)
 		.insert(data, 'user_id')
 		.then(one)
-	}
-
-	user.newEmailDrop = function (user_id, trx)
-	{
-		return user.email_confirms()
-		.transacting(trx)
-		.where('user_id', user_id)
-		.del()
 	}
 
 	user.newEmailByCode = function (code)
@@ -113,11 +105,19 @@ module.exports = function User (db)
 			.then(one)
 			.then(function (id)
 			{
-				return user.newEmailDrop(id, trx)
+				return newEmailDrop(id, trx)
 			})
 			.then(trx.commit)
 			.catch(trx.rollback)
 		})
+	}
+
+	function newEmailDrop (user_id, trx)
+	{
+		return user.email_confirms()
+		.transacting(trx)
+		.where('user_id', user_id)
+		.del()
 	}
 
 	return user
