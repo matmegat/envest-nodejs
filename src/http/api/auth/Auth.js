@@ -1,4 +1,6 @@
 
+var pick = require('lodash/pick')
+
 var Router = require('express').Router
 
 module.exports = function Auth (auth_model, passport)
@@ -10,27 +12,24 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/register', (rq, rs) =>
 	{
-		var data = rq.body
-		var user_data =
-		{
-			full_name: data.full_name,
-			email: data.email,
-			password: data.password
-		}
+		var user_data = pick(rq.body,
+		[
+			'full_name',
+			'email',
+			'password'
+		])
 
 		auth.model.register(user_data)
-		.then((id) =>
+		.then(id =>
 		{
-			var loginData =
+			var login_data =
 			{
 				id: id,
-				email: data.email,
-				password: data.password
+				email: user_data.email,
+				full_name: user_data.full_name
 			}
 
-			user_data.id = id
-
-			rq.login(loginData, err =>
+			rq.login(login_data, err =>
 			{
 				if (err)
 				{
@@ -40,12 +39,11 @@ module.exports = function Auth (auth_model, passport)
 						message: 'Login failed'
 					})
 				}
+				else
+				{
+					rs.status(200).send({})
+				}
 			})
-
-			delete user_data.password
-
-			rs.status(200)
-			.send(user_data)
 		})
 		.catch(error =>
 		{
