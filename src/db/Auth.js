@@ -3,6 +3,7 @@ var clone = require('lodash/clone')
 
 var Err  = require('../Err')
 var EmailAlreadyExists = Err('email_already_exists', 'User with this email already exists')
+var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 module.exports = function Auth (db)
 {
@@ -48,43 +49,31 @@ module.exports = function Auth (db)
 		{
 			return user.byEmail(email)
 		})
+		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
 		{
-			if (user_data)
+			return compare_passwords(
+				user_data.password,
+				password,
+				user_data.salt
+			)
+			.then(result =>
 			{
-				return compare_passwords(
-					user_data.password,
-					password,
-					user_data.salt
-				)
-				.then(result =>
+				if (result)
 				{
-					if (result)
-					{
-						delete user_data.password
-						delete user_data.salt
+					delete user_data.password
+					delete user_data.salt
 
-						return {
-							status: true,
-							user: user_data
-						}
+					return {
+						status: true,
+						user: user_data
 					}
-					else
-					{
-						return {
-							status: false,
-							message: 'Incorrect password.'
-						}
-					}
-				})
-			}
-			else
-			{
-				return {
-					status: false,
-					message: 'Incorrect email.'
 				}
-			}
+				else
+				{
+					throw WrongLogin()
+				}
+			})
 		})
 	}
 

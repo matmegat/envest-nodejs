@@ -37,3 +37,17 @@ Err.fromDb = function (constraint, fn)
 		throw error
 	}
 }
+
+Err.nullish = function (fn)
+{
+	return (it) =>
+	{
+		// eslint-disable-next-line eqeqeq
+		if (it == null)
+		{
+			throw fn()
+		}
+
+		return it
+	}
+}
