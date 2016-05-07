@@ -6,6 +6,7 @@ var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var pick = require('lodash/pick')
+var noop = require('lodash/noop')
 
 module.exports = function Auth (db)
 {
@@ -72,45 +73,32 @@ module.exports = function Auth (db)
 		})
 	}
 
+
+	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
+
 	auth.emailConfirm = function (code)
 	{
 		return user.newEmailByCode(code)
+		.then(Err.nullish(WrongConfirmCode))
 		.then(email_confirms =>
 		{
-			if (email_confirms)
+			return user.byConfirmedEmail(email_confirms.new_email)
+			.then(user_data =>
 			{
-				return user.byConfirmedEmail(email_confirms.new_email)
-				.then(user_data =>
+				if (user_data)
 				{
-					if (user_data)
-					{
-						return {
-							status: false,
-							message: 'This email is already used.'
-						}
-
-					}
-					else
-					{
-						user.emailConfirm(
-							email_confirms.user_id,
-							email_confirms.new_email)
-
-						return {
-							status: true,
-							message: 'Email confirmation.'
-						}
-					}
-				})
-			}
-			else
-			{
-				return {
-					status: false,
-					message: 'Not correct confirmation code.'
+					throw EmailAlreadyExists();
 				}
-			}
+				else
+				{
+					return user.emailConfirm(
+						email_confirms.user_id,
+						email_confirms.new_email
+					)
+				}
+			})
 		})
+		.then(noop)
 	}
 
 	return auth

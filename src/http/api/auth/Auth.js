@@ -66,12 +66,7 @@ module.exports = function Auth (auth_model, passport)
 	{
 		var code = rq.body.code
 
-		auth.model.emailConfirm(code)
-		.then((data) =>
-		{
-			rs.status(200)
-			.send(data)
-		})
+		toss(rs, auth.model.emailConfirm(code))
 	})
 
 	auth.express.post('/logout', (rq, rs) =>
