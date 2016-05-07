@@ -21,7 +21,7 @@ exports.up = function (knex, Promise)
 		{
 			table.integer('user_id').primary()
 
-			table.string('new_email').unique()
+			table.string('new_email').notNullable().unique()
 			table.string('code', 16).notNullable()
 		})
 	})

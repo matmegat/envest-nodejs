@@ -70,16 +70,17 @@ module.exports = function User (db)
 					user_id: id,
 					new_email: data.email,
 					code: data.code
-				})
+				}, trx)
 			})
 			.then(trx.commit)
 			.catch(trx.rollback)
 		})
 	}
 
-	user.newEmailCreate = function (data)
+	user.newEmailCreate = function (data, trx)
 	{
 		return user.email_confirms()
+		.transacting(trx)
 		.insert(data, 'user_id')
 		.then(one)
 	}
