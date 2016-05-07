@@ -1,6 +1,13 @@
 
 var clone = require('lodash/clone')
 
+var Err  = require('../Err')
+var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
+
+var pick = require('lodash/pick')
+var noop = require('lodash/noop')
+
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -35,6 +42,7 @@ module.exports = function Auth (db)
 				})
 			})
 		})
+		.catch(Err.fromDb('email_confirms_new_email_unique', EmailAlreadyExists))
 	}
 
 	auth.login = function (email, password)
@@ -44,85 +52,53 @@ module.exports = function Auth (db)
 		{
 			return user.byEmail(email)
 		})
+		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
 		{
-			if (user_data)
+			return compare_passwords(
+				user_data.password,
+				password,
+				user_data.salt
+			)
+			.then(Err.falsy(WrongLogin))
+			.then(() =>
 			{
-				return compare_passwords(
-					user_data.password,
-					password,
-					user_data.salt
-				)
-				.then(result =>
-				{
-					if (result)
-					{
-						delete user_data.password
-						delete user_data.salt
-
-						return {
-							status: true,
-							user: user_data
-						}
-					}
-					else
-					{
-						return {
-							status: false,
-							message: 'Incorrect password.'
-						}
-					}
-				})
-			}
-			else
-			{
-				return {
-					status: false,
-					message: 'Incorrect email.'
-				}
-			}
+				return pick(user_data,
+				[
+					'id',
+					'full_name',
+					'email'
+				])
+			})
 		})
 	}
+
+
+	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
 	auth.emailConfirm = function (code)
 	{
 		return user.newEmailByCode(code)
+		.then(Err.nullish(WrongConfirmCode))
 		.then(email_confirms =>
 		{
-			if (email_confirms)
+			return user.byConfirmedEmail(email_confirms.new_email)
+			.then(user_data =>
 			{
-				return user.byConfirmedEmail(email_confirms.new_email)
-				.then(user_data =>
+				if (user_data)
 				{
-					if (user_data)
-					{
-						return {
-							status: false,
-							message: 'This email is already used.'
-						}
-
-					}
-					else
-					{
-						user.emailConfirm(
-							email_confirms.user_id,
-							email_confirms.new_email)
-
-						return {
-							status: true,
-							message: 'Email confirmation.'
-						}
-					}
-				})
-			}
-			else
-			{
-				return {
-					status: false,
-					message: 'Not correct confirmation code.'
+					throw EmailAlreadyExists();
 				}
-			}
+				else
+				{
+					return user.emailConfirm(
+						email_confirms.user_id,
+						email_confirms.new_email
+					)
+				}
+			})
 		})
+		.then(noop)
 	}
 
 	return auth
@@ -179,14 +155,14 @@ function compare_passwords (db_pass, form_pass, salt)
 	})
 }
 
+
+/* validations */
 function validate_register (credentials)
 {
 	return new Promise(rs =>
 	{
-		validate_required(credentials.full_name, 'full_name')
-		validate_required(credentials.email,     'email')
+		validate_fullname(credentials.full_name)
 		validate_password(credentials.password)
-
 		validate_email(credentials.email)
 
 		return rs()
@@ -197,9 +173,7 @@ function validate_login (email, password)
 {
 	return new Promise(rs =>
 	{
-		validate_required(email, 'email')
 		validate_password(password)
-
 		validate_email(email)
 
 		return rs()
@@ -207,26 +181,63 @@ function validate_login (email, password)
 }
 
 
-var format = require('util').format
+var Err = require('../Err')
+
+var FieldRequired = Err('field_required', 'Field is required')
 
 function validate_required (field, name)
 {
 	// eslint-disable-next-line eqeqeq
 	if (field == null)
 	{
-		throw new Error(format('field `%s` is required', name))
+		throw FieldRequired({ field: name })
 	}
 }
 
+
+var XRegExp = require('xregexp')
+var WrongFullName = Err('wrong_full_name_format', 'Wrong full name format')
+
+function validate_fullname (full_name)
+{
+	validate_required(full_name, 'full_name')
+
+	/*
+	   Two words minimum, separated by space.
+	   Any alphabet letters,
+	   dashes, dots and spaces (not more than one successively).
+
+	   Should begin with a letter and end with a letter or dot.
+	*/
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})+ \\.? $`,
+	{
+		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+	},
+	'x')
+
+	if (! re.test(full_name))
+	{
+		throw WrongFullName()
+	}
+}
+
+
+var WrongEmail = Err('wrong_email_format', 'Wrong email format')
+
 function validate_email (email)
 {
+	validate_required(email, 'email')
+
 	var emailRe = /@/
 
 	if (! emailRe.test(email))
 	{
-		throw new Error('invalid email')
+		throw WrongEmail()
 	}
 }
+
+var TooShortPassword = Err('too_short_password', 'Password is too short')
+var TooLongPassword  = Err('too_long_password', 'Password is too long')
 
 function validate_password (password)
 {
@@ -234,10 +245,10 @@ function validate_password (password)
 
 	if (password.length < 6)
 	{
-		throw new Error('password is too short')
+		throw TooShortPassword()
 	}
 	if (password.length > 100)
 	{
-		throw new Error('password is too long')
+		throw TooLongPassword()
 	}
 }

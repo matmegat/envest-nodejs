@@ -54,18 +54,7 @@ function useLocal (auth)
 	}
 	, (email, password, done) =>
 	{
-		auth.login(email, password, done)
-		.then(result =>
-		{
-			if (result.status)
-			{
-				return done(null, result.user)
-			}
-			else
-			{
-				return done(null, false, { message: result.message })
-			}
-		}
-		, done)
+		auth.login(email, password)
+		.then(user_data => done(null, user_data), done)
 	}))
 }

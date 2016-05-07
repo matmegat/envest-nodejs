@@ -24,8 +24,8 @@ post:
       description: user model
       schema:
         $ref: ../../swagger/User.yaml
-    403:
-      description: Errors of registration.
+    400:
+      description: if something went wrong
       schema:
         $ref: ../../swagger/Error.yaml
   tags:

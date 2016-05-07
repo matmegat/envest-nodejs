@@ -3,6 +3,8 @@ var pick = require('lodash/pick')
 
 var Router = require('express').Router
 
+var toss = require('../../toss')
+
 module.exports = function Auth (auth_model, passport)
 {
 	var auth = {}
@@ -20,72 +22,42 @@ module.exports = function Auth (auth_model, passport)
 		])
 
 		auth.model.register(user_data)
-		.then(id =>
+		.then(() =>
 		{
-			var login_data =
-			{
-				id: id,
-				email: user_data.email,
-				full_name: user_data.full_name
-			}
-
-			rq.login(login_data, err =>
+			return auth.model.login(user_data.email, user_data.password)
+		})
+		.then(user_data =>
+		{
+			rq.login(user_data, err =>
 			{
 				if (err)
 				{
-					return rs.status(500).send(
-					{
-						status: false,
-						message: 'Login failed'
-					})
+					return toss.err(rs, err)
 				}
 				else
 				{
-					rs.status(200).send({})
+					return toss.ok(rs, user_data)
 				}
 			})
 		})
-		.catch(error =>
-		{
-			if (error.constraint === 'email_confirms_new_email_unique')
-			{
-				return rs.status(403).send(
-				{
-					status: false,
-					message: 'User with this email already exists'
-				})
-			}
-
-			return rs.status(500).send(
-			{
-				status: false,
-				message: error.message
-			})
-		})
+		.catch(toss.err(rs))
 	})
 
 	auth.express.post('/login', (rq, rs, next) =>
 	{
-		passport.authenticate('local', (err, user) =>
+		passport.authenticate('local', (err, user_data) =>
 		{
-			if (err) { return next(err) }
-
-			if (! user)
+			if (err)
 			{
-				return rs.status(401).send(
-				{
-					status: false,
-					message: 'Email and password doesn\'t match'
-				})
+				return toss.err(rs, err)
 			}
 
-			rq.login(user, function (err)
+			rq.login(user_data, function (err)
 			{
+				/* ¯\_(ツ)_/¯ */
 				if (err) { return next(err) }
 
-				return rs
-				.status(200)
-				.send(user)
+				return toss.ok(rs, user_data)
 			})
 		})(rq, rs, next)
 	})
@@ -94,18 +66,13 @@ module.exports = function Auth (auth_model, passport)
 	{
 		var code = rq.body.code
 
-		auth.model.emailConfirm(code)
-		.then((data) =>
-		{
-			rs.status(200)
-			.send(data)
-		})
+		toss(rs, auth.model.emailConfirm(code))
 	})
 
 	auth.express.post('/logout', (rq, rs) =>
 	{
 		rq.logout()
-		rs.sendStatus(200)
+		rs.status(200).end()
 	})
 
 	return auth
