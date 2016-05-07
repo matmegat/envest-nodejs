@@ -36,7 +36,7 @@ module.exports = function Auth (auth_model, passport)
 				}
 				else
 				{
-					rs.status(200).send(user_data)
+					return toss.ok(rs, user_data)
 				}
 			})
 		})
@@ -45,19 +45,19 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/login', (rq, rs, next) =>
 	{
-		passport.authenticate('local', (err, user) =>
+		passport.authenticate('local', (err, user_data) =>
 		{
 			if (err)
 			{
 				return toss.err(rs, err)
 			}
 
-			rq.login(user, function (err)
+			rq.login(user_data, function (err)
 			{
 				/* ¯\_(ツ)_/¯ */
 				if (err) { return next(err) }
 
-				return rs.status(200).send(user)
+				return toss.ok(rs, user_data)
 			})
 		})(rq, rs, next)
 	})
