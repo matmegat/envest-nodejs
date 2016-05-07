@@ -1,6 +1,7 @@
 
-var Err  = require('../Err')
+var clone = require('lodash/clone')
 
+var Err  = require('../Err')
 var EmailAlreadyExists = Err('email_already_exists', 'User with this email already exists')
 
 module.exports = function Auth (db)
@@ -13,6 +14,8 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
+		userdata = clone(userdata)
+
 		return validate_register(userdata)
 		.then(() =>
 		{
@@ -21,15 +24,21 @@ module.exports = function Auth (db)
 		.then(salt =>
 		{
 			return encrypt_pass(userdata.password, salt)
-		})
-		.then(obj =>
-		{
-			userdata.password = obj.encrypted_pass
-			userdata.salt = obj.salt
+			.then(encrypted_pass =>
+			{
+				userdata.password = encrypted_pass
+				userdata.salt     = salt
 
-			return user.create(userdata)
+				return generate_code()
+				.then(code =>
+				{
+					userdata.code = code
+
+					return user.create(userdata)
+				})
+			})
 		})
-		.catch(Err.fromDb('users_email_unique', EmailAlreadyExists))
+		.catch(Err.fromDb('email_confirms_new_email_unique', EmailAlreadyExists))
 	}
 
 	auth.login = function (email, password)
@@ -39,21 +48,25 @@ module.exports = function Auth (db)
 		{
 			return user.byEmail(email)
 		})
-		.then(user =>
+		.then(user_data =>
 		{
-			if (user)
+			if (user_data)
 			{
-				return compare_passwords(user.password, password, user.salt)
+				return compare_passwords(
+					user_data.password,
+					password,
+					user_data.salt
+				)
 				.then(result =>
 				{
 					if (result)
 					{
-						delete user.password
-						delete user.salt
+						delete user_data.password
+						delete user_data.salt
 
 						return {
 							status: true,
-							user: user
+							user: user_data
 						}
 					}
 					else
@@ -75,43 +88,83 @@ module.exports = function Auth (db)
 		})
 	}
 
+	auth.emailConfirm = function (code)
+	{
+		return user.newEmailByCode(code)
+		.then(email_confirms =>
+		{
+			if (email_confirms)
+			{
+				return user.byConfirmedEmail(email_confirms.new_email)
+				.then(user_data =>
+				{
+					if (user_data)
+					{
+						return {
+							status: false,
+							message: 'This email is already used.'
+						}
+
+					}
+					else
+					{
+						user.emailConfirm(
+							email_confirms.user_id,
+							email_confirms.new_email)
+
+						return {
+							status: true,
+							message: 'Email confirmation.'
+						}
+					}
+				})
+			}
+			else
+			{
+				return {
+					status: false,
+					message: 'Not correct confirmation code.'
+				}
+			}
+		})
+	}
+
 	return auth
 }
 
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
 var salt_size     = 16 / 2
+var code_size     = 16 / 2
 var password_size = 36 / 2
 var iterations    = 100000
 
 var promisify = require('promisify-node')
 
 var crypto = require('crypto')
-var randomBytes = promisify(crypto.randomBytes)
 var genHash = promisify(crypto.pbkdf2)
 
 var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
+var gen_rand_str = require('../genRandStr')
+
 function generate_salt ()
 {
-	return randomBytes(salt_size)
-	.then(hex)
+	return gen_rand_str(salt_size)
+}
+
+function generate_code ()
+{
+	return gen_rand_str(code_size)
 }
 
 function encrypt_pass (password, salt)
 {
-	return hash(password, '', password_size)
+	return hash(password, '')
 	.then(pass_hash =>
 	{
-		return hash(pass_hash, salt, password_size)
-	})
-	.then(str =>
-	{
-		return {
-			encrypted_pass: str,
-			salt: salt
-		}
+		return hash(pass_hash, salt)
 	})
 }
 
@@ -121,12 +174,12 @@ function hash (password, salt)
 	.then(hex)
 }
 
-function compare_passwords (dbPass, formPass, salt)
+function compare_passwords (db_pass, form_pass, salt)
 {
-	return encrypt_pass(formPass, salt)
-	.then(result =>
+	return encrypt_pass(form_pass, salt)
+	.then(encrypted_pass =>
 	{
-		return result.encrypted_pass === dbPass
+		return encrypted_pass === db_pass
 	})
 }
 
@@ -134,7 +187,7 @@ function compare_passwords (dbPass, formPass, salt)
 /* validations */
 function validate_register (credentials)
 {
-	return new Promise((rs, rj) =>
+	return new Promise(rs =>
 	{
 		validate_required(credentials.full_name, 'full_name')
 		validate_required(credentials.email,     'email')
@@ -148,7 +201,7 @@ function validate_register (credentials)
 
 function validate_login (email, password)
 {
-	return new Promise((rs, rj) =>
+	return new Promise(rs =>
 	{
 		validate_required(email, 'email')
 		validate_password(password)
@@ -167,7 +220,7 @@ var FieldRequired = Err('field_required', 'Field is required')
 
 function validate_required (field, name)
 {
-	if (field == null)
+	if (field === null)
 	{
 		throw FieldRequired({ field: name })
 	}

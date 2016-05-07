@@ -1,4 +1,6 @@
 
+var pick = require('lodash/pick')
+
 var Router = require('express').Router
 
 var Err  = require('../../../Err')
@@ -13,27 +15,24 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/register', (rq, rs) =>
 	{
-		var data = rq.body
-		var user_data =
-		{
-			full_name: data.full_name,
-			email: data.email,
-			password: data.password
-		}
+		var user_data = pick(rq.body,
+		[
+			'full_name',
+			'email',
+			'password'
+		])
 
 		auth.model.register(user_data)
-		.then((id) =>
+		.then(id =>
 		{
-			var loginData =
+			var login_data =
 			{
-				id: id[0],
-				email: data.email,
-				password: data.password
+				id: id,
+				email: user_data.email,
+				full_name: user_data.full_name
 			}
 
-			user_data.id = id[0]
-
-			rq.login(loginData, err =>
+			rq.login(login_data, err =>
 			{
 				if (err)
 				{
@@ -43,13 +42,11 @@ module.exports = function Auth (auth_model, passport)
 						message: 'Login failed'
 					})
 				}
+				else
+				{
+					rs.status(200).send({})
+				}
 			})
-
-			delete user_data.password
-			delete user_data.salt
-
-			rs.status(200)
-			.send(user_data)
 		})
 		.catch(toss.err(rs))
 	})
@@ -80,7 +77,19 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
-	auth.express.get('/logout', (rq, rs) =>
+	auth.express.post('/confirm-email', (rq, rs) =>
+	{
+		var code = rq.body.code
+
+		auth.model.emailConfirm(code)
+		.then((data) =>
+		{
+			rs.status(200)
+			.send(data)
+		})
+	})
+
+	auth.express.post('/logout', (rq, rs) =>
 	{
 		rq.logout()
 		rs.sendStatus(200)
