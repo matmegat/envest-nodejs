@@ -211,7 +211,8 @@ var format = require('util').format
 
 function validate_required (field, name)
 {
-	if (field === null)
+	// eslint-disable-next-line eqeqeq
+	if (field == null)
 	{
 		throw new Error(format('field `%s` is required', name))
 	}
