@@ -170,12 +170,12 @@ function hash (password, salt)
 	.then(hex)
 }
 
-function compare_passwords (dbPass, formPass, salt)
+function compare_passwords (db_pass, form_pass, salt)
 {
-	return encrypt_pass(formPass, salt)
+	return encrypt_pass(form_pass, salt)
 	.then(encrypted_pass =>
 	{
-		return encrypted_pass === dbPass
+		return encrypted_pass === db_pass
 	})
 }
 
