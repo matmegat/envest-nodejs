@@ -22,7 +22,7 @@ module.exports = function User (db)
 	user.byEmail = function (email)
 	{
 		return knex.select('*')
-		.from( function ()
+		.from(function ()
 		{
 			this.select(
 				'users.id AS id',
