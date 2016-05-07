@@ -5,6 +5,8 @@ var Err  = require('../Err')
 var EmailAlreadyExists = Err('email_already_exists', 'User with this email already exists')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
+var pick = require('lodash/pick')
+
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -57,17 +59,16 @@ module.exports = function Auth (db)
 				password,
 				user_data.salt
 			)
-			.then(result =>
+			.then(ok =>
 			{
-				if (result)
+				if (ok)
 				{
-					delete user_data.password
-					delete user_data.salt
-
-					return {
-						status: true,
-						user: user_data
-					}
+					return pick(user_data,
+					[
+						'id',
+						'full_name',
+						'email'
+					])
 				}
 				else
 				{

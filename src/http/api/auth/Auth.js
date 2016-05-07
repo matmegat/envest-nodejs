@@ -25,26 +25,19 @@ module.exports = function Auth (auth_model, passport)
 		auth.model.register(user_data)
 		.then(id =>
 		{
-			var login_data =
-			{
-				id: id,
-				email: user_data.email,
-				full_name: user_data.full_name
-			}
-
-			rq.login(login_data, err =>
+			return auth.model.login(user_data.email, user_data.password)
+		})
+		.then(user_data =>
+		{
+			rq.login(user_data, err =>
 			{
 				if (err)
 				{
-					return rs.status(500).send(
-					{
-						status: false,
-						message: 'Login failed'
-					})
+					return toss.err(rs, err)
 				}
 				else
 				{
-					rs.status(200).send({})
+					rs.status(200).send(user_data)
 				}
 			})
 		})
@@ -55,24 +48,17 @@ module.exports = function Auth (auth_model, passport)
 	{
 		passport.authenticate('local', (err, user) =>
 		{
-			if (err) { return next(err) }
-
-			if (! user)
+			if (err)
 			{
-				return rs.status(401).send(
-				{
-					status: false,
-					message: 'Email and password doesn\'t match'
-				})
+				return toss.err(rs, err)
 			}
 
 			rq.login(user, function (err)
 			{
+				/* ¯\_(ツ)_/¯ */
 				if (err) { return next(err) }
 
-				return rs
-				.status(200)
-				.send(user)
+				return rs.status(200).send(user)
 			})
 		})(rq, rs, next)
 	})
