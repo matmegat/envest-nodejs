@@ -24,6 +24,6 @@ toss.err = curry((rs, err) =>
 		console.warn('using wrong error object')
 		console.error(err)
 
-		return rs.status(500).send({})
+		return rs.status(500).end()
 	}
 })

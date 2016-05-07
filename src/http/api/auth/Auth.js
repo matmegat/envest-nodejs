@@ -92,7 +92,7 @@ module.exports = function Auth (auth_model, passport)
 	auth.express.post('/logout', (rq, rs) =>
 	{
 		rq.logout()
-		rs.sendStatus(200)
+		rs.status(200).end()
 	})
 
 	return auth
