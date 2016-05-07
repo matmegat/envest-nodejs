@@ -189,8 +189,7 @@ function validate_register (credentials)
 {
 	return new Promise(rs =>
 	{
-		validate_required(credentials.full_name, 'full_name')
-
+		validate_fullname(credentials.full_name)
 		validate_password(credentials.password)
 		validate_email(credentials.email)
 
@@ -223,6 +222,34 @@ function validate_required (field, name)
 		throw FieldRequired({ field: name })
 	}
 }
+
+
+var XRegExp = require('xregexp')
+var WrongFullName = Err('wrong_full_name_format', 'Wrong full name format')
+
+function validate_fullname (full_name)
+{
+	validate_required(full_name, 'full_name')
+
+	/*
+	   Two words minimum, separated by space.
+	   Any alphabet letters,
+	   dashes, dots and spaces (not more than one successively).
+
+	   Should begin with a letter and end with a letter or dot.
+	*/
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})+ \\.? $`,
+	{
+		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+	},
+	'x')
+
+	if (! re.test(full_name))
+	{
+		throw WrongFullName()
+	}
+}
+
 
 var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 
