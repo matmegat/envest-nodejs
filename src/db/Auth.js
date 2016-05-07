@@ -2,7 +2,7 @@
 var clone = require('lodash/clone')
 
 var Err  = require('../Err')
-var EmailAlreadyExists = Err('email_already_exists', 'User with this email already exists')
+var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var pick = require('lodash/pick')
@@ -193,7 +193,6 @@ function validate_login (email, password)
 }
 
 
-var format = require('util').format
 var Err = require('../Err')
 
 var FieldRequired = Err('field_required', 'Field is required')
@@ -249,8 +248,8 @@ function validate_email (email)
 	}
 }
 
-var TooShortPassword = Err('too_short_password', 'Password is too short, 6 symbols at least required')
-var TooLongPassword  = Err('too_short_password', 'Password is too short, 6 symbols at least required')
+var TooShortPassword = Err('too_short_password', 'Password is too short')
+var TooLongPassword  = Err('too_short_password', 'Password is too long')
 
 function validate_password (password)
 {

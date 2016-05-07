@@ -10,7 +10,7 @@ var toss = module.exports = curry((rs, data) =>
 
 toss.ok = curry((rs, data) =>
 {
-	return rs.status(200).send(ok)
+	return rs.status(200).send(data)
 })
 
 toss.err = curry((rs, err) =>

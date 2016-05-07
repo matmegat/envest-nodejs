@@ -3,7 +3,6 @@ var pick = require('lodash/pick')
 
 var Router = require('express').Router
 
-var Err  = require('../../../Err')
 var toss = require('../../toss')
 
 module.exports = function Auth (auth_model, passport)
@@ -23,7 +22,7 @@ module.exports = function Auth (auth_model, passport)
 		])
 
 		auth.model.register(user_data)
-		.then(id =>
+		.then(() =>
 		{
 			return auth.model.login(user_data.email, user_data.password)
 		})
