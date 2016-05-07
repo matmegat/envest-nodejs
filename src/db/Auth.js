@@ -87,7 +87,7 @@ module.exports = function Auth (db)
 			{
 				if (user_data)
 				{
-					throw EmailAlreadyExists();
+					throw EmailAlreadyExists()
 				}
 				else
 				{
@@ -187,7 +187,6 @@ var FieldRequired = Err('field_required', 'Field is required')
 
 function validate_required (field, name)
 {
-	// eslint-disable-next-line eqeqeq
 	if (field == null)
 	{
 		throw FieldRequired({ field: name })

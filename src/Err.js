@@ -42,7 +42,6 @@ Err.nullish = function (fn)
 {
 	return (it) =>
 	{
-		// eslint-disable-next-line eqeqeq
 		if (it == null)
 		{
 			throw fn()
