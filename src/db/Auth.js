@@ -59,21 +59,15 @@ module.exports = function Auth (db)
 				password,
 				user_data.salt
 			)
-			.then(ok =>
+			.then(Err.falsy(WrongLogin))
+			.then(() =>
 			{
-				if (ok)
-				{
-					return pick(user_data,
-					[
-						'id',
-						'full_name',
-						'email'
-					])
-				}
-				else
-				{
-					throw WrongLogin()
-				}
+				return pick(user_data,
+				[
+					'id',
+					'full_name',
+					'email'
+				])
 			})
 		})
 	}

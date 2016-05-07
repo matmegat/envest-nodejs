@@ -51,3 +51,16 @@ Err.nullish = function (fn)
 		return it
 	}
 }
+
+Err.falsy = function (fn)
+{
+	return (it) =>
+	{
+		if (! it)
+		{
+			throw fn()
+		}
+
+		return it
+	}
+}
