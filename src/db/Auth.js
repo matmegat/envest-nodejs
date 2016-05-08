@@ -94,8 +94,12 @@ module.exports = function Auth (db)
 
 	auth.changeEmail = function (user_id, new_email)
 	{
-		return user.byConfirmedEmail(new_email)
-		.then(Err.existent(EmailUsed))
+		return validate_change_email(new_email)
+		.then(() =>
+		{
+			return user.byConfirmedEmail(new_email)
+			.then(Err.existent(EmailUsed))
+		})
 		.then(() =>
 		{
 			return generate_code()
@@ -175,6 +179,17 @@ function validate_register (credentials)
 		validate_fullname(credentials.full_name)
 		validate_password(credentials.password)
 		validate_email(credentials.email)
+
+		return rs()
+	})
+}
+
+function validate_change_email (email)
+{
+	return new Promise(rs =>
+	{
+		console.log(email)
+		validate_email(email)
 
 		return rs()
 	})
