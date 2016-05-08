@@ -71,8 +71,7 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/change-email', (rq, rs) =>
 	{
-		console.log(rq.isAuthenticated())
-		if(rq.isAuthenticated())
+		if (rq.isAuthenticated())
 		{
 			var email   = rq.body.email
 			var user_id = rq.user.id

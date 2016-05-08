@@ -125,8 +125,9 @@ module.exports = function User (db)
 		return user.email_confirms()
 		.insert(data, 'user_id')
 		.then(one)
-		.catch( err => {
-			if(err.constraint === 'email_confirms_pkey')
+		.catch(err =>
+		{
+			if (err.constraint === 'email_confirms_pkey')
 			{
 				return user.email_confirms()
 				.update({
