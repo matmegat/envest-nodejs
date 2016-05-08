@@ -69,6 +69,22 @@ module.exports = function Auth (auth_model, passport)
 		toss(rs, auth.model.emailConfirm(code))
 	})
 
+	auth.express.post('/change-email', (rq, rs) =>
+	{
+		console.log(rq.isAuthenticated())
+		if(rq.isAuthenticated())
+		{
+			var email   = rq.body.email
+			var user_id = rq.user.id
+
+			toss(rs, auth.model.changeEmail(user_id, email))
+		}
+		else
+		{
+			rs.status(400).end()
+		}
+	})
+
 	auth.express.post('/logout', (rq, rs) =>
 	{
 		rq.logout()
