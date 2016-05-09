@@ -112,7 +112,6 @@ module.exports = function Auth (db)
 				code: code
 			})
 			.then(noop)
-			.catch(Err.fromDb('users_email_unique', WrongConfirmCode))
 		})
 	}
 
@@ -188,7 +187,6 @@ function validate_change_email (email)
 {
 	return new Promise(rs =>
 	{
-		console.log(email)
 		validate_email(email)
 
 		return rs()
