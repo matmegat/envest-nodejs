@@ -42,6 +42,7 @@ module.exports = function (express, db)
 	})
 
 	useLocal(auth)
+	useFacebookToken(auth, user)
 
 	return passport
 }
@@ -63,7 +64,7 @@ function useLocal (auth)
 var clientID = '213309782384928'
 var clientSecret = '7bb071d47fb514268d2d3e26edca4c57'
 
-function useFacebookToken (auth)
+function useFacebookToken (auth, user)
 {
 	passport.use(new FacebookTokenStrategy(
 	{
@@ -72,12 +73,12 @@ function useFacebookToken (auth)
 	}
 	, (accessToken, refreshToken, profile, done) =>
 	{
-		var user_data = 
+		var user_data =
 		{
-			'email': profile.emails[0].value,
-			'full_name': `${profile.name.givenName} ${profile.name.familyName}`,
-			'facebook_id': profile.id,
-			'token': accessToken
+			email: profile.emails[0].value,
+			full_name: `${profile.name.givenName} ${profile.name.familyName}`,
+			facebook_id: profile.id,
+			token: accessToken
 		}
 
 		user.findOrCreate(user_data)

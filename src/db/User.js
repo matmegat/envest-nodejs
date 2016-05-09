@@ -11,7 +11,7 @@ module.exports = function User (db)
 
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
-	user.auth_facebook  = () => knex('auth_facebook') 
+	user.auth_facebook  = () => knex('auth_facebook')
 
 	user.byConfirmedEmail = function (email)
 	{
@@ -118,7 +118,7 @@ module.exports = function User (db)
 		return user.byFacebookId(data.facebook_id)
 		.then(user =>
 		{
-			if(! user)
+			if (! user)
 			{
 				return user.createFacebook()
 			}
