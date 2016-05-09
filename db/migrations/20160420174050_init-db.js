@@ -25,6 +25,15 @@ exports.up = function (knex, Promise)
 			table.string('code', 16).notNullable()
 		})
 	})
+	.then(() =>
+	{
+		return knex.schema.createTable('auth_facebook', (table) =>
+		{
+			table.integer('user_id').primary()
+
+			table.integer('facebook_id').notNullable().unique()
+		})
+	})
 }
 
 exports.down = function (knex, Promise)
