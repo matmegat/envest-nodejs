@@ -11,6 +11,7 @@ module.exports = function User (db)
 
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
+	user.auth_facebook  = () => knex('auth_facebook') 
 
 	user.byConfirmedEmail = function (email)
 	{
@@ -50,6 +51,13 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
+	user.byFacebookId = function (id)
+	{
+		return user.auth_facebook()
+		.where('id', id)
+		.then(oneMaybe)
+	}
+
 	user.create = function (data)
 	{
 		return knex.transaction(function (trx)
@@ -75,11 +83,63 @@ module.exports = function User (db)
 			.then(trx.commit)
 			.catch(trx.rollback)
 		})
+		.then(inserts =>
+		{
+			console.log(inserts)
+		})
+	}
+
+	user.createFacebok = function (data)
+	{
+		return knex.transaction(function (trx)
+		{
+			user.users_table()
+			.transaction(trx)
+			.insert({
+				full_name: data.full_name,
+				email: data.email
+			}
+			, 'id')
+			.then(one)
+			.then(function (id)
+			{
+				return newFacebookUser({
+					user_id: id,
+					facebook_id: data.facebook_id
+				}, trx)
+			})
+			.then(trx.commit)
+			.catch(trx.rollback)
+		})
+	}
+
+	user.findOrCreate = function (data)
+	{
+		return user.byFacebookId(data.facebook_id)
+		.then(user =>
+		{
+			if(! user)
+			{
+				return user.createFacebook()
+			}
+			else
+			{
+				return user
+			}
+		})
 	}
 
 	function newEmailCreate (data, trx)
 	{
 		return user.email_confirms()
+		.transacting(trx)
+		.insert(data, 'user_id')
+		.then(one)
+	}
+
+	function newFacebookUser (data, trx)
+	{
+		return user.auth_facebook()
 		.transacting(trx)
 		.insert(data, 'user_id')
 		.then(one)
