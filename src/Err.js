@@ -63,3 +63,17 @@ Err.falsy = function (fn)
 		return it
 	}
 }
+
+Err.existent = function (fn)
+{
+	return (it) =>
+	{
+		if (it)
+		{
+			throw fn()
+		}
+
+		return it
+	}
+}
+
