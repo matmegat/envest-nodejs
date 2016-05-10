@@ -1,4 +1,5 @@
-module.exports = function Motivations () {
+module.exports = function Motivations ()
+{
 	var motivations =
 		[
 			{

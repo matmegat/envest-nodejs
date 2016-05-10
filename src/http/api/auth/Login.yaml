@@ -21,7 +21,6 @@ post:
           description: Password
           format: password
       required:
-      - full_name
       - email
       - password
   responses:

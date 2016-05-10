@@ -13,8 +13,8 @@ var dummyEvents =
 					ticker: 'ZG',
 					company: 'ZILLOW',
 				},
-				price: Math.floor(Math.random()*100),
-				amount: Math.floor(Math.random()*1000),
+				price: Math.floor(Math.random() * 100),
+				amount: Math.floor(Math.random() * 1000),
 				text: 'I want to become a downshifter.',
 				risk: 'low',
 				motivations: _.sampleSize(motivations, 3)
@@ -30,8 +30,8 @@ var dummyEvents =
 					ticker: 'ZG',
 					company: 'ZILLOW',
 				},
-				price: Math.floor(Math.random()*100),
-				amount: Math.floor(Math.random()*1000),
+				price: Math.floor(Math.random() * 100),
+				amount: Math.floor(Math.random() * 1000),
 				text: 'I want to sell all my assets and become a downshifter.',
 				risk: 'medium',
 				motivations: _.sampleSize(motivations, 3)
