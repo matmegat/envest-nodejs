@@ -57,10 +57,10 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
-	user.byFacebookId = function (id)
+	user.byFacebookId = function (facebook_id)
 	{
 		return user.auth_facebook()
-		.where('id', facebook_id)
+		.where('facebook_id', facebook_id)
 		.then(oneMaybe)
 	}
 
@@ -105,7 +105,7 @@ module.exports = function User (db)
 		})		
 	}
 
-	user.createFacebok = function (data)
+	user.createFacebook = function (data)
 	{
 		return generate_code()
 		.then(code =>
@@ -113,7 +113,7 @@ module.exports = function User (db)
 			return knex.transaction(function (trx)
 			{
 				user.users_table()
-				.transaction(trx)
+				.transacting(trx)
 				.insert({
 					full_name: data.full_name,
 					email: null
@@ -143,16 +143,20 @@ module.exports = function User (db)
 
 	user.findOrCreate = function (data)
 	{
+
+		console.log('findOrCreate data: ')
+		console.log(data)
+
 		return user.byFacebookId(data.facebook_id)
-		.then(user =>
+		.then(result =>
 		{
-			if (! user)
+			if (! result)
 			{
 				return user.createFacebook(data)
 			}
 			else
 			{
-				return user
+				return result
 			}
 		})
 	}

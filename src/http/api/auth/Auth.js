@@ -72,12 +72,14 @@ module.exports = function Auth (auth_model, passport)
 				return toss.err(rs, err)
 			}
 
-			rq.login(user_data, function (err)
+			console.log(user)
+
+			rq.login(user, function (err)
 			{
 				/* ¯\_(ツ)_/¯ */
 				if (err) { return next(err) }
 
-				return toss.ok(rs, user_data)
+				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)
 	})
