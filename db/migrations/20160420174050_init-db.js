@@ -23,6 +23,15 @@ exports.up = function (knex, Promise)
 			table.string('code', 16).notNullable()
 		})
 	})
+		.then(() =>
+		{
+			console.info('Running Seed Data')
+
+			return knex.seed.run(
+				{
+					directory: './seeds/20160420'
+				})
+		})
 }
 
 exports.down = function (knex, Promise)

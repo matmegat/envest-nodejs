@@ -38,30 +38,45 @@ module.exports = function Feed (db)
 		return new Promise((resolve, reject) =>
 		{
 			feed_queryset
-			.then((feed_iems) =>
+			.then((feed_items) =>
 			{
 				Promise
 				.all(
 				[
 					feed.investors_table()
-						.whereIn('id', _.map(feed_iems, (item) =>
+						.whereIn('id', _.map(feed_items, (item) =>
 						{
 							return item.investor_id
 						})),
 
 					feed.comments_table()
 						.select('feed_id')
-						.whereIn('feed_id', _.map(feed_iems, (item) =>
+						.count('id as count')
+						.whereIn('feed_id', _.map(feed_items, (item) =>
 						{
 							return item.id
 						}))
 						.groupBy('feed_id')
 				])
-				.then((investors, comments) =>
+				.then((response) =>
 				{
-					console.log('investors', investors)
-					console.log('comments', comments)
-					resolve(feed_iems)
+					var investors = _.cloneDeep(response[0])
+					var commentsCount = _.cloneDeep(response[1])
+
+					_.each(feed_items, (item) =>
+					{
+						var comments = _.find(commentsCount, { feed_id: item.id })
+						if (comments)
+						{
+							comments = comments.count
+						}
+
+						item.comments = comments || 0
+						item.investor = _.find(investors, { id: item.investor_id })
+						delete item.investor_id
+					})
+
+					resolve(feed_items)
 				})
 			})
 			.catch((error) =>

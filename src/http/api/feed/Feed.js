@@ -11,14 +11,14 @@ module.exports = function Feed (feed_model)
 
 	feed.express.use((req, res, next) =>
 	{
-		if (! req.user)
-		{
-			return res.status(403).json(
-				{
-					status: false,
-					message: 'Not authenticated'
-				})
-		}
+		// if (! req.user)
+		// {
+		// 	return res.status(403).json(
+		// 		{
+		// 			status: false,
+		// 			message: 'Not authenticated'
+		// 		})
+		// }
 
 		next()
 	})

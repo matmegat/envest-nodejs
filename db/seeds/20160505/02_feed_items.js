@@ -83,13 +83,14 @@ var dummyEvents =
 
 exports.seed = function (knex, Promise)
 {
-	var seedItems = _.map(dummyEvents, (event, i) =>
+	var seedItems = _.times(50, (i) =>
 	{
 		return knex('feed_items').insert(
 		{
-			id: i,
+			id: i + 1,
+			timestamp: new Date(new Date().getTime() + i),
 			investor_id: Math.floor(Math.random() * 4 + 1),
-			event: event
+			event: dummyEvents[i % dummyEvents.length]
 		})
 	})
 	seedItems.splice(0, 0, knex('feed_items').del())
