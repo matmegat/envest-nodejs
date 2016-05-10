@@ -61,14 +61,14 @@ function useLocal (auth)
 	}))
 }
 
-var clientID = '213309782384928'
+var clientID = 213309782384928
 var clientSecret = '7bb071d47fb514268d2d3e26edca4c57'
 
 function useFacebookToken (auth, user)
 {
 	passport.use(new FacebookTokenStrategy(
 	{
-		cliendID: clientID,
+		clientID: clientID,
 		clientSecret: clientSecret
 	}
 	, (accessToken, refreshToken, profile, done) =>
