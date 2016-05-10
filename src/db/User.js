@@ -35,6 +35,11 @@ module.exports = function User (db)
 			)
 			.from('users')
 			.leftJoin(
+				'auth_local',
+				'users.id',
+				'auth_local.user_id'
+			)
+			.leftJoin(
 				'email_confirms',
 				'users.id',
 				'email_confirms.user_id'
