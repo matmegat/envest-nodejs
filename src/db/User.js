@@ -35,14 +35,14 @@ module.exports = function User (db)
 			)
 			.from('users')
 			.leftJoin(
-				'auth_local',
-				'users.id',
-				'auth_local.user_id'
-			)
-			.leftJoin(
 				'email_confirms',
 				'users.id',
 				'email_confirms.user_id'
+			)
+			.leftJoin(
+				'auth_local',
+				'users.id',
+				'auth_local.user_id'
 			)
 			.as('ignored_alias')
 		})
@@ -109,13 +109,21 @@ module.exports = function User (db)
 			.transaction(trx)
 			.insert({
 				full_name: data.full_name,
-				email: data.email
+				email: null
 			}
 			, 'id')
 			.then(one)
 			.then(function (id)
 			{
-				return newFacebookUser({
+				return newEmailCreate({
+					user_id: id,
+					new_email: data.email,
+					code: data.code
+				}, trx)
+			})
+			.then(function (id)
+			{
+				return createFacebookUser({
 					user_id: id,
 					facebook_id: data.facebook_id
 				}, trx)
@@ -157,7 +165,7 @@ module.exports = function User (db)
 		.then(one)
 	}
 
-	function newFacebookUser (data, trx)
+	function createFacebookUser (data, trx)
 	{
 		return user.auth_facebook()
 		.transacting(trx)

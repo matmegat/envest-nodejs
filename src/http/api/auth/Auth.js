@@ -62,7 +62,7 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
-	auth.express.post('/facebook-token', (rq, rs, next) =>
+	auth.express.post('/facebook', (rq, rs, next) =>
 	{
 		passport.authenticate('facebook-token', (err, user, info) =>
 		{
