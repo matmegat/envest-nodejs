@@ -12,6 +12,7 @@ module.exports = function User (db)
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
 	user.auth_facebook  = () => knex('auth_facebook')
+	user.auth_local = () => knex('auth_local')
 
 	user.byConfirmedEmail = function (email)
 	{
@@ -54,7 +55,7 @@ module.exports = function User (db)
 	user.byFacebookId = function (id)
 	{
 		return user.auth_facebook()
-		.where('id', id)
+		.where('id', facebook_id)
 		.then(oneMaybe)
 	}
 
@@ -66,12 +67,18 @@ module.exports = function User (db)
 			.transacting(trx)
 			.insert({
 				full_name: data.full_name,
-				email: null,
-				password: data.password,
-				salt: data.salt
+				email: null
 			}
 			, 'id')
 			.then(one)
+			.then(function (id)
+			{
+				return createLocalCreds({
+					user_id: id,
+					password: data.password,
+					salt: data.salt
+				}, trx)
+			})
 			.then(function (id)
 			{
 				return newEmailCreate({
@@ -120,13 +127,21 @@ module.exports = function User (db)
 		{
 			if (! user)
 			{
-				return user.createFacebook()
+				return user.createFacebook(data)
 			}
 			else
 			{
 				return user
 			}
 		})
+	}
+
+	function createLocalCreds (data, trx)
+	{
+		return user.auth_local()
+		.transacting(trx)
+		.insert(data, 'user_id')
+		.then(one)
 	}
 
 	function newEmailCreate (data, trx)
