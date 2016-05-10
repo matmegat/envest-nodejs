@@ -66,70 +66,78 @@ module.exports = function User (db)
 
 	user.create = function (data)
 	{
-		return knex.transaction(function (trx)
+		return generate_code()
+		.then(code =>
 		{
-			user.users_table()
-			.transacting(trx)
-			.insert({
-				full_name: data.full_name,
-				email: null
-			}
-			, 'id')
-			.then(one)
-			.then(function (id)
+			return knex.transaction(function (trx)
 			{
-				return createLocalCreds({
-					user_id: id,
-					password: data.password,
-					salt: data.salt
-				}, trx)
+				user.users_table()
+				.transacting(trx)
+				.insert({
+					full_name: data.full_name,
+					email: null
+				}
+				, 'id')
+				.then(one)
+				.then(function (id)
+				{
+					return createLocalCreds({
+						user_id: id,
+						password: data.password,
+						salt: data.salt
+					}, trx)
+				})
+				.then(function (id)
+				{
+					return newEmailCreate({
+						user_id: id,
+						new_email: data.email,
+						code: code
+					}, trx)
+				})
+				.then(trx.commit)
+				.catch(trx.rollback)
 			})
-			.then(function (id)
+			.then(inserts =>
 			{
-				return newEmailCreate({
-					user_id: id,
-					new_email: data.email,
-					code: data.code
-				}, trx)
+				console.log(inserts)
 			})
-			.then(trx.commit)
-			.catch(trx.rollback)
-		})
-		.then(inserts =>
-		{
-			console.log(inserts)
-		})
+		})		
 	}
 
 	user.createFacebok = function (data)
 	{
-		return knex.transaction(function (trx)
+		return generate_code()
+		.then(code =>
 		{
-			user.users_table()
-			.transaction(trx)
-			.insert({
-				full_name: data.full_name,
-				email: null
-			}
-			, 'id')
-			.then(one)
-			.then(function (id)
+			return knex.transaction(function (trx)
 			{
-				return newEmailCreate({
-					user_id: id,
-					new_email: data.email,
-					code: data.code
-				}, trx)
+				user.users_table()
+				.transaction(trx)
+				.insert({
+					full_name: data.full_name,
+					email: null
+				}
+				, 'id')
+				.then(one)
+				.then(function (id)
+				{
+					return newEmailCreate({
+						user_id: id,
+						new_email: data.email,
+						code: code
+					}, trx)
+				})
+				.then(function (id)
+				{
+					return createFacebookUser({
+						user_id: id,
+						facebook_id: data.facebook_id
+					}, trx)
+				})
+				.then(trx.commit)
+				.catch(trx.rollback)
 			})
-			.then(function (id)
-			{
-				return createFacebookUser({
-					user_id: id,
-					facebook_id: data.facebook_id
-				}, trx)
-			})
-			.then(trx.commit)
-			.catch(trx.rollback)
 		})
 	}
 
@@ -228,4 +236,13 @@ module.exports = function User (db)
 	}
 
 	return user
+}
+
+var gen_rand_str = require('../genRandStr')
+
+var code_size     = 16 / 2
+
+function generate_code ()
+{
+	return gen_rand_str(code_size)
 }

@@ -33,13 +33,7 @@ module.exports = function Auth (db)
 				userdata.password = encrypted_pass
 				userdata.salt     = salt
 
-				return generate_code()
-				.then(code =>
-				{
-					userdata.code = code
-
-					return user.create(userdata)
-				})
+				return user.create(userdata)
 			})
 		})
 		.catch(Err.fromDb('email_confirms_new_email_unique', EmailAlreadyExists))
