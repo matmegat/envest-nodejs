@@ -4,7 +4,7 @@ var secret  = 'aoor91xck0'
 
 var passport = require('passport')
 var LocalStrategy = require('passport-local')
-var FacebookTokenStrategy = require('passport-facebook-token')
+var FacebookStrategy = require('passport-facebook-token')
 
 module.exports = function (express, db)
 {
@@ -66,7 +66,7 @@ var clientSecret = '7bb071d47fb514268d2d3e26edca4c57'
 
 function useFacebookToken (auth, user)
 {
-	passport.use(new FacebookTokenStrategy(
+	passport.use(new FacebookStrategy(
 	{
 		clientID: clientID,
 		clientSecret: clientSecret
@@ -84,9 +84,6 @@ function useFacebookToken (auth, user)
 		user.findOrCreate(user_data)
 		.then(user =>
 		{
-			// Preparing for serialize
-			user.id = user.user_id
-
 			done(null, user)
 		}
 		, done)

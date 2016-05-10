@@ -12,7 +12,7 @@ module.exports = function User (db)
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
 	user.auth_facebook  = () => knex('auth_facebook')
-	user.auth_local = () => knex('auth_local')
+	user.auth_local     = () => knex('auth_local')
 
 	user.byConfirmedEmail = function (email)
 	{
@@ -59,7 +59,21 @@ module.exports = function User (db)
 
 	user.byFacebookId = function (facebook_id)
 	{
-		return user.auth_facebook()
+		return knex.select('id', 'facebook_id')
+		.from(function ()
+		{
+			this.select(
+				'users.id AS id',
+				'auth_facebook.facebook_id AS facebook_id'
+			)
+			.from('users')
+			.leftJoin(
+				'auth_facebook',
+				'users.id',
+				'auth_facebook.user_id'
+			)
+			.as('ignored_alias')
+		})
 		.where('facebook_id', facebook_id)
 		.then(oneMaybe)
 	}
@@ -102,7 +116,7 @@ module.exports = function User (db)
 			{
 				console.log(inserts)
 			})
-		})		
+		})
 	}
 
 	user.createFacebook = function (data)
@@ -143,10 +157,6 @@ module.exports = function User (db)
 
 	user.findOrCreate = function (data)
 	{
-
-		console.log('findOrCreate data: ')
-		console.log(data)
-
 		return user.byFacebookId(data.facebook_id)
 		.then(result =>
 		{

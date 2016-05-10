@@ -46,37 +46,36 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/login', (rq, rs, next) =>
 	{
-		passport.authenticate('local', (err, user_data) =>
+		passport.authenticate('local', (err, user) =>
 		{
 			if (err)
 			{
 				return toss.err(rs, err)
 			}
-
-			rq.login(user_data, function (err)
-			{
-				/* ¯\_(ツ)_/¯ */
-				if (err) { return next(err) }
-
-				return toss.ok(rs, user_data)
-			})
-		})(rq, rs, next)
-	})
-
-	auth.express.post('/facebook', (rq, rs, next) =>
-	{
-		passport.authenticate('facebook-token', (err, user, info) =>
-		{
-			if (err)
-			{
-				return toss.err(rs, err)
-			}
-
-			console.log(user)
 
 			rq.login(user, function (err)
 			{
 				/* ¯\_(ツ)_/¯ */
+				if (err) { return next(err) }
+
+				return toss.ok(rs, user)
+			})
+		})(rq, rs, next)
+	})
+
+	// todo remove copypasta
+
+	auth.express.post('/facebook', (rq, rs, next) =>
+	{
+		passport.authenticate('facebook-token', (err, user) =>
+		{
+			if (err)
+			{
+				return toss.err(rs, err)
+			}
+
+			rq.login(user, function (err)
+			{
 				if (err) { return next(err) }
 
 				return toss.ok(rs, user)
