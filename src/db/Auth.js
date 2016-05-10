@@ -119,11 +119,11 @@ module.exports = function Auth (db)
 }
 
 
-// DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
-var salt_size     = 16 / 2
-var code_size     = 16 / 2
-var password_size = 36 / 2
-var iterations    = 100000
+// 2 chars per 1 password  char
+var salt_size     = 16
+var code_size     = 16
+var password_size = 36
+var iterations    = 48329
 
 var promisify = require('promisify-node')
 
