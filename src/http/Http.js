@@ -38,7 +38,7 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
-	mount(Feed(), 'feed', 'feed')
+	mount(Feed(app.db.feed), 'feed', 'feed')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 
 	app.swagger = Swagger(app, http.express)

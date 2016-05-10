@@ -1,94 +1,63 @@
 
-var times = require('lodash/times')
+var _ = require('lodash')
 var Router = require('express').Router
 
-module.exports = function Feed ()
+module.exports = function Feed (feed_model)
 {
 	var feed = {}
 
+	feed.model = feed_model
 	feed.express = Router()
 
-	var dummy_id = Id()
-	var feed_length = 10
-
-	feed.express.get('/latest', (rq, rs) =>
+	feed.express.use((req, res, next) =>
 	{
-		var data = times(feed_length, dummy_post)
-		.map(function (post)
+		if (! req.user)
 		{
-			post.id = dummy_id()
+			return res.status(403).json(
+				{
+					status: false,
+					message: 'Not authenticated'
+				})
+		}
 
-			return post
-		})
+		next()
+	})
 
-		rs.json(data)
+	feed.express.get('/', (rq, rs) =>
+	{
+		var options =
+		{
+			limit: 10
+		}
+
+		if (_.isNaN(_.toNumber(rq.query.limit)))
+		{
+			options.limit = rq.query.limit
+		}
+
+		if (_.isNaN(_.toNumber(rq.query.afterId)))
+		{
+			options.afterId = rq.query.afterId
+		}
+
+		feed.model.getList(options)
+			.then((feed) =>
+			{
+				return rs.status(200).json(
+					{
+						status: true,
+						response: feed
+					})
+			})
+			.catch((error) =>
+			{
+				return rs.status(500).json(
+					{
+						status: false,
+						error: error.message
+					})
+			})
 	})
 
 	return feed
-}
-
-function dummy_post ()
-{
-	var post =
-	{
-		id: 1,
-		timestamp: dummy_date(),
-
-		comments: 0,
-
-		investor:
-		{
-			id: 1,
-			name: 'Allen Schwartzh',
-			pic: null
-		},
-
-		event:
-		{
-			type: 'Trade',
-			data: // data is related to `type` and depends on it
-			{
-				dir: 'sold',
-
-				symbol:
-				{
-					ticker: 'ZG',
-					company: 'ZILLOW',
-				},
-
-				price: 150,
-				amount: 100,
-
-				text: 'I want to sell all my assets and become a downshifter.',
-
-				risk: 'low', // low|medium|high
-				motivations:
-				[
-					'Earnings', // maybe this will be expanded to motivation Objects
-					'Valuation',
-					'Growth Potential'
-				]
-			}
-		}
-	}
-
-	return post
-}
-
-
-function dummy_date ()
-{
-	return (new Date).toISOString()
-}
-
-function Id ()
-{
-	var id = 0
-
-	return function dummy_id ()
-	{
-		id = id + 1
-
-		return id
-	}
 }

@@ -14,7 +14,7 @@ produces:
 
 basePath: /api
 paths:
-  '/feed/latest':
+  '/feed':
     get:
       description: latest 10 Feed posts for current user
       parameters: []
