@@ -1,4 +1,8 @@
 
+var genCryptoHelpers = require('../genCryptoHelpers')()
+
+var generate_code = genCryptoHelpers.generate_code
+
 module.exports = function User (db)
 {
 	var user = {}
@@ -155,7 +159,7 @@ module.exports = function User (db)
 		})
 	}
 
-	user.findOrCreate = function (data)
+	user.findByFBIDOrCreate = function (data)
 	{
 		return user.byFacebookId(data.facebook_id)
 		.then(result =>
@@ -250,13 +254,4 @@ module.exports = function User (db)
 	}
 
 	return user
-}
-
-var gen_rand_str = require('../genRandStr')
-
-var code_size     = 16 / 2
-
-function generate_code ()
-{
-	return gen_rand_str(code_size)
 }

@@ -8,6 +8,13 @@ var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
+var genCryptoHelpers = require('../genCryptoHelpers')()
+
+var generate_salt = genCryptoHelpers.generate_salt
+var generate_code = genCryptoHelpers.generate_code
+var encrypt_pass = genCryptoHelpers.encrypt_pass
+var compare_passwords = genCryptoHelpers.compare_passwords
+
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -111,58 +118,6 @@ module.exports = function Auth (db)
 
 	return auth
 }
-
-
-// DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
-var salt_size     = 16 / 2
-var code_size     = 16 / 2
-var password_size = 36 / 2
-var iterations    = 100000
-
-var promisify = require('promisify-node')
-
-var crypto = require('crypto')
-var genHash = promisify(crypto.pbkdf2)
-
-var method = require('lodash/method')
-var hex = method('toString', 'hex')
-
-var gen_rand_str = require('../genRandStr')
-
-function generate_salt ()
-{
-	return gen_rand_str(salt_size)
-}
-
-function generate_code ()
-{
-	return gen_rand_str(code_size)
-}
-
-function encrypt_pass (password, salt)
-{
-	return hash(password, '')
-	.then(pass_hash =>
-	{
-		return hash(pass_hash, salt)
-	})
-}
-
-function hash (password, salt)
-{
-	return genHash(password, salt, iterations, password_size, 'sha512')
-	.then(hex)
-}
-
-function compare_passwords (db_pass, form_pass, salt)
-{
-	return encrypt_pass(form_pass, salt)
-	.then(encrypted_pass =>
-	{
-		return encrypted_pass === db_pass
-	})
-}
-
 
 /* validations */
 function validate_register (credentials)
