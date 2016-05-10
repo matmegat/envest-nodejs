@@ -73,7 +73,6 @@ module.exports = function Auth (db)
 		})
 	}
 
-
 	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
 	auth.emailConfirm = function (code)
@@ -82,23 +81,38 @@ module.exports = function Auth (db)
 		.then(Err.nullish(WrongConfirmCode))
 		.then(email_confirms =>
 		{
-			return user.byConfirmedEmail(email_confirms.new_email)
-			.then(user_data =>
-			{
-				if (user_data)
-				{
-					throw EmailAlreadyExists()
-				}
-				else
-				{
-					return user.emailConfirm(
-						email_confirms.user_id,
-						email_confirms.new_email
-					)
-				}
-			})
+			return user.emailConfirm(
+				email_confirms.user_id,
+				email_confirms.new_email
+			)
 		})
 		.then(noop)
+		.catch(Err.fromDb('users_email_unique', WrongConfirmCode))
+	}
+
+	var EmailUsed = Err('email_used', 'This email is used')
+
+	auth.changeEmail = function (user_id, new_email)
+	{
+		return validate_change_email(new_email)
+		.then(() =>
+		{
+			return user.byConfirmedEmail(new_email)
+			.then(Err.existent(EmailUsed))
+		})
+		.then(() =>
+		{
+			return generate_code()
+		})
+		.then(code =>
+		{
+			return user.newEmailUpdate({
+				user_id: user_id,
+				new_email: new_email,
+				code: code
+			})
+			.then(noop)
+		})
 	}
 
 	return auth
@@ -164,6 +178,17 @@ function validate_register (credentials)
 		validate_fullname(credentials.full_name)
 		validate_password(credentials.password)
 		validate_email(credentials.email)
+
+		return rs()
+	})
+}
+
+// eslint-disable-next-line id-length
+function validate_change_email (email)
+{
+	return new Promise(rs =>
+	{
+		validate_email(email)
 
 		return rs()
 	})

@@ -3,6 +3,7 @@ var pick = require('lodash/pick')
 
 var Router = require('express').Router
 
+var authRequired = require('../../auth-required')
 var toss = require('../../toss')
 
 module.exports = function Auth (auth_model, passport)
@@ -88,7 +89,15 @@ module.exports = function Auth (auth_model, passport)
 		toss(rs, auth.model.emailConfirm(code))
 	})
 
-	auth.express.post('/logout', (rq, rs) =>
+	auth.express.post('/change-email', authRequired, (rq, rs) =>
+	{
+		var email   = rq.body.email
+		var user_id = rq.user.id
+
+		toss(rs, auth.model.changeEmail(user_id, email))
+	})
+
+	auth.express.post('/logout', authRequired, (rq, rs) =>
 	{
 		rq.logout()
 		rs.status(200).end()

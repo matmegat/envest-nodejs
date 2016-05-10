@@ -208,5 +208,24 @@ module.exports = function User (db)
 		.del()
 	}
 
+	user.newEmailUpdate = function (data)
+	{
+		return user.email_confirms()
+		.insert(data, 'user_id')
+		.then(one)
+		.catch(err =>
+		{
+			if (err.constraint === 'email_confirms_pkey')
+			{
+				return user.email_confirms()
+				.update({
+					new_email: data.new_email,
+					code: data.code
+				})
+				.where('user_id', data.user_id)
+			}
+		})
+	}
+
 	return user
 }

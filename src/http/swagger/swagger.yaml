@@ -35,6 +35,12 @@ paths:
   '/auth/logout':
     $ref: ../api/auth/Logout.yaml
 
+  '/auth/confirm-email':
+    $ref: ../api/auth/ConfirmEmail.yaml
+
+  '/auth/change-email':
+    $ref: ../api/auth/ChangeEmail.yaml
+
 definitions:
   # Put here only COMMON definitions
 
