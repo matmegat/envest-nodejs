@@ -1,6 +1,9 @@
 
 var _ = require('lodash')
 var Router = require('express').Router
+var toss = require('../../toss')
+var Err = require('../../../Err')
+var Unauthorized = Err('unauthorized', 'You are not logged in')
 
 module.exports = function Feed (feed_model)
 {
@@ -11,14 +14,10 @@ module.exports = function Feed (feed_model)
 
 	feed.express.use((req, res, next) =>
 	{
-		// if (! req.user)
-		// {
-		// 	return res.status(403).json(
-		// 		{
-		// 			status: false,
-		// 			message: 'Not authenticated'
-		// 		})
-		// }
+		if (! req.user)
+		{
+			return toss.err(res, Unauthorized())
+		}
 
 		next()
 	})
@@ -30,33 +29,29 @@ module.exports = function Feed (feed_model)
 			limit: 10
 		}
 
-		if (_.isNaN(_.toNumber(rq.query.limit)))
+		rq.query.limit = _.toNumber(rq.query.limit)
+		if (_.isNaN())
 		{
 			options.limit = rq.query.limit
 		}
 
-		if (_.isNaN(_.toNumber(rq.query.afterId)))
-		{
-			options.afterId = rq.query.afterId
-		}
+		// TODO: clarify reqs for pagination and uncomment
+		// rq.query.afterId = _.toNumber(rq.query.afterId)
+		// if (! _.isNaN(rq.query.afterId))
+		// {
+		// 	options.afterId = rq.query.afterId
+		// }
 
 		feed.model.getList(options)
 			.then((feed) =>
 			{
 				return rs.status(200).json(
-					{
-						status: true,
-						response: feed
-					})
+				{
+					status: true,
+					response: feed
+				})
 			})
-			.catch((error) =>
-			{
-				return rs.status(500).json(
-					{
-						status: false,
-						error: error.message
-					})
-			})
+			.catch(toss.err(rs))
 	})
 
 	return feed
