@@ -39,7 +39,7 @@ exports.up = function (knex, Promise)
 		{
 			table.integer('user_id').primary()
 
-			table.integer('facebook_id').notNullable().unique()
+			table.bigInteger('facebook_id').notNullable().unique()
 		})
 	})
 }
@@ -50,5 +50,7 @@ exports.down = function (knex, Promise)
 	[
 		knex.schema.dropTableIfExists('users'),
 		knex.schema.dropTableIfExists('email_confirms'),
+		knex.schema.dropTableIfExists('auth_local'),
+		knex.schema.dropTableIfExists('auth_facebook')
 	])
 }
