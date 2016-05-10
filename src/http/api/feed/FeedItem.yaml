@@ -10,9 +10,17 @@ properties:
   investor:
     $ref: ../../swagger/Investor.yaml
   event:
-    type: object
     description: One of Events
+    type: object
     enum:
     - $ref: ./TradeEvent.yaml
     - $ref: ./WatchlistEvent.yaml
     - $ref: ./UpdateEvent.yaml
+  comments:
+    type: number
+    description: Amount of comments for Feed Item
+required:
+- id
+- timestamp
+- investor
+- event

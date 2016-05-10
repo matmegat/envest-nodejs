@@ -20,9 +20,9 @@ paths:
       parameters: []
       responses:
         200:
-          description: user Feed
+          description: user's Feed
           schema:
-            $ref: ../api/feed/Feed.yaml
+            $ref: '#/definitions/Feed'
       tags:
       - feed
 
@@ -39,8 +39,12 @@ definitions:
   # Put here only COMMON definitions
 
   Feed:
-    type: object
-    $ref: ../api/feed/Feed.yaml
+    type: array
+    items:
+      $ref: '#/definitions/FeedItem'
+
+  FeedItem:
+    $ref: ../api/feed/FeedItem.yaml
 
   Investor:
     $ref: ./Investor.yaml

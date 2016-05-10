@@ -1,2 +1,11 @@
 type: object
-discriminator: eventType
+discriminator: type
+properties:
+  type:
+    type: string
+    enum:
+    - trade
+    - whatchlist
+    - update
+required:
+- type
