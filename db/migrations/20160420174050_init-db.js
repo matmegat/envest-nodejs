@@ -11,6 +11,14 @@ exports.up = function (knex, Promise)
 			table.string('full_name').notNullable()
 
 			table.string('email').unique()
+		})
+	})
+	.then(() =>
+	{
+		return knex.schema.createTable('auth_local', (table) =>
+		{
+			table.integer('user_id').primary()
+
 			table.string('password', 36).notNullable()
 			table.string('salt', 16).notNullable()
 		})
