@@ -81,11 +81,15 @@ function useFacebookToken (auth, user)
 			token: accessToken
 		}
 
-		console.log('Userdata: ')
-		console.log(user_data)
-
 		user.findOrCreate(user_data)
-		.then(user => done(null, user), done)
+		.then(user =>
+		{
+			// Preparing for serialize
+			user.id = user.user_id
+
+			done(null, user)
+		}
+		, done)
 	}))
 }
 
