@@ -109,7 +109,7 @@ module.exports = function Auth (db)
 var salt_size     = 16
 var code_size     = 16
 var password_size = 36
-var iterations    = 50000
+var iterations    = 48329
 
 var promisify = require('promisify-node')
 
