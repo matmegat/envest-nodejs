@@ -62,6 +62,25 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
+	auth.express.post('/facebook-token', (rq, rs, next) =>
+	{
+		passport.authenticate('facebook-token', (err, user, info) =>
+		{
+			if (err)
+			{
+				return toss.err(rs, err)
+			}
+
+			rq.login(user_data, function (err)
+			{
+				/* ¯\_(ツ)_/¯ */
+				if (err) { return next(err) }
+
+				return toss.ok(rs, user_data)
+			})
+		})(rq, rs, next)
+	})
+
 	auth.express.post('/confirm-email', (rq, rs) =>
 	{
 		var code = rq.body.code
