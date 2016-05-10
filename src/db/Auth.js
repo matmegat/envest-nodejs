@@ -183,6 +183,7 @@ function validate_register (credentials)
 	})
 }
 
+// eslint-disable-next-line id-length
 function validate_change_email (email)
 {
 	return new Promise(rs =>
