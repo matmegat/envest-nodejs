@@ -10,7 +10,9 @@ properties:
   investor:
     $ref: ../../swagger/Investor.yaml
   event:
-    description: One of Events
+    description: |
+      One of Events
+      more details at [github](https://github.com/WeezLabs/NetVest/tree/backend/develop/src/http/api/feed)
     type: object
     enum:
     - $ref: ./TradeEvent.yaml
