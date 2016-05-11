@@ -16,8 +16,8 @@ module.exports = function Feed (db)
 	feed.byId = function (id)
 	{
 		return feed.feed_table()
-			.where('id', id)
-			.then(oneMaybe)
+		.where('id', id)
+		.then(oneMaybe)
 	}
 
 	feed.getList = function (options)
@@ -26,8 +26,8 @@ module.exports = function Feed (db)
 		options.limit = options.limit || 20
 
 		var feed_queryset = feed.feed_table()
-			.orderBy('timestamp', 'desc')
-			.limit(options.limit)
+		.orderBy('timestamp', 'desc')
+		.limit(options.limit)
 
 		if (options.since_id && options.max_id)
 		{
