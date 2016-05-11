@@ -12,15 +12,15 @@ module.exports = function Feed (feed_model)
 	feed.model = feed_model
 	feed.express = Router()
 
-	// feed.express.use((req, res, next) =>
-	// {
-	// 	if (! req.user)
-	// 	{
-	// 		return toss.err(res, Unauthorized())
-	// 	}
-    //
-	// 	next()
-	// })
+	feed.express.use((req, res, next) =>
+	{
+		if (! req.user)
+		{
+			return toss.err(res, Unauthorized())
+		}
+
+		next()
+	})
 
 	feed.express.get('/', (rq, rs) =>
 	{
