@@ -212,12 +212,24 @@ function validate_required (field, name)
 }
 
 
+var FieldEmpty = Err('field_empty', 'Field must not be empty')
+
+function validate_empty (field, name)
+{
+	if (field == '')
+	{
+		throw FieldEmpty({ field: name })
+	}
+}
+
+
 var XRegExp = require('xregexp')
 var WrongFullName = Err('wrong_full_name_format', 'Wrong full name format')
 
 function validate_fullname (full_name)
 {
 	validate_required(full_name, 'full_name')
+	validate_empty(full_name, 'full_name')
 
 	/*
 	   Two words minimum, separated by space.
@@ -244,6 +256,7 @@ var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 function validate_email (email)
 {
 	validate_required(email, 'email')
+	validate_empty(email, 'email')
 
 	var emailRe = /@/
 
