@@ -29,18 +29,6 @@ module.exports = function Feed (db)
 			.orderBy('timestamp', 'desc')
 			.limit(options.limit)
 
-		if (options.max_id)
-		{
-			feed_queryset
-			.where('id', '<=', options.max_id)
-		}
-
-		if (options.since_id)
-		{
-			feed_queryset
-			.where('id', '>', options.since_id)
-		}
-
 		if (options.since_id && options.max_id)
 		{
 			feed_queryset
@@ -50,6 +38,16 @@ module.exports = function Feed (db)
 				options.since_id + options.max_id
 			])
 		}
+		else if (options.since_id)
+		{
+			feed_queryset
+			.where('id', '>', options.since_id)
+		}
+		else if (options.max_id)
+		{
+			feed_queryset
+			.where('id', '<=', options.max_id)
+		}
 
 		return feed_queryset
 		.then((feed_items) =>
@@ -58,13 +56,13 @@ module.exports = function Feed (db)
 			.whereIn('id', _.map(feed_items, 'investor_id'))
 			.then((investors) =>
 			{
-				_.each(feed_items, (item) =>
+				feed_items.forEach((i, item) =>
 				{
 					item.investor = _.find(investors, { id: item.investor_id })
 					delete item.investor_id
 				})
 
-				return Promise.resolve(feed_items)
+				return feed_items
 			})
 		})
 		.then((feed_items) =>
@@ -76,7 +74,7 @@ module.exports = function Feed (db)
 			.groupBy('feed_id')
 			.then((commentsCount) =>
 			{
-				_.each(feed_items, (item) =>
+				feed_items.forEach((i, item) =>
 				{
 					var comments = _.find(commentsCount, { feed_id: item.id })
 					if (comments)
@@ -87,7 +85,7 @@ module.exports = function Feed (db)
 					item.comments = comments || 0
 				})
 
-				return Promise.resolve(feed_items)
+				return feed_items
 			})
 		})
 	}

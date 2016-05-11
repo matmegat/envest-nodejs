@@ -2,8 +2,6 @@
 var _ = require('lodash')
 var Router = require('express').Router
 var toss = require('../../toss')
-var Err = require('../../../Err')
-var Unauthorized = Err('unauthorized', 'You are not logged in')
 
 module.exports = function Feed (feed_model)
 {
@@ -12,16 +10,6 @@ module.exports = function Feed (feed_model)
 	feed.model = feed_model
 	feed.express = Router()
 
-	feed.express.use((req, res, next) =>
-	{
-		if (! req.user)
-		{
-			return toss.err(res, Unauthorized())
-		}
-
-		next()
-	})
-
 	feed.express.get('/', (rq, rs) =>
 	{
 		var options =
@@ -29,34 +17,23 @@ module.exports = function Feed (feed_model)
 			limit: 10
 		}
 
-		rq.query.limit = _.toNumber(rq.query.limit)
-		if (! _.isNaN(rq.query.limit))
+		var max_id = _.toNumber(rq.query.max_id)
+		if (! _.isNaN(max_id))
 		{
-			options.limit = rq.query.limit
+			options.max_id = max_id
 		}
 
-		rq.query.max_id = _.toNumber(rq.query.max_id)
-		if (! _.isNaN(rq.query.max_id))
+		var since_id = _.toNumber(since_id)
+		if (! _.isNaN(since_id))
 		{
-			options.max_id = rq.query.max_id
+			options.since_id = since_id
 		}
 
-		rq.query.since_id = _.toNumber(rq.query.since_id)
-		if (! _.isNaN(rq.query.since_id))
-		{
-			options.since_id = rq.query.since_id
-		}
-
-		feed.model.getList(options)
-			.then((feed) =>
-			{
-				return rs.status(200).json(
-				{
-					status: true,
-					response: feed
-				})
-			})
-			.catch(toss.err(rs))
+		feed
+		.model
+		.getList(options)
+		.then(toss(rs))
+		.catch(toss.err(rs))
 	})
 
 	return feed
