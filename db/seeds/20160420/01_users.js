@@ -12,7 +12,7 @@ exports.seed = function (knex, Promise)
 			email: 'seed.1@user.com',
 			full_name: 'Seed User1',
 			password: '13e3b57d2130ef454db3e9a8645da7eb9b67e3c1ec472cd10c27106ca582cac619e7efb0',	// 321321
-			salt: '9eae2ad71fc1dd2a071e4284aded85c4s'
+			salt: '9eae2ad71fc1dd2a071e4284aded85c4'
 		}),
 		knex('users')
 		.insert(

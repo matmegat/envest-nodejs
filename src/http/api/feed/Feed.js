@@ -2,6 +2,7 @@
 var _ = require('lodash')
 var Router = require('express').Router
 var toss = require('../../toss')
+var authRequired = require('../../auth-required')
 
 module.exports = function Feed (feed_model)
 {
@@ -9,6 +10,7 @@ module.exports = function Feed (feed_model)
 
 	feed.model = feed_model
 	feed.express = Router()
+	feed.express.use(authRequired)
 
 	feed.express.get('/', (rq, rs) =>
 	{
