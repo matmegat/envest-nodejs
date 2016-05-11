@@ -1,5 +1,8 @@
 
 var _ = require('lodash')
+var toNumber = _.toNumber
+var isNaN    = _.isNaN
+
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
@@ -19,14 +22,14 @@ module.exports = function Feed (feed_model)
 			limit: 10
 		}
 
-		var max_id = _.toNumber(rq.query.max_id)
-		if (! _.isNaN(max_id))
+		var max_id = toNumber(rq.query.max_id)
+		if (! isNaN(max_id))
 		{
 			options.max_id = max_id
 		}
 
-		var since_id = _.toNumber(since_id)
-		if (! _.isNaN(since_id))
+		var since_id = toNumber(since_id)
+		if (! isNaN(since_id))
 		{
 			options.since_id = since_id
 		}
