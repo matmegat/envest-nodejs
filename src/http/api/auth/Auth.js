@@ -51,7 +51,7 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.post('/facebook', (rq, rs, next) =>
 	{
-		authByProvider(rq, rs, next, 'facebook')
+		authByProvider(rq, rs, next, 'facebook-token')
 	})
 
 	auth.express.post('/confirm-email', (rq, rs) =>
