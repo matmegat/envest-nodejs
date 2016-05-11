@@ -22,8 +22,6 @@ module.exports = function Auth (auth_model, passport)
 			'password'
 		])
 
-		user_data.email = user_data.email.toLowerCase()
-
 		auth.model.register(user_data)
 		.then(() =>
 		{
