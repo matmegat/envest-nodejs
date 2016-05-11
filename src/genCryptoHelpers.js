@@ -14,52 +14,46 @@ var code_size     = 16 / 2
 var password_size = 36 / 2
 var iterations    = 100000
 
-module.exports = function genRandStr ()
+var helpers = {}
+
+function gen_rand_str (length)
 {
-	function gen_rand_str (length)
-	{
-		return randomBytes(length)
-		.then(hex)
-	}
+	return randomBytes(length)
+	.then(hex)
+}
 
-	function hash (password, salt)
-	{
-		return genHash(password, salt, iterations, password_size, 'sha512')
-		.then(hex)
-	}
+function hash (password, salt)
+{
+	return genHash(password, salt, iterations, password_size, 'sha512')
+	.then(hex)
+}
 
-	function generate_salt ()
+var helpers =
+{
+	generate_salt: function ()
 	{
 		return gen_rand_str(salt_size)
-	}
-
-	function generate_code ()
+	},
+	generate_code: function ()
 	{
 		return gen_rand_str(code_size)
-	}
-
-	function encrypt_pass (password, salt)
+	},
+	encrypt_pass: function (password, salt)
 	{
 		return hash(password, '')
 		.then(pass_hash =>
 		{
 			return hash(pass_hash, salt)
 		})
-	}
-
-	function compare_passwords (db_pass, form_pass, salt)
+	},
+	compare_passwords: function (db_pass, form_pass, salt)
 	{
-		return encrypt_pass(form_pass, salt)
+		return helpers.encrypt_pass(form_pass, salt)
 		.then(encrypted_pass =>
 		{
 			return encrypted_pass === db_pass
 		})
 	}
-
-	return {
-		generate_salt: generate_salt,
-		generate_code: generate_code,
-		encrypt_pass: encrypt_pass,
-		compare_passwords: compare_passwords
-	}
 }
+
+module.exports = helpers

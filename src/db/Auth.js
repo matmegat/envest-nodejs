@@ -8,7 +8,7 @@ var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
-var genCryptoHelpers = require('../genCryptoHelpers')()
+var genCryptoHelpers = require('../genCryptoHelpers')
 
 var generate_salt = genCryptoHelpers.generate_salt
 var generate_code = genCryptoHelpers.generate_code

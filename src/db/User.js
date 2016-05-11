@@ -1,5 +1,5 @@
 
-var genCryptoHelpers = require('../genCryptoHelpers')()
+var genCryptoHelpers = require('../genCryptoHelpers')
 
 var generate_code = genCryptoHelpers.generate_code
 
