@@ -31,11 +31,7 @@ module.exports = function Feed (feed_model)
 			options.since_id = since_id
 		}
 
-		feed
-		.model
-		.getList(options)
-		.then(toss(rs))
-		.catch(toss.err(rs))
+		toss(rs, feed.model.getList(options))
 	})
 
 	return feed
