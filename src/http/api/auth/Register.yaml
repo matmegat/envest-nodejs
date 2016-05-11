@@ -18,7 +18,7 @@ post:
         password:
           type: string
           format: password
-          description: Passweord
+          description: Password
       required:
       - full_name
       - email
