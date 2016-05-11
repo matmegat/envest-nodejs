@@ -35,6 +35,22 @@ module.exports = function Feed (db)
 			.where('id', '<=', options.max_id)
 		}
 
+		if (options.since_id)
+		{
+			feed_queryset
+			.where('id', '>', options.since_id)
+		}
+
+		if (options.since_id && options.max_id)
+		{
+			feed_queryset
+			.whereBetween('id',
+			[
+				options.since_id,
+				options.since_id + options.max_id
+			])
+		}
+
 		return feed_queryset
 		.then((feed_items) =>
 		{
