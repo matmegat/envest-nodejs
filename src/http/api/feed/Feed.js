@@ -30,17 +30,22 @@ module.exports = function Feed (feed_model)
 		}
 
 		rq.query.limit = _.toNumber(rq.query.limit)
-		if (_.isNaN())
+		if (! _.isNaN(rq.query.limit))
 		{
 			options.limit = rq.query.limit
 		}
 
-		// TODO: clarify reqs for pagination and uncomment
-		// rq.query.afterId = _.toNumber(rq.query.afterId)
-		// if (! _.isNaN(rq.query.afterId))
-		// {
-		// 	options.afterId = rq.query.afterId
-		// }
+		rq.query.max_id = _.toNumber(rq.query.max_id)
+		if (! _.isNaN(rq.query.max_id))
+		{
+			options.max_id = rq.query.max_id
+		}
+
+		rq.query.since_id = _.toNumber(rq.query.since_id)
+		if (! _.isNaN(rq.query.since_id))
+		{
+			options.since_id = rq.query.since_id
+		}
 
 		feed.model.getList(options)
 			.then((feed) =>

@@ -29,12 +29,11 @@ module.exports = function Feed (db)
 			.orderBy('timestamp', 'desc')
 			.limit(options.limit)
 
-		// TODO: clarify reqs for pagination and uncomment
-		// if (options.afterId)
-		// {
-		// 	feed_queryset = feed_queryset
-		// 		.where('id', '<', options.afterId)
-		// }
+		if (options.max_id)
+		{
+			feed_queryset
+			.where('id', '<=', options.max_id)
+		}
 
 		return feed_queryset
 		.then((feed_items) =>
