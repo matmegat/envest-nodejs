@@ -1,4 +1,6 @@
 
+var extend = require('lodash/extend')
+
 var Err = require('../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 
@@ -115,6 +117,8 @@ module.exports = function User (db)
 
 	user.newEmailUpdate = function (data)
 	{
+		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
+
 		return knex.transaction(function (trx)
 		{
 			return ensureEmailNotExists(data.new_email, trx)

@@ -46,6 +46,8 @@ module.exports = function Auth (db)
 
 	auth.login = function (email, password)
 	{
+		email = email.toLowerCase()
+
 		return validate_login(email, password)
 		.then(() =>
 		{
