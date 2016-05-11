@@ -1,8 +1,7 @@
 
 var clone = require('lodash/clone')
 
-var Err  = require('../Err')
-var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var Err = require('../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var pick = require('lodash/pick')
@@ -42,8 +41,8 @@ module.exports = function Auth (db)
 				})
 			})
 		})
-		.catch(Err.fromDb('email_confirms_new_email_unique', EmailAlreadyExists))
 	}
+
 
 	auth.login = function (email, password)
 	{
@@ -73,6 +72,7 @@ module.exports = function Auth (db)
 		})
 	}
 
+
 	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
 	auth.emailConfirm = function (code)
@@ -87,19 +87,12 @@ module.exports = function Auth (db)
 			)
 		})
 		.then(noop)
-		.catch(Err.fromDb('users_email_unique', WrongConfirmCode))
 	}
 
-	var EmailUsed = Err('email_used', 'This email is used')
 
 	auth.changeEmail = function (user_id, new_email)
 	{
 		return validate_change_email(new_email)
-		.then(() =>
-		{
-			return user.byConfirmedEmail(new_email)
-			.then(Err.existent(EmailUsed))
-		})
 		.then(() =>
 		{
 			return generate_code()
@@ -111,8 +104,8 @@ module.exports = function Auth (db)
 				new_email: new_email,
 				code: code
 			})
-			.then(noop)
 		})
+		.then(noop)
 	}
 
 	return auth
