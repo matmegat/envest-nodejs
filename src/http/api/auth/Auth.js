@@ -14,24 +14,6 @@ module.exports = function Auth (auth_model, passport)
 	auth.model = auth_model
 	auth.express = Router()
 
-	var authByProvider = curry((provider, rq, rs, next) =>
-	{
-		passport.authenticate(provider, (err, user) =>
-		{
-			if (err)
-			{
-				return toss.err(rs, err)
-			}
-
-			rq.login(user, function (err)
-			{
-				if (err) { return next(err) }
-
-				return toss.ok(rs, user)
-			})
-		})(rq, rs, next)
-	})
-
 	auth.express.post('/register', (rq, rs) =>
 	{
 		var user_data = pick(rq.body,
@@ -61,6 +43,24 @@ module.exports = function Auth (auth_model, passport)
 			})
 		})
 		.catch(toss.err(rs))
+	})
+
+	var authByProvider = curry((provider, rq, rs, next) =>
+	{
+		passport.authenticate(provider, (err, user) =>
+		{
+			if (err)
+			{
+				return toss.err(rs, err)
+			}
+
+			rq.login(user, function (err)
+			{
+				if (err) { return next(err) }
+
+				return toss.ok(rs, user)
+			})
+		})(rq, rs, next)
 	})
 
 	auth.express.post('/login', authByProvider('local'))
