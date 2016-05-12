@@ -1,5 +1,6 @@
 
 var pick = require('lodash/pick')
+var curry = require('lodash/curry')
 
 var Router = require('express').Router
 
@@ -12,6 +13,24 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.model = auth_model
 	auth.express = Router()
+
+	var authByProvider = curry((provider, rq, rs, next) =>
+	{
+		passport.authenticate(provider, (err, user) =>
+		{
+			if (err)
+			{
+				return toss.err(rs, err)
+			}
+
+			rq.login(user, function (err)
+			{
+				if (err) { return next(err) }
+
+				return toss.ok(rs, user)
+			})
+		})(rq, rs, next)
+	})
 
 	auth.express.post('/register', (rq, rs) =>
 	{
@@ -44,15 +63,9 @@ module.exports = function Auth (auth_model, passport)
 		.catch(toss.err(rs))
 	})
 
-	auth.express.post('/login', (rq, rs, next) =>
-	{
-		authByProvider(rq, rs, next, 'local')
-	})
+	auth.express.post('/login', authByProvider('local'))
 
-	auth.express.post('/facebook', (rq, rs, next) =>
-	{
-		authByProvider(rq, rs, next, 'facebook-token')
-	})
+	auth.express.post('/facebook', authByProvider('facebook-token'))
 
 	auth.express.post('/confirm-email', (rq, rs) =>
 	{
@@ -74,24 +87,6 @@ module.exports = function Auth (auth_model, passport)
 		rq.logout()
 		rs.status(200).end()
 	})
-
-	function authByProvider (rq, rs, next, provider)
-	{
-		passport.authenticate(provider, (err, user) =>
-		{
-			if (err)
-			{
-				return toss.err(rs, err)
-			}
-
-			rq.login(user, function (err)
-			{
-				if (err) { return next(err) }
-
-				return toss.ok(rs, user)
-			})
-		})(rq, rs, next)
-	}
 
 	return auth
 }
