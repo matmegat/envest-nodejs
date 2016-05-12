@@ -52,6 +52,7 @@ module.exports = function Auth (db)
 		{
 			return user.byEmail(email)
 		})
+		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
 		{
 			if (! user_data.password)
@@ -60,7 +61,6 @@ module.exports = function Auth (db)
 			}
 			return user_data
 		})
-		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
 		{
 			return compare_passwords(
