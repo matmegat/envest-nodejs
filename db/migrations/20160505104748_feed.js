@@ -4,13 +4,11 @@ exports.up = function (knex, Promise)
 	return Promise.resolve()
 		.then(() =>
 		{
-			console.info('Create Table for Investors')
-
 			return knex.schema.createTable('investors', (table) =>
 			{
 				table.increments('id').primary()
 
-				table.timestamps()	//	created_at, updated_at
+				table.timestamps() //	created_at, updated_at
 
 				table.string('full_name').notNullable()
 				table.string('icon', 512).notNullable()
@@ -18,8 +16,6 @@ exports.up = function (knex, Promise)
 		})
 		.then(() =>
 		{
-			console.info('Create Table for Feed')
-
 			return knex.schema.createTable('feed_items', (table) =>
 			{
 				table.increments('id').primary()
@@ -47,8 +43,6 @@ exports.up = function (knex, Promise)
 		})
 		.then(() =>
 		{
-			console.info('Create Table for Comments')
-
 			return knex.schema.createTable('comments', (table) =>
 			{
 				table.increments('id').primary()
@@ -65,12 +59,7 @@ exports.up = function (knex, Promise)
 		})
 		.then(() =>
 		{
-			console.info('Running Seed Data')
-
-			return knex.seed.run(
-			{
-				directory: './seeds/20160505'
-			})
+			return knex.seed.run({ directory: './seeds/20160505' })
 		})
 }
 
