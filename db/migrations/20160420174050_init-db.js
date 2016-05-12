@@ -25,10 +25,10 @@ exports.up = function (knex, Promise)
 			table.string('code', 32).notNullable()
 		})
 	})
-		.then(() =>
-		{
-			return knex.seed.run({ directory: './seeds/20160420' })
-		})
+	.then(() =>
+	{
+		return knex.seed.run({ directory: './seeds/20160420' })
+	})
 }
 
 exports.down = function (knex, Promise)
