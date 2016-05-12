@@ -43,7 +43,6 @@ module.exports = function Auth (db)
 		})
 	}
 
-
 	auth.login = function (email, password)
 	{
 		email = email.toLowerCase()
@@ -52,6 +51,14 @@ module.exports = function Auth (db)
 		.then(() =>
 		{
 			return user.byEmail(email)
+		})
+		.then(user_data =>
+		{
+			if (! user_data.password)
+			{
+				throw WrongLogin()
+			}
+			return user_data
 		})
 		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
