@@ -15,28 +15,10 @@ produces:
 basePath: /api
 paths:
   '/feed':
-    get:
-      description: latest 10 Feed posts for current user
-      parameters:
-      - name: max_id
-        in: query
-        type: number
-        description: |
-          Get feed items that are added before *max_id* (inclusive)
-          [twitter guide](https://dev.twitter.com/rest/public/timelines)
-      - name: since_id
-        in: query
-        type: number
-        description: |
-          Get feed items greater than *since_id* (non inclusive)
-          [twitter guide](https://dev.twitter.com/rest/public/timelines)
-      responses:
-        200:
-          description: user's Feed
-          schema:
-            $ref: '#/definitions/Feed'
-      tags:
-      - feed
+    $ref: ../api/feed/GetFeed.yaml
+
+  '/feed/{feed_id}':
+    $ref: ../api/feed/FeedById.yaml
 
   '/auth/register':
     $ref: ../api/auth/Register.yaml
@@ -57,9 +39,7 @@ definitions:
   # Put here only COMMON definitions
 
   Feed:
-    type: array
-    items:
-      $ref: '#/definitions/FeedItem'
+    $ref: ../api/feed/Feed.yaml
 
   FeedItem:
     $ref: ../api/feed/FeedItem.yaml
