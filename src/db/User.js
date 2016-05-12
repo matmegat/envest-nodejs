@@ -48,7 +48,7 @@ module.exports = function User (db)
 					})
 					.then(function (id)
 					{
-						return newEmailCreate({
+						return user.newEmailUpdate({
 							user_id: id,
 							new_email: data.email,
 							code: code
@@ -142,7 +142,7 @@ module.exports = function User (db)
 				.then(one)
 				.then(function (id)
 				{
-					return newEmailCreate({
+					return user.newEmailUpdate({
 						user_id: id,
 						new_email: data.email,
 						code: code
@@ -188,14 +188,6 @@ module.exports = function User (db)
 	function createLocalCreds (data, trx)
 	{
 		return user.auth_local()
-		.transacting(trx)
-		.insert(data, 'user_id')
-		.then(one)
-	}
-
-	function newEmailCreate (data, trx)
-	{
-		return user.email_confirms()
 		.transacting(trx)
 		.insert(data, 'user_id')
 		.then(one)
