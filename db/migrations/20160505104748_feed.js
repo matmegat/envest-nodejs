@@ -8,7 +8,7 @@ exports.up = function (knex, Promise)
 			{
 				table.increments('id').primary()
 
-				table.timestamps() //	created_at, updated_at
+				table.timestamps() // created_at, updated_at
 
 				table.string('full_name').notNullable()
 				table.string('icon', 512).notNullable()
