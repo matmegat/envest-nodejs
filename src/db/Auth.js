@@ -1,8 +1,7 @@
 
 var clone = require('lodash/clone')
 
-var Err  = require('../Err')
-var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var Err = require('../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var pick = require('lodash/pick')
@@ -43,11 +42,13 @@ module.exports = function Auth (db)
 				return user.create(userdata)
 			})
 		})
-		.catch(Err.fromDb('email_confirms_new_email_unique', EmailAlreadyExists))
 	}
+
 
 	auth.login = function (email, password)
 	{
+		email = email.toLowerCase()
+
 		return validate_login(email, password)
 		.then(() =>
 		{
@@ -74,6 +75,7 @@ module.exports = function Auth (db)
 		})
 	}
 
+
 	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
 	auth.emailConfirm = function (code)
@@ -88,19 +90,12 @@ module.exports = function Auth (db)
 			)
 		})
 		.then(noop)
-		.catch(Err.fromDb('users_email_unique', WrongConfirmCode))
 	}
 
-	var EmailUsed = Err('email_used', 'This email is used')
 
 	auth.changeEmail = function (user_id, new_email)
 	{
 		return validate_change_email(new_email)
-		.then(() =>
-		{
-			return user.byConfirmedEmail(new_email)
-			.then(Err.existent(EmailUsed))
-		})
 		.then(() =>
 		{
 			return generate_code()
@@ -112,8 +107,8 @@ module.exports = function Auth (db)
 				new_email: new_email,
 				code: code
 			})
-			.then(noop)
 		})
+		.then(noop)
 	}
 
 	return auth
@@ -168,12 +163,24 @@ function validate_required (field, name)
 }
 
 
+var FieldEmpty = Err('field_empty', 'Field must not be empty')
+
+function validate_empty (field, name)
+{
+	if (field == '')
+	{
+		throw FieldEmpty({ field: name })
+	}
+}
+
+
 var XRegExp = require('xregexp')
 var WrongFullName = Err('wrong_full_name_format', 'Wrong full name format')
 
 function validate_fullname (full_name)
 {
 	validate_required(full_name, 'full_name')
+	validate_empty(full_name, 'full_name')
 
 	/*
 	   Two words minimum, separated by space.
@@ -200,6 +207,7 @@ var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 function validate_email (email)
 {
 	validate_required(email, 'email')
+	validate_empty(email, 'email')
 
 	var emailRe = /@/
 

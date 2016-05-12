@@ -9,8 +9,7 @@ exports.up = function (knex, Promise)
 			table.increments('id').primary()
 
 			table.string('full_name').notNullable()
-
-			table.string('email').unique()
+			table.string('email')
 		})
 	})
 	.then(() =>
@@ -30,7 +29,7 @@ exports.up = function (knex, Promise)
 			table.integer('user_id').primary()
 
 			table.string('new_email').notNullable().unique()
-			table.string('code', 16).notNullable()
+			table.string('code', 32).notNullable()
 		})
 	})
 	.then(() =>

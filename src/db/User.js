@@ -1,5 +1,9 @@
 
 var generate_code = require('../crypto-helpers').generate_code
+var extend = require('lodash/extend')
+
+var Err = require('../Err')
+var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 
 module.exports = function User (db)
 {
@@ -16,16 +20,58 @@ module.exports = function User (db)
 	user.auth_facebook  = () => knex('auth_facebook')
 	user.auth_local     = () => knex('auth_local')
 
-	user.byConfirmedEmail = function (email)
+
+	user.create = function (data)
 	{
-		return user.users_table()
-		.where('email', email)
-		.then(oneMaybe)
+		return knex.transaction(function (trx)
+		{
+			return ensureEmailNotExists(data.email, trx)
+			.then(() =>
+			{
+				return generate_code()
+				.then(code =>
+				{
+					return user.users_table()
+					.transacting(trx)
+					.insert({
+						full_name: data.full_name,
+						email: null
+					}
+					, 'id')
+					.then(one)
+					.then(function (id)
+					{
+						return createLocalCreds({
+							user_id: id,
+							password: data.password,
+							salt: data.salt
+						}, trx)
+					})
+					.then(function (id)
+					{
+						return newEmailCreate({
+							user_id: id,
+							new_email: data.email,
+							code: code
+						}, trx)
+					})
+				})
+			})
+		})
 	}
 
-	user.byEmail = function (email)
+	/* ensures email not exists in BOTH tables (sparse unique) */
+	// eslint-disable-next-line id-length
+	function ensureEmailNotExists (email, trx)
+	{
+		return user.byEmail(email, trx)
+		.then(Err.existent(EmailAlreadyExists))
+	}
+
+	user.byEmail = function (email, trx)
 	{
 		return knex.select('*')
+		.transacting(trx)
 		.from(function ()
 		{
 			this.select(
@@ -80,47 +126,6 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
-	user.create = function (data)
-	{
-		return generate_code()
-		.then(code =>
-		{
-			return knex.transaction(function (trx)
-			{
-				user.users_table()
-				.transacting(trx)
-				.insert({
-					full_name: data.full_name,
-					email: null
-				}
-				, 'id')
-				.then(one)
-				.then(function (id)
-				{
-					return createLocalCreds({
-						user_id: id,
-						password: data.password,
-						salt: data.salt
-					}, trx)
-				})
-				.then(function (id)
-				{
-					return newEmailCreate({
-						user_id: id,
-						new_email: data.email,
-						code: code
-					}, trx)
-				})
-				.then(trx.commit)
-				.catch(trx.rollback)
-			})
-			.then(inserts =>
-			{
-				console.log(inserts)
-			})
-		})
-	}
-
 	user.createFacebook = function (data)
 	{
 		return generate_code()
@@ -173,6 +178,14 @@ module.exports = function User (db)
 		})
 	}
 
+	function createFacebookUser (data, trx)
+	{
+		return user.auth_facebook()
+		.transacting(trx)
+		.insert(data, 'user_id')
+		.then(one)
+	}
+
 	function createLocalCreds (data, trx)
 	{
 		return user.auth_local()
@@ -189,14 +202,6 @@ module.exports = function User (db)
 		.then(one)
 	}
 
-	function createFacebookUser (data, trx)
-	{
-		return user.auth_facebook()
-		.transacting(trx)
-		.insert(data, 'user_id')
-		.then(one)
-	}
-
 	user.newEmailByCode = function (code)
 	{
 		return user.email_confirms()
@@ -208,7 +213,7 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			user.users_table()
+			return user.users_table()
 			.transacting(trx)
 			.where('id', user_id)
 			.update({
@@ -219,8 +224,6 @@ module.exports = function User (db)
 			{
 				return newEmailDrop(id, trx)
 			})
-			.then(trx.commit)
-			.catch(trx.rollback)
 		})
 	}
 
@@ -234,20 +237,31 @@ module.exports = function User (db)
 
 	user.newEmailUpdate = function (data)
 	{
-		return user.email_confirms()
-		.insert(data, 'user_id')
-		.then(one)
-		.catch(err =>
+		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
+
+		return knex.transaction(function (trx)
 		{
-			if (err.constraint === 'email_confirms_pkey')
+			return ensureEmailNotExists(data.new_email, trx)
+			.then(() =>
 			{
 				return user.email_confirms()
-				.update({
-					new_email: data.new_email,
-					code: data.code
+				.transacting(trx)
+				.insert(data, 'user_id')
+				.then(one)
+				.catch(err =>
+				{
+					// UPSERT
+					if (err.constraint === 'email_confirms_pkey')
+					{
+						return user.email_confirms()
+						.update({
+							new_email: data.new_email,
+							code: data.code
+						})
+						.where('user_id', data.user_id)
+					}
 				})
-				.where('user_id', data.user_id)
-			}
+			})
 		})
 	}
 
