@@ -1,4 +1,3 @@
-
 var _ = require('lodash')
 var toNumber = _.toNumber
 var isNaN    = _.isNaN
@@ -6,6 +5,8 @@ var isNaN    = _.isNaN
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
+var Err = require('../../../Err')
+var InvalidParams = Err('invalid_request', 'Invalid request parameters')
 
 module.exports = function Feed (feed_model)
 {
@@ -35,6 +36,17 @@ module.exports = function Feed (feed_model)
 		}
 
 		toss(rs, feed.model.getList(options))
+	})
+
+	feed.express.get('/:id', (rq, rs) =>
+	{
+		var id = _.toNumber(rq.params.id)
+		if (_.isNaN(id))
+		{
+			return toss.err(rs, InvalidParams())
+		}
+
+		toss(rs, feed.model.byId(rq.params.id))
 	})
 
 	return feed

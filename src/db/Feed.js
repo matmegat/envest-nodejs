@@ -1,5 +1,6 @@
-
 var _ = require('lodash')
+var Err = require('../Err')
+var NotFound = Err('not_found', 'Feed Item not found')
 
 module.exports = function Feed (db)
 {
@@ -19,6 +20,32 @@ module.exports = function Feed (db)
 		return feed.feed_table()
 		.where('id', id)
 		.then(oneMaybe)
+		.then((feed_item) =>
+		{
+			return feed
+			.investors_table()
+			.where('id', feed_item.investor_id)
+			.then((investor) =>
+			{
+				feed_item.investor = investor
+				delete feed_item.investor_id
+
+				return feed_item
+			})
+		})
+		.then((feed_item) =>
+		{
+			return feed
+			.comments_table()
+			.where('feed_id', feed_item.id)
+			.then((comments) =>
+			{
+				feed_item.comments = comments.length
+
+				return feed_item
+			})
+		})
+		.then(Err.nullish(NotFound))
 	}
 
 	feed.getList = function (options)
