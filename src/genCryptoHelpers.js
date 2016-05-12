@@ -1,11 +1,11 @@
 
-var crypto    = require('crypto')
+var crypto = require('crypto')
 var promisify = require('promisify-node')
-var method    = require('lodash/method')
 
 var randomBytes = promisify(crypto.randomBytes)
 var genHash = promisify(crypto.pbkdf2)
 
+var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
