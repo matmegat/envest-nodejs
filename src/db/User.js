@@ -27,33 +27,28 @@ module.exports = function User (db)
 			return ensureEmailNotExists(data.email, trx)
 			.then(() =>
 			{
-				return generate_code()
-				.then(code =>
+				return user.users_table()
+				.transacting(trx)
+				.insert({
+					full_name: data.full_name,
+					email: null
+				}
+				, 'id')
+				.then(one)
+				.then(function (id)
 				{
-					return user.users_table()
-					.transacting(trx)
-					.insert({
-						full_name: data.full_name,
-						email: null
-					}
-					, 'id')
-					.then(one)
-					.then(function (id)
-					{
-						return createLocalCreds({
-							user_id: id,
-							password: data.password,
-							salt: data.salt
-						}, trx)
-					})
-					.then(function (id)
-					{
-						return user.newEmailUpdate({
-							user_id: id,
-							new_email: data.email,
-							code: code
-						}, trx)
-					})
+					return createLocalCreds({
+						user_id: id,
+						password: data.password,
+						salt: data.salt
+					}, trx)
+				})
+				.then(function (id)
+				{
+					return user.newEmailUpdate({
+						user_id: id,
+						new_email: data.email
+					}, trx)
 				})
 			})
 		})
@@ -127,37 +122,32 @@ module.exports = function User (db)
 
 	user.createFacebook = function (data)
 	{
-		return generate_code()
-		.then(code =>
+		return knex.transaction(function (trx)
 		{
-			return knex.transaction(function (trx)
+			user.users_table()
+			.transacting(trx)
+			.insert({
+				full_name: data.full_name,
+				email: null
+			}
+			, 'id')
+			.then(one)
+			.then(function (id)
 			{
-				user.users_table()
-				.transacting(trx)
-				.insert({
-					full_name: data.full_name,
-					email: null
-				}
-				, 'id')
-				.then(one)
-				.then(function (id)
-				{
-					return user.newEmailUpdate({
-						user_id: id,
-						new_email: data.email,
-						code: code
-					}, trx)
-				})
-				.then(function (id)
-				{
-					return createFacebookUser({
-						user_id: id,
-						facebook_id: data.facebook_id
-					}, trx)
-				})
-				.then(trx.commit)
-				.catch(trx.rollback)
+				return user.newEmailUpdate({
+					user_id: id,
+					new_email: data.email
+				}, trx)
 			})
+			.then(function (id)
+			{
+				return createFacebookUser({
+					user_id: id,
+					facebook_id: data.facebook_id
+				}, trx)
+			})
+			.then(trx.commit)
+			.catch(trx.rollback)
 		})
 	}
 
@@ -242,15 +232,19 @@ module.exports = function User (db)
 				.catch(err =>
 				{
 					// UPSERT
-					if (err.constraint === 'email_confirms_pkey')
+					return generate_code()
+					.then(code =>
 					{
-						return user.email_confirms()
-						.update({
-							new_email: data.new_email,
-							code: data.code
-						})
-						.where('user_id', data.user_id)
-					}
+						if (err.constraint === 'email_confirms_pkey')
+						{
+							return user.email_confirms()
+							.update({
+								new_email: data.new_email,
+								code: code
+							})
+							.where('user_id', data.user_id)
+						}
+					})
 				})
 			})
 		})

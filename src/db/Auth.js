@@ -10,7 +10,6 @@ var noop = require('lodash/noop')
 var cr_helpers = require('../crypto-helpers')
 
 var generate_salt = cr_helpers.generate_salt
-var generate_code = cr_helpers.generate_code
 var encrypt_pass  = cr_helpers.encrypt_pass
 var compare_passwords = cr_helpers.compare_passwords
 
@@ -97,14 +96,9 @@ module.exports = function Auth (db)
 		return validate_change_email(new_email)
 		.then(() =>
 		{
-			return generate_code()
-		})
-		.then(code =>
-		{
 			return user.newEmailUpdate({
 				user_id: user_id,
-				new_email: new_email,
-				code: code
+				new_email: new_email
 			})
 		})
 		.then(noop)
