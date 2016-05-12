@@ -218,7 +218,7 @@ var FieldEmpty = Err('field_empty', 'Field must not be empty')
 
 function validate_empty (field, name)
 {
-	if (field == '')
+	if (field === '')
 	{
 		throw FieldEmpty({ field: name })
 	}
