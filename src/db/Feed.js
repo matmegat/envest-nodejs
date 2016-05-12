@@ -1,5 +1,6 @@
 
 var _ = require('lodash')
+var Paginator = require('./Paginator')
 
 module.exports = function Feed (db)
 {
@@ -27,30 +28,8 @@ module.exports = function Feed (db)
 		options.limit = options.limit || 20
 
 		var feed_queryset = feed.feed_table()
-		.orderBy('timestamp', 'desc')
-		.limit(options.limit)
 
-		if (options.since_id && options.max_id)
-		{
-			feed_queryset
-			.whereBetween('id',
-			[
-				options.since_id,
-				options.since_id + options.max_id
-			])
-		}
-		else if (options.since_id)
-		{
-			feed_queryset
-			.where('id', '>', options.since_id)
-		}
-		else if (options.max_id)
-		{
-			feed_queryset
-			.where('id', '<=', options.max_id)
-		}
-
-		return feed_queryset
+		return Paginator(feed_queryset, options)
 		.then((feed_items) =>
 		{
 			return feed.investors_table()
@@ -78,6 +57,7 @@ module.exports = function Feed (db)
 				feed_items.forEach((i, item) =>
 				{
 					var comments = _.find(commentsCount, { feed_id: item.id })
+
 					if (comments)
 					{
 						comments = comments.count

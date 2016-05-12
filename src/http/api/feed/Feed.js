@@ -1,37 +1,25 @@
 
-var _ = require('lodash')
-var toNumber = _.toNumber
-var isNaN    = _.isNaN
-
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
+var Comments = require('./Comments')
 
-module.exports = function Feed (feed_model)
+module.exports = function Feed (db)
 {
 	var feed = {}
 
-	feed.model = feed_model
+	feed.model = db.feed
 	feed.express = Router()
 	feed.express.use(authRequired)
+	feed.express.use('/comments', Comments(db.comments).express)
 
 	feed.express.get('/', (rq, rs) =>
 	{
 		var options =
 		{
-			limit: 10
-		}
-
-		var max_id = toNumber(rq.query.max_id)
-		if (! isNaN(max_id))
-		{
-			options.max_id = max_id
-		}
-
-		var since_id = toNumber(since_id)
-		if (! isNaN(since_id))
-		{
-			options.since_id = since_id
+			limit: 10,
+			max_id:   rq.query.max_id,
+			since_id: rq.query.since_id
 		}
 
 		toss(rs, feed.model.getList(options))
@@ -39,3 +27,4 @@ module.exports = function Feed (feed_model)
 
 	return feed
 }
+
