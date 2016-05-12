@@ -229,7 +229,7 @@ module.exports = function User (db)
 				.then(code =>
 				{
 					data.code = code
-				
+
 					return user.email_confirms()
 					.transacting(trx)
 					.insert(data, 'user_id')

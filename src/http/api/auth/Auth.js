@@ -90,5 +90,3 @@ module.exports = function Auth (auth_model, passport)
 
 	return auth
 }
-
-
