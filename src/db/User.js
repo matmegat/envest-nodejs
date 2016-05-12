@@ -225,22 +225,23 @@ module.exports = function User (db)
 			return ensureEmailNotExists(data.new_email, trx)
 			.then(() =>
 			{
-				return user.email_confirms()
-				.transacting(trx)
-				.insert(data, 'user_id')
-				.then(one)
-				.catch(err =>
+				return generate_code()
+				.then(code =>
 				{
-					// UPSERT
-					return generate_code()
-					.then(code =>
+					data.code = code
+				
+					return user.email_confirms()
+					.transacting(trx)
+					.insert(data, 'user_id')
+					.then(one)
+					.catch(err =>
 					{
 						if (err.constraint === 'email_confirms_pkey')
 						{
 							return user.email_confirms()
 							.update({
 								new_email: data.new_email,
-								code: code
+								code: data.code
 							})
 							.where('user_id', data.user_id)
 						}
