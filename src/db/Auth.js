@@ -8,12 +8,12 @@ var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
-var genCryptoHelpers = require('../genCryptoHelpers')
+var cr_helpers = require('../crypto-helpers')
 
-var generate_salt = genCryptoHelpers.generate_salt
-var generate_code = genCryptoHelpers.generate_code
-var encrypt_pass = genCryptoHelpers.encrypt_pass
-var compare_passwords = genCryptoHelpers.compare_passwords
+var generate_salt = cr_helpers.generate_salt
+var generate_code = cr_helpers.generate_code
+var encrypt_pass  = cr_helpers.encrypt_pass
+var compare_passwords = cr_helpers.compare_passwords
 
 module.exports = function Auth (db)
 {

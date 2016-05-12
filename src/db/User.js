@@ -1,7 +1,5 @@
 
-var genCryptoHelpers = require('../genCryptoHelpers')
-
-var generate_code = genCryptoHelpers.generate_code
+var generate_code = require('../crypto-helpers').generate_code
 
 module.exports = function User (db)
 {
