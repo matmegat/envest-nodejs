@@ -81,7 +81,7 @@ function useFacebookToken (auth, user)
 			token: accessToken
 		}
 
-		user.findByFBIDOrCreate(user_data)
+		user.byFB(user_data)
 		.then(user =>
 		{
 			done(null, user)

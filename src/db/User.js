@@ -151,7 +151,7 @@ module.exports = function User (db)
 		})
 	}
 
-	user.findByFBIDOrCreate = function (data)
+	user.byFB = function (data)
 	{
 		return user.byFacebookId(data.facebook_id)
 		.then(result =>
