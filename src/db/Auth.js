@@ -75,7 +75,6 @@ module.exports = function Auth (db)
 		})
 	}
 
-
 	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
 	auth.emailConfirm = function (code)

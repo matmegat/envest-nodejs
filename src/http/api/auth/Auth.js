@@ -75,7 +75,7 @@ module.exports = function Auth (auth_model, passport)
 		rs.status(200).end()
 	})
 
-	function authByProvider(rq, rs, next, provider)
+	function authByProvider (rq, rs, next, provider)
 	{
 		passport.authenticate(provider, (err, user) =>
 		{

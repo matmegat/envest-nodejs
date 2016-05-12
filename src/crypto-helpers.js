@@ -29,12 +29,12 @@ function hash (password, salt)
 }
 
 
-var generate_salt = helpers.generate_salt = function generate_salt ()
+helpers.generate_salt = function generate_salt ()
 {
 	return gen_rand_str(salt_size)
 }
 
-var generate_code = helpers.generate_code = function generate_code ()
+helpers.generate_code = function generate_code ()
 {
 	return gen_rand_str(code_size)
 }
@@ -48,9 +48,9 @@ var encrypt_pass = helpers.encrypt_pass = function encrypt_pass (password, salt)
 	})
 }
 
-var compare_passwords = helpers.compare_passwords = function compare_passwords (db_pass, form_pass, salt)
+helpers.compare_passwords = function compare_passwords (db_pass, form_pass, salt)
 {
-	return helpers.encrypt_pass(form_pass, salt)
+	return encrypt_pass(form_pass, salt)
 	.then(encrypted_pass =>
 	{
 		return encrypted_pass === db_pass

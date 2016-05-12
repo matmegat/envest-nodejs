@@ -20,7 +20,6 @@ module.exports = function User (db)
 	user.auth_facebook  = () => knex('auth_facebook')
 	user.auth_local     = () => knex('auth_local')
 
-
 	user.create = function (data)
 	{
 		return knex.transaction(function (trx)
