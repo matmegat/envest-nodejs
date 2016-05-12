@@ -10,7 +10,7 @@ exports.up = function (knex, Promise)
 
 			table.string('full_name').notNullable()
 
-			table.string('email').unique()
+			table.string('email')
 			table.string('password', 72).notNullable()
 			table.string('salt', 32).notNullable()
 		})

@@ -1,4 +1,9 @@
 
+var extend = require('lodash/extend')
+
+var Err = require('../Err')
+var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+
 module.exports = function User (db)
 {
 	var user = {}
@@ -12,16 +17,49 @@ module.exports = function User (db)
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
 
-	user.byConfirmedEmail = function (email)
+
+	user.create = function (data)
 	{
-		return user.users_table()
-		.where('email', email)
-		.then(oneMaybe)
+		return knex.transaction(function (trx)
+		{
+			return ensureEmailNotExists(data.email, trx)
+			.then(() =>
+			{
+				return user.users_table()
+				.transacting(trx)
+				.insert({
+					full_name: data.full_name,
+					email: null,
+					password: data.password,
+					salt: data.salt
+				}
+				, 'id')
+				.then(one)
+				.then(function (id)
+				{
+					return user.newEmailUpdate({
+						user_id: id,
+						new_email: data.email,
+						code: data.code
+					}
+					, trx)
+				})
+			})
+		})
 	}
 
-	user.byEmail = function (email)
+	/* ensures email not exists in BOTH tables (sparse unique) */
+	// eslint-disable-next-line id-length
+	function ensureEmailNotExists (email, trx)
+	{
+		return user.byEmail(email, trx)
+		.then(Err.existent(EmailAlreadyExists))
+	}
+
+	user.byEmail = function (email, trx)
 	{
 		return knex.select('*')
+		.transacting(trx)
 		.from(function ()
 		{
 			this.select(
@@ -43,47 +81,6 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
-	user.byId = function (id)
-	{
-		return user.users_table()
-		.where('id', id)
-		.then(oneMaybe)
-	}
-
-	user.create = function (data)
-	{
-		return knex.transaction(function (trx)
-		{
-			user.users_table()
-			.transacting(trx)
-			.insert({
-				full_name: data.full_name,
-				email: null,
-				password: data.password,
-				salt: data.salt
-			}
-			, 'id')
-			.then(one)
-			.then(function (id)
-			{
-				return newEmailCreate({
-					user_id: id,
-					new_email: data.email,
-					code: data.code
-				}, trx)
-			})
-			.then(trx.commit)
-			.catch(trx.rollback)
-		})
-	}
-
-	function newEmailCreate (data, trx)
-	{
-		return user.email_confirms()
-		.transacting(trx)
-		.insert(data, 'user_id')
-		.then(one)
-	}
 
 	user.newEmailByCode = function (code)
 	{
@@ -96,7 +93,7 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			user.users_table()
+			return user.users_table()
 			.transacting(trx)
 			.where('id', user_id)
 			.update({
@@ -107,8 +104,6 @@ module.exports = function User (db)
 			{
 				return newEmailDrop(id, trx)
 			})
-			.then(trx.commit)
-			.catch(trx.rollback)
 		})
 	}
 
@@ -122,22 +117,42 @@ module.exports = function User (db)
 
 	user.newEmailUpdate = function (data)
 	{
-		return user.email_confirms()
-		.insert(data, 'user_id')
-		.then(one)
-		.catch(err =>
+		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
+
+		return knex.transaction(function (trx)
 		{
-			if (err.constraint === 'email_confirms_pkey')
+			return ensureEmailNotExists(data.new_email, trx)
+			.then(() =>
 			{
 				return user.email_confirms()
-				.update({
-					new_email: data.new_email,
-					code: data.code
+				.transacting(trx)
+				.insert(data, 'user_id')
+				.then(one)
+				.catch(err =>
+				{
+					// UPSERT
+					if (err.constraint === 'email_confirms_pkey')
+					{
+						return user.email_confirms()
+						.update({
+							new_email: data.new_email,
+							code: data.code
+						})
+						.where('user_id', data.user_id)
+					}
 				})
-				.where('user_id', data.user_id)
-			}
+			})
 		})
 	}
+
+
+	user.byId = function (id)
+	{
+		return user.users_table()
+		.where('id', id)
+		.then(oneMaybe)
+	}
+
 
 	return user
 }
