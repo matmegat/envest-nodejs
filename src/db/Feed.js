@@ -57,42 +57,18 @@ module.exports = function Feed (db)
 		.orderBy('timestamp', 'desc')
 		.limit(options.limit)
 
-		if (options.since_id && options.max_id)
-		{
-			feed_queryset
-			.whereBetween('id',
-			[
-				options.since_id,
-				options.since_id + options.max_id
-			])
-		}
-		else if (options.since_id)
+		if (options.since_id)
 		{
 			feed_queryset
 			.where('id', '>', options.since_id)
 		}
-		else if (options.max_id)
+		if (options.max_id)
 		{
 			feed_queryset
 			.where('id', '<=', options.max_id)
 		}
 
 		return feed_queryset
-		.then((feed_items) =>
-		{
-			return feed.investors_table()
-			.whereIn('id', _.map(feed_items, 'investor_id'))
-			.then((investors) =>
-			{
-				feed_items.forEach((i, item) =>
-				{
-					item.investor = _.find(investors, { id: item.investor_id })
-					delete item.investor_id
-				})
-
-				return feed_items
-			})
-		})
 		.then((feed_items) =>
 		{
 			return feed.comments_table()
@@ -102,18 +78,33 @@ module.exports = function Feed (db)
 			.groupBy('feed_id')
 			.then((commentsCount) =>
 			{
-				feed_items.forEach((i, item) =>
+				feed_items.forEach((item) =>
 				{
 					var comments = _.find(commentsCount, { feed_id: item.id })
 					if (comments)
 					{
-						comments = comments.count
+						comments = _.toNumber(comments.count)
 					}
 
 					item.comments = comments || 0
 				})
 
 				return feed_items
+			})
+		})
+		.then((feed_items) =>
+		{
+			return feed.investors_table()
+			.whereIn('id', _.map(feed_items, 'investor_id'))
+			.then((investors) =>
+			{
+				var response =
+				{
+					feed: feed_items,
+					investors: investors,
+				}
+
+				return response
 			})
 		})
 	}

@@ -29,7 +29,7 @@ module.exports = function Feed (feed_model)
 			options.max_id = max_id
 		}
 
-		var since_id = toNumber(since_id)
+		var since_id = toNumber(rq.query.since_id)
 		if (! isNaN(since_id))
 		{
 			options.since_id = since_id
