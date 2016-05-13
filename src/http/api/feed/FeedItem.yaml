@@ -7,7 +7,15 @@ properties:
     type: string
     format: date-time
     description: when event occurs
+  investor_id:
+    type: number
+    description: |
+      **optional**
+      present at `/feed` requests
   investor:
+    description: |
+      **optional**
+      present at `/feed/:id` requests
     $ref: ../../swagger/Investor.yaml
   event:
     description: |
@@ -24,5 +32,4 @@ properties:
 required:
 - id
 - timestamp
-- investor
 - event

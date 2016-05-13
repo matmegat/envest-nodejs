@@ -1,3 +1,13 @@
-type: array
-items:
-  $ref: ./FeedItem.yaml
+type: object
+properties:
+  feed:
+    type: array
+    items:
+    - $ref: ./FeedItem.yaml
+  investors:
+    type: array
+    items:
+    - $ref: ../../swagger/Investor.yaml
+required:
+- feed
+- investors
