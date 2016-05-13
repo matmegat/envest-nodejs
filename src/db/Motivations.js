@@ -35,17 +35,17 @@ module.exports = function Motivations ()
 		{
 			id: 7,
 			category: 'Valuation',
-			tetx: 'Fair Valuation'
+			text: 'Fair Valuation'
 		},
 		{
 			id: 8,
 			category: 'Valuation',
-			tetx: 'Cheap Valuation'
+			text: 'Cheap Valuation'
 		},
 		{
 			id: 9,
 			category: 'Valuation',
-			tetx: 'Expensive Valuation'
+			text: 'Expensive Valuation'
 		},
 		{
 			id: 10,
