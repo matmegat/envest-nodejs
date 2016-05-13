@@ -11,5 +11,7 @@ allOf:
           type: array
           items:
             $ref: ../../swagger/Symbol.yaml
+        title:
+          type: string
         text:
           type: string

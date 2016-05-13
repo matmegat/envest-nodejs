@@ -73,9 +73,15 @@ var dummyEvents =
 			[
 				{
 					ticker: 'ZG',
-					company: 'ZILLOW',
+				},
+				{
+					ticker: 'AAPL',
+				},
+				{
+					ticker: 'CMG',
 				},
 			],
+			title: 'Title of the Update Event',
 			text: 'Just an update.',
 		}
 	},
