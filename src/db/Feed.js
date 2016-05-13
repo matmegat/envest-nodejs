@@ -51,11 +51,10 @@ module.exports = function Feed (db)
 	feed.getList = function (options)
 	{
 		options = options || {}
-		options.limit = options.limit || 20
 
 		var feed_queryset = feed.feed_table()
 		.orderBy('timestamp', 'desc')
-		.limit(options.limit)
+		.limit(20)	// TODO: be aware of this constant
 
 		if (options.since_id)
 		{
