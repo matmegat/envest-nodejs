@@ -10,7 +10,7 @@ exports.up = function (knex, Promise)
 
 			table.string('full_name').notNullable()
 
-			table.string('email').unique()
+			table.string('email')
 			table.string('password', 72).notNullable()
 			table.string('salt', 32).notNullable()
 		})
@@ -25,15 +25,10 @@ exports.up = function (knex, Promise)
 			table.string('code', 32).notNullable()
 		})
 	})
-		.then(() =>
-		{
-			console.info('Running Seed Data')
-
-			return knex.seed.run(
-				{
-					directory: './seeds/20160420'
-				})
-		})
+	.then(() =>
+	{
+		return knex.seed.run({ directory: './seeds/20160420' })
+	})
 }
 
 exports.down = function (knex, Promise)

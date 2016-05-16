@@ -1,6 +1,8 @@
-
 var _ = require('lodash')
+
 var Paginator = require('./Paginator')
+var Err = require('../Err')
+var NotFound = Err('not_found', 'Feed Item not found')
 
 module.exports = function Feed (db)
 {
@@ -22,26 +24,64 @@ module.exports = function Feed (db)
 		return feed.feed_table()
 		.where('id', id)
 		.then(oneMaybe)
+		.then((feed_item) =>
+		{
+			return feed
+			.investors_table()
+			.where('id', feed_item.investor_id)
+			.then((investor) =>
+			{
+				feed_item.investor = investor
+				delete feed_item.investor_id
+
+				return feed_item
+			})
+		})
+		.then((feed_item) =>
+		{
+			return feed
+			.comments_table()	// TODO: replace with method from Comments
+			.where('feed_id', feed_item.id)
+			.then((comments) =>
+			{
+				feed_item.comments = comments.length
+
+				return feed_item
+			})
+		})
+		.then(Err.nullish(NotFound))
 	}
 
-	feed.getList = function (options)
+	feed.List = function (_options)
 	{
-		options = options || {}
-		options.limit = options.limit || 20
+		var options = _.defaults(
+			{
+				limit: 20	//	TODO: be aware of this constant
+			}, _options)
 
 		var feed_queryset = feed.feed_table()
 
 		return paginator.paginate(feed_queryset, options)
 		.then((feed_items) =>
 		{
-			return feed.investors_table()
-			.whereIn('id', _.map(feed_items, 'investor_id'))
-			.then((investors) =>
+			return feed
+			.comments_table()	//	TODO: replace with method from Comments
+			.select('feed_id')
+			.count('id as count')
+			.whereIn('feed_id', _.map(feed_items, 'id'))
+			.groupBy('feed_id')
+			.then((commentsCount) =>
 			{
-				feed_items.forEach((i, item) =>
+				feed_items.forEach((item) =>
 				{
-					item.investor = _.find(investors, { id: item.investor_id })
-					delete item.investor_id
+					var comments = _.find(commentsCount, { feed_id: item.id })
+
+					if (comments)
+					{
+						comments = _.toNumber(comments.count)
+					}
+
+					item.comments = comments || 0
 				})
 
 				return feed_items
@@ -49,26 +89,17 @@ module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			return feed.comments_table()
-			.select('feed_id')
-			.count('id as count')
-			.whereIn('feed_id', _.map(feed_items, 'id'))
-			.groupBy('feed_id')
-			.then((commentsCount) =>
+			return feed.investors_table()
+			.whereIn('id', _.map(feed_items, 'investor_id'))
+			.then((investors) =>
 			{
-				feed_items.forEach((i, item) =>
+				var response =
 				{
-					var comments = _.find(commentsCount, { feed_id: item.id })
+					feed: feed_items,
+					investors: investors,
+				}
 
-					if (comments)
-					{
-						comments = comments.count
-					}
-
-					item.comments = comments || 0
-				})
-
-				return feed_items
+				return response
 			})
 		})
 	}

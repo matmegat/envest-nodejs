@@ -1,35 +1,28 @@
 
-exports.seed = function (knex, Promise)
+exports.seed = function (knex)
 {
-	return Promise.join(
-		// Deletes ALL existing entries
-		knex('investors')
-		.del(),
-
-		// Inserts seed entries
-		knex('investors')
+	return knex('investors').del()
+	.then(() =>
+	{
+		return knex('investors')
 		.insert(
-		{
-			full_name: 'Allen Schwartz',
-			icon: ''
-		}),
-		knex('investors')
-		.insert(
-		{
-			full_name: 'Cheyenne Parsons',
-			icon: ''
-		}),
-		knex('investors')
-		.insert(
-		{
-			full_name: 'George Masterson',
-			icon: ''
-		}),
-		knex('investors')
-		.insert(
-		{
-			full_name: 'Anna Brinkly',
-			icon: ''
-		})
-	)
+		[
+			{
+				full_name: 'Allen Schwartz',
+				icon: ''
+			},
+			{
+				full_name: 'Cheyenne Parsons',
+				icon: ''
+			},
+			{
+				full_name: 'George Masterson',
+				icon: ''
+			},
+			{
+				full_name: 'Anna Brinkly',
+				icon: ''
+			}
+		])
+	})
 }
