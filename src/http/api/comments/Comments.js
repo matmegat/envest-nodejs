@@ -28,10 +28,10 @@ module.exports = function Comments (сomments_model)
 	comments.express.post('/', (rq, rs) =>
 	{
 		var comment_data = pick(rq.body,
-			[
-				'feed_id',
-				'text'
-			])
+		[
+			'feed_id',
+			'text'
+		])
 
 		comment_data.user_id = rq.user.id
 
