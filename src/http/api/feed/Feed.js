@@ -18,24 +18,21 @@ module.exports = function Feed (feed_model)
 
 	feed.express.get('/', (rq, rs) =>
 	{
-		var options =
-		{
-			limit: 10
-		}
+		var options = {}
 
-		var max_id = toNumber(rq.query.max_id)
+		var max_id = toNumber(rq.query.max_id)	// TODO: отрефакторить в toId
 		if (! isNaN(max_id))
 		{
 			options.max_id = max_id
 		}
 
-		var since_id = toNumber(rq.query.since_id)
+		var since_id = toNumber(rq.query.since_id)	// TODO: отрефакторить в toId
 		if (! isNaN(since_id))
 		{
 			options.since_id = since_id
 		}
 
-		toss(rs, feed.model.getList(options))
+		toss(rs, feed.model.List(options))
 	})
 
 	feed.express.get('/:id', (rq, rs) =>

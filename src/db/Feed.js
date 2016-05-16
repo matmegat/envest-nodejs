@@ -36,7 +36,7 @@ module.exports = function Feed (db)
 		.then((feed_item) =>
 		{
 			return feed
-			.comments_table()
+			.comments_table()	// TODO: replace with method from Comments
 			.where('feed_id', feed_item.id)
 			.then((comments) =>
 			{
@@ -48,13 +48,16 @@ module.exports = function Feed (db)
 		.then(Err.nullish(NotFound))
 	}
 
-	feed.getList = function (options)
+	feed.List = function (_options)
 	{
-		options = options || {}
+		var options = _.defaults(
+			{
+				limit: 20	//	TODO: be aware of this constant
+			}, _options)
 
 		var feed_queryset = feed.feed_table()
 		.orderBy('timestamp', 'desc')
-		.limit(20)	// TODO: be aware of this constant
+		.limit(options.limit)
 
 		if (options.since_id)
 		{
@@ -70,7 +73,8 @@ module.exports = function Feed (db)
 		return feed_queryset
 		.then((feed_items) =>
 		{
-			return feed.comments_table()
+			return feed
+			.comments_table()	//	TODO: replace with method from Comments
 			.select('feed_id')
 			.count('id as count')
 			.whereIn('feed_id', _.map(feed_items, 'id'))
