@@ -1,5 +1,5 @@
 
-var pick     = require('lodash/pick')
+var pick = require('lodash/pick')
 
 var Router = require('express').Router
 var toss = require('../../toss')

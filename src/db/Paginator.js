@@ -1,7 +1,7 @@
 
 var _ = require('lodash')
-var toNumber = _.toNumber
-var isInteger    = _.isInteger
+var toNumber  = _.toNumber
+var isInteger = _.isInteger
 
 module.exports = function Paginator (queryset, options, column_name)
 {
@@ -32,7 +32,6 @@ module.exports = function Paginator (queryset, options, column_name)
 	{
 		queryset
 		.where(column_name, '<=', options.max_id).toString()
-
 	}
 
 	return queryset

@@ -4,8 +4,9 @@ var Err = require('../Err')
 
 var _ = require('lodash')
 
-var toNumber     = _.toNumber
-var isInteger    = _.isInteger
+var toNumber  = _.toNumber
+var isInteger = _.isInteger
+var noop      = _.noop
 
 module.exports = function Comments (db)
 {
@@ -14,8 +15,7 @@ module.exports = function Comments (db)
 	comments.db = db
 
 	var knex = db.knex
-	var one = db.one
-	var noop = _.noop
+	var one  = db.one
 
 	comments.table = () => knex('comments')
 
