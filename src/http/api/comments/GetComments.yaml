@@ -1,0 +1,32 @@
+get:
+  description: Get comments of Post (Feed Item)
+  parameters:
+  - name: max_id
+    in: query
+    type: number
+    description: |
+      Get comments that are added before *max_id* (inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  - name: since_id
+    in: query
+    type: number
+    description: |
+      Get comments greater than *since_id* (non inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  - name: feed_id
+    description: Post (Feed Item) id
+    in: query
+    type: number
+    default: 1
+    required: true
+  responses:
+    200:
+      description: Post (Feed Item) comments
+      schema:
+        $ref: ./Comments.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - comments

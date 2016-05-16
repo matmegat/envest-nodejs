@@ -1,5 +1,5 @@
 get:
-  description: latest 10 Feed posts for current user
+  description: latest 20 Feed posts for current user
   parameters:
   - name: max_id
     in: query

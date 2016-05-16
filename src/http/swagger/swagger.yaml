@@ -35,6 +35,9 @@ paths:
   '/auth/change-email':
     $ref: ../api/auth/ChangeEmail.yaml
 
+  '/comments':
+    $ref: ../api/comments/GetComments.yaml
+
 definitions:
   # Put here only COMMON definitions
 
