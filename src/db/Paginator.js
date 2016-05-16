@@ -1,48 +1,41 @@
 
 var _ = require('lodash')
-var toNumber  = _.toNumber
-var isInteger = _.isInteger
 
-module.exports = function Paginator (queryset, options, column_name)
+var extend = _.extend
+
+var toId = require('../toId')
+
+module.exports = function Paginator (column_name, paginator_defaults)
 {
-	var column_name = column_name || 'id'
+	var paginator = {}
 
-	options.max_id   = validate_id(options.max_id)
-	options.since_id = validate_id(options.since_id)
-
-	queryset
-	.orderBy('timestamp', 'desc')
-	.limit(options.limit)
-
-	if (options.since_id && options.max_id)
+	paginator.paginate = function (queryset, options)
 	{
+		var column_name = column_name || 'id'
+
+		options = extend({}, paginator_defaults, options)
+
+		options.max_id   = toId(options.max_id)
+		options.since_id = toId(options.since_id)
+		options.limit    = options.limit || 20
+
 		queryset
-		.whereBetween(column_name,
-		[
-			options.since_id,
-			options.since_id + options.max_id
-		])
-	}
-	else if (options.since_id)
-	{
-		queryset
-		.where(column_name, '>', options.since_id)
-	}
-	else if (options.max_id)
-	{
-		queryset
-		.where(column_name, '<=', options.max_id).toString()
+		.orderBy('timestamp', 'desc')
+		.limit(options.limit)
+
+		if (options.since_id)
+		{
+			queryset
+			.where('id', '>', options.since_id)
+		}
+		if (options.max_id)
+		{
+			queryset
+			.where('id', '<=', options.max_id)
+		}
+
+		return queryset
 	}
 
-	return queryset
-}
-
-function validate_id (id)
-{
-	var id = toNumber(id)
-
-	if (isInteger(id) && id > 0)
-	{
-		return id
-	}
+	return paginator
 }

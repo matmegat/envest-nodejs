@@ -11,6 +11,8 @@ module.exports = function Feed (db)
 	var knex = db.knex
 	var oneMaybe = db.oneMaybe
 
+	var paginator = Paginator()
+
 	feed.feed_table = () => knex('feed_items')
 	feed.investors_table = () => knex('investors')
 	feed.comments_table = () => knex('comments')
@@ -29,7 +31,7 @@ module.exports = function Feed (db)
 
 		var feed_queryset = feed.feed_table()
 
-		return Paginator(feed_queryset, options)
+		return paginator.paginate(feed_queryset, options)
 		.then((feed_items) =>
 		{
 			return feed.investors_table()
