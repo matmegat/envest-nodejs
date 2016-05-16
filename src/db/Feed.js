@@ -52,20 +52,19 @@ module.exports = function Feed (db)
 		.then(Err.nullish(NotFound))
 	}
 
-	feed.List = function (_options)
+
+	feed.list = function (options)
 	{
-		var options = _.defaults(
-			{
-				limit: 20	//	TODO: be aware of this constant
-			}, _options)
+		options = _.extend({}, options,
+		{
+			limit: 20
+		})
 
-		var feed_queryset = feed.feed_table()
-
-		return paginator.paginate(feed_queryset, options)
+		return paginator.paginate(feed.feed_table(), options)
 		.then((feed_items) =>
 		{
 			return feed
-			.comments_table()	//	TODO: replace with method from Comments
+			.comments_table() // TODO: replace with method from Comments
 			.select('feed_id')
 			.count('id as count')
 			.whereIn('feed_id', _.map(feed_items, 'id'))

@@ -21,15 +21,13 @@ module.exports = function Feed (db)
 
 	feed.express.get('/', (rq, rs) =>
 	{
+		var options = _.pick(rq.query,
+		[
+			'max_id',
+			'since_id'
+		])
 
-		var options =
-		{
-			limit: 10,
-			max_id:   rq.query.max_id,
-			since_id: rq.query.since_id
-		}
-
-		toss(rs, feed.model.List(options))
+		toss(rs, feed.model.list(options))
 	})
 
 	feed.express.get('/:id', (rq, rs) =>
