@@ -6,7 +6,7 @@ module.exports = function Admin (db)
 	var exists = db.exists
 	var knex   = db.knex
 
-	var table = () => knex('admin')
+	var table = () => knex('admins')
 
 	admin.is = function (user_id)
 	{
