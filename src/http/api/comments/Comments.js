@@ -22,7 +22,7 @@ module.exports = function Comments (сomments_model)
 			'since_id',
 		])
 
-		return toss(rs, comments.model.list(options))
+		toss(rs, comments.model.list(options))
 	})
 
 	comments.express.post('/', (rq, rs) =>
@@ -35,12 +35,12 @@ module.exports = function Comments (сomments_model)
 
 		comment_data.user_id = rq.user.id
 
-		return toss(rs, comments.model.create(comment_data))
+		toss(rs, comments.model.create(comment_data))
 	})
 
 	comments.express.get('/count', (rq, rs) =>
 	{
-		return toss(rs, comments.model.count(rq.query.feed_id))
+		toss(rs, comments.model.count(rq.query.feed_id))
 	})
 
 	return comments
