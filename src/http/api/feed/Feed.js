@@ -1,4 +1,6 @@
 
+var _ = require('lodash')
+
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
@@ -19,6 +21,7 @@ module.exports = function Feed (db)
 
 	feed.express.get('/', (rq, rs) =>
 	{
+
 		var options =
 		{
 			limit: 10,
