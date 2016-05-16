@@ -49,6 +49,17 @@ module.exports = function Comments (db)
 			.where('feed_id', feed_id)
 			.then(one)
 		})
+		.then(row => row.count)
+	}
+
+	comments.countMany = function (feed_ids)
+	{
+		return comments.table()
+		.select('feed_id')
+		.count('id as count')
+		.whereIn('feed_id', feed_ids)
+		.groupBy('feed_id')
+		.then(toObject)
 	}
 
 	function byId (feed_id)
@@ -81,4 +92,16 @@ function validate_feed_id (feed_id)
 
 		return rs()
 	})
+}
+
+function toObject (arr)
+{
+	var obj = {}
+
+	arr.forEach((item) =>
+	{
+		obj[item.feed_id] = item.count
+	})
+
+	return obj
 }

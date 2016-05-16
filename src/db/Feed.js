@@ -1,6 +1,7 @@
 var _ = require('lodash')
 
 var Paginator = require('./Paginator')
+var Comments  = require('./Comments')
 var Err = require('../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
 
@@ -14,6 +15,7 @@ module.exports = function Feed (db)
 	var oneMaybe = db.oneMaybe
 
 	var paginator = Paginator()
+	var comments  = Comments(db)
 
 	feed.feed_table = () => knex('feed_items')
 	feed.investors_table = () => knex('investors')
@@ -39,12 +41,10 @@ module.exports = function Feed (db)
 		})
 		.then((feed_item) =>
 		{
-			return feed
-			.comments_table()	// TODO: replace with method from Comments
-			.where('feed_id', feed_item.id)
-			.then((comments) =>
+			return comments.count(feed_item.id)
+			.then((count) =>
 			{
-				feed_item.comments = comments.length
+				feed_item.comments = count
 
 				return feed_item
 			})
@@ -63,21 +63,17 @@ module.exports = function Feed (db)
 		return paginator.paginate(feed.feed_table(), options)
 		.then((feed_items) =>
 		{
-			return feed
-			.comments_table() // TODO: replace with method from Comments
-			.select('feed_id')
-			.count('id as count')
-			.whereIn('feed_id', _.map(feed_items, 'id'))
-			.groupBy('feed_id')
+			return comments
+			.countMany(_.map(feed_items, 'id'))
 			.then((commentsCount) =>
 			{
 				feed_items.forEach((item) =>
 				{
-					var comments = _.find(commentsCount, { feed_id: item.id })
+					var comments = commentsCount[item.id]
 
 					if (comments)
 					{
-						comments = _.toNumber(comments.count)
+						comments = _.toNumber(comments)
 					}
 
 					item.comments = comments || 0
