@@ -47,11 +47,7 @@ module.exports = function Auth (db)
 	{
 		email = email.toLowerCase()
 
-		return validate_login(email, password)
-		.then(() =>
-		{
-			return user.byEmail(email)
-		})
+		return user.byEmail(email)
 		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
 		{
@@ -109,6 +105,14 @@ module.exports = function Auth (db)
 			})
 		})
 		.then(noop)
+	}
+
+
+	auth.validateLogin = function(email, password)
+	{
+		email = email.toLowerCase()
+
+		return validate_login(email, password)
 	}
 
 	return auth
@@ -223,6 +227,7 @@ var TooLongPassword  = Err('too_long_password', 'Password is too long')
 function validate_password (password)
 {
 	validate_required(password, 'password')
+	validate_empty(password, 'password')
 
 	if (password.length < 6)
 	{

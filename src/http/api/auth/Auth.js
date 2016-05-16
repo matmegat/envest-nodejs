@@ -6,6 +6,7 @@ var Router = require('express').Router
 
 var authRequired = require('../../auth-required')
 var toss = require('../../toss')
+var Err = require('../../../Err')
 
 module.exports = function Auth (auth_model, passport)
 {
@@ -47,7 +48,7 @@ module.exports = function Auth (auth_model, passport)
 
 	var authByProvider = curry((provider, rq, rs, next) =>
 	{
-		passport.authenticate(provider, (err, user) =>
+		passport.authenticate(provider, (err, user, info) =>
 		{
 			if (err)
 			{
@@ -56,14 +57,35 @@ module.exports = function Auth (auth_model, passport)
 
 			rq.login(user, function (err)
 			{
-				if (err) { return next(err) }
+				if (err) {
+					
+					if (info)
+					{
+						err.message = info.message
+					}
+
+					return next(err)
+				}
 
 				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)
 	})
 
-	auth.express.post('/login', authByProvider('local'))
+	var checkAuthCreds = curry((rq, rs, next) =>
+	{
+		var email = rq.body.email
+		var password = rq.body.password
+
+		auth.model.validateLogin(email, password)
+		.then(() =>
+		{
+			next()
+		}
+		, err => { return toss.err(rs, err) })
+	})
+
+	auth.express.post('/login', checkAuthCreds, authByProvider('local'))
 
 	auth.express.post('/login/facebook', authByProvider('facebook-token'))
 
@@ -87,6 +109,15 @@ module.exports = function Auth (auth_model, passport)
 		rq.logout()
 		rs.status(200).end()
 	})
+
+	auth.express.use(function(err, rq, rs, next) {
+		if (err)
+		{
+			var MiddlewareError = Err('authentication_middleware_error', err.message)
+			toss.err(rs, MiddlewareError())
+		}
+		next()
+	});
 
 	return auth
 }
