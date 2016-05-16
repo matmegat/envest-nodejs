@@ -12,4 +12,6 @@ module.exports = function toId (id)
 	{
 		return id
 	}
+
+	return null
 }
