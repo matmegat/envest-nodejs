@@ -17,7 +17,7 @@ module.exports = function Comments (db)
 	var knex = db.knex
 	var one  = db.one
 
-	var paginator = Paginator('comments.id')
+	var paginator = Paginator({column_name: 'comments.id'})
 
 	comments.table = () => knex('comments')
 
