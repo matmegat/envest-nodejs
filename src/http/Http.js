@@ -3,6 +3,8 @@ var express = require('express')
 var body_parser = require('body-parser')
 var cookie_parser = require('cookie-parser')
 
+var compose = require('composable-middleware')
+var authRequired = require('./auth-required')
 var AdminRequired = require('./admin-required')
 
 var Feed = require('./api/feed/Feed')
@@ -26,7 +28,7 @@ module.exports = function Http (app)
 		next()
 	})
 
-	http.adminRequired = AdminRequired(app.db.admin)
+	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.passport = Passport(http.express, app.db)
 
 	http.api = {}
@@ -62,7 +64,7 @@ module.exports = function Http (app)
 		app.swagger
 	])
 
-	http.express.get('/admin', require('./auth-required'), http.adminRequired, (rq, rs) =>
+	http.express.get('/admin', http.adminRequired, (rq, rs) =>
 	{
 		rs.status(200).end()
 	})
