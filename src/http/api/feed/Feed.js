@@ -5,8 +5,6 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
-var Comments = require('./Comments')
-
 var Err = require('../../../Err')
 var InvalidParams = Err('invalid_request', 'Invalid request parameters')
 
@@ -17,7 +15,6 @@ module.exports = function Feed (db)
 	feed.model = db.feed
 	feed.express = Router()
 	feed.express.use(authRequired)
-	feed.express.use('/comments', Comments(db.comments).express)
 
 	feed.express.get('/', (rq, rs) =>
 	{

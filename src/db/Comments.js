@@ -17,16 +17,16 @@ module.exports = function Comments (db)
 	var knex = db.knex
 	var one  = db.one
 
-	var paginator = Paginator({column_name: 'comments.id'})
+	var paginator = Paginator({ column_name: 'comments.id' })
 
 	comments.table = () => knex('comments')
 
-	comments.getList = function (options)
+	comments.list = function (options)
 	{
 		return validate_feed_id(options.feed_id)
 		.then(() =>
 		{
-			var comments_queryset = byFeedId(options.feed_id)
+			var comments_queryset = byId(options.feed_id)
 
 			return paginator.paginate(comments_queryset, options)
 		})
@@ -51,7 +51,7 @@ module.exports = function Comments (db)
 		})
 	}
 
-	function byFeedId (feed_id)
+	function byId (feed_id)
 	{
 		return comments.table()
 		.select(
