@@ -1,37 +1,43 @@
 
 var _ = require('lodash')
-
 var extend = _.extend
 
 var toId = require('../toId')
 
-module.exports = function Paginator (column_name, paginator_defaults)
+var defaults =
+{
+	column_name: 'id',
+	limit: 20
+}
+
+module.exports = function Paginator (paginator_options)
 {
 	var paginator = {}
 
+	paginator_options = extend({}, defaults, paginator_options)
+
 	paginator.paginate = function (queryset, options)
 	{
-		var column_name = column_name || 'id'
+		options = extend({}, paginator_options, options)
 
-		options = extend({}, paginator_defaults, options)
+		var column_name = options.column_name
+		var max_id = toId(options.max_id)
+		var since_id = toId(options.since_id)
+		var limit = options.limit
 
-		options.max_id   = toId(options.max_id)
-		options.since_id = toId(options.since_id)
-		options.limit    = options.limit || 20
+		limit = Math.min(limit, defaults.limit)
 
 		queryset
 		.orderBy('timestamp', 'desc')
-		.limit(options.limit)
+		.limit(limit)
 
-		if (options.since_id)
+		if (since_id)
 		{
-			queryset
-			.where('id', '>', options.since_id)
+			queryset.where(column_name, '>', since_id)
 		}
-		if (options.max_id)
+		if (max_id)
 		{
-			queryset
-			.where('id', '<=', options.max_id)
+			queryset.where(column_name, '<=', max_id)
 		}
 
 		return queryset
