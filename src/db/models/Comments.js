@@ -10,8 +10,6 @@ module.exports = function Comments (db)
 {
 	var comments = {}
 
-	comments.db = db
-
 	var knex = db.knex
 
 	var one  = db.helpers.one

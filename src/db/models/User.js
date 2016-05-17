@@ -9,8 +9,6 @@ module.exports = function User (db)
 {
 	var user = {}
 
-	user.db = db
-
 	var knex = db.knex
 
 	var oneMaybe = db.helpers.oneMaybe

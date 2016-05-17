@@ -9,8 +9,6 @@ module.exports = function Feed (db)
 {
 	var feed = {}
 
-	feed.db = db
-
 	var knex = db.knex
 
 	var oneMaybe = db.helpers.oneMaybe

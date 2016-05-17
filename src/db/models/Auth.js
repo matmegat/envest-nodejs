@@ -17,8 +17,6 @@ module.exports = function Auth (db)
 {
 	var auth = {}
 
-	auth.db = db
-
 	var user = db.user
 
 	auth.register = function (userdata)
