@@ -20,6 +20,9 @@ paths:
   '/feed/{feed_id}':
     $ref: ../api/feed/FeedById.yaml
 
+  '/feed/{feed_id}/comments':
+    $ref: ../api/feed/GetFeedComments.yaml
+
   '/auth/register':
     $ref: ../api/auth/Register.yaml
 
@@ -58,3 +61,6 @@ definitions:
 
   User:
     $ref: ./User.yaml
+
+  Comments:
+    $ref: ../api/comments/Comments.yaml
