@@ -52,6 +52,9 @@ module.exports = function Comments (db)
 		.then(row => row.count)
 	}
 
+	var at  = require('lodash/fp/at')
+	var zip = _.fromPairs
+
 	comments.countMany = function (feed_ids)
 	{
 		return comments.table()
@@ -59,7 +62,12 @@ module.exports = function Comments (db)
 		.count('id as count')
 		.whereIn('feed_id', feed_ids)
 		.groupBy('feed_id')
-		.then(toObject)
+		.then(seq =>
+		{
+			seq = seq.map(at([ 'feed_id', 'count' ]))
+
+			return zip(seq)
+		})
 	}
 
 	function byId (feed_id)
@@ -92,16 +100,4 @@ function validate_feed_id (feed_id)
 
 		return rs()
 	})
-}
-
-function toObject (arr)
-{
-	var obj = {}
-
-	arr.forEach((item) =>
-	{
-		obj[item.feed_id] = item.count
-	})
-
-	return obj
 }

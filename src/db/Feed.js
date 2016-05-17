@@ -63,8 +63,10 @@ module.exports = function Feed (db)
 		return paginator.paginate(feed.feed_table(), options)
 		.then((feed_items) =>
 		{
+			var feed_ids = _.map(feed_items, 'id')
+
 			return comments
-			.countMany(_.map(feed_items, 'id'))
+			.countMany(feed_ids)
 			.then((commentsCount) =>
 			{
 				feed_items.forEach((item) =>
