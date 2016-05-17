@@ -23,7 +23,7 @@ module.exports = function Comments (db)
 
 	comments.list = function (options)
 	{
-		return validate_feed_id(options.feed_id)
+		return comments.validate_feed_id(options.feed_id)
 		.then(() =>
 		{
 			var comments_queryset = byId(options.feed_id)
@@ -41,7 +41,7 @@ module.exports = function Comments (db)
 
 	comments.count = function (feed_id)
 	{
-		return validate_feed_id(feed_id)
+		return comments.validate_feed_id(feed_id)
 		.then(() =>
 		{
 			return comments.table()
@@ -89,23 +89,25 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
+	var toId = require('../toId')
+	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+
+	comments.validate_feed_id = function (feed_id)
+	{
+		return new Promise(rs =>
+		{
+			feed_id = toId(feed_id)
+
+			if (! feed_id)
+			{
+				throw WrongFeedId()
+			}
+
+			return rs()
+		})
+	}
+
 	return comments
 }
 
-var toId = require('../toId')
-var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
-function validate_feed_id (feed_id)
-{
-	return new Promise(rs =>
-	{
-		feed_id = toId(feed_id)
-
-		if (! feed_id)
-		{
-			throw WrongFeedId()
-		}
-
-		return rs()
-	})
-}

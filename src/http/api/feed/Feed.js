@@ -31,12 +31,6 @@ module.exports = function Feed (db)
 
 	feed.express.get('/:id', (rq, rs) =>
 	{
-		var id = _.toNumber(rq.params.id)
-		if (_.isNaN(id))
-		{
-			return toss.err(rs, InvalidParams())
-		}
-
 		toss(rs, feed.model.byId(rq.params.id))
 	})
 

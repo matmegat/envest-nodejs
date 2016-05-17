@@ -23,8 +23,12 @@ module.exports = function Feed (db)
 
 	feed.byId = function (id)
 	{
-		return feed.feed_table()
-		.where('id', id)
+		return comments.validate_feed_id(id)
+		.then(() =>
+		{
+			return feed.feed_table()
+			.where('id', id)
+		})
 		.then(oneMaybe)
 		.then((feed_item) =>
 		{
