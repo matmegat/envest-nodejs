@@ -3,9 +3,7 @@ var Paginator = require('./Paginator')
 var Err = require('../Err')
 
 var _ = require('lodash')
-
-var toNumber  = _.toNumber
-var noop      = _.noop
+var noop = _.noop
 
 module.exports = function Comments (db)
 {
@@ -31,46 +29,22 @@ module.exports = function Comments (db)
 		})
 	}
 
-	comments.create = function (data)
-	{
-		return comments.table()
-		.insert(data)
-		.then(noop)
-	}
 
-	comments.count = function (feed_id)
+	var toId = require('../toId')
+	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+
+	comments.validate_feed_id = function (feed_id)
 	{
-		return comments.validate_feed_id(feed_id)
-		.then(() =>
+		return new Promise(rs =>
 		{
-			return comments.table()
-			.count('id')
-			.where('feed_id', feed_id)
-			.then(one)
-		})
-		.then(row => row.count)
-	}
+			feed_id = toId(feed_id)
 
-	var at  = require('lodash/fp/at')
-	var zip = _.fromPairs
-	var mapValues = _.mapValues
+			if (! feed_id)
+			{
+				throw WrongFeedId()
+			}
 
-	comments.countMany = function (feed_ids)
-	{
-		return comments.table()
-		.select('feed_id')
-		.count('id as count')
-		.whereIn('feed_id', feed_ids)
-		.groupBy('feed_id')
-		.then(seq =>
-		{
-			seq = seq.map(at([ 'feed_id', 'count' ]))
-
-			seq = zip(seq)
-
-			seq = mapValues(seq, toNumber)
-
-			return seq
+			return rs()
 		})
 	}
 
@@ -88,21 +62,50 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var toId = require('../toId')
-	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
-	comments.validate_feed_id = function (feed_id)
+	comments.create = function (data)
 	{
-		return new Promise(rs =>
+		return comments.table()
+		.insert(data)
+		.then(noop)
+	}
+
+
+	comments.count = function (feed_id)
+	{
+		return comments.validate_feed_id(feed_id)
+		.then(() =>
 		{
-			feed_id = toId(feed_id)
+			return comments.table()
+			.count('id')
+			.where('feed_id', feed_id)
+			.then(one)
+		})
+		.then(row => row.count)
+	}
 
-			if (! feed_id)
-			{
-				throw WrongFeedId()
-			}
 
-			return rs()
+	var at  = require('lodash/fp/at')
+	var zip = _.fromPairs
+	var mapValues = _.mapValues
+	var toNumber = _.toNumber
+
+	comments.countMany = function (feed_ids)
+	{
+		return comments.table()
+		.select('feed_id')
+		.count('id as count')
+		.whereIn('feed_id', feed_ids)
+		.groupBy('feed_id')
+		.then(seq =>
+		{
+			seq = seq.map(at([ 'feed_id', 'count' ]))
+
+			seq = zip(seq)
+
+			seq = mapValues(seq, toNumber)
+
+			return seq
 		})
 	}
 
