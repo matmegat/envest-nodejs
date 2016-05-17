@@ -88,7 +88,7 @@ Err.fromDb = function (constraint, fn)
  * usage:
  *   .then(shortcut(IsValueBad, NewError))
  */
-Err.shortcut = curry(function (pred, fn)
+var shortcut = Err.shortcut = curry(function (pred, fn)
 {
 	return (value) =>
 	{
@@ -104,43 +104,6 @@ Err.shortcut = curry(function (pred, fn)
 })
 
 
-Err.nullish = function (fn)
-{
-	return (it) =>
-	{
-		if (it == null)
-		{
-			throw fn()
-		}
-
-		return it
-	}
-}
-
-Err.falsy = function (fn)
-{
-	return (it) =>
-	{
-		if (! it)
-		{
-			throw fn()
-		}
-
-		return it
-	}
-}
-
-Err.existent = function (fn)
-{
-	return (it) =>
-	{
-		if (it)
-		{
-			throw fn()
-		}
-
-		return it
-	}
-}
-
-
+Err.nullish  = shortcut(it => it == null)
+Err.falsy    = shortcut(it => ! it)
+Err.existent = shortcut(it => !! it)
