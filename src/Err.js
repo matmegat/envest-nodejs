@@ -24,18 +24,47 @@ Err.is = function (err)
 }
 
 
-Err.fromDb = function (constraint, fn)
+var curry = require('lodash/curry')
+
+/*
+ * checks for pred(error) and rethrows new error
+ *   if  true -> fn(error)
+ *      false -> noop
+ *
+ * usage:
+ *   .catch(rethrow(CheckOldError, ConstructNewError))
+ */
+var rethrow = Err.rethrow = curry(function rethrow (pred, fn)
 {
 	return (error) =>
 	{
-		if (! error.constraint) { throw error }
-		if (error.constraint !== constraint) { throw error }
-
-		/* upgrade to ErrInst */
-		error = fn(/* error */)
-
-		throw error
+		if (pred(error))
+		{
+			throw fn(error)
+		}
+		else
+		{
+			throw error
+		}
 	}
+})
+
+Err.fromDb = function (constraint, fn)
+{
+	return rethrow(error =>
+	{
+		/* check for constraint to be desired */
+		if (! error.constraint)              { return false }
+		if (error.constraint !== constraint) { return false }
+
+		return true
+	}
+	,
+	() =>
+	{
+		/* upgrade to ErrInst */
+		return fn(/* mask error */)
+	})
 }
 
 Err.nullish = function (fn)
@@ -76,4 +105,5 @@ Err.existent = function (fn)
 		return it
 	}
 }
+
 
