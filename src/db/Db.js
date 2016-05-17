@@ -1,9 +1,9 @@
 
 var knex = require('knex')
-var User = require('./User')
-var Auth = require('./Auth')
-var Feed = require('./Feed')
-var Comments = require('./Comments')
+var User = require('./models/User')
+var Auth = require('./models/Auth')
+var Feed = require('./models/Feed')
+var Comments = require('./models/Comments')
 
 module.exports = function name (app)
 {

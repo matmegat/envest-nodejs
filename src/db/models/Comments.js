@@ -1,6 +1,7 @@
 
-var Paginator = require('./Paginator')
-var Err = require('../Err')
+var Paginator = require('../Paginator')
+
+var Err = require('../../Err')
 
 var _ = require('lodash')
 var noop = _.noop
@@ -30,7 +31,7 @@ module.exports = function Comments (db)
 	}
 
 
-	var toId = require('../toId')
+	var toId = require('../../toId')
 	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 	comments.validate_feed_id = function (feed_id)
@@ -111,5 +112,3 @@ module.exports = function Comments (db)
 
 	return comments
 }
-
-

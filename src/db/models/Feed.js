@@ -1,8 +1,8 @@
 var _ = require('lodash')
 
-var Paginator = require('./Paginator')
-var Comments  = require('./Comments')
-var Err = require('../Err')
+var Paginator = require('../Paginator')
+
+var Err = require('../../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
 
 module.exports = function Feed (db)

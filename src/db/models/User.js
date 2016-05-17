@@ -1,8 +1,8 @@
 
-var generate_code = require('../crypto-helpers').generate_code
+var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
-var Err = require('../Err')
+var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 
 module.exports = function User (db)

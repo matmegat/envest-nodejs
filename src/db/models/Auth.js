@@ -1,13 +1,13 @@
 
 var clone = require('lodash/clone')
 
-var Err = require('../Err')
+var Err = require('../../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
-var cr_helpers = require('../crypto-helpers')
+var cr_helpers = require('../../crypto-helpers')
 
 var generate_salt = cr_helpers.generate_salt
 var encrypt_pass  = cr_helpers.encrypt_pass
@@ -157,8 +157,6 @@ function validate_login (email, password)
 	})
 }
 
-
-var Err = require('../Err')
 
 var FieldRequired = Err('field_required', 'Field is required')
 
