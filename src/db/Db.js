@@ -12,6 +12,7 @@ module.exports = function name (app)
 	var cfg  = app.cfg
 	var conn = cfg.pg
 
+	db.exists = exists
 	db.one = one
 	db.oneMaybe = oneMaybe
 
@@ -49,6 +50,14 @@ module.exports = function name (app)
 	db.comments = Comments(db)
 
 	return db
+}
+
+
+function exists (queryset)
+{
+	ensureNotMultiple(queryset)
+
+	return queryset.length === 1
 }
 
 function oneMaybe (queryset)
