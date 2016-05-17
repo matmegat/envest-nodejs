@@ -30,3 +30,34 @@ get:
         $ref: ../../swagger/Error.yaml
   tags:
   - comments
+post:
+  description: Create comment for Post (Feed Item)
+  parameters:
+  - name: payload
+    description: JSON payload to create comment
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Comment Payload
+      properties:
+        feed_id:
+          type: integer
+          description: Post (Feed Item) Id
+          default: 1
+        text:
+          type: string
+          description: text of comment
+          default: Some comment from logged in user
+      required:
+      - feed_id
+      - text
+  responses:
+    200:
+      description: Post (Feed Item) successfull creation
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - comments
