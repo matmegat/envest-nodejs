@@ -1,0 +1,24 @@
+type: object
+title: Comment
+properties:
+  id:
+    type: number
+    description: Comment Id
+  timestamp:
+    type: string
+    format: date-time
+    description: Timestamp of comment
+  text:
+    type: string
+    description: Text of comment
+  user_id:
+    type: number
+    description: Comment author Id
+  full_name:
+    type: string
+    description: Comment author full name
+required:
+- id
+- timestamp
+- text
+- user_id

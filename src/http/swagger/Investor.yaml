@@ -6,6 +6,18 @@ properties:
   name:
     type: string
     description: Investor name
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of investor creation
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of investor's last update
   pic:
     type: string
     description: backend-related URI to Investor userpic
+required:
+- id
+- name
+- pic

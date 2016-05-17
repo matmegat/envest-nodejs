@@ -14,17 +14,14 @@ produces:
 
 basePath: /api
 paths:
-  '/feed/latest':
-    get:
-      description: latest 10 Feed posts for current user
-      parameters: []
-      responses:
-        200:
-          description: user Feed
-          schema:
-            $ref: ../api/feed/Feed.yaml
-      tags:
-      - feed
+  '/feed':
+    $ref: ../api/feed/GetFeed.yaml
+
+  '/feed/{feed_id}':
+    $ref: ../api/feed/FeedById.yaml
+
+  '/feed/{feed_id}/comments':
+    $ref: ../api/feed/GetPostFeedComments.yaml
 
   '/auth/register':
     $ref: ../api/auth/Register.yaml
@@ -41,12 +38,19 @@ paths:
   '/auth/change-email':
     $ref: ../api/auth/ChangeEmail.yaml
 
+  '/comments':
+    $ref: ../api/comments/GetPostComments.yaml
+  '/comments/count':
+    $ref: ../api/comments/GetCount.yaml
+
 definitions:
   # Put here only COMMON definitions
 
   Feed:
-    type: object
     $ref: ../api/feed/Feed.yaml
+
+  FeedItem:
+    $ref: ../api/feed/FeedItem.yaml
 
   Investor:
     $ref: ./Investor.yaml
@@ -59,3 +63,6 @@ definitions:
 
   User:
     $ref: ./User.yaml
+
+  Comments:
+    $ref: ../api/comments/Comments.yaml

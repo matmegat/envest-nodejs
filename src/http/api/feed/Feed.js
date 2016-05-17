@@ -1,94 +1,59 @@
 
-var times = require('lodash/times')
-var Router = require('express').Router
+var _ = require('lodash')
 
-module.exports = function Feed ()
+var Router = require('express').Router
+var toss = require('../../toss')
+var authRequired = require('../../auth-required')
+
+var Err = require('../../../Err')
+var InvalidParams = Err('invalid_request', 'Invalid request parameters')
+
+var toId = require('../../../toId')
+
+module.exports = function Feed (db)
 {
 	var feed = {}
 
+	feed.model = db.feed
 	feed.express = Router()
+	feed.express.use(authRequired)
 
-	var dummy_id = Id()
-	var feed_length = 10
-
-	feed.express.get('/latest', (rq, rs) =>
+	feed.express.get('/', (rq, rs) =>
 	{
-		var data = times(feed_length, dummy_post)
-		.map(function (post)
-		{
-			post.id = dummy_id()
+		var options = _.pick(rq.query,
+		[
+			'max_id',
+			'since_id'
+		])
 
-			return post
-		})
+		toss(rs, feed.model.list(options))
+	})
 
-		rs.json(data)
+	feed.express.get('/:id', (rq, rs) =>
+	{
+		toss(rs, feed.model.byId(rq.params.id))
+	})
+
+	feed.express.get('/:id/comments', (rq, rs) =>
+	{
+		var options = _.pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+		])
+		options.feed_id = rq.params.id
+
+		toss(rs, db.comments.list(options))
+	})
+
+	feed.express.post('/:id/comments', (rq, rs) =>
+	{
+		var comment_data = _.pick(rq.body, [ 'text' ])
+		comment_data.feed_id = rq.params.id
+
+		toss(rs, db.comments.create(comment_data))
 	})
 
 	return feed
 }
 
-function dummy_post ()
-{
-	var post =
-	{
-		id: 1,
-		timestamp: dummy_date(),
-
-		comments: 0,
-
-		investor:
-		{
-			id: 1,
-			name: 'Allen Schwartzh',
-			pic: null
-		},
-
-		event:
-		{
-			type: 'Trade',
-			data: // data is related to `type` and depends on it
-			{
-				dir: 'sold',
-
-				symbol:
-				{
-					ticker: 'ZG',
-					company: 'ZILLOW',
-				},
-
-				price: 150,
-				amount: 100,
-
-				text: 'I want to sell all my assets and become a downshifter.',
-
-				risk: 'low', // low|medium|high
-				motivations:
-				[
-					'Earnings', // maybe this will be expanded to motivation Objects
-					'Valuation',
-					'Growth Potential'
-				]
-			}
-		}
-	}
-
-	return post
-}
-
-
-function dummy_date ()
-{
-	return (new Date).toISOString()
-}
-
-function Id ()
-{
-	var id = 0
-
-	return function dummy_id ()
-	{
-		id = id + 1
-
-		return id
-	}
-}

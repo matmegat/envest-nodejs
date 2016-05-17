@@ -10,18 +10,16 @@ post:
     schema:
       type: object
       properties:
-        full_name:
-          type: string
-          description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
         email:
           type: string
           description: Email
+          default: seed.2@user.com
         password:
           type: string
           description: Password
           format: password
+          default: '321321'
       required:
-      - full_name
       - email
       - password
   responses:

@@ -1,0 +1,63 @@
+get:
+  description: Get comments of Post (Feed Item)
+  parameters:
+  - name: max_id
+    in: query
+    type: integer
+    description: |
+      Get comments that are added before *max_id* (inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  - name: since_id
+    in: query
+    type: integer
+    description: |
+      Get comments greater than *since_id* (non inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  - name: feed_id
+    description: Post (Feed Item) id
+    in: query
+    type: integer
+    default: 1
+    required: true
+  responses:
+    200:
+      description: Post (Feed Item) comments
+      schema:
+        $ref: ./Comments.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - comments
+post:
+  description: Create comment for Post (Feed Item)
+  parameters:
+  - name: payload
+    description: JSON payload to create comment
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Comment Payload
+      properties:
+        feed_id:
+          type: integer
+          description: Post (Feed Item) Id
+          default: 1
+        text:
+          type: string
+          description: text of comment
+          default: Some comment from logged in user
+      required:
+      - feed_id
+      - text
+  responses:
+    200:
+      description: Post (Feed Item) successfull creation
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - comments

@@ -2,6 +2,8 @@
 var knex = require('knex')
 var User = require('./User')
 var Auth = require('./Auth')
+var Feed = require('./Feed')
+var Comments = require('./Comments')
 
 module.exports = function name (app)
 {
@@ -43,6 +45,8 @@ module.exports = function name (app)
 
 	db.user = User(db)
 	db.auth = Auth(db)
+	db.feed = Feed(db)
+	db.comments = Comments(db)
 
 	return db
 }
