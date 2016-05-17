@@ -49,6 +49,18 @@ var rethrow = Err.rethrow = curry(function rethrow (pred, fn)
 	}
 })
 
+Err.fromCode = function (code, fn)
+{
+	return rethrow(error =>
+	{
+		if (! Err.is(error))   { return false }
+		if (Err.code !== code) { return false }
+
+		return true
+	}
+	, fn)
+}
+
 Err.fromDb = function (constraint, fn)
 {
 	return rethrow(error =>
