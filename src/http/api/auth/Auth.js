@@ -52,7 +52,7 @@ module.exports = function Auth (auth_model, passport)
 		{
 			if (err)
 			{
-				return toss.err(rs, err)
+				return next(err)
 			}
 
 			rq.login(user, function (err)
@@ -113,6 +113,8 @@ module.exports = function Auth (auth_model, passport)
 	auth.express.use(function(err, rq, rs, next) {
 		if (err)
 		{
+			if (err.oauthError) err.message = JSON.parse(err.oauthError.data)
+
 			var MiddlewareError = Err('authentication_middleware_error', err.message)
 			toss.err(rs, MiddlewareError())
 		}

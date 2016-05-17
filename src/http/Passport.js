@@ -82,11 +82,7 @@ function useFacebookToken (auth, user)
 		}
 
 		user.byFB(user_data)
-		.then(user =>
-		{
-			done(null, user)
-		}
-		, done)
+		.then(user => done(null, user), done)
 	}))
 }
 
