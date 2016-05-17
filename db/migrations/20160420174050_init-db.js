@@ -18,8 +18,8 @@ exports.up = function (knex, Promise)
 		{
 			table.integer('user_id').primary()
 
-			table.string('password', 36).notNullable()
-			table.string('salt', 16).notNullable()
+			table.string('password', 72).notNullable()
+			table.string('salt', 32).notNullable()
 		})
 	})
 	.then(() =>
