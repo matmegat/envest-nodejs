@@ -41,6 +41,10 @@ exports.up = function (knex, Promise)
 			table.bigInteger('facebook_id').notNullable().unique()
 		})
 	})
+	.then(() =>
+	{
+		return knex.seed.run({ directory: './seeds/20160420' })
+	})
 }
 
 exports.down = function (knex, Promise)

@@ -7,12 +7,29 @@ properties:
     type: string
     format: date-time
     description: when event occurs
+  investor_id:
+    type: number
+    description: |
+      **optional**
+      present at `/feed` requests
   investor:
+    description: |
+      **optional**
+      present at `/feed/:id` requests
     $ref: ../../swagger/Investor.yaml
   event:
+    description: |
+      One of Events
+      more details at [github](https://github.com/WeezLabs/NetVest/tree/backend/develop/src/http/api/feed)
     type: object
-    description: One of Events
     enum:
     - $ref: ./TradeEvent.yaml
     - $ref: ./WatchlistEvent.yaml
     - $ref: ./UpdateEvent.yaml
+  comments:
+    type: number
+    description: Amount of comments for Feed Item
+required:
+- id
+- timestamp
+- event

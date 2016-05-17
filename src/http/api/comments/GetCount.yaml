@@ -1,0 +1,21 @@
+get:
+  description: Get amount of comments for Post (Feed Item)
+  parameters:
+  - name: feed_id
+    in: query
+    type: integer
+    description: Post (Feed Item) id
+    required: true
+    default: 1
+  responses:
+    200:
+      description: amount of comments
+      schema:
+        type: integer
+        title: Comments Count
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../swagger/Error.yaml
+  tags:
+  - comments
