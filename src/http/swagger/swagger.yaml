@@ -40,6 +40,8 @@ paths:
 
   '/comments':
     $ref: ../api/comments/GetPostComments.yaml
+  '/comments/count':
+    $ref: ../api/comments/GetCount.yaml
 
 definitions:
   # Put here only COMMON definitions
