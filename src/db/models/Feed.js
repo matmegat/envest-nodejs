@@ -12,7 +12,8 @@ module.exports = function Feed (db)
 	feed.db = db
 
 	var knex = db.knex
-	var oneMaybe = db.oneMaybe
+
+	var oneMaybe = db.helpers.oneMaybe
 
 	var paginator = Paginator()
 	var comments  = db.comments

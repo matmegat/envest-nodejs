@@ -1,8 +1,6 @@
 
 var knex = require('knex')
 
-var extend = require('lodash/extend')
-
 var User = require('./models/User')
 var Auth = require('./models/Auth')
 var Feed = require('./models/Feed')
@@ -15,7 +13,7 @@ module.exports = function name (app)
 	var cfg  = app.cfg
 	var conn = cfg.pg
 
-	extend(db, require('./helpers'))
+	db.helpers = require('./helpers')
 
 	db.knex = knex({
 		client: 'pg',

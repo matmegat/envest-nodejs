@@ -13,7 +13,8 @@ module.exports = function Comments (db)
 	comments.db = db
 
 	var knex = db.knex
-	var one  = db.one
+
+	var one  = db.helpers.one
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
