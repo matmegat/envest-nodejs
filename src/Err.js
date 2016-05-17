@@ -27,20 +27,20 @@ Err.is = function (err)
 var curry = require('lodash/curry')
 
 /*
- * checks for pred(error) and rethrows new error
- *   if  true -> fn(error)
- *      false -> noop
+ * checks for pred(error) and rethrows:
+ *   if  true -> rethrows fn() result
+ *      false -> rethrows current error
  *
  * usage:
  *   .catch(rethrow(CheckOldError, ConstructNewError))
  */
-var rethrow = Err.rethrow = curry(function rethrow (pred, fn)
+var rethrow = Err.rethrow = curry(function (pred, fn)
 {
 	return (error) =>
 	{
 		if (pred(error))
 		{
-			throw fn(error)
+			throw fn()
 		}
 		else
 		{
@@ -48,6 +48,7 @@ var rethrow = Err.rethrow = curry(function rethrow (pred, fn)
 		}
 	}
 })
+
 
 Err.fromCode = function (code, fn)
 {
@@ -71,12 +72,7 @@ Err.fromDb = function (constraint, fn)
 
 		return true
 	}
-	,
-	() =>
-	{
-		/* upgrade to ErrInst */
-		return fn(/* mask error */)
-	})
+	, fn)
 }
 
 
