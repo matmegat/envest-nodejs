@@ -21,7 +21,7 @@ paths:
     $ref: ../api/feed/FeedById.yaml
 
   '/feed/{feed_id}/comments':
-    $ref: ../api/feed/GetFeedComments.yaml
+    $ref: ../api/feed/GetPostFeedComments.yaml
 
   '/auth/register':
     $ref: ../api/auth/Register.yaml
