@@ -9,10 +9,10 @@ var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
-var salt_size     = 16 / 2
-var code_size     = 16 / 2
-var password_size = 36 / 2
-var iterations    = 100000
+var salt_size     = 16
+var code_size     = 16
+var password_size = 36
+var iterations    = 48329
 
 var helpers = module.exports = {}
 
