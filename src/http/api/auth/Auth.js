@@ -127,7 +127,7 @@ module.exports = function Auth (auth_model, passport)
 		else
 		{
 			next()
-		}		
+		}
 	})
 
 	return auth
