@@ -54,6 +54,7 @@ module.exports = function Comments (db)
 
 	var at  = require('lodash/fp/at')
 	var zip = _.fromPairs
+	var mapValues = _.mapValues
 
 	comments.countMany = function (feed_ids)
 	{
@@ -66,7 +67,11 @@ module.exports = function Comments (db)
 		{
 			seq = seq.map(at([ 'feed_id', 'count' ]))
 
-			return zip(seq)
+			seq = zip(seq)
+
+			seq = mapValues(seq, toNumber)
+
+			return seq
 		})
 	}
 

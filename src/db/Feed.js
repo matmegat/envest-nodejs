@@ -67,18 +67,11 @@ module.exports = function Feed (db)
 
 			return comments
 			.countMany(feed_ids)
-			.then((commentsCount) =>
+			.then(counts =>
 			{
 				feed_items.forEach((item) =>
 				{
-					var comments = commentsCount[item.id]
-
-					if (comments)
-					{
-						comments = _.toNumber(comments)
-					}
-
-					item.comments = comments || 0
+					item.comments = counts[item.id]
 				})
 
 				return feed_items
