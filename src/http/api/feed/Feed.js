@@ -5,11 +5,6 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
-var Err = require('../../../Err')
-var InvalidParams = Err('invalid_request', 'Invalid request parameters')
-
-var toId = require('../../../toId')
-
 module.exports = function Feed (db)
 {
 	var feed = {}
@@ -50,6 +45,7 @@ module.exports = function Feed (db)
 	{
 		var comment_data = _.pick(rq.body, [ 'text' ])
 		comment_data.feed_id = rq.params.id
+		comment_data.user_id = rq.user.id
 
 		toss(rs, db.comments.create(comment_data))
 	})
