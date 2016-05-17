@@ -112,7 +112,7 @@ module.exports = function Auth (db)
 	}
 
 
-	auth.validateLogin = function(email, password)
+	auth.validateLogin = function (email, password)
 	{
 		email = email.toLowerCase()
 

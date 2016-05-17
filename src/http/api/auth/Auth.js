@@ -57,8 +57,9 @@ module.exports = function Auth (auth_model, passport)
 
 			rq.login(user, function (err)
 			{
-				if (err) {
-					
+				if (err)
+				{
+
 					if (info)
 					{
 						err.message = info.message
@@ -72,7 +73,7 @@ module.exports = function Auth (auth_model, passport)
 		})(rq, rs, next)
 	})
 
-	var checkAuthCreds = curry((rq, rs, next) =>
+	var checkAuthCreds = function (rq, rs, next)
 	{
 		var email = rq.body.email
 		var password = rq.body.password
@@ -82,8 +83,8 @@ module.exports = function Auth (auth_model, passport)
 		{
 			next()
 		}
-		, err => { return toss.err(rs, err) })
-	})
+		, toss.err(rs))
+	}
 
 	auth.express.post('/login', checkAuthCreds, authByProvider('local'))
 
@@ -110,16 +111,20 @@ module.exports = function Auth (auth_model, passport)
 		rs.status(200).end()
 	})
 
-	auth.express.use(function(err, rq, rs, next) {
+	auth.express.use(function (err, rq, rs, next)
+	{
 		if (err)
 		{
-			if (err.oauthError) err.message = JSON.parse(err.oauthError.data)
+			if (err.oauthError)
+			{
+				err.message = JSON.parse(err.oauthError.data)
+			}
 
 			var MiddlewareError = Err('authentication_middleware_error', err.message)
 			toss.err(rs, MiddlewareError())
 		}
 		next()
-	});
+	})
 
 	return auth
 }
