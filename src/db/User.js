@@ -1,4 +1,5 @@
 
+var generate_code = require('../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
 var Err = require('../Err')
@@ -16,7 +17,8 @@ module.exports = function User (db)
 
 	user.users_table    = () => knex('users')
 	user.email_confirms = () => knex('email_confirms')
-
+	user.auth_facebook  = () => knex('auth_facebook')
+	user.auth_local     = () => knex('auth_local')
 
 	user.create = function (data)
 	{
@@ -29,20 +31,24 @@ module.exports = function User (db)
 				.transacting(trx)
 				.insert({
 					full_name: data.full_name,
-					email: null,
-					password: data.password,
-					salt: data.salt
+					email: null
 				}
 				, 'id')
 				.then(one)
 				.then(function (id)
 				{
+					return createLocalCreds({
+						user_id: id,
+						password: data.password,
+						salt: data.salt
+					}, trx)
+				})
+				.then(function (id)
+				{
 					return user.newEmailUpdate({
 						user_id: id,
-						new_email: data.email,
-						code: data.code
-					}
-					, trx)
+						new_email: data.email
+					}, trx)
 				})
 			})
 		})
@@ -75,12 +81,107 @@ module.exports = function User (db)
 				'users.id',
 				'email_confirms.user_id'
 			)
+			.leftJoin(
+				'auth_local',
+				'users.id',
+				'auth_local.user_id'
+			)
 			.as('ignored_alias')
 		})
 		.where('email', email)
 		.then(oneMaybe)
 	}
 
+	user.byId = function (id)
+	{
+		return user.users_table()
+		.where('id', id)
+		.then(oneMaybe)
+	}
+
+	user.byFacebookId = function (facebook_id)
+	{
+		return knex.select('id', 'facebook_id')
+		.from(function ()
+		{
+			this.select(
+				'users.id AS id',
+				'auth_facebook.facebook_id AS facebook_id'
+			)
+			.from('users')
+			.leftJoin(
+				'auth_facebook',
+				'users.id',
+				'auth_facebook.user_id'
+			)
+			.as('ignored_alias')
+		})
+		.where('facebook_id', facebook_id)
+		.then(oneMaybe)
+	}
+
+	user.createFacebook = function (data)
+	{
+		return knex.transaction(function (trx)
+		{
+			user.users_table()
+			.transacting(trx)
+			.insert({
+				full_name: data.full_name,
+				email: null
+			}
+			, 'id')
+			.then(one)
+			.then(function (id)
+			{
+				return user.newEmailUpdate({
+					user_id: id,
+					new_email: data.email
+				}, trx)
+			})
+			.then(function (id)
+			{
+				return createFacebookUser({
+					user_id: id,
+					facebook_id: data.facebook_id
+				}, trx)
+			})
+			.then(trx.commit)
+			.catch(trx.rollback)
+		})
+	}
+
+	user.byFB = function (data)
+	{
+		return user.byFacebookId(data.facebook_id)
+		.then(result =>
+		{
+			if (! result)
+			{
+				return user.createFacebook(data)
+			}
+			else
+			{
+				return result
+			}
+		})
+	}
+
+	function createFacebookUser (data, trx)
+	{
+		return user.auth_facebook()
+		.transacting(trx)
+		.insert(data, 'user_id')
+		.then(one)
+	}
+
+	function createLocalCreds (data, trx)
+	{
+		return user.auth_local()
+		.transacting(trx)
+		.insert(data, 'user_id')
+		.then(one)
+	}
 
 	user.newEmailByCode = function (code)
 	{
@@ -124,35 +225,31 @@ module.exports = function User (db)
 			return ensureEmailNotExists(data.new_email, trx)
 			.then(() =>
 			{
-				return user.email_confirms()
-				.transacting(trx)
-				.insert(data, 'user_id')
-				.then(one)
-				.catch(err =>
+				return generate_code()
+				.then(code =>
 				{
-					// UPSERT
-					if (err.constraint === 'email_confirms_pkey')
+					data.code = code
+
+					return user.email_confirms()
+					.transacting(trx)
+					.insert(data, 'user_id')
+					.then(one)
+					.catch(err =>
 					{
-						return user.email_confirms()
-						.update({
-							new_email: data.new_email,
-							code: data.code
-						})
-						.where('user_id', data.user_id)
-					}
+						if (err.constraint === 'email_confirms_pkey')
+						{
+							return user.email_confirms()
+							.update({
+								new_email: data.new_email,
+								code: data.code
+							})
+							.where('user_id', data.user_id)
+						}
+					})
 				})
 			})
 		})
 	}
-
-
-	user.byId = function (id)
-	{
-		return user.users_table()
-		.where('id', id)
-		.then(oneMaybe)
-	}
-
 
 	return user
 }

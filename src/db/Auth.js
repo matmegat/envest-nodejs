@@ -7,6 +7,12 @@ var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
+var cr_helpers = require('../crypto-helpers')
+
+var generate_salt = cr_helpers.generate_salt
+var encrypt_pass  = cr_helpers.encrypt_pass
+var compare_passwords = cr_helpers.compare_passwords
+
 module.exports = function Auth (db)
 {
 	var auth = {}
@@ -32,17 +38,10 @@ module.exports = function Auth (db)
 				userdata.password = encrypted_pass
 				userdata.salt     = salt
 
-				return generate_code()
-				.then(code =>
-				{
-					userdata.code = code
-
-					return user.create(userdata)
-				})
+				return user.create(userdata)
 			})
 		})
 	}
-
 
 	auth.login = function (email, password)
 	{
@@ -54,6 +53,14 @@ module.exports = function Auth (db)
 			return user.byEmail(email)
 		})
 		.then(Err.nullish(WrongLogin))
+		.then(user_data =>
+		{
+			if (! user_data.password)
+			{
+				throw WrongLogin()
+			}
+			return user_data
+		})
 		.then(user_data =>
 		{
 			return compare_passwords(
@@ -73,7 +80,6 @@ module.exports = function Auth (db)
 			})
 		})
 	}
-
 
 	var WrongConfirmCode = Err('wrong_confirm', 'Wrong confirm code')
 
@@ -97,73 +103,24 @@ module.exports = function Auth (db)
 		return validate_change_email(new_email)
 		.then(() =>
 		{
-			return generate_code()
-		})
-		.then(code =>
-		{
 			return user.newEmailUpdate({
 				user_id: user_id,
-				new_email: new_email,
-				code: code
+				new_email: new_email
 			})
 		})
 		.then(noop)
 	}
 
+
+	auth.validateLogin = function (email, password)
+	{
+		email = email.toLowerCase()
+
+		return validate_login(email, password)
+	}
+
 	return auth
 }
-
-
-// 2 chars per 1 password  char
-var salt_size     = 16
-var code_size     = 16
-var password_size = 36
-var iterations    = 48329
-
-var promisify = require('promisify-node')
-
-var crypto = require('crypto')
-var genHash = promisify(crypto.pbkdf2)
-
-var method = require('lodash/method')
-var hex = method('toString', 'hex')
-
-var gen_rand_str = require('../genRandStr')
-
-function generate_salt ()
-{
-	return gen_rand_str(salt_size)
-}
-
-function generate_code ()
-{
-	return gen_rand_str(code_size)
-}
-
-function encrypt_pass (password, salt)
-{
-	return hash(password, '')
-	.then(pass_hash =>
-	{
-		return hash(pass_hash, salt)
-	})
-}
-
-function hash (password, salt)
-{
-	return genHash(password, salt, iterations, password_size, 'sha512')
-	.then(hex)
-}
-
-function compare_passwords (db_pass, form_pass, salt)
-{
-	return encrypt_pass(form_pass, salt)
-	.then(encrypted_pass =>
-	{
-		return encrypted_pass === db_pass
-	})
-}
-
 
 /* validations */
 function validate_register (credentials)
@@ -274,6 +231,7 @@ var TooLongPassword  = Err('too_long_password', 'Password is too long')
 function validate_password (password)
 {
 	validate_required(password, 'password')
+	validate_empty(password, 'password')
 
 	if (password.length < 6)
 	{

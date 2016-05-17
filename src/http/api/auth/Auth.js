@@ -1,10 +1,12 @@
 
 var pick = require('lodash/pick')
+var curry = require('lodash/curry')
 
 var Router = require('express').Router
 
 var authRequired = require('../../auth-required')
 var toss = require('../../toss')
+var Err = require('../../../Err')
 
 module.exports = function Auth (auth_model, passport)
 {
@@ -44,24 +46,49 @@ module.exports = function Auth (auth_model, passport)
 		.catch(toss.err(rs))
 	})
 
-	auth.express.post('/login', (rq, rs, next) =>
+	var authByProvider = curry((provider, rq, rs, next) =>
 	{
-		passport.authenticate('local', (err, user_data) =>
+		passport.authenticate(provider, (err, user, info) =>
 		{
 			if (err)
 			{
-				return toss.err(rs, err)
+				return next(err)
 			}
 
-			rq.login(user_data, function (err)
+			rq.login(user, function (err)
 			{
-				/* ¯\_(ツ)_/¯ */
-				if (err) { return next(err) }
+				if (err)
+				{
 
-				return toss.ok(rs, user_data)
+					if (info)
+					{
+						err.message = info.message
+					}
+
+					return next(err)
+				}
+
+				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)
 	})
+
+	var checkAuthCreds = function (rq, rs, next)
+	{
+		var email = rq.body.email
+		var password = rq.body.password
+
+		auth.model.validateLogin(email, password)
+		.then(() =>
+		{
+			next()
+		}
+		, toss.err(rs))
+	}
+
+	auth.express.post('/login', checkAuthCreds, authByProvider('local'))
+
+	auth.express.post('/login/facebook', authByProvider('facebook-token'))
 
 	auth.express.post('/confirm-email', (rq, rs) =>
 	{
@@ -82,6 +109,25 @@ module.exports = function Auth (auth_model, passport)
 	{
 		rq.logout()
 		rs.status(200).end()
+	})
+
+	var MiddlewareError = Err('auth_middleware_error', 'Middleware error')
+
+	auth.express.use(function (err, rq, rs, next)
+	{
+		if (err)
+		{
+			if (err.oauthError)
+			{
+				err.message = JSON.parse(err.oauthError.data)
+			}
+
+			toss.err(rs, MiddlewareError(err.message))
+		}
+		else
+		{
+			next()
+		}
 	})
 
 	return auth

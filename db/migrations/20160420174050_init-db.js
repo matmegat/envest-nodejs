@@ -9,10 +9,17 @@ exports.up = function (knex, Promise)
 			table.increments('id').primary()
 
 			table.string('full_name').notNullable()
-
 			table.string('email')
-			table.string('password', 72).notNullable()
-			table.string('salt', 32).notNullable()
+		})
+	})
+	.then(() =>
+	{
+		return knex.schema.createTable('auth_local', (table) =>
+		{
+			table.integer('user_id').primary()
+
+			table.string('password', 36).notNullable()
+			table.string('salt', 16).notNullable()
 		})
 	})
 	.then(() =>
@@ -25,6 +32,15 @@ exports.up = function (knex, Promise)
 			table.string('code', 32).notNullable()
 		})
 	})
+	.then(() =>
+	{
+		return knex.schema.createTable('auth_facebook', (table) =>
+		{
+			table.integer('user_id').primary()
+
+			table.bigInteger('facebook_id').notNullable().unique()
+		})
+	})
 }
 
 exports.down = function (knex, Promise)
@@ -33,5 +49,7 @@ exports.down = function (knex, Promise)
 	[
 		knex.schema.dropTableIfExists('users'),
 		knex.schema.dropTableIfExists('email_confirms'),
+		knex.schema.dropTableIfExists('auth_local'),
+		knex.schema.dropTableIfExists('auth_facebook')
 	])
 }
