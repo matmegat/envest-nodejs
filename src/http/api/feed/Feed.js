@@ -8,6 +8,8 @@ var authRequired = require('../../auth-required')
 var Err = require('../../../Err')
 var InvalidParams = Err('invalid_request', 'Invalid request parameters')
 
+var toId = require('../../../toId')
+
 module.exports = function Feed (db)
 {
 	var feed = {}

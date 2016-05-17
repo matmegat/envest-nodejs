@@ -87,13 +87,16 @@ module.exports = function Comments (db)
 	return comments
 }
 
+var toId = require('../toId')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 function validate_feed_id (feed_id)
 {
 	return new Promise(rs =>
 	{
-		if (! isInteger(toNumber(feed_id)) || feed_id <= 0)
+		feed_id = toId(feed_id)
+
+		if (! feed_id)
 		{
 			throw WrongFeedId()
 		}
