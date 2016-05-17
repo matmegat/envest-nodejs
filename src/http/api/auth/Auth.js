@@ -111,6 +111,8 @@ module.exports = function Auth (auth_model, passport)
 		rs.status(200).end()
 	})
 
+	var MiddlewareError = Err('auth_middleware_error', 'Middleware error')
+
 	auth.express.use(function (err, rq, rs, next)
 	{
 		if (err)
@@ -120,10 +122,12 @@ module.exports = function Auth (auth_model, passport)
 				err.message = JSON.parse(err.oauthError.data)
 			}
 
-			var MiddlewareError = Err('authentication_middleware_error', err.message)
-			toss.err(rs, MiddlewareError())
+			toss.err(rs, MiddlewareError(err.message))
 		}
-		next()
+		else
+		{
+			next()
+		}		
 	})
 
 	return auth
