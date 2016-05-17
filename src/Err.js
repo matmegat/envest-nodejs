@@ -79,6 +79,31 @@ Err.fromDb = function (constraint, fn)
 	})
 }
 
+
+/*
+ * checks for pred(value)
+ * if  true -> rethrow fn()
+ *    false -> proceed with value
+ *
+ * usage:
+ *   .then(shortcut(IsValueBad, NewError))
+ */
+Err.shortcut = curry(function (pred, fn)
+{
+	return (value) =>
+	{
+		if (pred(value))
+		{
+			throw fn()
+		}
+		else
+		{
+			return value
+		}
+	}
+})
+
+
 Err.nullish = function (fn)
 {
 	return (it) =>
