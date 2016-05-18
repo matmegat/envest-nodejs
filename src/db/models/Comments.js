@@ -112,6 +112,7 @@ module.exports = function Comments (db)
 	}
 
 	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
+	var AbuseExist = Err('abuse_exist', 'Abuse exist')
 
 	comments.abuse = function (user_id, comment_id)
 	{
@@ -126,6 +127,7 @@ module.exports = function Comments (db)
 			})
 			.then(noop)
 		})
+		.catch(Err.fromDb('abuse_comments_comment_id_unique', AbuseExist))
 	}
 
 	comments.byId = function (id)
