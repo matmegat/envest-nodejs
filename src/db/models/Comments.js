@@ -12,18 +12,20 @@ module.exports = function Comments (db)
 
 	var knex = db.knex
 
-	var one  = db.helpers.one
+	var one      = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
 	comments.table = () => knex('comments')
+	comments.abuse_table = () => knex('abuse_comments')
 
 	comments.list = function (options)
 	{
-		return comments.validate_feed_id(options.feed_id)
+		return comments.validate_id(options.feed_id)
 		.then(() =>
 		{
-			var comments_queryset = byId(options.feed_id)
+			var comments_queryset = byFeedId(options.feed_id)
 
 			return paginator.paginate(comments_queryset, options)
 		})
@@ -31,24 +33,24 @@ module.exports = function Comments (db)
 
 
 	var toId = require('../../toId')
-	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+	var WrongId = Err('wrong_id', 'Wrong id')
 
-	comments.validate_feed_id = function (feed_id)
+	comments.validate_id = function (id)
 	{
 		return new Promise(rs =>
 		{
-			feed_id = toId(feed_id)
+			id = toId(id)
 
-			if (! feed_id)
+			if (! id)
 			{
-				throw WrongFeedId()
+				throw WrongId()
 			}
 
 			return rs()
 		})
 	}
 
-	function byId (feed_id)
+	function byFeedId (feed_id)
 	{
 		return comments.table()
 		.select(
@@ -73,7 +75,7 @@ module.exports = function Comments (db)
 
 	comments.count = function (feed_id)
 	{
-		return comments.validate_feed_id(feed_id)
+		return comments.validate_id(feed_id)
 		.then(() =>
 		{
 			return comments.table()
@@ -106,6 +108,34 @@ module.exports = function Comments (db)
 			seq = mapValues(seq, toNumber)
 
 			return seq
+		})
+	}
+
+	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
+
+	comments.abuse = function (user_id, comment_id)
+	{
+		return comments.byId(comment_id)
+		.then(Err.nullish(CommentNotExist))
+		.then(() =>
+		{
+			return comments.abuse_table()
+			.insert({
+				user_id: user_id,
+				comment_id: comment_id
+			})
+			.then(noop)
+		})
+	}
+
+	comments.byId = function (id)
+	{
+		return comments.validate_id(id)
+		.then(() =>
+		{
+			return comments.table()
+			.where('id', id)
+			.then(oneMaybe)
 		})
 	}
 

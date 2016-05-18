@@ -22,7 +22,7 @@ module.exports = function Feed (db)
 
 	feed.byId = function (id)
 	{
-		return comments.validate_feed_id(id)
+		return comments.validate_id(id)
 		.then(() =>
 		{
 			return feed.feed_table()
