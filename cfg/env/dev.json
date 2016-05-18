@@ -1,5 +1,5 @@
 {
-  "dev":  false,
+  "dev":  true,
   "env": "dev",
 
   "port": 8000,
