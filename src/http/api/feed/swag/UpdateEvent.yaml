@@ -10,7 +10,7 @@ allOf:
         stocks:
           type: array
           items:
-            $ref: ../../swagger/Symbol.yaml
+            $ref: ../../../swagger/Symbol.yaml
         title:
           type: string
         text:

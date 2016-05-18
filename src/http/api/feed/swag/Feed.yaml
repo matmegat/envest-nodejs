@@ -7,7 +7,7 @@ properties:
   investors:
     type: array
     items:
-    - $ref: ../../swagger/Investor.yaml
+    - $ref: ../../../swagger/Investor.yaml
 required:
 - feed
 - investors

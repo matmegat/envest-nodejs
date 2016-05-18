@@ -1,35 +1,36 @@
 post:
-  description: Authenticates user by email and password
+  description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
   parameters:
   - name: payload
-    description: |
-      JSON payload to register / signup.
-      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
     in: body
-    required: true
+    description: |
+      JSON payload to log in.
+      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
     schema:
       type: object
       properties:
+        full_name:
+          type: string
+          description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
         email:
           type: string
           description: Email
-          default: seed.2@user.com
         password:
           type: string
-          description: Password
           format: password
-          default: '321321'
+          description: Password
       required:
+      - full_name
       - email
       - password
   responses:
     200:
       description: user model
       schema:
-        $ref: ../../swagger/User.yaml
+        $ref: ../../../swagger/User.yaml
     400:
       description: if something went wrong
       schema:
-        $ref: ../../swagger/Error.yaml
+        $ref: ../../../swagger/Error.yaml
   tags:
   - auth

@@ -16,6 +16,6 @@ get:
     400:
       description: if something went wrong
       schema:
-        $ref: ../../swagger/Error.yaml
+        $ref: ../../../swagger/Error.yaml
   tags:
   - comments
