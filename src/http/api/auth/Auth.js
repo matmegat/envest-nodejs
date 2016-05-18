@@ -113,7 +113,7 @@ module.exports = function Auth (auth_model, passport)
 
 	var MiddlewareError = Err('auth_middleware_error', 'Middleware error')
 
-	auth.express.use(function (err, rq, rs)
+	auth.express.use(function (err, rq, rs, next)
 	{
 		if (Err.is(err))
 		{
