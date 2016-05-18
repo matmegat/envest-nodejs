@@ -4,6 +4,7 @@ var secret  = 'aoor91xck0'
 
 var passport = require('passport')
 var LocalStrategy = require('passport-local')
+var FacebookStrategy = require('passport-facebook-token')
 
 module.exports = function (express, db)
 {
@@ -41,6 +42,7 @@ module.exports = function (express, db)
 	})
 
 	useLocal(auth)
+	useFacebookToken(auth, user)
 
 	return passport
 }
@@ -58,3 +60,29 @@ function useLocal (auth)
 		.then(user_data => done(null, user_data), done)
 	}))
 }
+
+var clientID = 213309782384928
+var clientSecret = '7bb071d47fb514268d2d3e26edca4c57'
+
+function useFacebookToken (auth, user)
+{
+	passport.use(new FacebookStrategy(
+	{
+		clientID: clientID,
+		clientSecret: clientSecret
+	}
+	, (accessToken, refreshToken, profile, done) =>
+	{
+		var user_data =
+		{
+			email: profile.emails[0].value,
+			full_name: `${profile.name.givenName} ${profile.name.familyName}`,
+			facebook_id: profile.id,
+			token: accessToken
+		}
+
+		user.byFB(user_data)
+		.then(user => done(null, user), done)
+	}))
+}
+

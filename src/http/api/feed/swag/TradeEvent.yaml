@@ -14,11 +14,11 @@ allOf:
           - sold
           - bought
         symbol:
-          $ref: ../../swagger/Symbol.yaml
+          $ref: ../../../swagger/Symbol.yaml
         price:
           type: integer
           minimum: 0
-        amount::
+        amount:
           type: integer
           minimum: 0
         text:

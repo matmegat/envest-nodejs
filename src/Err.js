@@ -24,56 +24,82 @@ Err.is = function (err)
 }
 
 
-Err.fromDb = function (constraint, fn)
+var curry = require('lodash/curry')
+
+/*
+ * checks for pred(error) and rethrows:
+ *   if  true -> rethrows fn() result
+ *      false -> rethrows current error
+ *
+ * usage:
+ *   .catch(rethrow(CheckOldError, ConstructNewError))
+ */
+var rethrow = Err.rethrow = curry(function (pred, fn)
 {
 	return (error) =>
 	{
-		if (! error.constraint) { throw error }
-		if (error.constraint !== constraint) { throw error }
-
-		/* upgrade to ErrInst */
-		error = fn(/* error */)
-
-		throw error
-	}
-}
-
-Err.nullish = function (fn)
-{
-	return (it) =>
-	{
-		if (it == null)
+		if (pred(error))
 		{
 			throw fn()
 		}
-
-		return it
+		else
+		{
+			throw error
+		}
 	}
+})
+
+
+Err.fromCode = function (code, fn)
+{
+	return rethrow(error =>
+	{
+		if (! Err.is(error))   { return false }
+		if (Err.code !== code) { return false }
+
+		return true
+	}
+	, fn)
 }
 
-Err.falsy = function (fn)
+Err.fromDb = function (constraint, fn)
 {
-	return (it) =>
+	return rethrow(error =>
 	{
-		if (! it)
+		/* check for constraint to be desired */
+		if (! error.constraint)              { return false }
+		if (error.constraint !== constraint) { return false }
+
+		return true
+	}
+	, fn)
+}
+
+
+/*
+ * checks for pred(value)
+ * if  true -> rethrow fn()
+ *    false -> proceed with value
+ *
+ * usage:
+ *   .then(shortcut(IsValueBad, NewError))
+ */
+var shortcut = Err.shortcut = curry(function (pred, fn)
+{
+	return (value) =>
+	{
+		if (pred(value))
 		{
 			throw fn()
 		}
-
-		return it
-	}
-}
-
-Err.existent = function (fn)
-{
-	return (it) =>
-	{
-		if (it)
+		else
 		{
-			throw fn()
+			return value
 		}
-
-		return it
 	}
-}
+})
 
+
+Err.nullish  = shortcut(it => it == null)
+Err.falsy    = shortcut(it => ! it)
+Err.existent = shortcut(it => !! it)

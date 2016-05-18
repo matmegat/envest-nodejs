@@ -14,39 +14,43 @@ produces:
 
 basePath: /api
 paths:
-  '/feed/latest':
-    get:
-      description: latest 10 Feed posts for current user
-      parameters: []
-      responses:
-        200:
-          description: user Feed
-          schema:
-            $ref: ../api/feed/Feed.yaml
-      tags:
-      - feed
+  '/feed':
+    $ref: ../api/feed/swag/GetFeed.yaml
+
+  '/feed/{feed_id}':
+    $ref: ../api/feed/swag/FeedById.yaml
+
+  '/feed/{feed_id}/comments':
+    $ref: ../api/feed/swag/GetPostFeedComments.yaml
 
   '/auth/register':
-    $ref: ../api/auth/Register.yaml
+    $ref: ../api/auth/swag/Register.yaml
 
   '/auth/login':
-    $ref: ../api/auth/Login.yaml
+    $ref: ../api/auth/swag/Login.yaml
 
   '/auth/logout':
-    $ref: ../api/auth/Logout.yaml
+    $ref: ../api/auth/swag/Logout.yaml
 
   '/auth/confirm-email':
-    $ref: ../api/auth/ConfirmEmail.yaml
+    $ref: ../api/auth/swag/ConfirmEmail.yaml
 
   '/auth/change-email':
-    $ref: ../api/auth/ChangeEmail.yaml
+    $ref: ../api/auth/swag/ChangeEmail.yaml
+
+  '/comments':
+    $ref: ../api/comments/swag/GetPostComments.yaml
+  '/comments/count':
+    $ref: ../api/comments/swag/GetCount.yaml
 
 definitions:
   # Put here only COMMON definitions
 
   Feed:
-    type: object
-    $ref: ../api/feed/Feed.yaml
+    $ref: ../api/feed/swag/Feed.yaml
+
+  FeedItem:
+    $ref: ../api/feed/swag/FeedItem.yaml
 
   Investor:
     $ref: ./Investor.yaml
@@ -59,3 +63,6 @@ definitions:
 
   User:
     $ref: ./User.yaml
+
+  Comments:
+    $ref: ../api/comments/swag/Comments.yaml

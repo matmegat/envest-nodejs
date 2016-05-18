@@ -6,3 +6,7 @@ properties:
     type: string
   email:
     type: string
+required:
+- id
+- full_name
+- email

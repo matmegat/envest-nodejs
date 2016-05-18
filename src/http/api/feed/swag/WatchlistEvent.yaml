@@ -14,7 +14,7 @@ allOf:
           - added
           - removed
         symbol:
-          $ref: ../../swagger/Symbol.yaml
+          $ref: ../../../swagger/Symbol.yaml
         text:
           type: string
         motivations:

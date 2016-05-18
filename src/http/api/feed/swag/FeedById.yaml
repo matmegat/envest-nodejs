@@ -1,0 +1,19 @@
+get:
+  description: Get selected Feed Item by ID
+  parameters:
+  - name: feed_id
+    in: path
+    type: number
+    description: Feed Item ID
+    required: true
+  responses:
+    200:
+      description: Selected Feed
+      schema:
+        $ref: ./FeedItem.yaml
+    400:
+      description: Handled Error
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

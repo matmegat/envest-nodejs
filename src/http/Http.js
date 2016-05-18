@@ -9,6 +9,7 @@ var AdminRequired = require('./admin-required')
 
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
+var Comments = require('./api/comments/Comments')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
@@ -43,7 +44,8 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
-	mount(Feed(), 'feed', 'feed')
+	mount(Feed(app.db), 'feed', 'feed')
+	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 
 	app.swagger = Swagger(app, http.express)

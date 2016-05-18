@@ -1,8 +1,11 @@
 
 var knex = require('knex')
-var User = require('./User')
-var Auth = require('./Auth')
-var Admin = require('./Admin')
+
+var User = require('./models/User')
+var Auth = require('./models/Auth')
+var Admin = require('./models/Admin')
+var Feed = require('./models/Feed')
+var Comments = require('./models/Comments')
 
 module.exports = function name (app)
 {
@@ -11,9 +14,7 @@ module.exports = function name (app)
 	var cfg  = app.cfg
 	var conn = cfg.pg
 
-	db.exists = exists
-	db.one = one
-	db.oneMaybe = oneMaybe
+	db.helpers = require('./helpers')
 
 	db.knex = knex({
 		client: 'pg',
@@ -46,46 +47,8 @@ module.exports = function name (app)
 	db.user  = User(db)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
+	db.feed = Feed(db)
+	db.comments = Comments(db)
 
 	return db
-}
-
-
-function exists (queryset)
-{
-	ensureNotMultiple(queryset)
-
-	return queryset.length === 1
-}
-
-function oneMaybe (queryset)
-{
-	ensureNotMultiple(queryset)
-
-	return queryset[0]
-}
-
-function one (queryset)
-{
-	ensureNotMultiple(queryset)
-
-	if (queryset.length === 0)
-	{
-		throw new Error('query must return strict 1 entry')
-	}
-
-	return queryset[0]
-}
-
-function ensureNotMultiple (queryset)
-{
-	if (! Array.isArray(queryset))
-	{
-		throw new Error('queryset must be an array')
-	}
-
-	if (queryset.length > 1)
-	{
-		throw new Error('query cannot return more that 1 entry')
-	}
 }
