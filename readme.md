@@ -33,13 +33,24 @@
 * `restart` — stop if any, then start
 * `st` — check styles against js-outlander style
 * `db-migrate` — migrates local DB on latest revision
-* `db-rollback` — rollbacks local DB last migration group
+* `db-rollback` — rollbacks local DB last migrations batch
 
 ## deploy
+
+**push & run**:
+To push and run backend `deploy` must be used.
 ```sh
 cd netvest-backend-dir
 run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 ```
+
+**migrate**:
+To migrate database use npm scripts.
+```sh
+npm run db-migrate # runs a batch of new migrations
+npm run db-rollback # CAREFUL; rollbacks last batch
+```
+
 
 ## API
 **Swagger** DOC: open in browser `/docs/`.
