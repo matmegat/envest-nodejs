@@ -1,7 +1,4 @@
 
-var constant = require('lodash/constant')
-var False = constant(false)
-
 var Err = require('../Err')
 var AdminRequired =
     Err('admin_required', 'Admin privileges is required for this operation')
@@ -23,7 +20,7 @@ module.exports = function (admin)
 		return admin.is(rq.user.id)
 
 		// if any error occurs, cast them to false
-		.catch(False)
+		.catch(debug)
 
 		// capture all falsy values
 		.then(Err.falsy(AdminRequired))
@@ -31,4 +28,12 @@ module.exports = function (admin)
 		//    OK            ERR
 		.then(() => next(), toss.err(rs))
 	}
+}
+
+function debug (error)
+{
+	console.error('admin-required error')
+	console.error(error)
+
+	return false
 }
