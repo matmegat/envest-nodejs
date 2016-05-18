@@ -47,8 +47,8 @@ module.exports = function name (app)
 	db.user  = User(db)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
-	db.feed = Feed(db)
 	db.comments = Comments(db)
+	db.feed = Feed(db)
 
 	return db
 }
