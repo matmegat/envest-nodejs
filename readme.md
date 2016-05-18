@@ -17,6 +17,11 @@
 * [message in Slack](https://weezlabs.slack.com/messages/@artem/)
 * [WeezLabs Jira](https://weezlabs.atlassian.net/wiki/display/~arttumin)
 
+**Developer**: Vlas Popov
+
+* [message in Slack](https://weezlabs.slack.com/messages/@no8ody0ne/)
+* [WeezLabs Jira](https://weezlabs.atlassian.net/wiki/display/~vlas)
+
 
 ## npm scripts
 `npm run <script>` to run a script.
