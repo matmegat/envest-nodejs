@@ -44,6 +44,7 @@ run/deploy --env=<env> --key=~/.ssh/WeezLabsDev.pem
 ## API
 **Swagger** DOC: open in browser `/docs/`.
 
-Like:
+Backend instances:
+* [dev /docs/](http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com:8000/docs/)
 * [test /docs/](http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com:8080/docs/)
 * [staging /docs/](http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com/docs/)
