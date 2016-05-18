@@ -55,12 +55,14 @@ module.exports = function Comments (db)
 		return comments.table()
 		.select(
 			'comments.id',
-			'timestamp',
+			'comments.timestamp',
 			'text',
-			'user_id',
-			'users.full_name'
+			'comments.user_id',
+			'users.full_name',
+			knex.raw('CASE WHEN abuse_comments.comment_id IS NULL THEN false ELSE true END AS abuse')
 		)
 		.innerJoin('users', 'comments.user_id', 'users.id')
+		.leftJoin('abuse_comments', 'abuse_comments.comment_id', 'comments.id')
 		.where('feed_id', feed_id)
 	}
 
