@@ -64,10 +64,5 @@ module.exports = function Http (app)
 		app.swagger
 	])
 
-	http.express.get('/admin', http.adminRequired, (rq, rs) =>
-	{
-		rs.status(200).end()
-	})
-
 	return http
 }
