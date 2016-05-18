@@ -34,8 +34,6 @@
 * `st` — check styles against js-outlander style
 * `db-migrate` — migrates local DB on latest revision
 * `db-rollback` — rollbacks local DB last migration group
-* `swagger` — open swagger GUI with docs
-* `swagger-ver` — verify/validate swagger manifest
 
 ## deploy
 ```sh
