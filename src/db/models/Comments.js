@@ -25,7 +25,7 @@ module.exports = function Comments (db)
 		return comments.validate_id(options.feed_id)
 		.then(() =>
 		{
-			var comments_queryset = byFeedId(options.feed_id)
+			var comments_queryset = byFeedId(options.feed_id, options.user_id)
 
 			return paginator.paginate(comments_queryset, options)
 		})
@@ -50,7 +50,7 @@ module.exports = function Comments (db)
 		})
 	}
 
-	function byFeedId (feed_id)
+	function byFeedId (feed_id, user_id)
 	{
 		return comments.table()
 		.select(
@@ -59,13 +59,15 @@ module.exports = function Comments (db)
 			'text',
 			'comments.user_id',
 			'users.full_name',
-			knex.raw('CASE WHEN abuse_comments.comment_id IS NULL THEN false ELSE true END AS abuse')
+			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
 		.innerJoin('users', 'comments.user_id', 'users.id')
-		.leftJoin('abuse_comments', 'abuse_comments.comment_id', 'comments.id')
+		.leftJoin('abuse_comments', function()
+		{
+			this.on('abuse_comments.comment_id', '=', 'comments.id').andOn('abuse_comments.user_id', '=', user_id)
+		})
 		.where('feed_id', feed_id)
 	}
-
 
 	comments.create = function (data)
 	{
@@ -73,7 +75,6 @@ module.exports = function Comments (db)
 		.insert(data)
 		.then(noop)
 	}
-
 
 	comments.count = function (feed_id)
 	{
@@ -87,7 +88,6 @@ module.exports = function Comments (db)
 		})
 		.then(row => row.count)
 	}
-
 
 	var at  = require('lodash/fp/at')
 	var zip = _.fromPairs
@@ -129,7 +129,7 @@ module.exports = function Comments (db)
 			})
 			.then(noop)
 		})
-		.catch(Err.fromDb('abuse_comments_comment_id_unique', AbuseExist))
+		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 	}
 
 	comments.byId = function (id)

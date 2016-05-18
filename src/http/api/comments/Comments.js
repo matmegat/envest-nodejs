@@ -22,6 +22,8 @@ module.exports = function Comments (сomments_model)
 			'since_id',
 		])
 
+		options.user_id = rq.user.id
+
 		toss(rs, comments.model.list(options))
 	})
 
