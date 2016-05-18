@@ -1,4 +1,4 @@
-var motivations = require('../../../src/db/Motivations')()
+var motivations = require('../../../src/db/models/Motivations')()
 var _ = require('lodash')
 
 var dummyEvents =
