@@ -42,6 +42,8 @@ paths:
     $ref: ../api/comments/swag/GetPostComments.yaml
   '/comments/count':
     $ref: ../api/comments/swag/GetCount.yaml
+  '/comments/abuse':
+    $ref: ../api/comments/swag/Abuse.yaml
 
 definitions:
   # Put here only COMMON definitions
