@@ -48,6 +48,7 @@ if (key)
 var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
 ssh = partial(ssh, remote)
+rsync = partial(rsync, '--recursive', '--delete')
 
 function outputify (name, fn)
 {
@@ -118,11 +119,11 @@ Promise.resolve()
 }))
 .then(outputify('copy db/', () =>
 {
-	return scp('-r', rootpath('db'), target())
+	return rsync(rootpath('db') + '/', target('db'))
 }))
 .then(outputify('copy src/', () =>
 {
-	return scp('-r', rootpath('src'), target())
+	return rsync(rootpath('src') + '/', target('src'))
 }))
 .then(() =>
 {
