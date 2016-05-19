@@ -2,6 +2,9 @@
 
 require('console-ultimate/global').replace()
 
+var f = require('util').format
+var home = require('home').resolve
+
 var args = require('minimist')(process.argv.slice(2),
 {
 	string:
@@ -22,8 +25,12 @@ if (! env)
 var cmd = require('command-promise')
 var partial = require('lodash/partial')
 
+// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/ ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
+
 var ssh = partial(cmd, 'ssh')
 var scp = partial(cmd, 'scp')
+
+var rsync = partial(cmd, 'rsync')
 
 var key = args.key
 
@@ -31,6 +38,11 @@ if (key)
 {
 	ssh = partial(ssh, [ '-i', key ])
 	scp = partial(scp, [ '-i', key ])
+
+	var fkey = home(key)
+	fkey = f('"ssh -i %s"', fkey)
+
+	rsync = partial(rsync, [ '-e', fkey ])
 }
 
 var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
@@ -55,7 +67,6 @@ function outputify (name, fn)
 }
 
 
-var f = require('util').format
 var load = require('fs-sync').readJSON
 var write = require('fs-sync').write
 var rootpath = require('rootpath')(__dirname, '..')
