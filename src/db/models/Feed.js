@@ -1,3 +1,6 @@
+
+var expect = require('chai').expect
+
 var _ = require('lodash')
 
 var Paginator = require('../Paginator')
@@ -14,7 +17,9 @@ module.exports = function Feed (db)
 	var oneMaybe = db.helpers.oneMaybe
 
 	var paginator = Paginator()
-	var comments  = db.comments
+
+	expect(db, 'Feed depends on Comments').property('comments')
+	var comments = db.comments
 
 	feed.feed_table = () => knex('feed_items')
 	feed.investors_table = () => knex('investors')
