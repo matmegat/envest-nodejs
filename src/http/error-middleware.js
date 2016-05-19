@@ -4,6 +4,7 @@ var Err = require('../Err')
 
 var MiddlewareError = Err('Middleware_error', 'Middleware error')
 
+// eslint-disable-next-line no-unused-vars
 module.exports = (err, rq, rs, next) =>
 {
 	if (Err.is(err))
