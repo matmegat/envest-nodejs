@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 module.exports = function Admin (db)
 {
 	var admin = {}
@@ -9,6 +11,7 @@ module.exports = function Admin (db)
 	var table = () => knex('admins')
 
 	var user = db.user
+	expect(db, 'Admin depends on User').property('user')
 
 	admin.is = function (user_id)
 	{
