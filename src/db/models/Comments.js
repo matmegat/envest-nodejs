@@ -1,5 +1,6 @@
 
 var Paginator = require('../Paginator')
+var Abuse     = require('./Abuse')
 
 var Err = require('../../Err')
 
@@ -18,7 +19,7 @@ module.exports = function Comments (db)
 	var paginator = Paginator({ column_name: 'comments.id' })
 
 	comments.table = () => knex('comments')
-	comments.abuse_table = () => knex('abuse_comments')
+	comments.abuse = Abuse(db, comments)
 
 	comments.list = function (options)
 	{
@@ -62,9 +63,10 @@ module.exports = function Comments (db)
 			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
 		.innerJoin('users', 'comments.user_id', 'users.id')
-		.leftJoin('abuse_comments', function()
+		.leftJoin('abuse_comments', function ()
 		{
-			this.on('abuse_comments.comment_id', '=', 'comments.id').andOn('abuse_comments.user_id', '=', user_id)
+			this.on('abuse_comments.comment_id', '=', 'comments.id')
+			.andOn('abuse_comments.user_id', '=', user_id)
 		})
 		.where('feed_id', feed_id)
 	}
@@ -111,25 +113,6 @@ module.exports = function Comments (db)
 
 			return seq
 		})
-	}
-
-	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
-	var AbuseExist = Err('abuse_exist', 'Abuse exist')
-
-	comments.abuse = function (user_id, comment_id)
-	{
-		return comments.byId(comment_id)
-		.then(Err.nullish(CommentNotExist))
-		.then(() =>
-		{
-			return comments.abuse_table()
-			.insert({
-				user_id: user_id,
-				comment_id: comment_id
-			})
-			.then(noop)
-		})
-		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 	}
 
 	comments.byId = function (id)

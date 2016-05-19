@@ -47,7 +47,7 @@ module.exports = function Comments (сomments_model)
 
 	comments.express.post('/abuse', (rq, rs) =>
 	{
-		toss(rs, comments.model.abuse(rq.user.id, rq.body.comment_id))
+		toss(rs, comments.model.abuse.create(rq.user.id, rq.body.comment_id))
 	})
 
 	return comments
