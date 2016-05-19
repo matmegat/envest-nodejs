@@ -18,7 +18,6 @@ module.exports = function Feed (db)
 
 	feed.feed_table = () => knex('feed_items')
 	feed.investors_table = () => knex('investors')
-	feed.comments_table = () => knex('comments')
 
 	feed.byId = function (id)
 	{
