@@ -9,7 +9,7 @@ var Comments = require('./api/comments/Comments')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
-var errorHandler = require('./err-handler')
+var errorMiddleware = require('./error-middleware')
 
 module.exports = function Http (app)
 {
@@ -45,7 +45,7 @@ module.exports = function Http (app)
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 
-	http.express.use(errorHandler)
+	http.express.use(errorMiddleware)
 
 	app.swagger = Swagger(app, http.express)
 
