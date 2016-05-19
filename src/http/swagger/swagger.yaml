@@ -29,6 +29,9 @@ paths:
   '/auth/login':
     $ref: ../api/auth/swag/Login.yaml
 
+  '/auth/login/facebook':
+    $ref: ../api/auth/swag/LoginFacebook.yaml
+
   '/auth/logout':
     $ref: ../api/auth/swag/Logout.yaml
 
