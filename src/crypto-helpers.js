@@ -48,11 +48,11 @@ var encrypt_pass = helpers.encrypt_pass = function encrypt_pass (password, salt)
 	})
 }
 
-helpers.compare_passwords = function compare_passwords (db_pass, form_pass, salt)
+helpers.compare_passwords = function compare_passwords (pass, form_pass, salt)
 {
 	return encrypt_pass(form_pass, salt)
 	.then(encrypted_pass =>
 	{
-		return encrypted_pass === db_pass
+		return encrypted_pass === pass
 	})
 }

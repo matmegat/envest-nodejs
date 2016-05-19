@@ -202,12 +202,12 @@ module.exports = function User (db)
 			.then(one)
 			.then(function (id)
 			{
-				return newEmailDrop(id, trx)
+				return newEmailRemove(id, trx)
 			})
 		})
 	}
 
-	function newEmailDrop (user_id, trx)
+	function newEmailRemove (user_id, trx)
 	{
 		return user.email_confirms()
 		.transacting(trx)

@@ -1,5 +1,5 @@
 post:
-  description: Confirms email
+  description: Changes the email
   parameters:
   - name: payload
     in: body
@@ -9,17 +9,17 @@ post:
     schema:
       type: object
       properties:
-        code:
+        email:
           type: string
-          description: Code
+          description: Email
       required:
-      - code
+      - email
   responses:
     200:
-      description: email confirmed
+      description: email changed
     400:
       description: if something went wrong
       schema:
-        $ref: ../../swagger/Error.yaml
+        $ref: ../../../swagger/Error.yaml
   tags:
   - auth

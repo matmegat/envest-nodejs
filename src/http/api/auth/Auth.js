@@ -115,18 +115,22 @@ module.exports = function Auth (auth_model, passport)
 
 	auth.express.use(function (err, rq, rs, next)
 	{
-		if (err)
+		if (Err.is(err))
 		{
-			if (err.oauthError)
-			{
-				err.message = JSON.parse(err.oauthError.data)
-			}
-
-			toss.err(rs, MiddlewareError(err.message))
+			return toss.err(rs, err)
 		}
 		else
 		{
-			next()
+			if (err.oauthError)
+			{
+				err.oauth_error = JSON.parse(err.oauthError.data)
+
+				return toss.err(rs, MiddlewareError(err.oauth_error))
+			}
+			else
+			{
+				return toss.err(rs, MiddlewareError())
+			}
 		}
 	})
 

@@ -15,42 +15,45 @@ produces:
 basePath: /api
 paths:
   '/feed':
-    $ref: ../api/feed/GetFeed.yaml
+    $ref: ../api/feed/swag/GetFeed.yaml
 
   '/feed/{feed_id}':
-    $ref: ../api/feed/FeedById.yaml
+    $ref: ../api/feed/swag/FeedById.yaml
 
   '/feed/{feed_id}/comments':
-    $ref: ../api/feed/GetPostFeedComments.yaml
+    $ref: ../api/feed/swag/GetPostFeedComments.yaml
 
   '/auth/register':
-    $ref: ../api/auth/Register.yaml
+    $ref: ../api/auth/swag/Register.yaml
 
   '/auth/login':
-    $ref: ../api/auth/Login.yaml
+    $ref: ../api/auth/swag/Login.yaml
+
+  '/auth/login/facebook':
+    $ref: ../api/auth/swag/LoginFacebook.yaml
 
   '/auth/logout':
-    $ref: ../api/auth/Logout.yaml
+    $ref: ../api/auth/swag/Logout.yaml
 
   '/auth/confirm-email':
-    $ref: ../api/auth/ConfirmEmail.yaml
+    $ref: ../api/auth/swag/ConfirmEmail.yaml
 
   '/auth/change-email':
-    $ref: ../api/auth/ChangeEmail.yaml
+    $ref: ../api/auth/swag/ChangeEmail.yaml
 
   '/comments':
-    $ref: ../api/comments/GetPostComments.yaml
+    $ref: ../api/comments/swag/GetPostComments.yaml
   '/comments/count':
-    $ref: ../api/comments/GetCount.yaml
+    $ref: ../api/comments/swag/GetCount.yaml
 
 definitions:
   # Put here only COMMON definitions
 
   Feed:
-    $ref: ../api/feed/Feed.yaml
+    $ref: ../api/feed/swag/Feed.yaml
 
   FeedItem:
-    $ref: ../api/feed/FeedItem.yaml
+    $ref: ../api/feed/swag/FeedItem.yaml
 
   Investor:
     $ref: ./Investor.yaml
@@ -65,4 +68,4 @@ definitions:
     $ref: ./User.yaml
 
   Comments:
-    $ref: ../api/comments/Comments.yaml
+    $ref: ../api/comments/swag/Comments.yaml
