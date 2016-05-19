@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var clone = require('lodash/clone')
 
 var Err = require('../../Err')
@@ -17,6 +19,7 @@ module.exports = function Auth (db)
 {
 	var auth = {}
 
+	expect(db, 'Auth depends on User').property('user')
 	var user = db.user
 
 	auth.register = function (userdata)
