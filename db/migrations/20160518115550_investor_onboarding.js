@@ -3,15 +3,31 @@ exports.up = function (knex, Promise)
 	return Promise.resolve()
 	.then(() =>
 	{
+		return knex('comments').del()
+	})
+	.then(() =>
+	{
+		return knex('feed_items').del()
+	})
+	.then(() =>
+	{
+		return knex('investors').del()
+	})
+	.then(() =>
+	{
 		return knex.schema.table('investors', (table) =>
 		{
-			// TODO: create updated_at trigger http://goo.gl/FLK4kT
+			table.dropColumn('created_at')
+			table.dropColumn('updated_at')
+			table.timestamp('timestamp').defaultTo(knex.fn.now())
+
+			table.integer('user_id').notNullable()
+			table.foreign('user_id').references('users.id')
 
 			table.dropColumn('full_name')
-			table.string('first_name', 72).notNullable().defaultTo('First_Name')
-			table.string('last_name', 72).notNullable().defaultTo('Last_Name')
-			table.string('email').notNullable().defaultTo('fake@email')
-			table.string('profession')
+			table.string('first_name', 72)
+			table.string('last_name', 72)
+			table.string('profession').defaultTo('')
 			table.jsonb('focus').defaultTo(JSON.stringify([]))	// [String, ]. Up to 3 elements
 			table.text('background').defaultTo('')
 			table.jsonb('historical_returns').notNullable().defaultTo(
@@ -32,55 +48,46 @@ exports.up = function (knex, Promise)
 	{
 		return knex.schema.createTable('brokerage', (table) =>
 		{
-			table.increments('id').primary()
-
-			table.timestamps(true)
-			// TODO: create updated_at trigger http://goo.gl/FLK4kT
-
-			table.integer('investor_id').notNullable()
+			// Amount of Investor's cash
+			table.integer('investor_id').primary()
 			table.foreign('investor_id').references('investors.id')
 
-			table.float('real').notNullable()
-			table.float('ratio').notNullable()
+			table.decimal('cash_value').notNullable()
+			table.float('multiplier').notNullable()
 		})
 	})
 	.then(() =>
 	{
-		return knex.schema.createTable('stocks', (table) =>
+		return knex.schema.createTable('symbols', (table) =>
 		{
 			table.increments('id').primary()
-
-			table.timestamp('timestamp').defaultTo(knex.fn.now())
 			table.string('ticker').notNullable()
 			table.string('company').notNullable()
 		})
 	})
 	.then(() =>
 	{
-		return knex.schema.createTable('portfolio', (table) =>
+		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()
-
-			table.timestamps(true)
-			// TODO: create updated_at trigger http://goo.gl/FLK4kT
-
 			table.integer('amount').notNullable().comment('Number of Shares')
-			table.float('price').notNullable().comment('Price per share')
 
-			table.integer('stock_id')
-			table.foreign('stock_id').references('stocks.id')
-			// Could be null. If null - then its Cash
-			// amount = 1
-			// price = amount of cash
+			table.integer('investor_id').notNullable()
+			table.foreign('investor_id').references('investors.id')
+
+			table.integer('symbol_id')
+			table.foreign('symbol_id').references('symbols.id')
 		})
+
+		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
 	})
 }
 
 exports.down = function (knex, Promise) {
 	return Promise
 	.join(
-		knex.schema.dropTableIfExists('portfolio'),
-		knex.schema.dropTableIfExists('stocks'),
+		knex.schema.dropTableIfExists('portfolio_symbols'),
+		knex.schema.dropTableIfExists('symbols')
 		// knex.schema.dropTableIfExists('investors')
 	)
 }
