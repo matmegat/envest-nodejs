@@ -11,7 +11,7 @@ post:
       properties:
         comment_id:
           type: integer
-          description: Post (Feed Item) Id
+          description: Post (Comments Item) Id
           default: 1
       required:
       - comment_id
