@@ -8,6 +8,8 @@ module.exports = function Admin (db)
 
 	var table = () => knex('admins')
 
+	var user = db.user
+
 	admin.is = function (user_id)
 	{
 		return table()
@@ -17,7 +19,12 @@ module.exports = function Admin (db)
 
 	admin.intro = function (target_user_id, by_user_id)
 	{
-		by_user_id || (by_user_id = null)
+		return user.ensureExists(target_user_id)
+		.then(() =>
+		{
+			by_user_id || (by_user_id = null)
+		})
+
 
 		// ...
 	}
