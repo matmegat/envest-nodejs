@@ -4,223 +4,123 @@ module.exports = function Motivations ()
 	[
 		{
 			id: 1,
-			category: 'Events',
-			text: 'Earnings Release'
+			text: 'Earnings'
 		},
 		{
 			id: 2,
-			category: 'Events',
-			text: 'Press Release'
+			text: 'Valuation'
 		},
 		{
 			id: 3,
-			category: 'Events',
-			text: 'Competitive Dynamics'
-		},
-		{
-			id: 4,
-			category: 'Events',
-			text: 'Macro Change'
-		},
-		{
-			id: 5,
-			category: 'Events',
-			text: 'Price Movement'
-		},
-		{
-			id: 6,
-			category: 'Events',
-			text: 'Mergers & Acquisitions'
-		},
-		{
-			id: 7,
-			category: 'Valuation',
-			text: 'Fair Valuation'
-		},
-		{
-			id: 8,
-			category: 'Valuation',
-			text: 'Cheap Valuation'
-		},
-		{
-			id: 9,
-			category: 'Valuation',
-			text: 'Expensive Valuation'
-		},
-		{
-			id: 10,
-			category: 'Style',
 			text: 'Growth Potential'
 		},
 		{
+			id: 4,
+			text: 'Curiosity'
+		},
+		{
+			id: 5,
+			text: 'Press Release'
+		},
+		{
+			id: 6,
+			text: 'Competition'
+		},
+		{
+			id: 7,
+			text: 'Macro Change'
+		},
+		{
+			id: 8,
+			text: 'Price Movement'
+		},
+		{
+			id: 9,
+			text: 'M&A'
+		},
+		{
+			id: 10,
+			text: 'Fair Valuation'
+		},
+		{
 			id: 11,
-			category: 'Style',
-			text: 'Value Play'
+			text: 'Cheap Valuation'
 		},
 		{
 			id: 12,
-			category: 'Style',
-			text: 'Dividend/Income'
+			text: 'Expensive Valuation'
 		},
 		{
 			id: 13,
-			category: 'Style',
-			text: 'Speculative'
+			text: 'Tax Loses'
 		},
 		{
 			id: 14,
-			category: 'Style',
-			text: 'Momentum'
+			text: 'Dividend'
 		},
 		{
 			id: 15,
-			category: 'Style',
-			text: 'Turnaround'
+			text: 'Momentum'
 		},
 		{
 			id: 16,
-			category: 'Style',
-			text: 'Contrarian'
+			text: 'Turnaround'
 		},
 		{
 			id: 17,
-			category: 'Company Background',
-			text: 'High Quality Company'
+			text: 'Contrarian'
 		},
 		{
 			id: 18,
-			category: 'Company Background',
-			text: 'Competitive Advantages'
+			text: 'High Quality Company'
 		},
 		{
 			id: 19,
-			category: 'Company Background',
-			text: 'Steady Business'
+			text: 'Competitive Advantages'
 		},
 		{
 			id: 20,
-			category: 'Company Background',
 			text: 'Buyout Candidate'
 		},
 		{
 			id: 21,
-			category: 'Company Background',
 			text: 'Attractive Industry'
 		},
 		{
 			id: 22,
-			category: 'Company Background',
-			text: 'Cyclical Upside'
+			text: 'Cyclical'
 		},
 		{
 			id: 23,
-			category: 'Portfolio Changes',
-			text: 'Change in Thesis'
+			text: 'Thesis Change'
 		},
 		{
 			id: 24,
-			category: 'Portfolio Changes',
-			text: 'New Position'
+			text: 'Made a Mistake'
 		},
 		{
 			id: 25,
-			category: 'Portfolio Changes',
-			text: 'Adding to Position'
+			text: 'Raising Cash'
 		},
 		{
 			id: 26,
-			category: 'Portfolio Changes',
 			text: 'Diversification'
 		},
 		{
 			id: 27,
-			category: 'Portfolio Changes',
-			text: 'Locking in Winner!'
+			text: 'Locking in Winner'
 		},
 		{
 			id: 28,
-			category: 'Portfolio Changes',
 			text: 'Cutting Losses'
 		},
 		{
 			id: 29,
-			category: 'Portfolio Changes',
-			text: 'Raising Cash'
-		},
-		{
-			id: 30,
-			category: 'Portfolio Changes',
-			text: 'Made a Mistake!'
-		},
-		{
-			id: 31,
-			category: 'Portfolio Changes',
-			text: 'Reached Downside Limit'
-		},
-		{
-			id: 32,
-			category: 'Portfolio Changes',
-			text: 'Tax Loss Selling'
-		},
-		{
-			id: 33,
-			category: 'Watchlist Motivations',
 			text: 'Value Play'
 		},
 		{
-			id: 34,
-			category: 'Watchlist Motivations',
-			text: 'Growth Potential'
-		},
-		{
-			id: 35,
-			category: 'Watchlist Motivations',
-			text: 'Dividend/Income'
-		},
-		{
-			id: 36,
-			category: 'Watchlist Motivations',
-			text: 'Speculative'
-		},
-		{
-			id: 37,
-			category: 'Watchlist Motivations',
-			text: 'Momentum'
-		},
-		{
-			id: 38,
-			category: 'Watchlist Motivations',
-			text: 'Turnaround'
-		},
-		{
-			id: 39,
-			category: 'Watchlist Motivations',
-			text: 'Contrarian'
-		},
-		{
-			id: 40,
-			category: 'Watchlist Motivations',
-			text: 'High Quality Company'
-		},
-		{
-			id: 41,
-			category: 'Watchlist Motivations',
-			text: 'Competitive Advantage'
-		},
-		{
-			id: 42,
-			category: 'Watchlist Motivations',
-			text: 'Steady Business'
-		},
-		{
-			id: 43,
-			category: 'Watchlist Motivations',
-			text: 'Buyout Candidate'
-		},
-		{
-			id: 44,
-			category: 'Watchlist Motivations',
-			text: 'Attractive Industry'
+			id: 30,
+			text: 'Speculation'
 		}
 	]
 
