@@ -4,6 +4,12 @@ require('console-ultimate/global').replace()
 
 var f = require('util').format
 var home = require('home').resolve
+var tmp = require('os').tmpdir
+
+var fs = require('fs-sync')
+var load  = fs.readJSON
+var write = fs.write
+
 
 var args = require('minimist')(process.argv.slice(2),
 {
@@ -68,8 +74,6 @@ function outputify (name, fn)
 }
 
 
-var load = require('fs-sync').readJSON
-var write = require('fs-sync').write
 var rootpath = require('rootpath')(__dirname, '..')
 var merge = require('lodash').merge
 
@@ -105,11 +109,12 @@ Promise.resolve()
 		.then(cmd.util.trim)
 		.then(what =>
 		{
-			var full = rev + ' ' + what
+			var fullrev = rev + ' ' + what
+			var tmprev = tmp() + '/netvest-REV'
 
-			var strcmd = f("'echo %s > %s'", full, remote_rootpath('REV'))
+			write(tmprev, fullrev)
 
-			return ssh(strcmd)
+			return scp(tmprev, target('REV'))
 		})
 	})
 })
