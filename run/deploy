@@ -10,6 +10,8 @@ var fs = require('fs-sync')
 var load  = fs.readJSON
 var write = fs.write
 
+var slack = require('./lib/slack')
+
 
 var args = require('minimist')(process.argv.slice(2),
 {
@@ -95,9 +97,7 @@ function dump (path, config)
 	write(path, config)
 }
 
-
-Promise.resolve()
-.then(() =>
+function rev ()
 {
 	return cmd('git describe --always --long --abbrev=16 --dirty')
 	.then(cmd.util.stdout)
@@ -107,16 +107,22 @@ Promise.resolve()
 		return cmd("git log --pretty='[%an] %s' -1")
 		.then(cmd.util.stdout)
 		.then(cmd.util.trim)
-		.then(outputify('copy REV', what =>
+		.then(logmsg =>
 		{
-			var fullrev = rev + ' ' + what
-			var tmprev = tmp() + '/netvest-REV'
-
-			write(tmprev, fullrev)
-
-			return scp(tmprev, target('REV'))
-		}))
+			return rev + ' ' + logmsg
+		})
 	})
+}
+
+
+rev()
+.then(fullrev =>
+{
+	var tmprev = tmp() + '/netvest-REV'
+
+	write(tmprev, fullrev)
+
+	return scp(tmprev, target('REV'))
 })
 .then(outputify('copy package.json', () =>
 {
@@ -158,9 +164,23 @@ Promise.resolve()
 		 + 'sudo npm run restart"', remote_rootpath()
 	))
 }))
-.then(() => console.info('OK'))
+.then(() =>
+{
+	console.info('OK')
+
+	rev()
+	.then(fullrev =>
+	{
+		/* return */ slack.success(env, fullrev)
+	})
+})
 .catch(error =>
 {
 	console.error(error)
-	process.exit(1)
+
+	slack.failure(env)
+	.then(() =>
+	{
+		process.exit(1)
+	})
 })
