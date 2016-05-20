@@ -15,7 +15,7 @@ var slack = module.exports = function slack (text)
 
 slack.success = function (env, rev)
 {
-	var template = 'Backend %s успешно задеплоен, rev: %s'
+	var template = 'Backend *%s* успешно задеплоен, _rev: %s_'
 	var text = format(template, ENV(env), rev)
 
 	return slack(text)
@@ -23,7 +23,7 @@ slack.success = function (env, rev)
 
 slack.failure = function (env)
 {
-	var template = 'Backend %s ошибка деплоя'
+	var template = 'Backend *%s* ошибка деплоя'
 	var text = format(template, ENV(env))
 
 	return slack(text)
