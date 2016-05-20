@@ -5,6 +5,17 @@ exports.up = function (knex, Promise)
 	var investor_migration = Investors(knex)
 
 	return Promise.resolve()
+	.then(() => {
+		return knex('comments').del()
+	})
+	.then(() =>
+	{
+		return knex('feed_items').del()
+	})
+	.then(() =>
+	{
+		return knex('investors').del()
+	})
 	.then(() =>
 	{
 		return investor_migration.secondUp
@@ -45,6 +56,10 @@ exports.up = function (knex, Promise)
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
+	})
+	.then(() =>
+	{
+		return knex.seed.run({ directory: './seeds/20160518' })
 	})
 }
 

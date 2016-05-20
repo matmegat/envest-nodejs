@@ -25,23 +25,26 @@ module.exports = function Investors (knex)
 
 		table.dropColumns('created_at', 'updated_at')
 
-		table.integer('user_id')
-		table.foreign('user_id').references('users.id')
+		table.integer('user_id').unique().notNullable()
+		.references('users.id')
+		.onUpdate('restrict') /* user.id should never change */
+		.onDelete('restrict') /* we don't want to accidentally delete investor */
 
 		table.renameColumn('full_name', 'first_name')
-		table.string('last_name')
+		table.string('last_name').after('first_name')
+		table.string('cover_image', 512).notNullable().defaultTo('')
 		table.string('profession').defaultTo('')
 		table.jsonb('focus').defaultTo(JSON.stringify([]))	// [String, ]. Up to 3 elements
 		table.text('background').defaultTo('')
 		table.jsonb('historical_returns').notNullable().defaultTo(
 			JSON.stringify(
-			[
-				{ year: 2011, percentage: 10 },
-				{ year: 2012, percentage: 11 },
-				{ year: 2013, percentage: -8 },
-				{ year: 2014, percentage: 5 },
-				{ year: 2015, percentage: 15 },
-			])
+				[
+					{ year: 2011, percentage: 10 },
+					{ year: 2012, percentage: 11 },
+					{ year: 2013, percentage: -8 },
+					{ year: 2014, percentage: 5 },
+					{ year: 2015, percentage: 15 },
+				])
 		)
 
 		table.boolean('is_public').defaultTo(false)
@@ -55,6 +58,7 @@ module.exports = function Investors (knex)
 		table.dropColumns(
 			'user_id',
 			'last_name',
+			'cover_image',
 			'profession',
 			'focus',
 			'background',
