@@ -107,7 +107,7 @@ Promise.resolve()
 		return cmd("git log --pretty='[%an] %s' -1")
 		.then(cmd.util.stdout)
 		.then(cmd.util.trim)
-		.then(what =>
+		.then(outputify('copy REV', what =>
 		{
 			var fullrev = rev + ' ' + what
 			var tmprev = tmp() + '/netvest-REV'
@@ -115,7 +115,7 @@ Promise.resolve()
 			write(tmprev, fullrev)
 
 			return scp(tmprev, target('REV'))
-		})
+		}))
 	})
 })
 .then(outputify('copy package.json', () =>
@@ -150,7 +150,7 @@ Promise.resolve()
 {
 	return ssh(f('"mkdir -p %s"', remote_rootpath('var/')))
 })
-.then(outputify('start remote', () =>
+.then(outputify('run remote', () =>
 {
 	return ssh(
 		f( '"cd %s;'
