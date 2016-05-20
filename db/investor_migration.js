@@ -1,4 +1,4 @@
-exports = function Investors (knex)
+module.exports = function Investors (knex)
 {
 	var investors = {}
 

@@ -60,7 +60,7 @@ exports.up = function (knex, Promise)
 
 exports.down = function (knex, Promise)
 {
-	var investor_migration = require('./../investor_migration')(knex)
+	var investor_migration = Investors(knex)
 
 	return Promise.all(
 	[
