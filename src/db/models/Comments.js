@@ -20,26 +20,12 @@ module.exports = function Comments (db)
 
 	comments.list = function (options)
 	{
-		return comments.validate_feed_id(options.feed_id)
+		return db.feed.validateFeedId(options.feed_id)
 		.then(() =>
 		{
 			var comments_queryset = byId(options.feed_id)
 
 			return paginator.paginate(comments_queryset, options)
-		})
-	}
-
-
-	var validateId = require('../../id').validate
-	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
-
-	comments.validate_feed_id = function (feed_id)
-	{
-		return new Promise(rs =>
-		{
-			validateId(feed_id, WrongFeedId)
-
-			return rs()
 		})
 	}
 
@@ -68,7 +54,7 @@ module.exports = function Comments (db)
 
 	comments.count = function (feed_id)
 	{
-		return comments.validate_feed_id(feed_id)
+		return db.feed.validateFeedId(feed_id)
 		.then(() =>
 		{
 			return comments.table()
