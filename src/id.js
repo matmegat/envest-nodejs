@@ -4,7 +4,9 @@ var _ = require('lodash')
 var toNumber  = _.toNumber
 var isInteger = _.isInteger
 
-module.exports = function toId (id)
+var id = module.exports = {}
+
+id.toId = function toId (id)
 {
 	id = toNumber(id)
 

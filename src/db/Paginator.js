@@ -2,7 +2,7 @@
 var _ = require('lodash')
 var extend = _.extend
 
-var toId = require('../toId')
+var toId = require('../id').toId
 
 var defaults =
 {

@@ -30,7 +30,7 @@ module.exports = function Comments (db)
 	}
 
 
-	var toId = require('../../toId')
+	var toId = require('../../id').toId
 	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 	comments.validate_feed_id = function (feed_id)
