@@ -10,12 +10,15 @@ var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
 var errorMiddleware = require('./error-middleware')
+var setErrorMode = require('./error-mode')
 
 module.exports = function Http (app)
 {
 	var http = {}
 
 	http.express = express()
+
+	setErrorMode(app.cfg, http.express)
 
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
