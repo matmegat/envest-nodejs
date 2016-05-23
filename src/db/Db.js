@@ -3,6 +3,7 @@ var knex = require('knex')
 
 var User = require('./models/User')
 var Auth = require('./models/Auth')
+var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
 
@@ -43,8 +44,9 @@ module.exports = function name (app)
 		console.info('DB: ok')
 	})
 
-	db.user = User(db)
-	db.auth = Auth(db)
+	db.user  = User(db)
+	db.auth  = Auth(db)
+	db.admin = Admin(db)
 	db.comments = Comments(db)
 	db.feed = Feed(db)
 

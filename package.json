@@ -47,6 +47,9 @@
     "express-session":
       "^1.13.0",
 
+    "composable-middleware":
+      "^0.3",
+
     "passport":
       "^0.3.2",
 
