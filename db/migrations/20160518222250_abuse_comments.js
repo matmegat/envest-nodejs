@@ -5,13 +5,13 @@ exports.up = function (knex)
 	{
 		table.integer('user_id')
 			.references('users.id')
-			.onUpdate('restrict')
-			.onDelete('restrict')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 		table.integer('comment_id')
 			.references('comments.id')
-			.onUpdate('restrict')
-			.onDelete('restrict')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 		table.timestamp('timestamp').defaultTo(knex.fn.now())
 		table.primary([ 'user_id', 'comment_id' ])
