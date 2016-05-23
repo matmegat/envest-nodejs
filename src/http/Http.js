@@ -27,6 +27,8 @@ module.exports = function Http (app)
 		next()
 	})
 
+	http.express.use(express.static(app.root() + '/static'))
+
 	http.passport = Passport(http.express, app.db)
 
 	http.api = {}
