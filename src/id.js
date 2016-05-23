@@ -6,7 +6,7 @@ var isInteger = _.isInteger
 
 var id = module.exports = {}
 
-id.toId = function toId (id)
+var toId = id.toId = function toId (id)
 {
 	id = toNumber(id)
 
@@ -16,4 +16,16 @@ id.toId = function toId (id)
 	}
 
 	return null
+}
+
+id.validate = function (id, fn)
+{
+	id = toId(id)
+
+	if (! id)
+	{
+		throw fn()
+	}
+
+	return id
 }
