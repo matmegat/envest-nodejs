@@ -1,8 +1,7 @@
 
 var Err = require('../../Err')
 
-var _ = require('lodash')
-var noop = _.noop
+var noop = require('lodash/noop')
 
 module.exports = function Abuse (db, comments)
 {
