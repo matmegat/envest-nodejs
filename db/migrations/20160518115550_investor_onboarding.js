@@ -28,7 +28,11 @@ exports.up = function (knex, Promise)
 			table.integer('investor_id').primary()
 			table.foreign('investor_id').references('investors.id')
 
-			table.decimal('cash_value').notNullable()
+			table.decimal('cash_value', 12, 2).notNullable()
+			/*
+			* precision: 12 - up to 999 999 999 999
+			* scale: .99
+			* */
 			table.float('multiplier').notNullable()
 		})
 	})

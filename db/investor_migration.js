@@ -9,7 +9,7 @@ module.exports = function Investors (knex)
 		table.timestamps() // created_at, updated_at
 
 		table.string('full_name').notNullable()
-		table.string('icon', 512).notNullable()
+		table.string('icon', 255).notNullable()
 	})
 
 	investors.initialDown = knex.schema.dropTableIfExists('investors')
@@ -32,7 +32,7 @@ module.exports = function Investors (knex)
 
 		table.renameColumn('full_name', 'first_name')
 		table.string('last_name').after('first_name')
-		table.string('cover_image', 512).notNullable().defaultTo('')
+		table.string('cover_image', 255).notNullable().defaultTo('')
 		table.string('profession').defaultTo('')
 		table.jsonb('focus').defaultTo(JSON.stringify([]))	// [String, ]. Up to 3 elements
 		table.text('background').defaultTo('')
