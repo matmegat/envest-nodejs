@@ -30,16 +30,18 @@ exports.seed = function (knex, Promise)
 		var symbols = data.symbols
 
 		var portfolio_symbols = []
-		investors.each((investor) =>
+		investors.forEach((investor) =>
 		{
 			times(random(3, 6), () =>
 			{
 				portfolio_symbols.push(
-				{
-					investor_id: investor.id,
-					symbol_id: symbols[random(symbols.length - 1)],
-					amount: random(100, 5000)
-				})
+					knex('portfolio_symbols').insert(
+					{
+						investor_id: investor.id,
+						symbol_id: symbols[random(symbols.length - 1)].id,
+						amount: random(100, 5000)
+					})
+				)
 			})
 		})
 
