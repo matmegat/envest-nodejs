@@ -12,5 +12,6 @@ module.exports = function (config, express)
 		mode = 'development'
 	}
 
+	express.set('env', mode)
 	console.info('Running app in `%s` mode', mode)
 }
