@@ -22,6 +22,8 @@ module.exports = function Comments (сomments_model)
 			'since_id',
 		])
 
+		options.user_id = rq.user.id
+
 		toss(rs, comments.model.list(options))
 	})
 
@@ -41,6 +43,11 @@ module.exports = function Comments (сomments_model)
 	comments.express.get('/count', (rq, rs) =>
 	{
 		toss(rs, comments.model.count(rq.query.feed_id))
+	})
+
+	comments.express.post('/abuse', (rq, rs) =>
+	{
+		toss(rs, comments.model.abuse.create(rq.user.id, rq.body.comment_id))
 	})
 
 	return comments

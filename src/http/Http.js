@@ -3,17 +3,26 @@ var express = require('express')
 var body_parser = require('body-parser')
 var cookie_parser = require('cookie-parser')
 
+var compose = require('composable-middleware')
+var authRequired = require('./auth-required')
+var AdminRequired = require('./admin-required')
+
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
+var errorMiddleware = require('./error-middleware')
+var setErrorMode = require('./error-mode')
+
 module.exports = function Http (app)
 {
 	var http = {}
 
 	http.express = express()
+
+	setErrorMode(app.cfg, http.express)
 
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
@@ -25,6 +34,7 @@ module.exports = function Http (app)
 		next()
 	})
 
+	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.passport = Passport(http.express, app.db)
 
 	http.api = {}
@@ -42,6 +52,8 @@ module.exports = function Http (app)
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+
+	http.express.use(errorMiddleware)
 
 	app.swagger = Swagger(app, http.express)
 

@@ -1,5 +1,6 @@
 
 var Paginator = require('../Paginator')
+var Abuse     = require('./Abuse')
 
 var Err = require('../../Err')
 
@@ -12,18 +13,20 @@ module.exports = function Comments (db)
 
 	var knex = db.knex
 
-	var one  = db.helpers.one
+	var one      = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
 	comments.table = () => knex('comments')
+	comments.abuse = Abuse(db, comments)
 
 	comments.list = function (options)
 	{
-		return comments.validate_feed_id(options.feed_id)
+		return comments.validate_id(options.feed_id)
 		.then(() =>
 		{
-			var comments_queryset = byId(options.feed_id)
+			var comments_queryset = byFeedId(options.feed_id, options.user_id)
 
 			return paginator.paginate(comments_queryset, options)
 		})
@@ -31,37 +34,42 @@ module.exports = function Comments (db)
 
 
 	var toId = require('../../toId')
-	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+	var WrongId = Err('wrong_id', 'Wrong id')
 
-	comments.validate_feed_id = function (feed_id)
+	comments.validate_id = function (id)
 	{
 		return new Promise(rs =>
 		{
-			feed_id = toId(feed_id)
+			id = toId(id)
 
-			if (! feed_id)
+			if (! id)
 			{
-				throw WrongFeedId()
+				throw WrongId()
 			}
 
 			return rs()
 		})
 	}
 
-	function byId (feed_id)
+	function byFeedId (feed_id, user_id)
 	{
 		return comments.table()
 		.select(
 			'comments.id',
-			'timestamp',
+			'comments.timestamp',
 			'text',
-			'user_id',
-			'users.full_name'
+			'comments.user_id',
+			'users.full_name',
+			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
 		.innerJoin('users', 'comments.user_id', 'users.id')
+		.leftJoin('abuse_comments', function ()
+		{
+			this.on('abuse_comments.comment_id', '=', 'comments.id')
+			.andOn('abuse_comments.user_id', '=', user_id)
+		})
 		.where('feed_id', feed_id)
 	}
-
 
 	comments.create = function (data)
 	{
@@ -70,10 +78,9 @@ module.exports = function Comments (db)
 		.then(noop)
 	}
 
-
 	comments.count = function (feed_id)
 	{
-		return comments.validate_feed_id(feed_id)
+		return comments.validate_id(feed_id)
 		.then(() =>
 		{
 			return comments.table()
@@ -83,7 +90,6 @@ module.exports = function Comments (db)
 		})
 		.then(row => row.count)
 	}
-
 
 	var at  = require('lodash/fp/at')
 	var zip = _.fromPairs
@@ -106,6 +112,17 @@ module.exports = function Comments (db)
 			seq = mapValues(seq, toNumber)
 
 			return seq
+		})
+	}
+
+	comments.byId = function (id)
+	{
+		return comments.validate_id(id)
+		.then(() =>
+		{
+			return comments.table()
+			.where('id', id)
+			.then(oneMaybe)
 		})
 	}
 
