@@ -25,8 +25,11 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('brokerage', (table) =>
 		{
 			// Amount of Investor's cash
-			table.integer('investor_id').primary()
-			table.foreign('investor_id').references('investors.id')
+			table.integer('investor_id')
+			.primary()
+			.references('investors.id')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 			table.decimal('cash_value', 12, 2).notNullable()
 			/*
@@ -52,11 +55,17 @@ exports.up = function (knex, Promise)
 			table.increments('id').primary()
 			table.integer('amount').notNullable().comment('Number of Shares')
 
-			table.integer('investor_id').notNullable()
-			table.foreign('investor_id').references('investors.id')
+			table.integer('investor_id')
+			.notNullable()
+			.references('investors.id')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 			table.integer('symbol_id')
-			table.foreign('symbol_id').references('symbols.id')
+			.notNullable()
+			.references('symbols.id')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
