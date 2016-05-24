@@ -1,8 +1,4 @@
 
-var toId = require('../toId')
-var Err = require('../Err')
-var WrongId = Err('wrong_id', 'Wrong id')
-
 var helpers = module.exports = {}
 
 helpers.exists = function exists (queryset)
@@ -29,20 +25,6 @@ helpers.one = function one (queryset)
 	}
 
 	return queryset[0]
-}
-
-helpers.validate_id = function validateId (id) {
-	return new Promise(rs =>
-	{
-		id = toId(id)
-
-		if (! id)
-		{
-			throw WrongId()
-		}
-
-		return rs()
-	})
 }
 
 function ensureNotMultiple (queryset)

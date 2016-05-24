@@ -2,7 +2,8 @@ var _ = require('lodash')
 
 var Err = require('../../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
-var helpers = require('../helpers')
+var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
+var validateId = require('../../id').validate
 
 module.exports = function Investor (db)
 {
@@ -13,18 +14,25 @@ module.exports = function Investor (db)
 
 	investor.table = () => knex('investors')
 
+	function validate_id (id)
+	{
+		return new Promise(rs =>
+		{
+			return rs(validateId(id, WrongInvestorId))
+		})
+	}
+
 	investor.byId = function (id)
 	{
-		return helpers
-		.validate_id(id)
+		return validate_id(id)
 		.then(() =>
 		{
 			return investor
 			.table()
 			.where('user_id', id)
 		})
-		.then(Err.nullish(NotFound))
 		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
 	}
 
 	investor.list = function (options)
