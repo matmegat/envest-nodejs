@@ -5,9 +5,11 @@ var _ = require('lodash')
 
 var Paginator = require('../Paginator')
 
+var validateId = require('../../id').validate
+
 var Err = require('../../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
-var helpers = require('../helpers')
+var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 module.exports = function Feed (db)
 {
@@ -27,7 +29,7 @@ module.exports = function Feed (db)
 
 	feed.byId = function (id)
 	{
-		return helpers.validate_id(id)
+		return feed.validateFeedId(id)
 		.then(() =>
 		{
 			return feed.feed_table()
@@ -60,6 +62,13 @@ module.exports = function Feed (db)
 		.then(Err.nullish(NotFound))
 	}
 
+	feed.validateFeedId = function (id)
+	{
+		return new Promise(rs =>
+		{
+			return rs(validateId(id, WrongFeedId))
+		})
+	}
 
 	feed.list = function (options)
 	{

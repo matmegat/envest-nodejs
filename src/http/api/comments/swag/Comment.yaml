@@ -17,6 +17,9 @@ properties:
   full_name:
     type: string
     description: Comment author full name
+  is_abuse:
+    type: boolean
+    description: Condition abuse for comments
 required:
 - id
 - timestamp

@@ -2,7 +2,9 @@
 var Paginator = require('../Paginator')
 var Abuse     = require('./Abuse')
 
-var helpers = require('../helpers')
+var validateId = require('../../id').validate
+
+var Err = require('../../Err')
 
 var _ = require('lodash')
 var noop = _.noop
@@ -23,7 +25,7 @@ module.exports = function Comments (db)
 
 	comments.list = function (options)
 	{
-		return helpers.validate_id(options.feed_id)
+		return db.feed.validateFeedId(options.feed_id)
 		.then(() =>
 		{
 			var comments_queryset = byFeedId(options.feed_id, options.user_id)
@@ -31,7 +33,6 @@ module.exports = function Comments (db)
 			return paginator.paginate(comments_queryset, options)
 		})
 	}
-
 
 	function byFeedId (feed_id, user_id)
 	{
@@ -62,7 +63,7 @@ module.exports = function Comments (db)
 
 	comments.count = function (feed_id)
 	{
-		return helpers.validate_id(feed_id)
+		return db.feed.validateFeedId(feed_id)
 		.then(() =>
 		{
 			return comments.table()
@@ -97,9 +98,20 @@ module.exports = function Comments (db)
 		})
 	}
 
+
+	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+
+	function validate_id (id)
+	{
+		return new Promise(rs =>
+		{
+			return rs(validateId(id, WrongCommentId))
+		})
+	}
+
 	comments.byId = function (id)
 	{
-		return helpers.validate_id(id)
+		return validate_id(id)
 		.then(() =>
 		{
 			return comments.table()
