@@ -1,6 +1,4 @@
 
-var _ = require('lodash')
-
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
@@ -11,7 +9,7 @@ module.exports = function (db)
 
 	investors.model = db.investor
 	investors.express = Router()
-	// investors.express.use(authRequired)
+	investors.express.use(authRequired)
 
 	investors.express.get('/', (rq, rs) =>
 	{

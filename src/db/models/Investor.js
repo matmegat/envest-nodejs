@@ -1,7 +1,5 @@
 var _ = require('lodash')
 
-var Paginator = require('../Paginator')
-
 var Err = require('../../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
 var helpers = require('../helpers')
@@ -13,8 +11,6 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
-
 	investor.table = () => knex('investors')
 
 	investor.byId = function (id)
@@ -25,7 +21,7 @@ module.exports = function Investor (db)
 		{
 			return investor
 			.table()
-			.where('id', id)
+			.where('user_id', id)
 		})
 		.then(Err.nullish(NotFound))
 		.then(oneMaybe)
@@ -43,24 +39,25 @@ module.exports = function Investor (db)
 		.orderBy('first_name', 'asc')
 		.then((investors) =>
 		{
-			investors.forEach((investor) =>
+			return investors.map((investor) =>
 			{
+				investor.id = investor.user_id
 				investor.full_name = investor.first_name + ' ' + investor.last_name
 				investor.annual_return = _.sumBy(
 					investor.historical_returns,
 					'percentage'
-				)
+				) / investor.historical_returns.length
+				// FIXME: refactor annual return when it comes more complecated
 
-				delete investor.user_id
-				delete investor.first_name
-				delete investor.last_name
-				delete investor.cover_image
-				delete investor.profession
-				delete investor.background
-				delete investor.historical_returns
+				return _.pick(investor,
+				[
+					'id',
+					'full_name',
+					'icon',
+					'focus',
+					'annual_return'
+				])
 			})
-
-			return investors
 		})
 	}
 
