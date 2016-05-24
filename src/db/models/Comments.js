@@ -1,8 +1,6 @@
 
 var Paginator = require('../Paginator')
 
-var Err = require('../../Err')
-
 var _ = require('lodash')
 var noop = _.noop
 

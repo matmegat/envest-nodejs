@@ -12,7 +12,7 @@ var istx = require('./is-tx')
  *  in transaction you can do
  *    users(tx) -> same knex table but added in transaction tx
  */
-var knexed = module.exports = function knexed (knex, table_name)
+module.exports = function knexed (knex, table_name)
 {
 	return function knex_table (tx)
 	{
