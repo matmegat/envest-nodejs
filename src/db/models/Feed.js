@@ -7,6 +7,7 @@ var Paginator = require('../Paginator')
 
 var Err = require('../../Err')
 var NotFound = Err('not_found', 'Feed Item not found')
+var helpers = require('../helpers')
 
 module.exports = function Feed (db)
 {
@@ -26,7 +27,7 @@ module.exports = function Feed (db)
 
 	feed.byId = function (id)
 	{
-		return comments.validate_id(id)
+		return helpers.validate_id(id)
 		.then(() =>
 		{
 			return feed.feed_table()
