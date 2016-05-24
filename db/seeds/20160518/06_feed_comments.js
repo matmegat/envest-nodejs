@@ -30,18 +30,16 @@ exports.seed = function (knex, Promise)
 				var user_id = users[_.random(users.length - 1)].id
 
 				feed_comments.push(
-					knex('comments').insert(
-					{
-						timestamp: new Date(new Date().getTime() + i),
-						user_id: user_id,
-						feed_id: feed_item.id,
-						text: 'Random comment for Feed Item #' +
-							feed_item.id + ' from user #' + user_id
-					})
-				)
+				{
+					timestamp: new Date(new Date().getTime() + i),
+					user_id: user_id,
+					feed_id: feed_item.id,
+					text: 'Random comment for Feed Item #' +
+						feed_item.id + ' from user #' + user_id
+				})
 			})
 		})
 
-		return Promise.all(feed_comments)
+		return knex('comments').insert(feed_comments)
 	})
 }

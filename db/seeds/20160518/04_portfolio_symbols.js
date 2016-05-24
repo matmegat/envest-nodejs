@@ -7,7 +7,7 @@ exports.seed = function (knex, Promise)
 	.then(() =>
 	{
 		return knex('investors')
-		.select('id')
+		.select('user_id as id')
 	})
 	.then((investors) =>
 	{
@@ -35,16 +35,14 @@ exports.seed = function (knex, Promise)
 			times(random(3, 6), () =>
 			{
 				portfolio_symbols.push(
-					knex('portfolio_symbols').insert(
-					{
-						investor_id: investor.id,
-						symbol_id: symbols[random(symbols.length - 1)].id,
-						amount: random(100, 5000)
-					})
-				)
+				{
+					investor_id: investor.id,
+					symbol_id: symbols[random(symbols.length - 1)].id,
+					amount: random(100, 5000)
+				})
 			})
 		})
 
-		return Promise.all(portfolio_symbols)
+		return knex('portfolio_symbols').insert(portfolio_symbols)
 	})
 }

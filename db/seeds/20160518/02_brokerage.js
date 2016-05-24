@@ -5,19 +5,19 @@ exports.seed = function (knex, Promise)
 	.then(() =>
 	{
 		return knex('investors')
-		.select('id')
+		.select('user_id as id')
 	})
 	.then((investors) =>
 	{
 		var brokerage = investors.map((investor) =>
 		{
-			return knex('brokerage').insert({
+			return {
 				investor_id: investor.id,
 				cash_value: Math.random() * 50000 + 50000,
 				multiplier: Math.random() * 2
-			})
+			}
 		})
 
-		return Promise.all(brokerage)
+		return knex('brokerage').insert(brokerage)
 	})
 }

@@ -65,7 +65,7 @@ var dummmy_events =
 exports.seed = function (knex, Promise)
 {
 	return knex('investors')
-	.select('id')
+	.select('user_id as id')
 	.then((investors) =>
 	{
 		return knex('symbols')
@@ -99,14 +99,13 @@ exports.seed = function (knex, Promise)
 			}
 			event.data.motivations = _.sampleSize(motivations, _.random(1, 3))
 
-			return knex('feed_items').insert(
-			{
+			return {
 				timestamp: new Date(new Date().getTime() + i),
 				investor_id: investors[_.random(investors.length - 1)].id,
 				event: event
-			})
+			}
 		})
 
-		return Promise.all(feed_items)
+		return knex('feed_items').insert(feed_items)
 	})
 }
