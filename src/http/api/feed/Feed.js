@@ -37,6 +37,7 @@ module.exports = function Feed (db)
 			'since_id',
 		])
 		options.feed_id = rq.params.id
+		options.user_id = rq.user.id
 
 		toss(rs, db.comments.list(options))
 	})
