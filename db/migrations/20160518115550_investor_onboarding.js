@@ -5,7 +5,8 @@ exports.up = function (knex, Promise)
 	var investor_migration = Investors(knex)
 
 	return Promise.resolve()
-	.then(() => {
+	.then(() =>
+	{
 		return knex('comments').del()
 	})
 	.then(() =>
@@ -18,7 +19,25 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
+		return knex.schema.table('feed_items', (table) =>
+		{
+			table.dropForeign('investor_id')
+		})
+	})
+	.then(() =>
+	{
 		return investor_migration.secondUp
+	})
+	.then(() =>
+	{
+		return knex.schema.table('feed_items', (table) =>
+		{
+			table
+				.foreign('investor_id')
+				.references('investors.user_id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
+		})
 	})
 	.then(() =>
 	{
@@ -27,7 +46,8 @@ exports.up = function (knex, Promise)
 			// Amount of Investor's cash
 			table.integer('investor_id')
 			.primary()
-			.references('investors.id')
+			.unique()
+			.references('investors.user_id')
 			.onUpdate('cascade')
 			.onDelete('cascade')
 
@@ -57,7 +77,7 @@ exports.up = function (knex, Promise)
 
 			table.integer('investor_id')
 			.notNullable()
-			.references('investors.id')
+			.references('investors.user_id')
 			.onUpdate('cascade')
 			.onDelete('cascade')
 
@@ -76,14 +96,74 @@ exports.up = function (knex, Promise)
 	})
 }
 
-exports.down = function (knex, Promise) {
-	var investor_migration = Investors(knex)
+exports.down = function (knex, Promise)
+{
+	// TODO: Rewrite to investor_migration.secondDown
 
-	return Promise
-	.join(
-		knex.schema.dropTableIfExists('portfolio_symbols'),
-		knex.schema.dropTableIfExists('symbols'),
-		knex.schema.dropTableIfExists('brokerage'),
-		investor_migration.secondDown
-	)
+	return knex.schema.dropTableIfExists('portfolio_symbols')
+	.then(() =>
+	{
+		return knex.schema.dropTableIfExists('symbols')
+	})
+	.then(() =>
+	{
+		return knex.schema.dropTableIfExists('brokerage')
+	})
+	.then(() =>
+	{
+		return knex.schema.table('feed_items', (table) =>
+		{
+			table.dropForeign('investor_id')
+		})
+	})
+	.then(() =>
+	{
+		return knex.schema.table('investors', (table) =>
+		{
+			table.dropPrimary('user_id')
+
+			table.dropColumns(
+				'user_id',
+				'last_name',
+				'cover_image',
+				'profession',
+				'focus',
+				'background',
+				'historical_returns',
+				'is_public'
+			)
+		})
+	})
+	.then(() =>
+	{
+		return knex('comments').del()
+	})
+	.then(() =>
+	{
+		return knex('feed_items').del()
+	})
+	.then(() =>
+	{
+		return knex('investors').del()
+	})
+	.then(() =>
+	{
+		return knex.schema.table('investors', (table) =>
+		{
+			table.increments('id').primary()
+			table.timestamps() // created_at, updated_at
+			table.renameColumn('first_name', 'full_name')
+		})
+	})
+	.then(() =>
+	{
+		return knex.schema.table('feed_items', (table) =>
+		{
+			table
+			.foreign('investor_id')
+			.references('investors.id')
+			.onUpdate('cascade')
+			.onDelete('cascade')
+		})
+	})
 }

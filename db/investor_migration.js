@@ -23,9 +23,10 @@ module.exports = function Investors (knex)
 		// table.increments('id').primary()
 		// table.string('icon', 512).notNullable()
 
-		table.dropColumns('created_at', 'updated_at')
+		table.dropPrimary()
+		table.dropColumns('id', 'created_at', 'updated_at')
 
-		table.integer('user_id').unique().notNullable()
+		table.integer('user_id').primary().unique().notNullable()
 		.references('users.id')
 		.onUpdate('restrict') /* user.id should never change */
 		.onDelete('restrict') /* we don't want to accidentally delete investor */
