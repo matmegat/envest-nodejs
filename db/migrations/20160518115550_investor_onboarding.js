@@ -96,7 +96,7 @@ exports.up = function (knex, Promise)
 	})
 }
 
-exports.down = function (knex, Promise)
+exports.down = function (knex)
 {
 	// TODO: Rewrite to investor_migration.secondDown
 

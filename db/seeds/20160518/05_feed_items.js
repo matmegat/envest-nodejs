@@ -62,7 +62,7 @@ var dummmy_events =
 	}
 ]
 
-exports.seed = function (knex, Promise)
+exports.seed = function (knex)
 {
 	return knex('investors')
 	.select('user_id as id')

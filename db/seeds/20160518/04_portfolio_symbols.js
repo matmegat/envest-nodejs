@@ -1,7 +1,7 @@
 var random = require('lodash/random')
 var times = require('lodash/times')
 
-exports.seed = function (knex, Promise)
+exports.seed = function (knex)
 {
 	return knex('portfolio_symbols').del()
 	.then(() =>
