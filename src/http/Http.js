@@ -10,6 +10,7 @@ var AdminRequired = require('./admin-required')
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
+var Investors = require('./api/investors/Investors')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
@@ -52,6 +53,7 @@ module.exports = function Http (app)
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Investors(app.db), 'investors', 'investors')
 
 	http.express.use(errorMiddleware)
 

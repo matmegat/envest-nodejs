@@ -31,14 +31,16 @@ module.exports = function Investor (db)
 		.then(oneMaybe)
 	}
 
-	investor.list = function (options) {
+	investor.list = function (options)
+	{
 		options = _.extend({}, options,
 		{
 			limit: 20
 		})
 
-		return paginator
-		.paginate(investor.table(), options)
+		return investor.table()
+		.orderBy('last_name', 'asc')
+		.orderBy('first_name', 'asc')
 		.then((investors) =>
 		{
 			investors.forEach((investor) =>
@@ -61,4 +63,6 @@ module.exports = function Investor (db)
 			return investors
 		})
 	}
+
+	return investor
 }
