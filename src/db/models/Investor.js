@@ -33,6 +33,18 @@ module.exports = function Investor (db)
 		})
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
+		.then((investor) =>
+		{
+			investor.id = investor.user_id
+			investor.full_name = investor.first_name + ' ' + investor.last_name
+			investor.annual_return = _.sumBy(
+				investor.historical_returns,
+				'percentage'
+			) / investor.historical_returns.length
+			// FIXME: refactor annual return when it comes more complecated
+
+			return _.omit(investor, [ 'user_id', 'first_name', 'last_name', 'historical_returns', 'is_public' ])
+		})
 	}
 
 	investor.list = function (options)
