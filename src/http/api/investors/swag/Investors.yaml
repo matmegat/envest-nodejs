@@ -1,0 +1,4 @@
+type: array
+title: Investors Model
+items:
+- $ref: ./Investor.yaml

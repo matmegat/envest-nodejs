@@ -48,6 +48,9 @@ paths:
   '/comments/abuse':
     $ref: ../api/comments/swag/Abuse.yaml
 
+  '/investors':
+    $ref: ../api/investors/swag/GetInvestors.yaml
+
 definitions:
   # Put here only COMMON definitions
 
@@ -58,7 +61,8 @@ definitions:
     $ref: ../api/feed/swag/FeedItem.yaml
 
   Investor:
-    $ref: ./Investor.yaml
+#    $ref: ./Investor.yaml
+    $ref: ../api/investors/swag/Investor.yaml
 
   Symbol:
     $ref: ./Symbol.yaml
