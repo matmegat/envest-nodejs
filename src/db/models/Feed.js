@@ -37,6 +37,7 @@ module.exports = function Feed (db)
 			.where('id', id)
 		})
 		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
 		.then((feed_item) =>
 		{
 			return investor.byId(feed_item.investor_id)
@@ -58,7 +59,6 @@ module.exports = function Feed (db)
 				return feed_item
 			})
 		})
-		.then(Err.nullish(NotFound))
 	}
 
 	feed.validateFeedId = function (id)
