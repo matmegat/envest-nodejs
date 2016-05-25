@@ -6,6 +6,7 @@ var cookie_parser = require('cookie-parser')
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
+var Statics = require('./api/statics/Statics')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
@@ -27,8 +28,6 @@ module.exports = function Http (app)
 		next()
 	})
 
-	http.express.use(express.static(app.root() + '/static'))
-
 	http.passport = Passport(http.express, app.db)
 
 	http.api = {}
@@ -46,6 +45,7 @@ module.exports = function Http (app)
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Statics(app.root()), 'static', 'static')
 
 	http.express.use(errorMiddleware)
 
