@@ -27,7 +27,6 @@ module.exports = function Feed (db)
 	var investor = db.investor
 
 	feed.feed_table = () => knex('feed_items')
-	feed.investors_table = () => knex('investors')
 
 	feed.byId = function (id)
 	{
@@ -96,8 +95,15 @@ module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			return feed.investors_table()
-			.whereIn('id', _.map(feed_items, 'investor_id'))
+			return investor.list(
+			{
+				where:
+				{
+					column_name: 'user_id',
+					clause: 'in',
+					argument: _.map(feed_items, 'investor_id')
+				}
+			})
 			.then((investors) =>
 			{
 				var response =

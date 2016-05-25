@@ -54,9 +54,22 @@ module.exports = function Investor (db)
 			limit: 20
 		})
 
-		return investor.table()
+		var queryset = investor.table()
 		.orderBy('last_name', 'asc')
 		.orderBy('first_name', 'asc')
+
+		if (options.where)
+		{
+			// TODO: validate options.where
+			queryset
+			.where(
+				options.where.column_name,
+				options.where.clause,
+				options.where.argument
+			)
+		}
+
+		return queryset
 		.then((investors) =>
 		{
 			return investors.map((investor) =>
