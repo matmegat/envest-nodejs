@@ -59,6 +59,7 @@ module.exports = function Comments (db)
 		return comments.table()
 		.insert(data)
 		.then(noop)
+		.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
 	}
 
 	comments.count = function (feed_id)

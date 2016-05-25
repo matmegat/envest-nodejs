@@ -8,7 +8,7 @@ var Paginator = require('../Paginator')
 var validateId = require('../../id').validate
 
 var Err = require('../../Err')
-var NotFound = Err('not_found', 'Feed Item not found')
+var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 module.exports = function Feed (db)
@@ -25,6 +25,8 @@ module.exports = function Feed (db)
 	expect(db, 'Feed depends on Investor').property('investor')
 	var comments = db.comments
 	var investor = db.investor
+
+	feed.NotFound = NotFound
 
 	feed.feed_table = () => knex('feed_items')
 
