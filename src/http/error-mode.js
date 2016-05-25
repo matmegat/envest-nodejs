@@ -1,7 +1,7 @@
 
 module.exports = function (config, express)
 {
-	var mode 
+	var mode
 
 	if (config.dev === false || config.env === 'prod' || config.env === 'staging')
 	{

@@ -87,7 +87,7 @@ var dummyEvents =
 	},
 ]
 
-exports.seed = function (knex, Promise)
+exports.seed = function (knex)
 {
 	return knex('feed_items').del()
 	.then(() =>
