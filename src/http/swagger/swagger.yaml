@@ -43,8 +43,10 @@ paths:
 
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
+
   '/comments/count':
     $ref: ../api/comments/swag/GetCount.yaml
+
   '/comments/abuse':
     $ref: ../api/comments/swag/Abuse.yaml
 
@@ -78,3 +80,9 @@ definitions:
 
   Comments:
     $ref: ../api/comments/swag/Comments.yaml
+
+  CommentsItem:
+    $ref: ../api/comments/swag/CommentItem.yaml
+
+  CommentUser:
+    $ref: ../api/comments/swag/CommentUser.yaml
