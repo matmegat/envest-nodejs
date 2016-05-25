@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' +
 	'eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m' +
 	'inim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip e' +
@@ -13,7 +15,7 @@ exports.seed = function (knex, Promise)
 	 * 1. Take all existing investors and update them to new format
 	 * 2. Create more Investors
 	 */
-    return knex('investors').del()
+	return knex('investors').del()
 	.then(() =>
 	{
 		return Promise.join(

@@ -35,7 +35,7 @@ module.exports = function Investors (knex, Promise)
 		table.string('last_name').after('first_name')
 		table.string('cover_image', 255).notNullable().defaultTo('')
 		table.string('profession').defaultTo('')
-		table.jsonb('focus').defaultTo(JSON.stringify([]))	// [String, ]. Up to 3 elements
+		table.jsonb('focus').defaultTo('[]') // [String, ]. Up to 3 elements
 		table.text('background').defaultTo('')
 		table.jsonb('historical_returns').notNullable().defaultTo(
 			JSON.stringify(

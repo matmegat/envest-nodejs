@@ -43,7 +43,14 @@ module.exports = function Investor (db)
 			) / investor.historical_returns.length
 			// FIXME: refactor annual return when it comes more complecated
 
-			return _.omit(investor, [ 'user_id', 'first_name', 'last_name', 'historical_returns', 'is_public' ])
+			return _.omit(investor,
+			[
+				'user_id',
+				'first_name',
+				'last_name',
+				'historical_returns',
+				'is_public'
+			])
 		})
 	}
 
