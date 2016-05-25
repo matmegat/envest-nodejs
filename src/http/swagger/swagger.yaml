@@ -51,6 +51,9 @@ paths:
   '/investors':
     $ref: ../api/investors/swag/GetInvestors.yaml
 
+  '/investors/{investor_id}':
+    $ref: ../api/investors/swag/GetInvestor.yaml
+
 definitions:
   # Put here only COMMON definitions
 
