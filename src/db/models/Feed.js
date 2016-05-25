@@ -22,7 +22,9 @@ module.exports = function Feed (db)
 	var paginator = Paginator()
 
 	expect(db, 'Feed depends on Comments').property('comments')
+	expect(db, 'Feed depends on Investor').property('investor')
 	var comments = db.comments
+	var investor = db.investor
 
 	feed.feed_table = () => knex('feed_items')
 	feed.investors_table = () => knex('investors')
@@ -38,12 +40,10 @@ module.exports = function Feed (db)
 		.then(oneMaybe)
 		.then((feed_item) =>
 		{
-			return feed
-			.investors_table()
-			.where('id', feed_item.investor_id)
+			return investor.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
-				feed_item.investor = investor
+				feed_item.investor = _.pick(investor, [ 'id', 'full_name', 'icon' ])
 				delete feed_item.investor_id
 
 				return feed_item
