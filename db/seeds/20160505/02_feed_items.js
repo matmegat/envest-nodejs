@@ -92,16 +92,20 @@ exports.seed = function (knex, Promise)
 	return knex('feed_items').del()
 	.then(() =>
 	{
+		return knex('investors')
+		.select('id')
+	})
+	.then((investors) =>
+	{
 		var items = _.times(50, (i) =>
 		{
-			return knex('feed_items').insert(
-			{
+			return {
 				timestamp: new Date(new Date().getTime() + i),
-				investor_id: Math.floor(Math.random() * 4 + 1),
+				investor_id: investors[_.random(investors.length - 1)].id,
 				event: dummyEvents[i % dummyEvents.length]
-			})
+			}
 		})
 
-		return Promise.all(items)
+		return knex('feed_items').insert(items)
 	})
 }

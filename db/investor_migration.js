@@ -1,4 +1,4 @@
-module.exports = function Investors (knex)
+module.exports = function Investors (knex, Promise)
 {
 	var investors = {}
 
@@ -51,22 +51,78 @@ module.exports = function Investors (knex)
 		table.boolean('is_public').defaultTo(false)
 	})
 
-	investors.secondDown = knex.schema.table('investors', (table) =>
+	investors.secondDown = function ()
 	{
-		table.timestamps() // created_at, updated_at
-		table.renameColumn('first_name', 'full_name')
+		/*
+		* drop Foreign Key of feed_items
+		* back to previous investors version
+		* create new Foreign Key for feed_items
+		* run seed data
+		* */
 
-		table.dropColumns(
-			'user_id',
-			'last_name',
-			'cover_image',
-			'profession',
-			'focus',
-			'background',
-			'historical_returns',
-			'is_public'
-		)
-	})
+		return Promise.resolve()
+		.then(() =>
+		{
+			return knex.schema.table('feed_items', (table) =>
+			{
+				table.dropForeign('investor_id')
+			})
+		})
+		.then(() =>
+		{
+			return knex.schema.table('investors', (table) =>
+			{
+				table.dropPrimary('user_id')
+
+				table.dropColumns(
+					'user_id',
+					'last_name',
+					'cover_image',
+					'profession',
+					'focus',
+					'background',
+					'historical_returns',
+					'is_public'
+				)
+			})
+		})
+		.then(() =>
+		{
+			return knex('comments').del()
+		})
+		.then(() =>
+		{
+			return knex('feed_items').del()
+		})
+		.then(() =>
+		{
+			return knex('investors').del()
+		})
+		.then(() =>
+		{
+			return knex.schema.table('investors', (table) =>
+			{
+				table.increments('id').primary()
+				table.timestamps() // created_at, updated_at
+				table.renameColumn('first_name', 'full_name')
+			})
+		})
+		.then(() =>
+		{
+			return knex.schema.table('feed_items', (table) =>
+			{
+				table
+				.foreign('investor_id')
+				.references('investors.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
+			})
+		})
+		.then(() =>
+		{
+			return knex.seed.run({ directory: './seeds/20160505' })
+		})
+	}
 
 	return investors
 }
