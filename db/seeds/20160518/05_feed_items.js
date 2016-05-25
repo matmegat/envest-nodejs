@@ -96,8 +96,8 @@ exports.seed = function (knex)
 			else
 			{
 				event.data.symbol = symbols[_.random(symbols.length - 1)]
+				event.data.motivations = _.sampleSize(motivations, _.random(1, 3))
 			}
-			event.data.motivations = _.sampleSize(motivations, _.random(1, 3))
 
 			return {
 				timestamp: new Date(new Date().getTime() + i),
