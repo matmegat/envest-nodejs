@@ -99,6 +99,13 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
+	user.list = function (ids)
+	{
+		return user.users_table()
+		.select('id', 'full_name')
+		.whereIn('id', ids)
+	}
+
 	user.byFacebookId = function (facebook_id)
 	{
 		return knex.select('id', 'facebook_id')

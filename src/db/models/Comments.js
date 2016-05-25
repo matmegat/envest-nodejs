@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var Paginator = require('../Paginator')
 var Abuse     = require('./Abuse')
 
@@ -20,6 +22,9 @@ module.exports = function Comments (db)
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
+	expect(db, 'Comments depends on User').property('user')
+	var user = db.user
+
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments)
 
@@ -32,6 +37,21 @@ module.exports = function Comments (db)
 
 			return paginator.paginate(comments_queryset, options)
 		})
+		.then(Err.emptish(db.feed.NotFound))
+		.then((comments_items) =>
+		{
+			return user.list(_.map(comments_items, 'user_id'))
+			.then((users) =>
+			{
+				var response =
+				{
+					comments: comments_items,
+					users: users
+				}
+
+				return response
+			})
+		})
 	}
 
 	function byFeedId (feed_id, user_id)
@@ -42,10 +62,8 @@ module.exports = function Comments (db)
 			'comments.timestamp',
 			'text',
 			'comments.user_id',
-			'users.full_name',
 			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
-		.innerJoin('users', 'comments.user_id', 'users.id')
 		.leftJoin('abuse_comments', function ()
 		{
 			this.on('abuse_comments.comment_id', '=', 'comments.id')
