@@ -44,17 +44,15 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('brokerage', (table) =>
 		{
 			// Amount of Investor's cash
-			table.integer('investor_id')
-			.primary()
-			.unique()
+			table.integer('investor_id').primary()
 			.references('investors.user_id')
-			.onUpdate('cascade')
-			.onDelete('cascade')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.decimal('cash_value', 12, 2).notNullable()
 			/*
-			* precision: 12 - up to 999 999 999 999
-			* scale: .99
+			* precision: up to 9 999 999 999
+			* scale: 0.99
 			* */
 			table.float('multiplier').notNullable()
 		})
