@@ -22,7 +22,7 @@ module.exports = function Comments (db)
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
-	expect(db, 'Feed depends on User').property('user')
+	expect(db, 'Comments depends on User').property('user')
 	var user = db.user
 
 	comments.table = () => knex('comments')
@@ -39,7 +39,7 @@ module.exports = function Comments (db)
 		})
 		.then((comments_items) =>
 		{
-			return user.byIdList(_.map(comments_items, 'user_id'))
+			return user.list(_.map(comments_items, 'user_id'))
 			.then((users) =>
 			{
 				var response =

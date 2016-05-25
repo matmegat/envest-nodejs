@@ -99,7 +99,7 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
-	user.byIdList = function (ids)
+	user.list = function (ids)
 	{
 		return user.users_table()
 		.select('id', 'full_name')
