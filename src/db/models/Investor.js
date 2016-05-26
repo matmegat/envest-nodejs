@@ -1,7 +1,7 @@
 var _ = require('lodash')
 
 var Err = require('../../Err')
-var NotFound = Err('not_found', 'Investor not found')
+var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var validateId = require('../../id').validate
 
