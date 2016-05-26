@@ -7,10 +7,10 @@ properties:
   full_name:
     type: string
     description: Investor's Full Name
-  icon:
+  pic:
     type: string
     description: URL to Investor's image
-  cover_image:
+  profile_pic:
     type: string
     description: URL to cover image of Investr's profile
   profession:
@@ -30,6 +30,6 @@ properties:
 required:
 - id
 - full_name
-- icon
+- pic
 - focus
 - annual_return

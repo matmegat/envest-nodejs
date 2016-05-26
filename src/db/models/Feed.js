@@ -45,7 +45,7 @@ module.exports = function Feed (db)
 			return investor.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
-				feed_item.investor = _.pick(investor, [ 'id', 'full_name', 'icon' ])
+				feed_item.investor = _.pick(investor, [ 'id', 'full_name', 'pic' ])
 				delete feed_item.investor_id
 
 				return feed_item

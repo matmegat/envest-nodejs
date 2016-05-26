@@ -32,28 +32,30 @@ module.exports = function Investor (db)
 		{
 			return investor
 			.table()
+			.select(
+				'users.id',
+				'users.full_name',
+				'users.pic',
+				'investors.profession',
+				'investors.focus',
+				'investors.background',
+				'investors.historical_returns',
+				'investors.profile_pic'
+			)
+			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
 		.then((investor) =>
 		{
-			investor.id = investor.user_id
-			investor.full_name = investor.first_name + ' ' + investor.last_name
 			investor.annual_return = _.sumBy(
 				investor.historical_returns,
 				'percentage'
 			) / investor.historical_returns.length
 			// FIXME: refactor annual return when it comes more complecated
 
-			return _.omit(investor,
-			[
-				'user_id',
-				'first_name',
-				'last_name',
-				'historical_returns',
-				'is_public'
-			])
+			return _.omit(investor, [ 'historical_returns' ])
 		})
 	}
 
@@ -62,10 +64,20 @@ module.exports = function Investor (db)
 		options = _.extend({}, options,
 		{
 			limit: 20,
-			column_name: 'user_id'
+			column_name: 'investors.user_id'
 		})
 
-		var queryset = paginator.paginate(investor.table(), options)
+		var queryset = investor.table()
+		.select(
+			'users.id',
+			'users.full_name',
+			'users.pic',
+			'investors.focus',
+			'investors.historical_returns'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
+
+		queryset = paginator.paginate(queryset, options)
 
 		if (options.where)
 		{
@@ -83,8 +95,6 @@ module.exports = function Investor (db)
 		{
 			return investors.map((investor) =>
 			{
-				investor.id = investor.user_id
-				investor.full_name = investor.first_name + ' ' + investor.last_name
 				investor.annual_return = _.sumBy(
 					investor.historical_returns,
 					'percentage'
@@ -95,7 +105,7 @@ module.exports = function Investor (db)
 				[
 					'id',
 					'full_name',
-					'icon',
+					'pic',
 					'focus',
 					'annual_return'
 				])
