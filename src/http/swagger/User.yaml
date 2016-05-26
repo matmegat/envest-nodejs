@@ -1,4 +1,5 @@
 type: object
+title: User Model
 properties:
   id:
     type: integer
@@ -6,7 +7,10 @@ properties:
     type: string
   email:
     type: string
+  pic:
+    type: string
 required:
 - id
 - full_name
 - email
+- pic
