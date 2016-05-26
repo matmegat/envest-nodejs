@@ -13,18 +13,10 @@ module.exports = function Statics (rootpath)
 
 	statics.express.get('/pic/:hash', (rq, rs) =>
 	{
-		console.log('Getting image by hash: `%s`', rq.params.hash)
+		var type = mime.lookup(filename)
 
-		Promise.resolve()
-		.then(() =>
-		{
-			return mime.lookup(filename)
-		})
-		.then(type =>
-		{
-			rs.setHeader('content-type', type)
-			stream(filename).pipe(rs)
-		})
+		rs.setHeader('content-type', type)
+		stream(filename).pipe(rs)
 	})
 
 	return statics
