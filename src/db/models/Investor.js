@@ -37,7 +37,7 @@ module.exports = function Investor (db)
 				'investors.focus',
 				'investors.background',
 				'investors.historical_returns',
-				'investors.profile_image'
+				'investors.profile_pic'
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
