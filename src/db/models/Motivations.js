@@ -52,7 +52,7 @@ module.exports = function Motivations ()
 		},
 		{
 			id: 13,
-			text: 'Tax Loses'
+			text: 'Tax Loss Selling'
 		},
 		{
 			id: 14,
