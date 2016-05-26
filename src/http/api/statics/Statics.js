@@ -6,7 +6,7 @@ var stream = require('fs').createReadStream
 module.exports = function Statics (rootpath)
 {
 	var statics = {}
-	var filename = rootpath + '/static/images/default.png'
+	var filename = rootpath('static/images/default.png')
 
 	statics.express = Router()
 
