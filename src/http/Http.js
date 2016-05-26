@@ -10,11 +10,8 @@ var AdminRequired = require('./admin-required')
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
-<<<<<<< HEAD
 var Investors = require('./api/investors/Investors')
-=======
 var Statics = require('./api/statics/Statics')
->>>>>>> NET-548_mockup_route_userpicture
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
