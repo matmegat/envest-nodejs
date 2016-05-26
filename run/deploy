@@ -132,6 +132,10 @@ rev()
 {
 	return rsync(rootpath('db') + '/', target('db'))
 }))
+.then(outputify('copy static/', () =>
+{
+	return rsync(rootpath('static') + '/', target('static'))
+}))
 .then(outputify('copy src/', () =>
 {
 	return rsync(rootpath('src') + '/', target('src'))
