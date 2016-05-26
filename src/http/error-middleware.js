@@ -2,7 +2,7 @@
 var toss = require('./toss')
 var Err = require('../Err')
 
-var MiddlewareError = Err('Middleware_error', 'Middleware error')
+var MiddlewareError = Err('middleware_error', 'Middleware error')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = (err, rq, rs, next) =>
