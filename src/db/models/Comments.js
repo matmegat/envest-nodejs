@@ -37,7 +37,6 @@ module.exports = function Comments (db)
 
 			return paginator.paginate(comments_queryset, options)
 		})
-		.then(Err.emptish(db.feed.NotFound))
 		.then((comments_items) =>
 		{
 			return user.list(_.map(comments_items, 'user_id'))
