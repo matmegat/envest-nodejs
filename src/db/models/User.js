@@ -5,6 +5,7 @@ var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
 var Err = require('../../Err')
+var NotFound = Err('user_not_found', 'User not found')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 
 module.exports = function User (db)
@@ -20,6 +21,8 @@ module.exports = function User (db)
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 	user.auth_local     = knexed(knex, 'auth_local')
+
+	user.NotFound = NotFound
 
 	user.create = function (data)
 	{
@@ -42,6 +45,15 @@ module.exports = function User (db)
 						password: data.password,
 						salt: data.salt
 					}, trx)
+				})
+				.then(function (id)
+				{
+					return db.notifications.viewed_table(trx)
+					.insert({
+						recipient_id: id,
+						last_viewed_id: 0
+					}, 'recipient_id')
+					.then(one)
 				})
 				.then(function (id)
 				{

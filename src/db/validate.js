@@ -24,3 +24,17 @@ validate.empty = function validate__empty (field, name)
 		throw FieldEmpty({ field: name })
 	}
 }
+
+var WrongJSON = Err('wrong_json', 'Wrong JSON')
+
+validate.json = function validate__json (json, name)
+{
+	try
+	{
+		JSON.parse(json)
+	}
+	catch (e)
+	{
+		throw WrongJSON({ field: name })
+	}
+}
