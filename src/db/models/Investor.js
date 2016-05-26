@@ -99,7 +99,7 @@ module.exports = function Investor (db)
 					investor.historical_returns,
 					'percentage'
 				) / investor.historical_returns.length
-				// FIXME: refactor annual return when it comes more complecated
+				// FIXME: refactor annual return when it comes more complicated
 
 				return _.pick(investor,
 				[
