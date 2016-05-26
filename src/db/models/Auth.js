@@ -159,26 +159,11 @@ function validate_login (email, password)
 }
 
 
-var FieldRequired = Err('field_required', 'Field is required')
+var validate = require('../validate')
 
-function validate_required (field, name)
-{
-	if (field == null)
-	{
-		throw FieldRequired({ field: name })
-	}
-}
+var validate_required = validate.required
 
-
-var FieldEmpty = Err('field_empty', 'Field must not be empty')
-
-function validate_empty (field, name)
-{
-	if (field === '')
-	{
-		throw FieldEmpty({ field: name })
-	}
-}
+var validate_empty = validate.empty
 
 
 var XRegExp = require('xregexp')
