@@ -62,8 +62,14 @@ module.exports = function Investor (db)
 		})
 
 		var queryset = investor.table()
-		.orderBy('last_name', 'asc')
-		.orderBy('first_name', 'asc')
+		.select(
+			'users.id',
+			'users.full_name',
+			'users.pic',
+			'investors.focus',
+			'investors.historical_returns'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
 
 		if (options.where)
 		{
@@ -81,8 +87,6 @@ module.exports = function Investor (db)
 		{
 			return investors.map((investor) =>
 			{
-				investor.id = investor.user_id
-				investor.full_name = investor.first_name + ' ' + investor.last_name
 				investor.annual_return = _.sumBy(
 					investor.historical_returns,
 					'percentage'
@@ -93,7 +97,7 @@ module.exports = function Investor (db)
 				[
 					'id',
 					'full_name',
-					'icon',
+					'pic',
 					'focus',
 					'annual_return'
 				])
