@@ -29,28 +29,30 @@ module.exports = function Investor (db)
 		{
 			return investor
 			.table()
+			.select(
+				'users.id',
+				'users.full_name',
+				'users.pic',
+				'investors.profession',
+				'investors.focus',
+				'investors.background',
+				'investors.historical_returns',
+				'investors.profile_image'
+			)
+			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
 		.then((investor) =>
 		{
-			investor.id = investor.user_id
-			investor.full_name = investor.first_name + ' ' + investor.last_name
 			investor.annual_return = _.sumBy(
 				investor.historical_returns,
 				'percentage'
 			) / investor.historical_returns.length
-			// FIXME: refactor annual return when it comes more complecated
+			// FIXME: refactor annual return when it comes more complicated
 
-			return _.omit(investor,
-			[
-				'user_id',
-				'first_name',
-				'last_name',
-				'historical_returns',
-				'is_public'
-			])
+			return _.omit(investor, [ 'historical_returns' ])
 		})
 	}
 
