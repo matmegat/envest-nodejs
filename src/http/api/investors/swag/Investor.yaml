@@ -10,7 +10,7 @@ properties:
   pic:
     type: string
     description: URL to Investor's image
-  profile_image:
+  profile_pic:
     type: string
     description: URL to cover image of Investr's profile
   profession:

@@ -8,7 +8,7 @@ exports.up = function (knex, Promise)
 	* Add column "pic" to users, with default url
 	* Remove column "icon" from investors
 	* Remove column "cover_image" of investors
-	* Add "profile_image" to investors and set default url
+	* Add "profile_pic" to investors and set default url
 	*   because of Error: table.renameColumn(...).defaultTo is not a function
 	* ...
 	* Update codebase to work with this stuff
@@ -29,7 +29,7 @@ exports.up = function (knex, Promise)
 		return knex.schema.table('investors', (table) =>
 		{
 			table.dropColumns('icon', 'cover_image')
-			table.text('profile_image').defaultTo(investorProfilePic)
+			table.text('profile_pic').defaultTo(investorProfilePic)
 		})
 	})
 }
@@ -39,7 +39,7 @@ exports.down = function (knex, Promise)
 	/*
 	* Remove column "pic" from users
 	* Add column "icon" to investors and set default url
-	* Rename "profile_image" to "cover_image" and save default url
+	* Rename "profile_pic" to "cover_image" and save default url
 	* */
 	return Promise.resolve()
 	.then(() =>
@@ -54,7 +54,7 @@ exports.down = function (knex, Promise)
 		return knex.schema.table('investors', (table) =>
 		{
 			table.text('icon').defaultTo(userPic)
-			table.renameColumn('profile_image', 'cover_image')
+			table.renameColumn('profile_pic', 'cover_image')
 		})
 	})
 }
