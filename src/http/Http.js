@@ -10,7 +10,11 @@ var AdminRequired = require('./admin-required')
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
+<<<<<<< HEAD
 var Investors = require('./api/investors/Investors')
+=======
+var Statics = require('./api/statics/Statics')
+>>>>>>> NET-548_mockup_route_userpicture
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
@@ -54,6 +58,7 @@ module.exports = function Http (app)
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Investors(app.db), 'investors', 'investors')
+	mount(Statics(app.root), 'static', 'static')
 
 	http.express.use(errorMiddleware)
 
