@@ -4,6 +4,7 @@ var expect = require('chai').expect
 var Paginator = require('../Paginator')
 var Abuse     = require('./Abuse')
 
+var validate = require('../validate')
 var validateId = require('../../id').validate
 
 var Err = require('../../Err')
@@ -73,10 +74,22 @@ module.exports = function Comments (db)
 
 	comments.create = function (data)
 	{
-		return comments.table()
-		.insert(data)
-		.then(noop)
-		.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
+		return new Promise(rs =>
+		{
+			validate.required(data.user_id, 'user_id')
+			validate.required(data.feed_id, 'feed_id')
+			validate.required(data.text, 'text')
+			validate.empty(data.text, 'text')
+
+			return rs(data)
+		})
+		.then(data =>
+		{
+			return comments.table()
+			.insert(data)
+			.then(noop)
+			.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
+		})
 	}
 
 	comments.count = function (feed_id)
