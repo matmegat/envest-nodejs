@@ -2,6 +2,7 @@
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
+var pick = require('lodash/pick')
 
 module.exports = function (db)
 {
@@ -13,7 +14,12 @@ module.exports = function (db)
 
 	investors.express.get('/', (rq, rs) =>
 	{
-		toss(rs, investors.model.list({}))
+		var options = pick(rq.query,
+		[
+			'max_id',
+			'since_id'
+		])
+		toss(rs, investors.model.list(options))
 	})
 
 	investors.express.get('/:id', (rq, rs) =>

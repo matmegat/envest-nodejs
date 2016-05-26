@@ -4,6 +4,7 @@ var Err = require('../../Err')
 var NotFound = Err('not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var validateId = require('../../id').validate
+var Paginator = require('../Paginator')
 
 module.exports = function Investor (db)
 {
@@ -11,6 +12,8 @@ module.exports = function Investor (db)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
+
+	var paginator = Paginator()
 
 	investor.table = () => knex('investors')
 
@@ -58,12 +61,11 @@ module.exports = function Investor (db)
 	{
 		options = _.extend({}, options,
 		{
-			limit: 20
+			limit: 20,
+			column_name: 'user_id'
 		})
 
-		var queryset = investor.table()
-		.orderBy('last_name', 'asc')
-		.orderBy('first_name', 'asc')
+		var queryset = paginator.paginate(investor.table(), options)
 
 		if (options.where)
 		{
