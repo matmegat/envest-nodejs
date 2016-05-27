@@ -1,4 +1,6 @@
 
+var knexed = require('../knexed')
+
 var expect = require('chai').expect
 
 module.exports = function Admin (db)
@@ -8,7 +10,7 @@ module.exports = function Admin (db)
 	var exists = db.exists
 	var knex   = db.knex
 
-	var table = () => knex('admins')
+	var table = knexed(knex, 'admins')
 
 	var user = db.user
 	expect(db, 'Admin depends on User').property('user')
