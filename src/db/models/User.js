@@ -73,6 +73,7 @@ module.exports = function User (db)
 				'password',
 				'salt',
 				'full_name',
+				'pic',
 				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 			)
 			.from('users')
@@ -102,7 +103,7 @@ module.exports = function User (db)
 	user.list = function (ids)
 	{
 		return user.users_table()
-		.select('id', 'full_name')
+		.select('id', 'full_name', 'pic')
 		.whereIn('id', ids)
 	}
 

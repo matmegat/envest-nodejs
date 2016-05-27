@@ -76,7 +76,8 @@ module.exports = function Auth (db)
 				[
 					'id',
 					'full_name',
-					'email'
+					'email',
+					'pic'
 				])
 			})
 		})
