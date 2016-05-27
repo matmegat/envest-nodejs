@@ -56,6 +56,9 @@ paths:
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
 
+  '/static/pic/{hash}':
+    $ref: ../api/statics/swag/GetPic.yaml
+
 definitions:
   # Put here only COMMON definitions
 
