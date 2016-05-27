@@ -1,0 +1,11 @@
+type: object
+properties:
+  id:
+    type: number
+    description: User Id
+  full_name:
+    type: string
+    description: User Full Name
+required:
+- id
+- full_name

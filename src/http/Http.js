@@ -10,14 +10,21 @@ var AdminRequired = require('./admin-required')
 var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
 var Comments = require('./api/comments/Comments')
+var Investors = require('./api/investors/Investors')
+var Statics = require('./api/statics/Statics')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
+
+var errorMiddleware = require('./error-middleware')
+var setErrorMode = require('./error-mode')
 
 module.exports = function Http (app)
 {
 	var http = {}
 
 	http.express = express()
+
+	setErrorMode(app.cfg, http.express)
 
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
@@ -47,6 +54,10 @@ module.exports = function Http (app)
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Investors(app.db), 'investors', 'investors')
+	mount(Statics(app.root), 'static', 'static')
+
+	http.express.use(errorMiddleware)
 
 	app.swagger = Swagger(app, http.express)
 

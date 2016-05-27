@@ -1,5 +1,11 @@
 
+var expect = require('chai').expect
+
 var Paginator = require('../Paginator')
+var Abuse     = require('./Abuse')
+
+var validate = require('../validate')
+var validateId = require('../../id').validate
 
 var Err = require('../../Err')
 
@@ -12,68 +18,83 @@ module.exports = function Comments (db)
 
 	var knex = db.knex
 
-	var one  = db.helpers.one
+	var one      = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
+	expect(db, 'Comments depends on User').property('user')
+	var user = db.user
+
 	comments.table = () => knex('comments')
+	comments.abuse = Abuse(db, comments)
 
 	comments.list = function (options)
 	{
-		return comments.validate_feed_id(options.feed_id)
+		return db.feed.validateFeedId(options.feed_id)
 		.then(() =>
 		{
-			var comments_queryset = byId(options.feed_id)
+			var comments_queryset = byFeedId(options.feed_id, options.user_id)
 
 			return paginator.paginate(comments_queryset, options)
 		})
-	}
-
-
-	var toId = require('../../toId')
-	var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
-
-	comments.validate_feed_id = function (feed_id)
-	{
-		return new Promise(rs =>
+		.then((comments_items) =>
 		{
-			feed_id = toId(feed_id)
-
-			if (! feed_id)
+			return user.list(_.map(comments_items, 'user_id'))
+			.then((users) =>
 			{
-				throw WrongFeedId()
-			}
+				var response =
+				{
+					comments: comments_items,
+					users: users
+				}
 
-			return rs()
+				return response
+			})
 		})
 	}
 
-	function byId (feed_id)
+	function byFeedId (feed_id, user_id)
 	{
 		return comments.table()
 		.select(
 			'comments.id',
-			'timestamp',
+			'comments.timestamp',
 			'text',
-			'user_id',
-			'users.full_name'
+			'comments.user_id',
+			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
-		.innerJoin('users', 'comments.user_id', 'users.id')
+		.leftJoin('abuse_comments', function ()
+		{
+			this.on('abuse_comments.comment_id', '=', 'comments.id')
+			.andOn('abuse_comments.user_id', '=', user_id)
+		})
 		.where('feed_id', feed_id)
 	}
 
-
 	comments.create = function (data)
 	{
-		return comments.table()
-		.insert(data)
-		.then(noop)
-	}
+		return new Promise(rs =>
+		{
+			validate.required(data.user_id, 'user_id')
+			validate.required(data.feed_id, 'feed_id')
+			validate.required(data.text, 'text')
+			validate.empty(data.text, 'text')
 
+			return rs(data)
+		})
+		.then(data =>
+		{
+			return comments.table()
+			.insert(data)
+			.then(noop)
+			.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
+		})
+	}
 
 	comments.count = function (feed_id)
 	{
-		return comments.validate_feed_id(feed_id)
+		return db.feed.validateFeedId(feed_id)
 		.then(() =>
 		{
 			return comments.table()
@@ -83,7 +104,6 @@ module.exports = function Comments (db)
 		})
 		.then(row => row.count)
 	}
-
 
 	var at  = require('lodash/fp/at')
 	var zip = _.fromPairs
@@ -106,6 +126,28 @@ module.exports = function Comments (db)
 			seq = mapValues(seq, toNumber)
 
 			return seq
+		})
+	}
+
+
+	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+
+	function validate_id (id)
+	{
+		return new Promise(rs =>
+		{
+			return rs(validateId(id, WrongCommentId))
+		})
+	}
+
+	comments.byId = function (id)
+	{
+		return validate_id(id)
+		.then(() =>
+		{
+			return comments.table()
+			.where('id', id)
+			.then(oneMaybe)
 		})
 	}
 

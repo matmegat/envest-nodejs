@@ -2,6 +2,17 @@
 
 require('console-ultimate/global').replace()
 
+var f = require('util').format
+var home = require('home').resolve
+var tmp = require('os').tmpdir
+
+var fs = require('fs-sync')
+var load  = fs.readJSON
+var write = fs.write
+
+var slack = require('./lib/slack')
+
+
 var args = require('minimist')(process.argv.slice(2),
 {
 	string:
@@ -22,8 +33,12 @@ if (! env)
 var cmd = require('command-promise')
 var partial = require('lodash/partial')
 
+// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/ ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
+
 var ssh = partial(cmd, 'ssh')
 var scp = partial(cmd, 'scp')
+
+var rsync = partial(cmd, 'rsync')
 
 var key = args.key
 
@@ -31,11 +46,17 @@ if (key)
 {
 	ssh = partial(ssh, [ '-i', key ])
 	scp = partial(scp, [ '-i', key ])
+
+	var fkey = home(key)
+	fkey = f('"ssh -i %s"', fkey)
+
+	rsync = partial(rsync, [ '-e', fkey ])
 }
 
 var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
 ssh = partial(ssh, remote)
+rsync = partial(rsync, '--recursive', '--delete')
 
 function outputify (name, fn)
 {
@@ -55,9 +76,6 @@ function outputify (name, fn)
 }
 
 
-var f = require('util').format
-var load = require('fs-sync').readJSON
-var write = require('fs-sync').write
 var rootpath = require('rootpath')(__dirname, '..')
 var merge = require('lodash').merge
 
@@ -79,19 +97,32 @@ function dump (path, config)
 	write(path, config)
 }
 
-
-Promise.resolve()
-.then(() =>
+function rev ()
 {
 	return cmd('git describe --always --long --abbrev=16 --dirty')
 	.then(cmd.util.stdout)
 	.then(cmd.util.trim)
 	.then(rev =>
 	{
-		var strcmd = f("'echo %s > %s'", rev, remote_rootpath('REV'))
-
-		return ssh(strcmd)
+		return cmd("git log --pretty='[%an] %s' -1")
+		.then(cmd.util.stdout)
+		.then(cmd.util.trim)
+		.then(logmsg =>
+		{
+			return rev + ' ' + logmsg
+		})
 	})
+}
+
+
+rev()
+.then(fullrev =>
+{
+	var tmprev = tmp() + '/netvest-REV'
+
+	write(tmprev, fullrev)
+
+	return scp(tmprev, target('REV'))
 })
 .then(outputify('copy package.json', () =>
 {
@@ -99,11 +130,15 @@ Promise.resolve()
 }))
 .then(outputify('copy db/', () =>
 {
-	return scp('-r', rootpath('db'), target())
+	return rsync(rootpath('db') + '/', target('db'))
+}))
+.then(outputify('copy static/', () =>
+{
+	return rsync(rootpath('static') + '/', target('static'))
 }))
 .then(outputify('copy src/', () =>
 {
-	return scp('-r', rootpath('src'), target())
+	return rsync(rootpath('src') + '/', target('src'))
 }))
 .then(() =>
 {
@@ -125,7 +160,7 @@ Promise.resolve()
 {
 	return ssh(f('"mkdir -p %s"', remote_rootpath('var/')))
 })
-.then(outputify('start remote', () =>
+.then(outputify('run remote', () =>
 {
 	return ssh(
 		f( '"cd %s;'
@@ -133,5 +168,23 @@ Promise.resolve()
 		 + 'sudo npm run restart"', remote_rootpath()
 	))
 }))
-.then(() => console.info('OK'))
-.catch(console.error)
+.then(() =>
+{
+	console.info('OK')
+
+	rev()
+	.then(fullrev =>
+	{
+		/* return */ slack.success(env, fullrev)
+	})
+})
+.catch(error =>
+{
+	console.error(error)
+
+	slack.failure(env)
+	.then(() =>
+	{
+		process.exit(1)
+	})
+})

@@ -29,6 +29,9 @@ paths:
   '/auth/login':
     $ref: ../api/auth/swag/Login.yaml
 
+  '/auth/login/facebook':
+    $ref: ../api/auth/swag/LoginFacebook.yaml
+
   '/auth/logout':
     $ref: ../api/auth/swag/Logout.yaml
 
@@ -40,8 +43,21 @@ paths:
 
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
+
   '/comments/count':
     $ref: ../api/comments/swag/GetCount.yaml
+
+  '/comments/abuse':
+    $ref: ../api/comments/swag/Abuse.yaml
+
+  '/investors':
+    $ref: ../api/investors/swag/GetInvestors.yaml
+
+  '/investors/{investor_id}':
+    $ref: ../api/investors/swag/GetInvestor.yaml
+
+  '/static/pic/{hash}':
+    $ref: ../api/statics/swag/GetPic.yaml
 
 definitions:
   # Put here only COMMON definitions
@@ -53,7 +69,8 @@ definitions:
     $ref: ../api/feed/swag/FeedItem.yaml
 
   Investor:
-    $ref: ./Investor.yaml
+#    $ref: ./Investor.yaml
+    $ref: ../api/investors/swag/Investor.yaml
 
   Symbol:
     $ref: ./Symbol.yaml
@@ -66,3 +83,9 @@ definitions:
 
   Comments:
     $ref: ../api/comments/swag/Comments.yaml
+
+  CommentsItem:
+    $ref: ../api/comments/swag/CommentItem.yaml
+
+  CommentUser:
+    $ref: ../api/comments/swag/CommentUser.yaml

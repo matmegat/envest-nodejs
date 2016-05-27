@@ -2,7 +2,7 @@
 var _ = require('lodash')
 var extend = _.extend
 
-var toId = require('../toId')
+var toId = require('../id').toId
 
 var defaults =
 {
@@ -27,10 +27,6 @@ module.exports = function Paginator (paginator_options)
 
 		limit = Math.min(limit, defaults.limit)
 
-		queryset
-		.orderBy('timestamp', 'desc')
-		.limit(limit)
-
 		if (since_id)
 		{
 			queryset.where(column_name, '>', since_id)
@@ -39,6 +35,17 @@ module.exports = function Paginator (paginator_options)
 		{
 			queryset.where(column_name, '<=', max_id)
 		}
+
+		if (since_id)
+		{
+			queryset.orderBy(column_name, 'asc')
+		}
+		else
+		{
+			queryset.orderBy(column_name, 'desc')
+		}
+
+		queryset.limit(limit)
 
 		return queryset
 	}

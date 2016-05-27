@@ -1,0 +1,35 @@
+type: object
+title: Investor Model
+properties:
+  id:
+    type: integer
+    description: Investor's Id
+  full_name:
+    type: string
+    description: Investor's Full Name
+  pic:
+    type: string
+    description: URL to Investor's image
+  profile_pic:
+    type: string
+    description: URL to cover image of Investr's profile
+  profession:
+    type: string
+    description: Investor's profession
+  focus:
+    type: array
+    items:
+    - type: string
+    description: Array of strings. Up to 3 elements
+  background:
+    type: string
+    description: Investor's background
+  annual_return:
+    type: number
+    description: Investor's 5 year annual return in percentage
+required:
+- id
+- full_name
+- pic
+- focus
+- annual_return

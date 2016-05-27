@@ -1,4 +1,6 @@
 
+var knexed = require('../knexed')
+
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
@@ -16,10 +18,10 @@ module.exports = function User (db)
 	var oneMaybe = db.helpers.oneMaybe
 	var exists   = db.helpers.exists
 
-	user.users_table    = () => knex('users')
-	user.email_confirms = () => knex('email_confirms')
-	user.auth_facebook  = () => knex('auth_facebook')
-	user.auth_local     = () => knex('auth_local')
+	user.users_table    = knexed(knex, 'users')
+	user.email_confirms = knexed(knex, 'email_confirms')
+	user.auth_facebook  = knexed(knex, 'auth_facebook')
+	user.auth_local     = knexed(knex, 'auth_local')
 
 
 	user.ensureExists = function (id)
@@ -42,8 +44,7 @@ module.exports = function User (db)
 			return ensureEmailNotExists(data.email, trx)
 			.then(() =>
 			{
-				return user.users_table()
-				.transacting(trx)
+				return user.users_table(trx)
 				.insert({
 					full_name: data.full_name,
 					email: null
@@ -88,6 +89,7 @@ module.exports = function User (db)
 				'password',
 				'salt',
 				'full_name',
+				'pic',
 				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 			)
 			.from('users')
@@ -105,6 +107,13 @@ module.exports = function User (db)
 		})
 		.where('email', email)
 		.then(oneMaybe)
+	}
+
+	user.list = function (ids)
+	{
+		return user.users_table()
+		.select('id', 'full_name', 'pic')
+		.whereIn('id', ids)
 	}
 
 	user.byFacebookId = function (facebook_id)
@@ -132,8 +141,7 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			user.users_table()
-			.transacting(trx)
+			user.users_table(trx)
 			.insert({
 				full_name: data.full_name,
 				email: null
@@ -177,16 +185,14 @@ module.exports = function User (db)
 
 	function createFacebookUser (data, trx)
 	{
-		return user.auth_facebook()
-		.transacting(trx)
+		return user.auth_facebook(trx)
 		.insert(data, 'user_id')
 		.then(one)
 	}
 
 	function createLocalCreds (data, trx)
 	{
-		return user.auth_local()
-		.transacting(trx)
+		return user.auth_local(trx)
 		.insert(data, 'user_id')
 		.then(one)
 	}
@@ -202,8 +208,7 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			return user.users_table()
-			.transacting(trx)
+			return user.users_table(trx)
 			.where('id', user_id)
 			.update({
 				email: new_email
@@ -218,8 +223,7 @@ module.exports = function User (db)
 
 	function newEmailRemove (user_id, trx)
 	{
-		return user.email_confirms()
-		.transacting(trx)
+		return user.email_confirms(trx)
 		.where('user_id', user_id)
 		.del()
 	}
@@ -238,8 +242,7 @@ module.exports = function User (db)
 				{
 					data.code = code
 
-					return user.email_confirms()
-					.transacting(trx)
+					return user.email_confirms(trx)
 					.insert(data, 'user_id')
 					.then(one)
 					.catch(err =>

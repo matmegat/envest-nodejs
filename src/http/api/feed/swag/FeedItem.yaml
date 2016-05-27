@@ -16,7 +16,7 @@ properties:
     description: |
       **optional**
       present at `/feed/:id` requests
-    $ref: ../../../swagger/Investor.yaml
+    $ref: ../../investors/swag/Investor.yaml
   event:
     description: |
       One of Events

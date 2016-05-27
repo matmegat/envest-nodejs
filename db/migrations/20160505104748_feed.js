@@ -1,18 +1,13 @@
+var Investors = require('./../investor_migration')
 
 exports.up = function (knex, Promise)
 {
+	var investor_migration = Investors(knex)
+
 	return Promise.resolve()
 		.then(() =>
 		{
-			return knex.schema.createTable('investors', (table) =>
-			{
-				table.increments('id').primary()
-
-				table.timestamps() // created_at, updated_at
-
-				table.string('full_name').notNullable()
-				table.string('icon', 512).notNullable()
-			})
+			return investor_migration.initialUp
 		})
 		.then(() =>
 		{
@@ -65,10 +60,12 @@ exports.up = function (knex, Promise)
 
 exports.down = function (knex, Promise)
 {
+	var investor_migration = Investors(knex)
+
 	return Promise.all(
 	[
 		knex.schema.dropTableIfExists('comments'),
 		knex.schema.dropTableIfExists('feed_items'),
-		knex.schema.dropTableIfExists('investors')
+		investor_migration.initialDown
 	])
 }

@@ -6,6 +6,7 @@ var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
+var Investor = require('./models/Investor')
 
 module.exports = function name (app)
 {
@@ -48,8 +49,9 @@ module.exports = function name (app)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
 
-	db.feed = Feed(db)
 	db.comments = Comments(db)
+	db.investor = Investor(db)
+	db.feed = Feed(db)
 
 	return db
 }

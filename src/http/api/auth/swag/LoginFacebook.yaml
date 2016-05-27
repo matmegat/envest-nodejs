@@ -1,0 +1,21 @@
+post:
+  description: Authenticates user by Facebook access-token
+  parameters:
+  - name: access_token
+    description: |
+      Pass access-token to authenticate by Facebook
+    in: header
+    required: true
+    type: integer
+    format: int64
+  responses:
+    200:
+      description: Facebook user model
+      schema:
+        $ref: ../../../swagger/UserFacebook.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - auth

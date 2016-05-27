@@ -1,0 +1,26 @@
+post:
+  description: Report comment (Comments Item)
+  parameters:
+  - name: payload
+    in: body
+    description: JSON payload to abuse comment.
+    required: true
+    schema:
+      type: object
+      title: Abuse Payload
+      properties:
+        comment_id:
+          type: integer
+          description: Post (Comments Item) Id
+          default: 1
+      required:
+      - comment_id
+  responses:
+    200:
+      description: Abuse successfully created
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - comments

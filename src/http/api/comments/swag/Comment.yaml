@@ -1,24 +1,13 @@
 type: object
-title: Comment
 properties:
-  id:
-    type: number
-    description: Comment Id
-  timestamp:
-    type: string
-    format: date-time
-    description: Timestamp of comment
-  text:
-    type: string
-    description: Text of comment
-  user_id:
-    type: number
-    description: Comment author Id
-  full_name:
-    type: string
-    description: Comment author full name
+  comments:
+    type: array
+    items:
+    - $ref: ./CommentItem.yaml
+  users:
+    type: array
+    items:
+    - $ref: ./CommentUser.yaml
 required:
-- id
-- timestamp
-- text
-- user_id
+- comments
+- users

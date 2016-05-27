@@ -5,8 +5,11 @@ var _ = require('lodash')
 
 var Paginator = require('../Paginator')
 
+var validateId = require('../../id').validate
+
 var Err = require('../../Err')
-var NotFound = Err('not_found', 'Feed Item not found')
+var NotFound = Err('feed_not_found', 'Feed item not found')
+var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 module.exports = function Feed (db)
 {
@@ -21,27 +24,29 @@ module.exports = function Feed (db)
 	expect(db, 'Feed depends on Comments').property('comments')
 	var comments = db.comments
 
+	expect(db, 'Feed depends on Investor').property('investor')
+	var investor = db.investor
+
+	feed.NotFound = NotFound
+
 	feed.feed_table = () => knex('feed_items')
-	feed.investors_table = () => knex('investors')
-	feed.comments_table = () => knex('comments')
 
 	feed.byId = function (id)
 	{
-		return comments.validate_feed_id(id)
+		return feed.validateFeedId(id)
 		.then(() =>
 		{
 			return feed.feed_table()
 			.where('id', id)
 		})
 		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
 		.then((feed_item) =>
 		{
-			return feed
-			.investors_table()
-			.where('id', feed_item.investor_id)
+			return investor.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
-				feed_item.investor = investor
+				feed_item.investor = _.pick(investor, [ 'id', 'full_name', 'pic' ])
 				delete feed_item.investor_id
 
 				return feed_item
@@ -57,9 +62,15 @@ module.exports = function Feed (db)
 				return feed_item
 			})
 		})
-		.then(Err.nullish(NotFound))
 	}
 
+	feed.validateFeedId = function (id)
+	{
+		return new Promise(rs =>
+		{
+			return rs(validateId(id, WrongFeedId))
+		})
+	}
 
 	feed.list = function (options)
 	{
@@ -87,8 +98,15 @@ module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			return feed.investors_table()
-			.whereIn('id', _.map(feed_items, 'investor_id'))
+			return investor.list(
+			{
+				where:
+				{
+					column_name: 'user_id',
+					clause: 'in',
+					argument: _.map(feed_items, 'investor_id')
+				}
+			})
 			.then((investors) =>
 			{
 				var response =
