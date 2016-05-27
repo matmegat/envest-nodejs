@@ -5,6 +5,9 @@ var Err = require('../../Err')
 var AdminRequired =
     Err('admin_required', 'Admin privileges is required for this operation')
 
+var CannotIntro =
+    Err('admin_cannot_intro', 'This admin cannot introduce another')
+
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
@@ -13,7 +16,7 @@ module.exports = function Admin (db)
 {
 	var admin = {}
 
-	var exists = db.exists
+	var oneMaybe = db.oneMaybe
 	var knex   = db.knex
 
 	var table = knexed(knex, 'admins')
@@ -50,9 +53,15 @@ module.exports = function Admin (db)
 
 	admin.is = function (user_id, trx)
 	{
+		return admin.byId(user_id, trx)
+		.then(Boolean)
+	}
+
+	admin.byId = function (user_id, trx)
+	{
 		return table(trx)
 		.where('user_id', user_id)
-		.then(exists)
+		.then(oneMaybe)
 	}
 
 	admin.intro = function (target_user_id, by_user_id)
@@ -68,6 +77,17 @@ module.exports = function Admin (db)
 			if (by_user_id)
 			{
 				return admin.ensure(by_user_id, trx)
+				.then(() =>
+				{
+					return admin.byId(by_user_id)
+					.then(by_whom =>
+					{
+						if (! by_whom.can_intro)
+						{
+							throw CannotIntro()
+						}
+					})
+				})
 			}
 			else
 			{
