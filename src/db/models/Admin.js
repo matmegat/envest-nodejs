@@ -64,21 +64,20 @@ module.exports = function Admin (db)
 		.then(oneMaybe)
 	}
 
-	admin.intro = function (target_user_id, by_user_id)
+	admin.intro = knexed.transact(knex, (trx, target_user_id, by_user_id) =>
 	{
-		var trx = null
-
 		by_user_id || (by_user_id = null)
 
-		Promise.resolve()
+		return Promise.resolve()
 		.then(() =>
 		{
-			// check for can_intro
 			if (by_user_id)
 			{
+				/* check for admin privileges */
 				return admin.ensure(by_user_id, trx)
 				.then(() =>
 				{
+					/* check for can_intro */
 					return admin.byId(by_user_id)
 					.then(by_whom =>
 					{
@@ -109,7 +108,7 @@ module.exports = function Admin (db)
 			})
 		})
 		.then(noop)
-	}
+	})
 
 	return admin
 }
