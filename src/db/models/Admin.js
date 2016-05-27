@@ -7,6 +7,8 @@ var AdminRequired =
 
 var expect = require('chai').expect
 
+var noop = require('lodash/noop')
+
 module.exports = function Admin (db)
 {
 	var admin = {}
@@ -20,7 +22,7 @@ module.exports = function Admin (db)
 	expect(db, 'Admin depends on User').property('user')
 
 
-	admin.ensure = function (user_id)
+	admin.ensure = function (user_id, trx)
 	{
 		/*
 		 * if admin.is() throws by any reason we cast it to `false`
@@ -29,7 +31,7 @@ module.exports = function Admin (db)
 		 * so we guarantee that admin-required is OK ONLY if
 		 * admin.is() is `true`
 		 */
-		return admin.is(user_id)
+		return admin.is(user_id, trx)
 
 		// if any error occurs, cast them to false
 		.catch(debug)
@@ -46,23 +48,47 @@ module.exports = function Admin (db)
 		return false
 	}
 
-	admin.is = function (user_id)
+	admin.is = function (user_id, trx)
 	{
-		return table()
+		return table(trx)
 		.where('user_id', user_id)
 		.then(exists)
 	}
 
 	admin.intro = function (target_user_id, by_user_id)
 	{
-		return user.ensureExists(target_user_id)
+		var trx = null
+
+		by_user_id || (by_user_id = null)
+
+		Promise.resolve()
 		.then(() =>
 		{
-			by_user_id || (by_user_id = null)
+			// check for can_intro
+			if (by_user_id)
+			{
+				return admin.ensure(by_user_id, trx)
+			}
+			else
+			{
+				console.warn('admin privileges granted without by_user_id')
+			}
 		})
-
-
-		// ...
+		.then(() =>
+		{
+			return user.ensure(target_user_id, trx)
+		})
+		.then(() =>
+		{
+			return table()
+			.insert(
+			{
+				user_id: target_user_id,
+				parent:  by_user_id,
+				can_intro: false
+			})
+		})
+		.then(noop)
 	}
 
 	return admin

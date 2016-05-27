@@ -16,7 +16,6 @@ module.exports = function User (db)
 
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
-	var exists   = db.helpers.exists
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
@@ -24,15 +23,15 @@ module.exports = function User (db)
 	user.auth_local     = knexed(knex, 'auth_local')
 
 
-	user.ensureExists = function (id)
+	user.ensure = function (id, trx)
 	{
-		return user.byId(id)
+		return user.byId(id, trx)
 		.then(Err.nullish(UserDoesNotExist))
 	}
 
-	user.byId = function (id)
+	user.byId = function (id, trx)
 	{
-		return user.users_table()
+		return user.users_table(trx)
 		.where('id', id)
 		.then(oneMaybe)
 	}
