@@ -14,7 +14,7 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
-	var oneMaybe = db.helpers.oneMaybe
+	var one = db.helpers.one
 
 	notifications.table = knexed(knex, 'notifications')
 	notifications.viewed_table = knexed(knex, 'notifications_viewed')
