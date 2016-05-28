@@ -1,17 +1,29 @@
 
 module.exports = function (config, express)
 {
-	var mode
-
-	if (config.dev === false || config.env === 'prod' || config.env === 'staging')
-	{
-		mode = 'production'
-	}
-	else
-	{
-		mode = 'development'
-	}
+	var mode = Mode(config)
 
 	express.set('env', mode)
+
 	console.info('Running app in `%s` mode', mode)
+}
+
+function Mode (config)
+{
+	if (config.dev === false)
+	{
+		return 'production'
+	}
+	if (config.env in prods)
+	{
+		return 'production'
+	}
+
+	return 'development'
+}
+
+var prods =
+{
+	prod: true,
+	staging: true
 }
