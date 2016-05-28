@@ -13,7 +13,7 @@ module.exports = function Abuse (db, comments)
 
 	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
 	var AbuseExist = Err('abuse_exist', 'Abuse exist')
-	var YourComments = Err('is_your_comment', 'It is impossible to abuse for your comments')
+	var YourComments = Err('is_your_comment', 'It is impossible to abuse your comments')
 
 	abuse.create = function (user_id, comment_id)
 	{
@@ -21,17 +21,17 @@ module.exports = function Abuse (db, comments)
 		.then(Err.nullish(CommentNotExist))
 		.then((comment_items) =>
 		{
-			if (comment_items.user_id != user_id)
+			if (comment_items.user_id == user_id)
 			{
-				return abuse.table()
-				.insert({
-					user_id: user_id,
-					comment_id: comment_id
-				})
-				.then(noop)
+				throw YourComments()
 			}
 
-			throw YourComments()
+			return abuse.table()
+			.insert({
+				user_id: user_id,
+				comment_id: comment_id
+			})
+			.then(noop)
 		})
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 	}

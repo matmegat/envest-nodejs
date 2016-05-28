@@ -62,7 +62,7 @@ module.exports = function Comments (db)
 			'comments.timestamp',
 			'text',
 			'comments.user_id',
-			knex.raw('abuse_comments.comment_id IS NOT NULL AND comments.user_id != ' + user_id + ' AS is_abuse')
+			knex.raw('abuse_comments.comment_id IS NOT NULL AS is_abuse')
 		)
 		.leftJoin('abuse_comments', function ()
 		{
