@@ -37,14 +37,13 @@ module.exports = function Notifications (db)
 
 			return rs(data)
 		})
-		.then( data =>
+		.then((data) =>
 		{
 			return notifications.table()
 			.insert(data)
 			.then(noop)
 			.catch(Err.fromDb('notifications_recipient_id_foreign', db.user.NotFound))
 		})
-
 	}
 
 	notifications.list = function (user_id)
@@ -62,7 +61,7 @@ module.exports = function Notifications (db)
 	{
 		return notifications.viewed_table()
 		.where('recipient_id', user_id)
-		.then(oneMaybe)
+		.then(one)
 		.then(row => row.last_viewed_id)
 	}
 
@@ -72,11 +71,9 @@ module.exports = function Notifications (db)
 	{
 		return new Promise(rs =>
 		{
-			validateId(last_viewed_id, WrongViewedId)
-
-			return rs()
+			return rs(validateId(last_viewed_id, WrongViewedId))
 		})
-		.then( () =>
+		.then(() =>
 		{
 			return notifications.lastViewedId(recipient_id)
 			.then((viewed_id) =>

@@ -17,21 +17,18 @@ exports.up = function (knex, Promise)
 				.references('users.id')
 				.onUpdate('cascade')
 				.onDelete('cascade')
-
 		})
 	})
 	.then(() =>
 	{
 		return knex.schema.createTable('notifications_viewed', (table) =>
 		{
-			table.integer('recipient_id')
-				.primary()
+			table.integer('recipient_id').primary()
 				.references('users.id')
 				.onUpdate('cascade')
 				.onDelete('cascade')
 
 			table.integer('last_viewed_id').notNullable()
-
 		})
 	})
 }
