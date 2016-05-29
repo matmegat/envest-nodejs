@@ -20,7 +20,7 @@ module.exports = function Notifications (db)
 	notifications.viewed_table = knexed(knex, 'notifications_viewed')
 
 	notifications.groups = {
-		users: ['user' ],
+		users: ['user'],
 		admins: ['admin'],
 		investors: ['investor']
 	}

@@ -104,19 +104,22 @@ module.exports = function User (db)
 		.then(oneMaybe)
 	}
 
+	var user_group = knex.raw(
+		`CASE
+			WHEN admins.user_id IS NOT NULL
+				THEN 'admins'
+			WHEN investors.user_id IS NOT NULL
+				THEN 'investors'
+			ELSE 'users'
+		END AS group`
+	)
+
 	user.byId = function (id)
 	{
 		return user.users_table()
 		.select(
 			'users.id',
-			knex.raw(`CASE
-				WHEN admins.user_id IS NOT NULL
-					THEN 'admins'
-				WHEN investors.user_id IS NOT NULL
-					THEN 'investors'
-				ELSE 'users' 
-				END AS group`
-			)
+			user_group
 		)
 		.leftJoin(
 			'admins',
@@ -147,14 +150,7 @@ module.exports = function User (db)
 			this.select(
 				'users.id AS id',
 				'auth_facebook.facebook_id AS facebook_id',
-				knex.raw(`CASE
-					WHEN admins.user_id IS NOT NULL
-						THEN 'admins'
-					WHEN investors.user_id IS NOT NULL
-						THEN 'investors'
-					ELSE 'users' 
-					END AS group`
-				)
+				user_group
 			)
 			.from('users')
 			.leftJoin(
