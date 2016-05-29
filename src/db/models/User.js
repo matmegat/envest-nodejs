@@ -107,7 +107,28 @@ module.exports = function User (db)
 	user.byId = function (id)
 	{
 		return user.users_table()
-		.where('id', id)
+		.select(
+			'users.id',
+			knex.raw(`CASE
+				WHEN admins.user_id IS NOT NULL
+					THEN 'admins'
+				WHEN investors.user_id IS NOT NULL
+					THEN 'investors'
+				ELSE 'users' 
+				END AS group`
+			)
+		)
+		.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+		)
+		.leftJoin(
+			'investors',
+			'users.id',
+			'investors.user_id'
+		)
+		.where('users.id', id)
 		.then(oneMaybe)
 	}
 
@@ -125,9 +146,27 @@ module.exports = function User (db)
 		{
 			this.select(
 				'users.id AS id',
-				'auth_facebook.facebook_id AS facebook_id'
+				'auth_facebook.facebook_id AS facebook_id',
+				knex.raw(`CASE
+					WHEN admins.user_id IS NOT NULL
+						THEN 'admins'
+					WHEN investors.user_id IS NOT NULL
+						THEN 'investors'
+					ELSE 'users' 
+					END AS group`
+				)
 			)
 			.from('users')
+			.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+			)
+			.leftJoin(
+				'investors',
+				'users.id',
+				'investors.user_id'
+			)
 			.leftJoin(
 				'auth_facebook',
 				'users.id',
