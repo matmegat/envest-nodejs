@@ -13,7 +13,7 @@ module.exports = function (db)
 
 	notifications.express.get('/', (rq, rs) =>
 	{
-		toss(rs, notifications.model.list(rq.user.id))
+		toss(rs, notifications.model.list(rq.user.id, rq.user.group))
 	})
 
 	notifications.express.post('/', (rq, rs) =>

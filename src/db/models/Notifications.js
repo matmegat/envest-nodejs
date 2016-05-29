@@ -19,23 +19,35 @@ module.exports = function Notifications (db)
 	notifications.table = knexed(knex, 'notifications')
 	notifications.viewed_table = knexed(knex, 'notifications_viewed')
 
+	notifications.groups = {
+		users: ['user' ],
+		admins: ['admin'],
+		investors: ['investor']
+	}
+
 	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
 
-	notifications.create = function (data)
+	notifications.create = function (type, event, recipient_id)
 	{
 		return new Promise(rs =>
 		{
-			validate.required(data.type, 'type')
-			validate.empty(data.type, 'type')
+			validate.required(type, 'type')
+			validate.empty(type, 'type')
 
-			validate.required(data.event, 'event')
-			validate.empty(data.type, 'event')
-			validate.json(data.event, 'event')
+			validate.required(event, 'event')
+			validate.empty(type, 'event')
+			validate.json(event, 'event')
 
-			validate.required(data.recipient_id, 'recipient_id')
-			validateId(data.recipient_id, WrongRecipientId)
+			if (recipient_id)
+			{
+				validateId(recipient_id, WrongRecipientId)
+			}
 
-			return rs(data)
+			return rs({
+				type: type,
+				event: event,
+				recipient_id: recipient_id
+			})
 		})
 		.then((data) =>
 		{
@@ -46,7 +58,7 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	notifications.list = function (user_id)
+	notifications.list = function (user_id, group)
 	{
 		return notifications.lastViewedId(user_id)
 		.then((last_viewed_id) =>
@@ -54,6 +66,9 @@ module.exports = function Notifications (db)
 			return notifications.table()
 			.where('recipient_id', user_id)
 			.andWhere('id', '>', last_viewed_id)
+			.orWhereIn('type', notifications.groups[group])
+			.andWhere('id', '>', last_viewed_id)
+			.orderBy('timestamp')
 		})
 	}
 
