@@ -9,8 +9,6 @@ var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
-var validateId = require('../../id').validate(WrongFeedId)
-
 module.exports = function Feed (db)
 {
 	var feed = {}

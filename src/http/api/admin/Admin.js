@@ -1,7 +1,6 @@
 
 var Router = require('express').Router
 var toss = require('../../toss')
-var authRequired = require('../../auth-required')
 
 module.exports = function (http, admin)
 {
