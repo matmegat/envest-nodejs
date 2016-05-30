@@ -1,10 +1,11 @@
 
 var _ = require('lodash')
 
+var id = module.exports = {}
+
+
 var toNumber  = _.toNumber
 var isInteger = _.isInteger
-
-var id = module.exports = {}
 
 var toId = id.toId = function toId (id)
 {
@@ -18,7 +19,10 @@ var toId = id.toId = function toId (id)
 	return null
 }
 
-id.validate = function (id, fn)
+
+var curry = _.curry
+
+id.validate = curry((fn, id) =>
 {
 	id = toId(id)
 
@@ -28,4 +32,4 @@ id.validate = function (id, fn)
 	}
 
 	return id
-}
+})
