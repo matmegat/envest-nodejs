@@ -1,0 +1,22 @@
+type: object
+properties:
+  id:
+    type: number
+    description: Notification Id
+  timestamp:
+    type: string
+    format: date-time
+    description: Timestamp of notification
+  type:
+    type: string
+    description: Type of notification
+  event:
+    type: string
+    description: JSON object events
+  recipient_id:
+    type: number
+    description: Recipient id
+required:
+- id
+- type
+- event

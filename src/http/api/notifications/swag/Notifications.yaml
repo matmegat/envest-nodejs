@@ -1,0 +1,4 @@
+type: array
+title: Notifications
+items:
+- $ref: ./NotificationItem.yaml

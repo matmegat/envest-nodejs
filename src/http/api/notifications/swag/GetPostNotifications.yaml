@@ -1,0 +1,52 @@
+get:
+  description: Get user notifications
+  parameters:
+  - name: max_id
+    in: query
+    type: integer
+    description: |
+      Get notifications that are added before *max_id* (inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  - name: since_id
+    in: query
+    type: integer
+    description: |
+      Get notifications greater than *since_id* (non inclusive)
+      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+  responses:
+    200:
+      description: User notifications
+      schema:
+        $ref: ./Notifications.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - notifications
+post:
+  description: Set id last viewed notifications
+  parameters:
+  - name: payload
+    description: JSON payload to create notification
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Notification Payload
+      properties:
+        viewed_id:
+          type: integer
+          description: Id last viewed notifications
+          default: 1
+      required:
+      - viewed_id
+  responses:
+    200:
+      description: id last viewed the notification set
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - notifications
