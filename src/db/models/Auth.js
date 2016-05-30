@@ -129,7 +129,8 @@ function validate_register (credentials)
 {
 	return new Promise(rs =>
 	{
-		validate_fullname(credentials.full_name)
+		validate_firstname(credentials.first_name)
+		validate_lastname(credentials.last_name)
 		validate_password(credentials.password)
 		validate_email(credentials.email)
 
@@ -168,12 +169,13 @@ var validate_empty = validate.empty
 
 
 var XRegExp = require('xregexp')
-var WrongFullName = Err('wrong_full_name_format', 'Wrong full name format')
 
-function validate_fullname (full_name)
+var WrongFirstName = Err('wrong_first_name_format', 'Wrong first name format')
+
+function validate_firstname (first_name)
 {
-	validate_required(full_name, 'full_name')
-	validate_empty(full_name, 'full_name')
+	validate_required(first_name, 'first_name')
+	validate_empty(first_name, 'first_name')
 
 	/*
 	   Two words minimum, separated by space.
@@ -188,9 +190,35 @@ function validate_fullname (full_name)
 	},
 	'x')
 
-	if (! re.test(full_name))
+	if (! re.test(first_name))
 	{
-		throw WrongFullName()
+		throw WrongFirstName()
+	}
+}
+
+var WrongLastName = Err('wrong_last_name_format', 'Wrong last name format')
+
+function validate_lastname (last_name)
+{
+	validate_required(last_name, 'last_name')
+	validate_empty(last_name, 'last_name')
+
+	/*
+	   Two words minimum, separated by space.
+	   Any alphabet letters,
+	   dashes, dots and spaces (not more than one successively).
+
+	   Should begin with a letter and end with a letter or dot.
+	*/
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})+ \\.? $`,
+	{
+		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+	},
+	'x')
+
+	if (! re.test(last_name))
+	{
+		throw WrongLastName()
 	}
 }
 
