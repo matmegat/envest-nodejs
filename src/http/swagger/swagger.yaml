@@ -41,6 +41,9 @@ paths:
   '/auth/change-email':
     $ref: ../api/auth/swag/ChangeEmail.yaml
 
+  '/admin':
+    $ref: ../api/admin/swag/Intro.yaml
+
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
