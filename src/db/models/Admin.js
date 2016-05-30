@@ -16,14 +16,13 @@ module.exports = function Admin (db)
 {
 	var admin = {}
 
-	var oneMaybe = db.oneMaybe
-	var knex   = db.knex
-
+	var knex = db.knex
 	var table = knexed(knex, 'admins')
 
 	var user = db.user
 	expect(db, 'Admin depends on User').property('user')
 
+	var oneMaybe = db.helpers.oneMaybe
 
 	admin.ensure = function (user_id, trx)
 	{
