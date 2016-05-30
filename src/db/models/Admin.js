@@ -11,6 +11,7 @@ var CannotIntro =
 var AlreadyAdmin = Err('already_admin', 'This user is admin already')
 
 var expect = require('chai').expect
+var validate = require('../validate')
 
 var noop = require('lodash/noop')
 
@@ -69,7 +70,11 @@ module.exports = function Admin (db)
 	{
 		by_user_id || (by_user_id = null)
 
-		return Promise.resolve()
+		return new Promise(rs =>
+		{
+			validate.required(target_user_id, 'target_user_id')
+			rs()
+		})
 		.then(() =>
 		{
 			if (by_user_id)

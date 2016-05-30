@@ -6,6 +6,7 @@ var extend = require('lodash/extend')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
 
 module.exports = function User (db)
@@ -31,10 +32,16 @@ module.exports = function User (db)
 
 	user.byId = function (id, trx)
 	{
-		return user.users_table(trx)
-		.where('id', id)
-		.then(oneMaybe)
+		return validate_id(id)
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.where('id', id)
+			.then(oneMaybe)
+		})
 	}
+
+	var validate_id = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
 	{
