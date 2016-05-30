@@ -7,7 +7,7 @@ exports.up = function (knex, Promise)
 	* Remove column "full_name" from users
 	* */
 
-	Promise.resolve()
+	return Promise.resolve()
 	.then(() =>
 	{
 		return knex.schema.table('users', (table) =>
@@ -27,7 +27,7 @@ exports.down = function (knex, Promise)
 	* Add column "full_name" from users
 	* */
 
-	Promise.resolve()
+	return Promise.resolve()
 	.then(() =>
 	{
 		return knex.schema.table('users', (table) =>
