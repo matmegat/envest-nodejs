@@ -75,7 +75,8 @@ module.exports = function Auth (db)
 				return pick(user_data,
 				[
 					'id',
-					'full_name',
+					'first_name',
+					'last_name',
 					'email',
 					'pic'
 				])
@@ -184,7 +185,7 @@ function validate_firstname (first_name)
 
 	   Should begin with a letter and end with a letter or dot.
 	*/
-	var re = XRegExp.build(`^ {{word}} (\\s {{word}})+ \\.? $`,
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
 	{
 		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
 	},
@@ -210,7 +211,7 @@ function validate_lastname (last_name)
 
 	   Should begin with a letter and end with a letter or dot.
 	*/
-	var re = XRegExp.build(`^ {{word}} (\\s {{word}})+ \\.? $`,
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
 	{
 		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
 	},
