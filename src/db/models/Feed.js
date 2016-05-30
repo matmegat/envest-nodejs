@@ -75,10 +75,34 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
-			limit: 20
+			limit: 20,
+			column_name: 'timestamp'
 		})
 
-		return paginator.paginate(feed.feed_table(), options)
+		// return paginator.paginate(feed.feed_table(), options)
+		var queryset = feed.feed_table()
+
+		if (options.max_id)
+		{
+			var paging_queryst = feed.feed_table()
+			.select('timestamp')
+			.where('id', options.max_id)
+
+			queryset = queryset
+			.where('timestamp', paging_queryst)
+			.andWhere('id', '>=', options.max_id)
+			.orWhere('timestamp', '<', paging_queryst)
+			.orderBy('timestamp', 'desc')
+			.orderBy('id', 'asc')
+			.limit(20)
+			.debug(true)
+		}
+		else
+		{
+			queryset.orderBy('timestamp', 'desc').orderBy('id', 'asc')
+		}
+
+		return queryset
 		.then((feed_items) =>
 		{
 			var feed_ids = _.map(feed_items, 'id')
