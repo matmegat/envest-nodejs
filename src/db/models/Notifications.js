@@ -5,6 +5,7 @@ var noop = require('lodash/noop')
 
 var validate = require('../validate')
 var validateId = require('../../id').validate
+var Paginator = require('../Paginator')
 
 var Err = require('../../Err')
 
@@ -15,6 +16,8 @@ module.exports = function Notifications (db)
 	var knex = db.knex
 
 	var one = db.helpers.one
+
+	var paginator = Paginator()
 
 	notifications.table = knexed(knex, 'notifications')
 	notifications.viewed_table = knexed(knex, 'notifications_viewed')
@@ -58,18 +61,24 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	notifications.list = function (user_id, group)
+	notifications.list = function (options)
 	{
-		return notifications.lastViewedId(user_id)
+		var queryset = byUserId(options.user_id)
+
+		return notifications.lastViewedId(options.user_id)
 		.then((last_viewed_id) =>
 		{
-			return notifications.table()
-			.where('recipient_id', user_id)
+			return paginator.paginate(queryset, options)
 			.andWhere('id', '>', last_viewed_id)
-			.orWhereIn('type', notifications.groups[group])
+			.orWhereIn('type', notifications.groups[options.user_group])
 			.andWhere('id', '>', last_viewed_id)
-			.orderBy('timestamp')
 		})
+	}
+
+	function byUserId (user_id)
+	{
+		return notifications.table()
+		.where('recipient_id', user_id)
 	}
 
 	notifications.lastViewedId = function (user_id)
