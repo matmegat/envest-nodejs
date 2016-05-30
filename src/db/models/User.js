@@ -134,7 +134,7 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			user.users_table(trx)
+			return user.users_table(trx)
 			.insert({
 				first_name: data.first_name,
 				last_name: data.last_name,
@@ -156,8 +156,10 @@ module.exports = function User (db)
 					facebook_id: data.facebook_id
 				}, trx)
 			})
-			.then(trx.commit)
-			.catch(trx.rollback)
+			.then(id =>
+			{
+				return user.byFacebookId(data.facebook_id)
+			})
 		})
 	}
 
