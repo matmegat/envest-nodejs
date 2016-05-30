@@ -95,9 +95,24 @@ module.exports = function Feed (db)
 			.orderBy('timestamp', 'desc')
 			.orderBy('id', 'asc')
 			.limit(20)
-			.debug(true)
 		}
-		else
+
+		if (options.since_id)
+		{
+			var paging_queryst = feed.feed_table()
+			.select('timestamp')
+			.where('id', options.since_id)
+
+			queryset = queryset
+			.where('timestamp', paging_queryst)
+			.andWhere('id', '<', options.since_id)
+			.orWhere('timestamp', '>', paging_queryst)
+			.orderBy('timestamp', 'asc')
+			.orderBy('id', 'desc')
+			.limit(20)
+		}
+
+		if (! options.max_id && ! options.since_id)
 		{
 			queryset.orderBy('timestamp', 'desc').orderBy('id', 'asc')
 		}
