@@ -3,7 +3,9 @@ var _ = require('lodash')
 var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
-var validateId = require('../../id').validate
+
+var validateId = require('../../id').validate(WrongInvestorId)
+
 var Paginator = require('../Paginator')
 
 module.exports = function Investor (db)
@@ -21,7 +23,7 @@ module.exports = function Investor (db)
 	{
 		return new Promise(rs =>
 		{
-			return rs(validateId(id, WrongInvestorId))
+			return rs(validateId(id))
 		})
 	}
 

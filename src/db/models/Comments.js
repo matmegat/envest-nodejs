@@ -5,7 +5,6 @@ var Paginator = require('../Paginator')
 var Abuse     = require('./Abuse')
 
 var validate = require('../validate')
-var validateId = require('../../id').validate
 
 var Err = require('../../Err')
 
@@ -131,12 +130,13 @@ module.exports = function Comments (db)
 
 
 	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+	var validateId = require('../../id').validate(WrongCommentId)
 
 	function validate_id (id)
 	{
 		return new Promise(rs =>
 		{
-			return rs(validateId(id, WrongCommentId))
+			return rs(validateId(id))
 		})
 	}
 

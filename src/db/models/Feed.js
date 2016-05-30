@@ -5,11 +5,11 @@ var _ = require('lodash')
 
 var Paginator = require('../Paginator')
 
-var validateId = require('../../id').validate
-
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+
+var validateId = require('../../id').validate(WrongFeedId)
 
 module.exports = function Feed (db)
 {
@@ -67,7 +67,7 @@ module.exports = function Feed (db)
 	{
 		return new Promise(rs =>
 		{
-			return rs(validateId(id, WrongFeedId))
+			return rs(validateId(id))
 		})
 	}
 
