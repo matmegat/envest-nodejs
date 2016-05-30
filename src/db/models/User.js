@@ -234,39 +234,41 @@ module.exports = function User (db)
 		.del()
 	}
 
-	user.newEmailUpdate = function (data)
+	user.newEmailUpdate = knexed.transact(knex, (trx, data) =>
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
-		return knex.transaction(function (trx)
+		return ensureEmailNotExists(data.new_email, trx)
+		.then(() =>
 		{
-			return ensureEmailNotExists(data.new_email, trx)
-			.then(() =>
-			{
-				return generate_code()
-				.then(code =>
-				{
-					data.code = code
+			return generate_code()
+		})
+		.then(code =>
+		{
+			data.code = code
 
-					return user.email_confirms(trx)
-					.insert(data, 'user_id')
-					.then(one)
-					.catch(err =>
+			return user.email_confirms(trx)
+			.insert(data, 'user_id')
+			.then(one)
+			.catch(err =>
+			{
+				if (err.constraint === 'email_confirms_pkey')
+				{
+					return user.email_confirms()
+					.update(
 					{
-						if (err.constraint === 'email_confirms_pkey')
-						{
-							return user.email_confirms()
-							.update({
-								new_email: data.new_email,
-								code: data.code
-							})
-							.where('user_id', data.user_id)
-						}
+						new_email: data.new_email,
+						code: data.code
 					})
-				})
+					.where('user_id', data.user_id)
+				}
+				else
+				{
+					throw err
+				}
 			})
 		})
-	}
+	})
 
 	return user
 }
