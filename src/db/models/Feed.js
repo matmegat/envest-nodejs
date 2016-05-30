@@ -63,13 +63,7 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.validateFeedId = function (id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(id))
-		})
-	}
+	feed.validateFeedId = require('../../id').validate.promise(WrongFeedId)
 
 	feed.list = function (options)
 	{
