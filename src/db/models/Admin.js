@@ -8,6 +8,8 @@ var AdminRequired =
 var CannotIntro =
     Err('admin_cannot_intro', 'This admin cannot introduce another')
 
+var AlreadyAdmin = Err('already_admin', 'This user is admin already')
+
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
@@ -105,6 +107,7 @@ module.exports = function Admin (db)
 				parent:  by_user_id,
 				can_intro: false
 			})
+			.catch(Err.fromDb('admins_pkey', AlreadyAdmin))
 		})
 		.then(noop)
 	})
