@@ -4,8 +4,6 @@ var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 
-var validateId = require('../../id').validate(WrongInvestorId)
-
 var Paginator = require('../Paginator')
 
 module.exports = function Investor (db)
@@ -18,14 +16,6 @@ module.exports = function Investor (db)
 	var paginator = Paginator()
 
 	investor.table = () => knex('investors')
-
-	function validate_id (id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(id))
-		})
-	}
 
 	investor.byId = function (id)
 	{
@@ -60,6 +50,8 @@ module.exports = function Investor (db)
 			return _.omit(investor, [ 'historical_returns' ])
 		})
 	}
+
+	var validate_id = require('../../id').validate.promise(WrongInvestorId)
 
 	investor.list = function (options)
 	{

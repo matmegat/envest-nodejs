@@ -22,7 +22,7 @@ var toId = id.toId = function toId (id)
 
 var curry = _.curry
 
-id.validate = curry((fn, id) =>
+var validate = id.validate = curry((fn, id) =>
 {
 	id = toId(id)
 
@@ -32,4 +32,9 @@ id.validate = curry((fn, id) =>
 	}
 
 	return id
+})
+
+id.validate.promise = curry((fn, id) =>
+{
+	return new Promise(rs => rs(validate(fn, id)))
 })
