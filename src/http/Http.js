@@ -7,11 +7,15 @@ var compose = require('composable-middleware')
 var authRequired = require('./auth-required')
 var AdminRequired = require('./admin-required')
 
-var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
+var Admin = require('./api/admin/Admin')
+
+var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
 var Investors = require('./api/investors/Investors')
+
 var Statics = require('./api/statics/Statics')
+
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 
@@ -51,9 +55,10 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
+	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
-	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
 
