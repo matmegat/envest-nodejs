@@ -84,7 +84,7 @@ module.exports = function Admin (db)
 				.then(() =>
 				{
 					/* check for can_intro */
-					return admin.byId(by_user_id)
+					return admin.byId(by_user_id, trx)
 					.then(by_whom =>
 					{
 						if (! by_whom.can_intro)
