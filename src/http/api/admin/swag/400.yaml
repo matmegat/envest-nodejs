@@ -1,0 +1,6 @@
+description: |
+  **Error object** which follows
+  [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+schema:
+  $ref: ../../../swagger/Error.yaml

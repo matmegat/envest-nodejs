@@ -6,6 +6,8 @@ var extend = require('lodash/extend')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var WrongUserId = Err('wrong_user_id', 'Wrong user id')
+var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
 
 module.exports = function User (db)
 {
@@ -13,13 +15,33 @@ module.exports = function User (db)
 
 	var knex = db.knex
 
+	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
-	var one = db.helpers.one
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 	user.auth_local     = knexed(knex, 'auth_local')
+
+
+	user.ensure = function (id, trx)
+	{
+		return user.byId(id, trx)
+		.then(Err.nullish(UserDoesNotExist))
+	}
+
+	user.byId = function (id, trx)
+	{
+		return validate_id(id)
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.where('id', id)
+			.then(oneMaybe)
+		})
+	}
+
+	var validate_id = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
 	{
@@ -90,13 +112,6 @@ module.exports = function User (db)
 			.as('ignored_alias')
 		})
 		.where('email', email)
-		.then(oneMaybe)
-	}
-
-	user.byId = function (id)
-	{
-		return user.users_table()
-		.where('id', id)
 		.then(oneMaybe)
 	}
 
@@ -219,39 +234,41 @@ module.exports = function User (db)
 		.del()
 	}
 
-	user.newEmailUpdate = function (data)
+	user.newEmailUpdate = knexed.transact(knex, (trx, data) =>
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
-		return knex.transaction(function (trx)
+		return ensureEmailNotExists(data.new_email, trx)
+		.then(() =>
 		{
-			return ensureEmailNotExists(data.new_email, trx)
-			.then(() =>
-			{
-				return generate_code()
-				.then(code =>
-				{
-					data.code = code
+			return generate_code()
+		})
+		.then(code =>
+		{
+			data.code = code
 
-					return user.email_confirms(trx)
-					.insert(data, 'user_id')
-					.then(one)
-					.catch(err =>
+			return user.email_confirms(trx)
+			.insert(data, 'user_id')
+			.then(one)
+			.catch(err =>
+			{
+				if (err.constraint === 'email_confirms_pkey')
+				{
+					return user.email_confirms()
+					.update(
 					{
-						if (err.constraint === 'email_confirms_pkey')
-						{
-							return user.email_confirms()
-							.update({
-								new_email: data.new_email,
-								code: data.code
-							})
-							.where('user_id', data.user_id)
-						}
+						new_email: data.new_email,
+						code: data.code
 					})
-				})
+					.where('user_id', data.user_id)
+				}
+				else
+				{
+					throw err
+				}
 			})
 		})
-	}
+	})
 
 	return user
 }
