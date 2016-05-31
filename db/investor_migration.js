@@ -1,6 +1,3 @@
-var investorProfilePic = '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b'
-/* TODO: fill with real links / hashes */
-
 module.exports = function Investors (knex, Promise)
 {
 	var investors = {}
@@ -12,8 +9,7 @@ module.exports = function Investors (knex, Promise)
 		table.timestamps() // created_at, updated_at
 
 		table.string('full_name').notNullable()
-		table.text('profile_pic').defaultTo(investorProfilePic)
-		// table.string('icon', 255).notNullable()
+		table.string('icon', 255).notNullable()
 	})
 
 	investors.initialDown = knex.schema.dropTableIfExists('investors')
@@ -37,7 +33,7 @@ module.exports = function Investors (knex, Promise)
 
 		table.renameColumn('full_name', 'first_name')
 		table.string('last_name').after('first_name')
-		// table.string('cover_image', 255).notNullable().defaultTo('')
+		table.string('cover_image', 255).notNullable().defaultTo('')
 		table.string('profession').defaultTo('')
 		table.jsonb('focus').defaultTo('[]') // [String, ]. Up to 3 elements
 		table.text('background').defaultTo('')
@@ -81,6 +77,7 @@ module.exports = function Investors (knex, Promise)
 				table.dropColumns(
 					'user_id',
 					'last_name',
+					'cover_image',
 					'profession',
 					'focus',
 					'background',
