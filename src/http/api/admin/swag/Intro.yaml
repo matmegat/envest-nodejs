@@ -1,0 +1,22 @@
+post:
+  description: introduce new admin by this (requester) autorized admin
+  parameters:
+  - name: payload
+    in: body
+    schema:
+      type: object
+      properties:
+        target_user_id:
+          type: integer
+          description: user_id which will be promoted to admins
+      required:
+        - target_user_id
+
+  responses:
+    200:
+      description: user promoted to admins
+    400:
+      $ref: './400.yaml'
+
+  tags:
+  - admin

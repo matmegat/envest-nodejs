@@ -6,6 +6,8 @@ var extend = require('lodash/extend')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+var WrongUserId = Err('wrong_user_id', 'Wrong user id')
+var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
 
 module.exports = function User (db)
 {
@@ -13,13 +15,33 @@ module.exports = function User (db)
 
 	var knex = db.knex
 
+	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
-	var one = db.helpers.one
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 	user.auth_local     = knexed(knex, 'auth_local')
+
+
+	user.ensure = function (id, trx)
+	{
+		return user.byId(id, trx)
+		.then(Err.nullish(UserDoesNotExist))
+	}
+
+	user.byId = function (id, trx)
+	{
+		return validate_id(id)
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.where('id', id)
+			.then(oneMaybe)
+		})
+	}
+
+	var validate_id = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
 	{
@@ -92,13 +114,6 @@ module.exports = function User (db)
 			.as('ignored_alias')
 		})
 		.where('email', email)
-		.then(oneMaybe)
-	}
-
-	user.byId = function (id)
-	{
-		return user.users_table()
-		.where('id', id)
 		.then(oneMaybe)
 	}
 
