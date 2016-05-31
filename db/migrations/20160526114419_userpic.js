@@ -1,4 +1,3 @@
-var userPic = '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 var investorProfilePic = '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b'
 /* TODO: fill with real links / hashes */
 
@@ -15,15 +14,6 @@ exports.up = function (knex, Promise)
 	* */
 
 	return Promise.resolve()
-	.then(() =>
-	{
-		return knex.schema.table('users', (table) =>
-		{
-			table
-			.text('pic')
-			.defaultTo(userPic)
-		})
-	})
 	.then(() =>
 	{
 		return knex.schema.table('investors', (table) =>
