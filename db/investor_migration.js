@@ -11,8 +11,7 @@ module.exports = function Investors (knex, Promise)
 
 		table.timestamps() // created_at, updated_at
 
-		table.string('first_name').notNullable()
-		table.string('last_name').notNullable()
+		table.string('full_name').notNullable()
 		table.text('profile_pic').defaultTo(investorProfilePic)
 		// table.string('icon', 255).notNullable()
 	})
@@ -36,8 +35,8 @@ module.exports = function Investors (knex, Promise)
 		.onUpdate('restrict') /* user.id should never change */
 		.onDelete('restrict') /* we don't want to accidentally delete investor */
 
-		// table.renameColumn('full_name', 'first_name')
-		// table.string('last_name').after('first_name')
+		table.renameColumn('full_name', 'first_name')
+		table.string('last_name').after('first_name')
 		// table.string('cover_image', 255).notNullable().defaultTo('')
 		table.string('profession').defaultTo('')
 		table.jsonb('focus').defaultTo('[]') // [String, ]. Up to 3 elements
@@ -81,6 +80,7 @@ module.exports = function Investors (knex, Promise)
 
 				table.dropColumns(
 					'user_id',
+					'last_name',
 					'profession',
 					'focus',
 					'background',
@@ -107,6 +107,7 @@ module.exports = function Investors (knex, Promise)
 			{
 				table.increments('id').primary()
 				table.timestamps() // created_at, updated_at
+				table.renameColumn('first_name', 'full_name')
 			})
 		})
 		.then(() =>
