@@ -81,31 +81,31 @@ module.exports = function Feed (db)
 
 		// return paginator.paginate(feed.feed_table(), options)
 		var queryset = feed.feed_table()
-		var paging_queryst = null
+		var paging_queryset = null
 
 		if (options.max_id)
 		{
-			paging_queryst = feed.feed_table()
+			paging_queryset = feed.feed_table()
 			.select('timestamp')
 			.where('id', options.max_id)
 
 			queryset = queryset
-			.where('timestamp', paging_queryst)
+			.where('timestamp', paging_queryset)
 			.andWhere('id', '<=', options.max_id)
-			.orWhere('timestamp', '<', paging_queryst)
+			.orWhere('timestamp', '<', paging_queryset)
 			.orderBy('timestamp', 'desc')
 			.orderBy('id', 'desc')
 		}
 		else if (options.since_id)
 		{
-			paging_queryst = feed.feed_table()
+			paging_queryset = feed.feed_table()
 			.select('timestamp')
 			.where('id', options.since_id)
 
 			queryset = queryset
-			.where('timestamp', paging_queryst)
+			.where('timestamp', paging_queryset)
 			.andWhere('id', '>', options.since_id)
-			.orWhere('timestamp', '>', paging_queryst)
+			.orWhere('timestamp', '>', paging_queryset)
 			.orderBy('timestamp', 'asc')
 			.orderBy('id', 'asc')
 		}
