@@ -77,7 +77,9 @@ module.exports = function Investor (db)
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
-		queryset = paginator.paginate(queryset, options)
+		var paging_queryset = investor.table()
+		.select('users.full_name')
+		.innerJoin('users', 'investors.user_id', 'users.id')
 
 		if (options.where)
 		{
@@ -88,6 +90,29 @@ module.exports = function Investor (db)
 				options.where.clause,
 				options.where.argument
 			)
+		}
+
+		if (options.max_id)
+		{
+			paging_queryset = paging_queryset
+			.where('user_id', options.max_id)
+
+			queryset = queryset
+			.where('full_name', '>=', paging_queryset)
+			.orderBy('full_name', 'asc')
+		}
+		else if (options.since_id)
+		{
+			paging_queryset = paging_queryset
+			.where('user_id', options.since_id)
+
+			queryset = queryset
+			.where('full_name', '<', paging_queryset)
+			.orderBy('full_name', 'desc')
+		}
+		else
+		{
+			queryset = queryset.orderBy('full_name', 'asc')
 		}
 
 		return queryset
