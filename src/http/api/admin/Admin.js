@@ -10,7 +10,7 @@ module.exports = function (http, admin)
 
 	express.use(http.adminRequired)
 
-	express.post('/', (rq, rs) =>
+	express.post('/intro', (rq, rs) =>
 	{
 		var by_user_id     = rq.user.id
 		var target_user_id = rq.body.target_user_id

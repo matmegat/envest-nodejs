@@ -4,6 +4,7 @@ post:
   - name: payload
     in: body
     schema:
+      title: Introduced User
       type: object
       properties:
         target_user_id:
