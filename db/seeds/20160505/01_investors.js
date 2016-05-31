@@ -8,19 +8,23 @@ exports.seed = function (knex)
 		.insert(
 		[
 			{
-				full_name: 'Allen Schwartz',
+				first_name: 'Allen',
+				last_name: 'Schwartz',
 				icon: ''
 			},
 			{
-				full_name: 'Cheyenne Parsons',
+				first_name: 'Cheyenne',
+				last_name: 'Parsons',
 				icon: ''
 			},
 			{
-				full_name: 'George Masterson',
+				first_name: 'George',
+				last_name: 'Masterson',
 				icon: ''
 			},
 			{
-				full_name: 'Anna Brinkly',
+				first_name: 'Anna',
+				last_name: 'Brinkly',
 				icon: ''
 			}
 		])

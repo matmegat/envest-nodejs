@@ -23,7 +23,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'allen.schwartz@investor.com',
-				full_name: 'Allen Schwartz',
+				first_name: 'Allen',
+				last_name: 'Schwartz'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -63,7 +64,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'george.masterson@investor.com',
-				full_name: 'George Masterson',
+				first_name: 'George',
+				last_name: 'Masterson'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -102,7 +104,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'burt.harris@investor.com',
-				full_name: 'Burt Harris',
+				first_name: 'Burt',
+				last_name: 'Harris'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -141,7 +144,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'anna.brinkley@investor.com',
-				full_name: 'Anna Brinkley',
+				first_name: 'Anna',
+				last_name: 'Brinkley'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -181,7 +185,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'david.philips@investor.com',
-				full_name: 'David M. Philips',
+				first_name: 'David',
+				last_name: 'M. Philips'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -221,7 +226,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'chaenne.parson@investor.com',
-				full_name: 'Chaenne Parson',
+				first_name: 'Chaenne',
+				last_name: 'Parson'
 			}, 'id')
 			.then((user_id) =>
 			{
