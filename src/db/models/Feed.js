@@ -81,43 +81,41 @@ module.exports = function Feed (db)
 
 		// return paginator.paginate(feed.feed_table(), options)
 		var queryset = feed.feed_table()
+		var paging_queryst = null
 
 		if (options.max_id)
 		{
-			var paging_queryst = feed.feed_table()
+			paging_queryst = feed.feed_table()
 			.select('timestamp')
 			.where('id', options.max_id)
 
 			queryset = queryset
 			.where('timestamp', paging_queryst)
-			.andWhere('id', '>=', options.max_id)
+			.andWhere('id', '<=', options.max_id)
 			.orWhere('timestamp', '<', paging_queryst)
 			.orderBy('timestamp', 'desc')
-			.orderBy('id', 'asc')
-			.limit(20)
+			.orderBy('id', 'desc')
 		}
-
-		if (options.since_id)
+		else if (options.since_id)
 		{
-			var paging_queryst = feed.feed_table()
+			paging_queryst = feed.feed_table()
 			.select('timestamp')
 			.where('id', options.since_id)
 
 			queryset = queryset
 			.where('timestamp', paging_queryst)
-			.andWhere('id', '<', options.since_id)
+			.andWhere('id', '>', options.since_id)
 			.orWhere('timestamp', '>', paging_queryst)
 			.orderBy('timestamp', 'asc')
-			.orderBy('id', 'desc')
-			.limit(20)
+			.orderBy('id', 'asc')
 		}
-
-		if (! options.max_id && ! options.since_id)
+		else
 		{
-			queryset.orderBy('timestamp', 'desc').orderBy('id', 'asc')
+			queryset.orderBy('timestamp', 'desc').orderBy('id', 'desc')
 		}
 
 		return queryset
+		.limit(20)
 		.then((feed_items) =>
 		{
 			var feed_ids = _.map(feed_items, 'id')
