@@ -1,4 +1,3 @@
-var investorProfilePic = '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b'
 
 exports.up = function (knex, Promise)
 {
@@ -12,7 +11,7 @@ exports.up = function (knex, Promise)
 			.onUpdate('restrict') /* user.id should never change */
 			.onDelete('restrict')
 
-			table.text('profile_pic').defaultTo(investorProfilePic)
+			table.text('profile_pic').nullable()
 			table.string('profession').defaultTo('')
 			table.jsonb('focus').defaultTo('[]')
 			table.text('background').defaultTo('')

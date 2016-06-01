@@ -50,6 +50,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Lawyer',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						is_public: true
 					})
@@ -122,6 +123,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Developer',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						is_public: true
 					})
@@ -196,6 +198,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Witcher',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						is_public: true
 					})
