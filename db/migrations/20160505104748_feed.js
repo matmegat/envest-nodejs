@@ -55,10 +55,6 @@ exports.up = function (knex, Promise)
 				table.text('text').notNullable()
 			})
 		})
-		// .then(() =>
-		// {
-		// 	return knex.seed.run({ directory: './seeds/20160505' })
-		// })
 }
 
 exports.down = function (knex, Promise)

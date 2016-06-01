@@ -24,21 +24,6 @@ exports.up = function (knex, Promise)
 			table.dropForeign('investor_id')
 		})
 	})
-	// .then(() =>
-	// {
-	// 	return investor_migration.secondUp
-	// })
-	.then(() =>
-	{
-		return knex.schema.table('feed_items', (table) =>
-		{
-			table
-				.foreign('investor_id')
-				.references('investors.user_id')
-				.onUpdate('cascade')
-				.onDelete('cascade')
-		})
-	})
 	.then(() =>
 	{
 		return knex.schema.createTable('brokerage', (table) =>
@@ -107,8 +92,4 @@ exports.down = function (knex, Promise)
 	{
 		return knex.schema.dropTableIfExists('brokerage')
 	})
-	// .then(() =>
-	// {
-	// 	return investor_migration.secondDown()
-	// })
 }
