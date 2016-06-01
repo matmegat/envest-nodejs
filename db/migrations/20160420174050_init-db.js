@@ -1,5 +1,3 @@
-var userPic = '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
-/* TODO: fill with real links / hashes */
 
 exports.up = function (knex, Promise)
 {
@@ -13,7 +11,7 @@ exports.up = function (knex, Promise)
 			table.string('first_name').notNullable()
 			table.string('last_name').notNullable()
 			table.string('email')
-			table.text('pic').defaultTo(userPic)
+			table.text('pic').nullable()
 		})
 	})
 	.then(() =>
