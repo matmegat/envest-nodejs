@@ -5,25 +5,6 @@ exports.up = function (knex, Promise)
 	var investor_migration = Investors(knex)
 
 	return Promise.resolve()
-	// .then(() =>
-	// {
-	// 	return knex('comments').del()
-	// })
-	// .then(() =>
-	// {
-	// 	return knex('feed_items').del()
-	// })
-	// .then(() =>
-	// {
-	// 	return knex('investors').del()
-	// })
-	// .then(() =>
-	// {
-	// 	return knex.schema.table('feed_items', (table) =>
-	// 	{
-	// 		table.dropForeign('investor_id')
-	// 	})
-	// })
 	.then(() =>
 	{
 		return knex.schema.createTable('brokerage', (table) =>
