@@ -27,6 +27,7 @@ exports.up = function (knex, Promise)
 					])
 			)
 			table.boolean('is_public').defaultTo(false)
+			table.timestamp('start_date').nullable()
 		})
 	})
 	.then(() =>
