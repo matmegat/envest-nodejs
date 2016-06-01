@@ -29,17 +29,6 @@ module.exports = function Feed (db)
 
 	feed.feed_table = () => knex('feed_items')
 
-	feed.constructEvent = (item) =>
-	{
-		item.event = {
-			type: item.type,
-			data: item.data
-		}
-
-		delete item.type
-		delete item.data
-	}
-
 	feed.byId = function (id)
 	{
 		return feed.validateFeedId(id)
@@ -58,7 +47,7 @@ module.exports = function Feed (db)
 				feed_item.investor = _.pick(investor, [ 'id', 'first_name', 'last_name', 'pic' ])
 				delete feed_item.investor_id
 
-				feed.constructEvent(feed_item)
+				transformEvent(feed_item)
 
 				return feed_item
 			})
@@ -96,7 +85,7 @@ module.exports = function Feed (db)
 				feed_items.forEach((item) =>
 				{
 					item.comments = counts[item.id]
-					feed.constructEvent(item)
+					transformEvent(item)
 				})
 
 				return feed_items
@@ -127,4 +116,15 @@ module.exports = function Feed (db)
 	}
 
 	return feed
+}
+
+function transformEvent (item)
+{
+	item.event = {
+		type: item.type,
+		data: item.data
+	}
+
+	delete item.type
+	delete item.data
 }
