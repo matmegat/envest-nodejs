@@ -12,12 +12,8 @@ module.exports = function Investors (knex, Promise)
 		.onUpdate('restrict') /* user.id should never change */
 		.onDelete('restrict')
 
-		table.timestamps() // created_at, updated_at
-
-		// table.string('full_name').notNullable()
 		table.string('first_name').notNullable()
 		table.string('last_name').notNullable()
-		// table.string('icon', 255).notNullable()
 		table.text('profile_pic').defaultTo(investorProfilePic)
 		table.string('profession').defaultTo('')
 		table.jsonb('focus').defaultTo('[]')
