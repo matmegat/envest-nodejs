@@ -102,7 +102,8 @@ exports.seed = function (knex)
 			return {
 				timestamp: new Date(new Date().getTime() + i),
 				investor_id: investors[_.random(investors.length - 1)].id,
-				event: event
+				event_type: event.type,
+				event: event.data
 			}
 		})
 

@@ -1,17 +1,11 @@
 type: object
 description: '"Update" type of event'
-allOf:
-- $ref: ./Event.yaml
-- type: object
-  properties:
-    data:
-      type: object
-      properties:
-        stocks:
-          type: array
-          items:
-            $ref: ../../../swagger/Symbol.yaml
-        title:
-          type: string
-        text:
-          type: string
+properties:
+  stocks:
+    type: array
+    items:
+      $ref: ../../../swagger/Symbol.yaml
+  title:
+    type: string
+  text:
+    type: string
