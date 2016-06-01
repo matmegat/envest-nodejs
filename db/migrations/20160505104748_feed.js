@@ -69,10 +69,16 @@ exports.up = function (knex, Promise)
 
 			table.timestamp('timestamp').defaultTo(knex.fn.now())
 			table.integer('user_id').notNullable()
-			table.foreign('user_id').references('users.id')
+			table.foreign('user_id')
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.integer('feed_id').notNullable()
-			table.foreign('feed_id').references('feed_items.id')
+			table.foreign('feed_id')
+				.references('feed_items.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.text('text').notNullable()
 		})
