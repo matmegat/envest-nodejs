@@ -33,7 +33,6 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
-
 	if (app.cfg.env === 'dev' || app.cfg.env === 'test')
 	{
 		http.express.use((rq, rs, next) =>
