@@ -1,17 +1,23 @@
 type: object
 description: '"Watchlist" type of event'
-properties:
-  dir:
-    description: Type of watchlist operation
-    type: string
-    enum:
-    - added
-    - removed
-  symbol:
-    $ref: ../../../swagger/Symbol.yaml
-  text:
-    type: string
-  motivations:
-    type: array
-    items:
-      type: string
+allOf:
+- $ref: ./Event.yaml
+- type: object
+  properties:
+    data:
+      type: object
+      properties:
+        dir:
+          description: Type of watchlist operation
+          type: string
+          enum:
+          - added
+          - removed
+        symbol:
+          $ref: ../../../swagger/Symbol.yaml
+        text:
+          type: string
+        motivations:
+          type: array
+          items:
+            type: string

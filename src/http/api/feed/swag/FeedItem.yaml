@@ -17,12 +17,6 @@ properties:
       **optional**
       present at `/feed/:id` requests
     $ref: ../../investors/swag/Investor.yaml
-  event_type:
-    type: string
-    enum:
-    - trade
-    - whatchlist
-    - update
   event:
     description: |
       One of Events
@@ -39,4 +33,3 @@ required:
 - id
 - timestamp
 - event
-- event_type
