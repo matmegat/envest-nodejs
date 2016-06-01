@@ -3,7 +3,9 @@ var expect = require('chai').expect
 
 var _ = require('lodash')
 
-// var Paginator = require('../Paginator')
+var knexed = require('../knexed')
+
+var Paginator = require('../paginator/Chunked')
 
 var validateId = require('../../id').validate
 
@@ -16,10 +18,14 @@ module.exports = function Feed (db)
 	var feed = {}
 
 	var knex = db.knex
-
 	var oneMaybe = db.helpers.oneMaybe
 
-	// var paginator = Paginator()
+	feed.feed_table = knexed(knex, 'feed_items')
+
+	var paginator = Paginator(
+	{
+		table: feed.feed_table
+	})
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	expect(db, 'Feed depends on Investor').property('investor')
@@ -27,8 +33,6 @@ module.exports = function Feed (db)
 	var investor = db.investor
 
 	feed.NotFound = NotFound
-
-	feed.feed_table = () => knex('feed_items')
 
 	feed.byId = function (id)
 	{
