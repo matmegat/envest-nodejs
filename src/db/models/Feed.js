@@ -3,7 +3,7 @@ var expect = require('chai').expect
 
 var _ = require('lodash')
 
-var Paginator = require('../Paginator')
+// var Paginator = require('../Paginator')
 
 var validateId = require('../../id').validate
 
@@ -19,7 +19,7 @@ module.exports = function Feed (db)
 
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
+	// var paginator = Paginator()
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	expect(db, 'Feed depends on Investor').property('investor')

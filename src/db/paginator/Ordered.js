@@ -10,7 +10,7 @@ var defaults =
 	limit: 20
 }
 
-module.exports = function Paginator (paginator_options)
+module.exports = function Paginator__Ordered (paginator_options)
 {
 	var paginator = {}
 

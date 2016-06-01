@@ -4,7 +4,8 @@ var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var validateId = require('../../id').validate
-var Paginator = require('../Paginator')
+
+// var Paginator = require('../Paginator')
 
 module.exports = function Investor (db)
 {
@@ -13,7 +14,7 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
+	// var paginator = Paginator()
 
 	investor.table = () => knex('investors')
 

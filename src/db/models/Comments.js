@@ -1,7 +1,7 @@
 
 var expect = require('chai').expect
 
-var Paginator = require('../Paginator')
+var Paginator = require('../paginator/Ordered')
 var Abuse     = require('./Abuse')
 
 var validate = require('../validate')
