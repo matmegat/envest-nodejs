@@ -15,16 +15,7 @@ exports.up = function (knex, Promise)
 			table.string('profession').defaultTo('')
 			table.jsonb('focus').defaultTo('[]')
 			table.text('background').defaultTo('')
-			table.jsonb('historical_returns').notNullable().defaultTo(
-				JSON.stringify(
-					[
-						{ year: 2011, percentage: 10 },
-						{ year: 2012, percentage: 11 },
-						{ year: 2013, percentage: -8 },
-						{ year: 2014, percentage: 5 },
-						{ year: 2015, percentage: 15 },
-					])
-			)
+			table.jsonb('historical_returns').notNullable().defaultTo('[]')
 			table.boolean('is_public').defaultTo(false)
 			table.timestamp('start_date').nullable()
 		})

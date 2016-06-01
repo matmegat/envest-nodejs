@@ -52,6 +52,14 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
+						historical_returns: JSON.stringify(
+						[
+							{ year: 2011, percentage: 10 },
+							{ year: 2012, percentage: 11 },
+							{ year: 2013, percentage: -8 },
+							{ year: 2014, percentage: 5 },
+							{ year: 2015, percentage: 15 },
+						]),
 						is_public: true
 					})
 				})
@@ -125,6 +133,14 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
+						historical_returns: JSON.stringify(
+						[
+							{ year: 2011, percentage: 10 },
+							{ year: 2012, percentage: 11 },
+							{ year: 2013, percentage: -8 },
+							{ year: 2014, percentage: 5 },
+							{ year: 2015, percentage: 15 },
+						]),
 						is_public: true
 					})
 				})
