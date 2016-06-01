@@ -1,9 +1,6 @@
-var Investors = require('./../investor_migration')
 
 exports.up = function (knex, Promise)
 {
-	var investor_migration = Investors(knex)
-
 	return Promise.resolve()
 	.then(() =>
 	{
