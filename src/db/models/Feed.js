@@ -47,7 +47,7 @@ module.exports = function Feed (db)
 				feed_item.investor = _.pick(investor, [ 'id', 'first_name', 'last_name', 'pic' ])
 				delete feed_item.investor_id
 
-				transformEvent(feed_item)
+				transform_event(feed_item)
 
 				return feed_item
 			})
@@ -85,7 +85,7 @@ module.exports = function Feed (db)
 				feed_items.forEach((item) =>
 				{
 					item.comments = counts[item.id]
-					transformEvent(item)
+					transform_event(item)
 				})
 
 				return feed_items
@@ -118,7 +118,7 @@ module.exports = function Feed (db)
 	return feed
 }
 
-function transformEvent (item)
+function transform_event (item)
 {
 	item.event = {
 		type: item.type,
