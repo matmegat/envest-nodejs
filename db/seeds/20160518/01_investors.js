@@ -48,8 +48,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Allen',
-						last_name: 'Schwartz',
 						profession: 'Lawyer',
 						focus: focus,
 						background: lorem,
@@ -86,8 +84,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'George',
-						last_name: 'Masterson',
 						profession: 'Preacher',
 						focus: focus,
 						background: lorem,
@@ -124,8 +120,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Burt',
-						last_name: 'Harris',
 						profession: 'Developer',
 						focus: focus,
 						background: lorem,
@@ -163,8 +157,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Anna',
-						last_name: 'Brinkley',
 						profession: 'Teacher',
 						focus: focus,
 						background: lorem,
@@ -202,8 +194,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'David',
-						last_name: 'M. Philips',
 						profession: 'Witcher',
 						focus: focus,
 						background: lorem,
@@ -241,8 +231,6 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Chaenne',
-						last_name: 'Parson',
 						profession: 'Liar',
 						focus: focus,
 						background: lorem,

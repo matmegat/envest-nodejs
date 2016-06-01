@@ -12,8 +12,6 @@ exports.up = function (knex, Promise)
 			.onUpdate('restrict') /* user.id should never change */
 			.onDelete('restrict')
 
-			table.string('first_name').notNullable()
-			table.string('last_name').notNullable()
 			table.text('profile_pic').defaultTo(investorProfilePic)
 			table.string('profession').defaultTo('')
 			table.jsonb('focus').defaultTo('[]')
