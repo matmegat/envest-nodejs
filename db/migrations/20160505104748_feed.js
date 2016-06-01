@@ -44,20 +44,22 @@ exports.up = function (knex, Promise)
 				.onUpdate('cascade')
 				.onDelete('cascade')
 			table.string('type').notNullable()
+			/* TODO: should follow notation
+			* 
+			* type: 'trade' | 'watchlist' | 'update'
+			*
+			* */
 			table.jsonb('data').notNullable()
 			/* TODO: should follow notation
+			* data:
 			* {
-			* 	type: 'trade' | 'watchlist' | 'update'
-			* 	data:
-			* 	{
-			*		dir:
-			*		symbol:
-			*		price:
-			*		amount:
-			*		text:
-			*		risk: 'low' | 'medium' | 'high'
-			*		motivations: []
-			* 	}
+			*	dir:
+			*	symbol:
+			*	price:
+			*	amount:
+			*	text:
+			*	risk: 'low' | 'medium' | 'high'
+			*	motivations: []
 			* }
 			* */
 		})
