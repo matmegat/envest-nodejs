@@ -17,7 +17,10 @@ exports.up = function (knex, Promise)
 
 				table.timestamp('timestamp').defaultTo(knex.fn.now())
 				table.integer('investor_id').notNullable()
-				table.foreign('investor_id').references('investors.id')
+				table.foreign('investor_id')
+					.references('investors.user_id')
+					.onUpdate('cascade')
+					.onDelete('cascade')
 				table.jsonb('event').notNullable()
 				/* TODO: should follow notation
 				* {
@@ -52,10 +55,10 @@ exports.up = function (knex, Promise)
 				table.text('text').notNullable()
 			})
 		})
-		.then(() =>
-		{
-			return knex.seed.run({ directory: './seeds/20160505' })
-		})
+		// .then(() =>
+		// {
+		// 	return knex.seed.run({ directory: './seeds/20160505' })
+		// })
 }
 
 exports.down = function (knex, Promise)
