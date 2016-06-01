@@ -9,23 +9,19 @@ exports.seed = function (knex)
 		[
 			{
 				first_name: 'Allen',
-				last_name: 'Schwartz',
-				icon: ''
+				last_name: 'Schwartz'
 			},
 			{
 				first_name: 'Cheyenne',
-				last_name: 'Parsons',
-				icon: ''
+				last_name: 'Parsons'
 			},
 			{
 				first_name: 'George',
-				last_name: 'Masterson',
-				icon: ''
+				last_name: 'Masterson'
 			},
 			{
 				first_name: 'Anna',
-				last_name: 'Brinkly',
-				icon: ''
+				last_name: 'Brinkly'
 			}
 		])
 	})
