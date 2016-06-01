@@ -171,7 +171,7 @@ module.exports = function User (db)
 					facebook_id: data.facebook_id
 				}, trx)
 			})
-			.then(id =>
+			.then(() =>
 			{
 				return user.byFacebookId(data.facebook_id)
 			})
