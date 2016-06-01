@@ -62,15 +62,10 @@ exports.up = function (knex, Promise)
 
 exports.down = function (knex, Promise)
 {
-	var investor_migration = Investors(knex, Promise)
-
-	return knex.schema.dropTableIfExists('portfolio_symbols')
-	.then(() =>
-	{
-		return knex.schema.dropTableIfExists('symbols')
-	})
-	.then(() =>
-	{
-		return knex.schema.dropTableIfExists('brokerage')
-	})
+	return Promise.all(
+	[
+		knex.schema.dropTableIfExists('portfolio_symbols'),
+		knex.schema.dropTableIfExists('symbols'),
+		knex.schema.dropTableIfExists('brokerage')
+	])
 }
