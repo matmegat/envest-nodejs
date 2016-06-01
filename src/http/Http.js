@@ -54,6 +54,7 @@ module.exports = function Http (app)
 				'Access-Control-Allow-Headers',
 				'Origin, X-Requested-With, Content-Type, Accept'
 			)
+			rs.header('Access-Control-Allow-Credentials', 'true')
 
 			return next()
 		})
