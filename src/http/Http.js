@@ -63,8 +63,7 @@ module.exports = function Http (app)
 
 	http.express.use('/api', (rq, rs, next) =>
 	{
-		console.info('%s %s', rq.method, rq.originalUrl)
-		console.log(rq.body)
+		app.log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
 		next()
 	})
 
