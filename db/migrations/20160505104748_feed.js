@@ -43,7 +43,8 @@ exports.up = function (knex, Promise)
 				.references('investors.user_id')
 				.onUpdate('cascade')
 				.onDelete('cascade')
-			table.jsonb('event').notNullable()
+			table.string('type').notNullable()
+			table.jsonb('data').notNullable()
 			/* TODO: should follow notation
 			* {
 			* 	type: 'trade' | 'watchlist' | 'update'
