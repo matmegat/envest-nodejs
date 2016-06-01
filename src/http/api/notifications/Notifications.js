@@ -28,7 +28,7 @@ module.exports = function (db)
 
 	notifications.express.post('/', (rq, rs) =>
 	{
-		toss(rs, notifications.model.setLastViewedId(rq.user.id, rq.body.viewed_id))
+		toss(rs, notifications.model.setViewed(rq.user.id, rq.body.viewed_ids))
 	})
 
 	return notifications

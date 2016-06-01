@@ -15,22 +15,113 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
-	var one = db.helpers.one
-
 	var paginator = Paginator()
 
 	notifications.table = knexed(knex, 'notifications')
-	notifications.viewed_table = knexed(knex, 'notifications_viewed')
-
-	notifications.groups = {
-		users: ['user'],
-		admins: ['admin'],
-		investors: ['investor']
-	}
 
 	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
 
 	notifications.create = function (type, event, recipient_id)
+	{
+		validateNotification(type, event, recipient_id)
+		.then((data) =>
+		{
+			return notifications.table()
+			.insert(data)
+			.then(noop)
+			.catch(Err.fromDb('notifications_recipient_id_foreign', db.user.NotFound))
+		})
+	}
+
+	notifications.groupCreate = function (type, event, group)
+	{
+		validateNotification(type, event)
+		.then(() =>
+		{
+			var queryGroup = getQueryGroup(type, event, group)
+
+			return notifications.table()
+					.insert(knex.raw('(type, event, is_viewed, recipient_id) ?', [queryGroup]))
+					.then(noop)
+		})
+	}
+
+	var WrongUserGroup = Err('wrong_user_group', 'Wrong user group')
+
+	function getQueryGroup (type, event, group)
+	{
+		if (group == 'admins' || group == 'investors')
+		{
+			return knex
+				.select(knex.raw('?, ?, false, user_id', [type, event]))
+				.from(group)
+		}
+		else if (group == 'users')
+		{
+			return knex
+				.select(knex.raw('?, ?, false, users.id', [type, event]))
+				.from(group)
+				.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+				)
+				.leftJoin(
+					'investors',
+					'users.id',
+					'investors.user_id'
+				)
+				.whereNull('admins.user_id')
+				.whereNull('investors.user_id')
+		}
+		else
+		{
+			throw WrongUserGroup()
+		}
+	}
+
+	notifications.list = function (options)
+	{
+		var queryset = byUserId(options.user_id)
+
+		return paginator.paginate(queryset, options)
+		.andWhere('is_viewed', false)
+	}
+
+	function byUserId (user_id)
+	{
+		return notifications.table()
+		.where('recipient_id', user_id)
+	}
+
+	notifications.setViewed = function (recipient_id, viewed_ids)
+	{
+		return validateViewedIds(viewed_ids)
+		.then(() =>
+		{
+			return notifications.table()
+			.update('is_viewed', true)
+			.whereIn('id', viewed_ids)
+			.andWhere('recipient_id', recipient_id)
+			.then(noop)
+		})
+	}
+
+	var WrongViewedId = Err('wrong_viewed_id', 'Wrong viewed id')
+
+	function validateViewedIds (viewed_ids)
+	{
+		return new Promise(rs =>
+		{
+			viewed_ids.forEach( (viewed_id) =>
+			{
+				validateId(viewed_id, WrongViewedId)
+			})
+			return rs()
+		})
+	}
+
+	function validateNotification (type, event, recipient_id)
 	{
 		return new Promise(rs =>
 		{
@@ -49,66 +140,8 @@ module.exports = function Notifications (db)
 			return rs({
 				type: type,
 				event: event,
-				recipient_id: recipient_id
-			})
-		})
-		.then((data) =>
-		{
-			return notifications.table()
-			.insert(data)
-			.then(noop)
-			.catch(Err.fromDb('notifications_recipient_id_foreign', db.user.NotFound))
-		})
-	}
-
-	notifications.list = function (options)
-	{
-		var queryset = byUserId(options.user_id)
-
-		return notifications.lastViewedId(options.user_id)
-		.then((last_viewed_id) =>
-		{
-			return paginator.paginate(queryset, options)
-			.andWhere('id', '>', last_viewed_id)
-			.orWhereIn('type', notifications.groups[options.user_group])
-			.andWhere('id', '>', last_viewed_id)
-		})
-	}
-
-	function byUserId (user_id)
-	{
-		return notifications.table()
-		.where('recipient_id', user_id)
-	}
-
-	notifications.lastViewedId = function (user_id)
-	{
-		return notifications.viewed_table()
-		.where('recipient_id', user_id)
-		.then(one)
-		.then(row => row.last_viewed_id)
-	}
-
-	var WrongViewedId = Err('wrong_viewed_id', 'Wrong viewed id')
-
-	notifications.setLastViewedId = function (recipient_id, last_viewed_id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(last_viewed_id, WrongViewedId))
-		})
-		.then(() =>
-		{
-			return notifications.lastViewedId(recipient_id)
-			.then((viewed_id) =>
-			{
-				if (viewed_id < last_viewed_id)
-				{
-					return notifications.viewed_table()
-					.update('last_viewed_id', last_viewed_id)
-					.where('recipient_id', recipient_id)
-					.then(noop)
-				}
+				recipient_id: recipient_id,
+				is_viewed: false
 			})
 		})
 	}
