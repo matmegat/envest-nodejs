@@ -4,7 +4,7 @@ var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
 
-module.exports = function (db)
+module.exports = function (db, http)
 {
 	var investors = {}
 
@@ -25,6 +25,11 @@ module.exports = function (db)
 	investors.express.get('/:id', (rq, rs) =>
 	{
 		toss(rs, investors.model.byId(rq.params.id))
+	})
+
+	investors.express.post('/', http.adminRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.create(rq.body))
 	})
 
 	return investors

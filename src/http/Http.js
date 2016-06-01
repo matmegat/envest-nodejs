@@ -85,7 +85,7 @@ module.exports = function Http (app)
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
-	mount(Investors(app.db), 'investors', 'investors')
+	mount(Investors(app.db, http), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
 
 	http.express.use(errorMiddleware)

@@ -1,10 +1,13 @@
 var _ = require('lodash')
+var generate_code = require('../../crypto-helpers').generate_code
 var knexed = require('../knexed')
 
 var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
+var AlreadyExists = Err('already_investor', 'This user is investor already')
 
+var expect = require('chai').expect
 var validate = require('../validate')
 
 var Paginator = require('../Paginator')
@@ -19,6 +22,10 @@ module.exports = function Investor (db)
 	var paginator = Paginator()
 
 	var table = knexed(knex, 'investors')
+
+	var auth = db.auth
+	expect(db, 'Investors depends on Auth').property('auth')
+	var user = db.user
 
 	var validate_id = require('../../id').validate.promise(WrongInvestorId)
 
@@ -108,6 +115,60 @@ module.exports = function Investor (db)
 			})
 		})
 	}
+
+	investor.create = knexed.transact(knex, (trx, data) =>
+	{
+		return new Promise((resolve) =>
+		{
+			validate.required(data.first_name, 'first_name')
+			validate.required(data.last_name, 'last_name')
+			validate.required(data.email, 'email')
+			resolve()
+		})
+		.then(() =>
+		{
+			return generate_code()
+		})
+		.then((password) =>
+		{
+			var full_name = data.first_name + ' ' + data.last_name
+			var user_data = _.extend({}, data,
+			{
+				full_name: full_name,
+				password: password	/* new Investor should reset his password */
+			})
+			/* FIXME: refactor to first_name, last_name */
+
+			return auth.register(user_data)
+		})
+		.then(() =>
+		{
+			return user.byEmail(data.email, trx)
+		})
+		.then((user) =>
+		{
+			return table(trx)
+			.insert(
+			{
+				user_id: user.id,
+				first_name: data.first_name,
+				last_name: data.last_name,
+				historical_returns: []
+			}, 'user_id')
+			.catch(Err.fromDb('investors_pkey', AlreadyExists))
+		})
+		.then(oneMaybe)
+		.then((investor_id) =>
+		{
+			// TODO: sent welcome email
+			return investor.byId(investor_id, trx)
+		})
+	})
+
+	// investor.update = knexed.transact(knex, (trx, id, data) =>
+	// {
+	//
+	// })
 
 	return investor
 }
