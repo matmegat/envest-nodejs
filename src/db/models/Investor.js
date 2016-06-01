@@ -1,8 +1,11 @@
 var _ = require('lodash')
+var knexed = require('../knexed')
 
 var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
+
+var validate = require('../validate')
 
 var Paginator = require('../Paginator')
 
@@ -15,15 +18,16 @@ module.exports = function Investor (db)
 
 	var paginator = Paginator()
 
-	investor.table = () => knex('investors')
+	var table = knexed(knex, 'investors')
 
-	investor.byId = function (id)
+	var validate_id = require('../../id').validate.promise(WrongInvestorId)
+
+	investor.byId = function (id, trx)
 	{
 		return validate_id(id)
 		.then(() =>
 		{
-			return investor
-			.table()
+			return table(trx)
 			.select(
 				'users.id',
 				'users.full_name',
@@ -51,9 +55,7 @@ module.exports = function Investor (db)
 		})
 	}
 
-	var validate_id = require('../../id').validate.promise(WrongInvestorId)
-
-	investor.list = function (options)
+	investor.list = function (options, trx)
 	{
 		options = _.extend({}, options,
 		{
@@ -61,7 +63,7 @@ module.exports = function Investor (db)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = investor.table()
+		var queryset = table(trx)
 		.select(
 			'users.id',
 			'users.full_name',
