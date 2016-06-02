@@ -47,13 +47,13 @@ module.exports = function name (app)
 	})
 
 	db.user  = User(db)
+	db.notifications = Notifications(db)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
 	db.investor = Investor(db)
 	db.feed = Feed(db)
-	db.notifications = Notifications(db)
 
 	return db
 }

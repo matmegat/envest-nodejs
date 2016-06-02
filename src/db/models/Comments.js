@@ -20,6 +20,9 @@ module.exports = function Comments (db)
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
+	expect(db, 'Comments depends on Notifications').property('notifications')
+	var notifications_emit = db.notifications.emit
+
 	var paginator = Paginator({ column_name: 'comments.id' })
 
 	expect(db, 'Comments depends on User').property('user')
@@ -71,6 +74,8 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
+	var new_feed_comment = notifications_emit.inst('new_feed_comment')
+
 	comments.create = function (data)
 	{
 		return new Promise(rs =>
@@ -88,6 +93,14 @@ module.exports = function Comments (db)
 			.insert(data)
 			.then(noop)
 			.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
+		})
+		.then(() =>
+		{
+			return db.feed.byId(data.feed_id)
+		})
+		.then(feed_item =>
+		{
+			return notifications_emit.addComments(new_feed_comment, feed_item.investor.id, 1)
 		})
 	}
 

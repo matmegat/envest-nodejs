@@ -1,11 +1,13 @@
 
 var knexed = require('../knexed')
+var expect = require('chai').expect
 
 var noop = require('lodash/noop')
 
-var validate = require('../validate')
+var validate   = require('../validate')
 var validateId = require('../../id').validate
-var Paginator = require('../Paginator')
+var Paginator  = require('../Paginator')
+var Emit       = require('./Emit')
 
 var Err = require('../../Err')
 
@@ -15,11 +17,14 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
+	expect(db, 'Notifications depends on User').property('user')
 	var user = db.user
 
 	var paginator = Paginator()
 
 	notifications.table = knexed(knex, 'notifications')
+
+	notifications.emit = Emit(db, notifications)
 
 	notifications.create = function (type, event, recipient_id)
 	{
