@@ -39,7 +39,7 @@ module.exports = function Notifications (db)
 			var query_group = get_query_group(type, event, group)
 
 			return notifications.table()
-			.insert(knex.raw('(type, event, recipient_id) ?', [queryGroup]))
+			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
 			.then(noop)
 		})
 	}
