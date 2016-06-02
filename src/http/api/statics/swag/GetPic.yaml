@@ -1,0 +1,19 @@
+get:
+  description: Get picture by hash
+  produces:
+  - image/png
+  parameters:
+  - name: hash
+    in: path
+    type: string
+    description: Static picture hash
+    required: true
+  responses:
+    200:
+      description: Binary data. General content type – image
+      schema:
+        type: string
+    404:
+      description: If image not found or hash parameter is empty
+  tags:
+  - static

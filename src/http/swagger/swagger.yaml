@@ -41,6 +41,9 @@ paths:
   '/auth/change-email':
     $ref: ../api/auth/swag/ChangeEmail.yaml
 
+  '/admin/intro':
+    $ref: ../api/admin/swag/Intro.yaml
+
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
@@ -59,8 +62,10 @@ paths:
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
 
+  '/static/pic/{hash}':
+    $ref: ../api/statics/swag/GetPic.yaml
+
 definitions:
-  # Put here only COMMON definitions
 
   Feed:
     $ref: ../api/feed/swag/Feed.yaml
@@ -69,7 +74,6 @@ definitions:
     $ref: ../api/feed/swag/FeedItem.yaml
 
   Investor:
-#    $ref: ./Investor.yaml
     $ref: ../api/investors/swag/Investor.yaml
 
   Symbol:

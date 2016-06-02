@@ -10,6 +10,7 @@ var defaults =
 	limit: 20
 }
 
+/* eslint complexity: [ 1, 4 ] */
 module.exports = function Paginator (paginator_options)
 {
 	var paginator = {}

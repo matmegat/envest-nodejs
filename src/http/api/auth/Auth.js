@@ -45,6 +45,7 @@ module.exports = function Auth (auth_model, passport)
 		.catch(toss.err(rs))
 	})
 
+	// eslint-disable-next-line max-params
 	var authByProvider = curry((provider, rq, rs, next) =>
 	{
 		passport.authenticate(provider, (err, user, info) =>

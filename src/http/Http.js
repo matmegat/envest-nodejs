@@ -7,11 +7,15 @@ var compose = require('composable-middleware')
 var authRequired = require('./auth-required')
 var AdminRequired = require('./admin-required')
 
-var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
+var Admin = require('./api/admin/Admin')
+
+var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
 var Investors = require('./api/investors/Investors')
+
 var Statics = require('./api/statics/Statics')
+
 var Notifications = require('./api/notifications/Notifications')
 
 var Passport = require('./Passport')
@@ -31,10 +35,36 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
+	if (app.cfg.env === 'dev' || app.cfg.env === 'test')
+	{
+		http.express.use((rq, rs, next) =>
+		{
+			var allowedOrigins =
+			[
+				'http://127.0.0.1:' + app.cfg.port,
+				'http://localhost:' + app.cfg.port,
+				'http://nevest.dev:' + app.cfg.port,
+			]
+			var origin = rq.headers.origin
+
+			if (allowedOrigins.indexOf(origin) > -1)
+			{
+				rs.setHeader('Access-Control-Allow-Origin', origin)
+			}
+			rs.header(
+				'Access-Control-Allow-Headers',
+				'Origin, X-Requested-With, Content-Type, Accept, ' +
+				'Access-Control-Allow-Credentials'
+			)
+			rs.header('Access-Control-Allow-Credentials', 'true')
+
+			return next()
+		})
+	}
+
 	http.express.use('/api', (rq, rs, next) =>
 	{
-		console.info('%s %s', rq.method, rq.originalUrl)
-		console.log(rq.body)
+		app.log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
 		next()
 	})
 
@@ -53,9 +83,10 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
+	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
-	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
 	mount(Notifications(app.db), 'notifications', 'notifications')

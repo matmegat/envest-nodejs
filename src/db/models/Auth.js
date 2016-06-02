@@ -76,7 +76,8 @@ module.exports = function Auth (db)
 				[
 					'id',
 					'full_name',
-					'email'
+					'email',
+					'pic'
 				])
 			})
 		})
@@ -200,6 +201,11 @@ function validate_email (email)
 {
 	validate_required(email, 'email')
 	validate_empty(email, 'email')
+
+	if (email.length > 254)
+	{
+		throw WrongEmail()
+	}
 
 	var emailRe = /@/
 
