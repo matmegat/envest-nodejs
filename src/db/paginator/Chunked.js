@@ -1,6 +1,5 @@
 
 var extend = require('lodash/extend')
-var values = require('lodash/values')
 
 var expect = require('chai').expect
 
@@ -53,13 +52,21 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 				if (current_chunk)
 				{
-					this.where(real_order_column, values(current_chunk)[0])
+					this.where(
+						real_order_column,
+						current_chunk[real_order_column]
+					)
 					this.where(order_column, sign, current_id)
 				}
 				/* FEED
 				* real_order_column = 'timestamp'
 				* order_column = 'id'
 				* default_direction = 'desc'
+				* */
+				/* INVESTOR
+				* real_order_column = 'full_name'
+				* order_column = null
+				* default_direction = 'asc'
 				* */
 			})
 			.orWhere(function ()
@@ -68,7 +75,11 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 				if (current_chunk)
 				{
-					this.where(real_order_column, sign, values(current_chunk)[0])
+					this.where(
+						real_order_column,
+						sign,
+						current_chunk[real_order_column]
+					)
 				}
 			})
 
@@ -105,7 +116,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 		}
 		else if (since_id)
 		{
-			return ' >'
+			return '>'
 		}
 		else if (direction === 'desc')
 		{

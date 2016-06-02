@@ -5,7 +5,7 @@ var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var validateId = require('../../id').validate
 
-// var Paginator = require('../Paginator')
+var Paginator = require('../paginator/Chunked')
 
 module.exports = function Investor (db)
 {
@@ -14,9 +14,24 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	// var paginator = Paginator()
-
 	investor.table = () => knex('investors')
+
+	var paging_table = function ()
+	{
+		return investor.table()
+		.select(
+			'user_id',
+			'users.full_name'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
+	}
+	var paginator = Paginator(
+	{
+		table: paging_table,
+		order_column: 'user_id',
+		real_order_column: 'full_name',
+		default_direction: 'asc'
+	})
 
 	function validate_id (id)
 	{
@@ -78,10 +93,6 @@ module.exports = function Investor (db)
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
-		var paging_queryset = investor.table()
-		.select('users.full_name')
-		.innerJoin('users', 'investors.user_id', 'users.id')
-
 		if (options.where)
 		{
 			// TODO: validate options.where
@@ -93,30 +104,30 @@ module.exports = function Investor (db)
 			)
 		}
 
-		if (options.max_id)
-		{
-			paging_queryset = paging_queryset
-			.where('user_id', options.max_id)
+		// if (options.max_id)
+		// {
+		// 	paging_queryset = paging_queryset
+		// 	.where('user_id', options.max_id)
+        //
+		// 	queryset = queryset
+		// 	.where('full_name', '>=', paging_queryset)
+		// 	.orderBy('full_name', 'asc')
+		// }
+		// else if (options.since_id)
+		// {
+		// 	paging_queryset = paging_queryset
+		// 	.where('user_id', options.since_id)
+        //
+		// 	queryset = queryset
+		// 	.where('full_name', '<', paging_queryset)
+		// 	.orderBy('full_name', 'desc')
+		// }
+		// else
+		// {
+		// 	queryset = queryset.orderBy('full_name', 'asc')
+		// }
 
-			queryset = queryset
-			.where('full_name', '>=', paging_queryset)
-			.orderBy('full_name', 'asc')
-		}
-		else if (options.since_id)
-		{
-			paging_queryset = paging_queryset
-			.where('user_id', options.since_id)
-
-			queryset = queryset
-			.where('full_name', '<', paging_queryset)
-			.orderBy('full_name', 'desc')
-		}
-		else
-		{
-			queryset = queryset.orderBy('full_name', 'asc')
-		}
-
-		return queryset
+		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
 		.then((investors) =>
 		{
 			return investors.map((investor) =>
