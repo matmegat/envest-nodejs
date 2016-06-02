@@ -54,7 +54,7 @@ paths:
     $ref: ../api/comments/swag/Abuse.yaml
 
   '/investors':
-    $ref: ../api/investors/swag/GetInvestors.yaml
+    $ref: ../api/investors/swag/GetPostInvestors.yaml
 
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
