@@ -111,7 +111,9 @@ module.exports = function Notifications (db)
 	{
 		return new Promise(rs =>
 		{
+			validate.array(viewed_ids, 'viewed_ids')
 			viewed_ids.forEach(validateId(WrongViewedId))
+
 			return rs()
 		})
 	}

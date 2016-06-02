@@ -38,3 +38,13 @@ validate.json = function validate__json (json, name)
 		throw WrongJSON({ field: name })
 	}
 }
+
+var ArrayRequired = Err('array_required', 'Requires array')
+
+validate.array = function validate__array (ar, name)
+{
+	if(! Array.isArray(ar))
+	{
+		throw ArrayRequired({ field: name })
+	}
+}
