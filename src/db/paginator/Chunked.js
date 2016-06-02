@@ -12,6 +12,7 @@ var defaults =
 {
 	order_column: 'id',
 	real_order_column: 'timestamp',
+	default_direction: 'desc',
 	table: null,
 	limit: 20
 }
@@ -32,11 +33,9 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 		var max_id   = toId(options.max_id)
 		var since_id = toId(options.since_id)
-
-		// expect(since_id && max_id).not.ok
+		var default_dir = options.default_direction
 
 		var current_id = (since_id || max_id)
-		// expect(current_id).ok
 
 		return get_current_chunk(current_id)
 		.then(current_chunk =>
@@ -50,7 +49,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 			queryset
 			.where(function ()
 			{
-				var sign = order_sign(since_id, max_id)
+				var sign = order_sign(default_dir, since_id, max_id)
 
 				if (current_chunk)
 				{
@@ -65,7 +64,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 			})
 			.orWhere(function ()
 			{
-				var sign = real_order_sign(since_id, max_id)
+				var sign = real_order_sign(default_dir, since_id, max_id)
 
 				if (current_chunk)
 				{
@@ -73,7 +72,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 				}
 			})
 
-			var dir = sorting(since_id, max_id)
+			var dir = sorting(default_dir, since_id, max_id)
 
 			queryset
 			.orderBy(real_order_column, dir)
@@ -98,40 +97,54 @@ module.exports = function Paginator__Chunked (paginator_options)
 		}
 	}
 
-	function order_sign (since_id, max_id)
+	function order_sign (direction, since_id, max_id)
 	{
-		if (since_id)
+		if (since_id && direction === 'desc')
 		{
 			return '>'
 		}
-		else
+		else if (since_id)
+		{
+			return ' >'
+		}
+		else if (direction === 'desc')
 		{
 			return '<='
 		}
+
+		return '>='
 	}
 
-	function real_order_sign (since_id, max_id)
+	function real_order_sign (direction, since_id, max_id)
 	{
-		if (since_id)
+		if (since_id && direction === 'desc')
 		{
 			return '>'
 		}
-		else
+		else if (since_id)
 		{
 			return '<'
 		}
+		else if (direction === 'desc')
+		{
+			return '<'
+		}
+
+		return '>'
 	}
 
-	function sorting (since_id, max_id)
+	function sorting (direction, since_id, max_id)
 	{
-		if (since_id)
+		if (since_id && direction === 'desc')
 		{
 			return 'asc'
 		}
-		else
+		else if (since_id)
 		{
 			return 'desc'
 		}
+
+		return direction
 	}
 
 	return paginator
