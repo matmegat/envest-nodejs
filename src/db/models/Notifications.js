@@ -111,10 +111,7 @@ module.exports = function Notifications (db)
 	{
 		return new Promise(rs =>
 		{
-			viewed_ids.forEach( (viewed_id) =>
-			{
-				validateId(viewed_id, WrongViewedId)
-			})
+			viewed_ids.forEach(validateId(WrongViewedId))
 			return rs()
 		})
 	}
@@ -134,7 +131,7 @@ module.exports = function Notifications (db)
 
 			if (recipient_id)
 			{
-				validateId(recipient_id, WrongRecipientId)
+				validateId(WrongRecipientId, recipient_id)
 			}
 
 			return rs({
