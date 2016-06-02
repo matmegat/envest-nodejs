@@ -10,6 +10,14 @@ var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' +
 
 exports.seed = function (knex, Promise)
 {
+	var hist_returns_default = JSON.stringify(
+	[
+		{ year: 2011, percentage: 10 },
+		{ year: 2012, percentage: 11 },
+		{ year: 2013, percentage: -8 },
+		{ year: 2014, percentage: 5 },
+		{ year: 2015, percentage: 15 },
+	])
 	/**
 	 * Algo:
 	 * 1. Take all existing investors and update them to new format
@@ -24,7 +32,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'allen.schwartz@investor.com',
 				first_name: 'Allen',
-				last_name: 'Schwartz'
+				last_name: 'Schwartz',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -52,15 +61,9 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						historical_returns: JSON.stringify(
-						[
-							{ year: 2011, percentage: 10 },
-							{ year: 2012, percentage: 11 },
-							{ year: 2013, percentage: -8 },
-							{ year: 2014, percentage: 5 },
-							{ year: 2015, percentage: 15 },
-						]),
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -70,7 +73,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'george.masterson@investor.com',
 				first_name: 'George',
-				last_name: 'Masterson'
+				last_name: 'Masterson',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -96,7 +100,9 @@ exports.seed = function (knex, Promise)
 						profession: 'Preacher',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -106,7 +112,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'burt.harris@investor.com',
 				first_name: 'Burt',
-				last_name: 'Harris'
+				last_name: 'Harris',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -133,15 +140,9 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						historical_returns: JSON.stringify(
-						[
-							{ year: 2011, percentage: 10 },
-							{ year: 2012, percentage: 11 },
-							{ year: 2013, percentage: -8 },
-							{ year: 2014, percentage: 5 },
-							{ year: 2015, percentage: 15 },
-						]),
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -151,7 +152,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'anna.brinkley@investor.com',
 				first_name: 'Anna',
-				last_name: 'Brinkley'
+				last_name: 'Brinkley',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -178,7 +180,9 @@ exports.seed = function (knex, Promise)
 						profession: 'Teacher',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -188,7 +192,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'david.philips@investor.com',
 				first_name: 'David',
-				last_name: 'M. Philips'
+				last_name: 'M. Philips',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -216,7 +221,9 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -226,7 +233,8 @@ exports.seed = function (knex, Promise)
 			{
 				email: 'chaenne.parson@investor.com',
 				first_name: 'Chaenne',
-				last_name: 'Parson'
+				last_name: 'Parson',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -253,7 +261,9 @@ exports.seed = function (knex, Promise)
 						profession: 'Liar',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			})
