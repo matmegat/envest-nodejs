@@ -19,8 +19,6 @@ module.exports = function Notifications (db)
 
 	notifications.table = knexed(knex, 'notifications')
 
-	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
-
 	notifications.create = function (type, event, recipient_id)
 	{
 		validateNotification(type, event, recipient_id)
@@ -33,46 +31,46 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	notifications.groupCreate = function (type, event, group)
+	notifications.createBroadcast = function (type, event, group)
 	{
 		validateNotification(type, event)
 		.then(() =>
 		{
-			var queryGroup = getQueryGroup(type, event, group)
+			var query_group = get_query_group(type, event, group)
 
 			return notifications.table()
-					.insert(knex.raw('(type, event, is_viewed, recipient_id) ?', [queryGroup]))
-					.then(noop)
+			.insert(knex.raw('(type, event, recipient_id) ?', [queryGroup]))
+			.then(noop)
 		})
 	}
 
 	var WrongUserGroup = Err('wrong_user_group', 'Wrong user group')
 
-	function getQueryGroup (type, event, group)
+	function get_query_group (type, event, group)
 	{
 		if (group == 'admins' || group == 'investors')
 		{
 			return knex
-				.select(knex.raw('?, ?, false, user_id', [type, event]))
-				.from(group)
+			.select(knex.raw('?, ?, user_id', [type, event]))
+			.from(group)
 		}
 		else if (group == 'users')
 		{
 			return knex
-				.select(knex.raw('?, ?, false, users.id', [type, event]))
-				.from(group)
-				.leftJoin(
-				'admins',
+			.select(knex.raw('?, ?, users.id', [type, event]))
+			.from(group)
+			.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+			)
+			.leftJoin(
+				'investors',
 				'users.id',
-				'admins.user_id'
-				)
-				.leftJoin(
-					'investors',
-					'users.id',
-					'investors.user_id'
-				)
-				.whereNull('admins.user_id')
-				.whereNull('investors.user_id')
+				'investors.user_id'
+			)
+			.whereNull('admins.user_id')
+			.whereNull('investors.user_id')
 		}
 		else
 		{
@@ -121,6 +119,8 @@ module.exports = function Notifications (db)
 		})
 	}
 
+	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
+
 	function validateNotification (type, event, recipient_id)
 	{
 		return new Promise(rs =>
@@ -140,8 +140,7 @@ module.exports = function Notifications (db)
 			return rs({
 				type: type,
 				event: event,
-				recipient_id: recipient_id,
-				is_viewed: false
+				recipient_id: recipient_id
 			})
 		})
 	}

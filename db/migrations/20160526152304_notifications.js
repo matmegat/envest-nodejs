@@ -12,7 +12,9 @@ exports.up = function (knex, Promise)
 
 			table.string('type').notNullable()
 			table.jsonb('event').notNullable()
+
 			table.boolean('is_viewed').notNullable()
+			.defaultTo(false)
 
 			table.integer('recipient_id')
 				.references('users.id')
