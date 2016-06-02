@@ -1,5 +1,6 @@
 
 var extend = require('lodash/extend')
+var values = require('lodash/values')
 
 var expect = require('chai').expect
 
@@ -32,10 +33,10 @@ module.exports = function Paginator__Chunked (paginator_options)
 		var max_id   = toId(options.max_id)
 		var since_id = toId(options.since_id)
 
-		expect(since_id && max_id).not.ok()
+		// expect(since_id && max_id).not.ok
 
 		var current_id = (since_id || max_id)
-		expect(current_id).ok()
+		// expect(current_id).ok
 
 		return get_current_chunk(current_id)
 		.then(current_chunk =>
@@ -51,14 +52,25 @@ module.exports = function Paginator__Chunked (paginator_options)
 			{
 				var sign = order_sign(since_id, max_id)
 
-				this.where(real_order_column, current_chunk)
-				this.andWhere(order_column, sign, current_id)
+				if (current_chunk)
+				{
+					this.where(real_order_column, values(current_chunk)[0])
+					this.where(order_column, sign, current_id)
+				}
+				/* FEED
+				* real_order_column = 'timestamp'
+				* order_column = 'id'
+				* default_direction = 'desc'
+				* */
 			})
 			.orWhere(function ()
 			{
 				var sign = real_order_sign(since_id, max_id)
 
-				this.where(real_order_column, sign, current_chunk)
+				if (current_chunk)
+				{
+					this.where(real_order_column, sign, values(current_chunk)[0])
+				}
 			})
 
 			var dir = sorting(since_id, max_id)
@@ -67,15 +79,23 @@ module.exports = function Paginator__Chunked (paginator_options)
 			.orderBy(real_order_column, dir)
 			.orderBy(order_column, dir)
 
-			queryset.limit(limit)
+			return queryset.limit(limit)
 		})
 	}
 
 	function get_current_chunk (id)
 	{
-		return table()
-		.where(paginator_options.order_column, id)
-		.then(one)
+		if (! id)
+		{
+			return Promise.resolve(null)
+		}
+		else
+		{
+			return table()
+			.select(paginator_options.real_order_column)
+			.where(paginator_options.order_column, id)
+			.then(one)
+		}
 	}
 
 	function order_sign (since_id, max_id)
