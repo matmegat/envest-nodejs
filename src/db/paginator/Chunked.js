@@ -36,11 +36,12 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 		var current_id = (since_id || max_id)
 
-		return get_current_chunk(current_id)
+		var order_column = options.order_column
+		var real_order_column = options.real_order_column
+
+		return get_current_chunk(current_id, real_order_column)
 		.then(current_chunk =>
 		{
-			var order_column = options.order_column
-			var real_order_column = options.real_order_column
 			var limit = options.limit
 
 			limit = Math.min(limit, defaults.limit)
@@ -52,22 +53,9 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 				if (current_chunk)
 				{
-					this.where(
-						real_order_column,
-						current_chunk[real_order_column]
-					)
+					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
 				}
-				/* FEED
-				* real_order_column = 'timestamp'
-				* order_column = 'id'
-				* default_direction = 'desc'
-				* */
-				/* INVESTOR
-				* real_order_column = 'full_name'
-				* order_column = null
-				* default_direction = 'asc'
-				* */
 			})
 			.orWhere(function ()
 			{
@@ -75,11 +63,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 				if (current_chunk)
 				{
-					this.where(
-						real_order_column,
-						sign,
-						current_chunk[real_order_column]
-					)
+					this.where(real_order_column, sign, current_chunk)
 				}
 			})
 
@@ -93,7 +77,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 		})
 	}
 
-	function get_current_chunk (id)
+	function get_current_chunk (id, column)
 	{
 		if (! id)
 		{
@@ -105,6 +89,10 @@ module.exports = function Paginator__Chunked (paginator_options)
 			.select(paginator_options.real_order_column)
 			.where(paginator_options.order_column, id)
 			.then(one)
+			.then((entry) =>
+			{
+				return Promise.resolve(entry[column])
+			})
 		}
 	}
 
