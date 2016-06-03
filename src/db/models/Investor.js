@@ -3,7 +3,6 @@ var _ = require('lodash')
 var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
-var validateId = require('../../id').validate
 
 var Paginator = require('../paginator/Chunked')
 
@@ -75,6 +74,8 @@ module.exports = function Investor (db)
 		})
 	}
 
+	var validate_id = require('../../id').validate.promise(WrongInvestorId)
+
 	investor.list = function (options)
 	{
 		options = _.extend({}, options,
@@ -103,29 +104,6 @@ module.exports = function Investor (db)
 				options.where.argument
 			)
 		}
-
-		// if (options.max_id)
-		// {
-		// 	paging_queryset = paging_queryset
-		// 	.where('user_id', options.max_id)
-        //
-		// 	queryset = queryset
-		// 	.where('full_name', '>=', paging_queryset)
-		// 	.orderBy('full_name', 'asc')
-		// }
-		// else if (options.since_id)
-		// {
-		// 	paging_queryset = paging_queryset
-		// 	.where('user_id', options.since_id)
-        //
-		// 	queryset = queryset
-		// 	.where('full_name', '<', paging_queryset)
-		// 	.orderBy('full_name', 'desc')
-		// }
-		// else
-		// {
-		// 	queryset = queryset.orderBy('full_name', 'asc')
-		// }
 
 		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
 		.then((investors) =>

@@ -3,15 +3,13 @@ exports.up = function (knex)
 {
 	return knex.schema.createTable('admins', (table) =>
 	{
-		table.increments('id').primary()
-
-		table.integer('user_id').unique().notNullable()
+		table.integer('user_id').primary()
 			.references('users.id')
 			.onUpdate('restrict') /* user.id should never change */
 			.onDelete('restrict') /* we don't want to accidentally delete admin */
 
 		table.integer('parent').nullable()
-			.references('admins.id')
+			.references('admins.user_id')
 			.onUpdate('restrict')
 			.onDelete('restrict')
 			.comment('another admin who introduced this admin')

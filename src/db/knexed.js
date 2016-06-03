@@ -12,7 +12,7 @@ var istx = require('./is-tx')
  *  in transaction you can do
  *    users(tx) -> same knex table but added in transaction tx
  */
-module.exports = function knexed (knex, table_name)
+var knexed = module.exports = function knexed (knex, table_name)
 {
 	return function knex_table (tx)
 	{
@@ -24,5 +24,21 @@ module.exports = function knexed (knex, table_name)
 		}
 
 		return table
+	}
+}
+
+
+var concat = require('lodash/concat')
+
+knexed.transact = function (knex, method)
+{
+	return function ()
+	{
+		var args = arguments
+
+		return knex.transaction(trx =>
+		{
+			return method.apply(this, concat(trx, args))
+		})
 	}
 }

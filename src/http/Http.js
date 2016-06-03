@@ -7,13 +7,19 @@ var compose = require('composable-middleware')
 var authRequired = require('./auth-required')
 var AdminRequired = require('./admin-required')
 
-var Feed = require('./api/feed/Feed')
 var Auth = require('./api/auth/Auth')
+var Admin = require('./api/admin/Admin')
+
+var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
 var Investors = require('./api/investors/Investors')
+
 var Statics = require('./api/statics/Statics')
+
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
+var CrossOrigin = require('./CrossOrigin')
+var ReqLog = require('./ReqLog')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -29,12 +35,9 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
-	http.express.use('/api', (rq, rs, next) =>
-	{
-		console.info('%s %s', rq.method, rq.originalUrl)
-		console.log(rq.body)
-		next()
-	})
+	CrossOrigin(app.cfg, http.express)
+
+	ReqLog(app.log, http.express)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.passport = Passport(http.express, app.db)
@@ -51,9 +54,10 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
+	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
-	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
 

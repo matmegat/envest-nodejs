@@ -7,8 +7,6 @@ var knexed = require('../knexed')
 
 var Paginator = require('../paginator/Chunked')
 
-var validateId = require('../../id').validate
-
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
@@ -28,8 +26,9 @@ module.exports = function Feed (db)
 	})
 
 	expect(db, 'Feed depends on Comments').property('comments')
-	expect(db, 'Feed depends on Investor').property('investor')
 	var comments = db.comments
+
+	expect(db, 'Feed depends on Investor').property('investor')
 	var investor = db.investor
 
 	feed.NotFound = NotFound
@@ -67,13 +66,7 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.validateFeedId = function (id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(id, WrongFeedId))
-		})
-	}
+	feed.validateFeedId = require('../../id').validate.promise(WrongFeedId)
 
 	feed.list = function (options)
 	{

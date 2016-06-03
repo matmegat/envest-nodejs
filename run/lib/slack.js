@@ -2,7 +2,8 @@
 var request = require('axios')
 var format  = require('util').format
 
-var uri = 'https://hooks.slack.com/services/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'
+var uri =
+'https://hooks.slack.com/services/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'
 
 var slack = module.exports = function slack (text)
 {

@@ -5,7 +5,6 @@ var Paginator = require('../paginator/Ordered')
 var Abuse     = require('./Abuse')
 
 var validate = require('../validate')
-var validateId = require('../../id').validate
 
 var Err = require('../../Err')
 
@@ -130,16 +129,6 @@ module.exports = function Comments (db)
 	}
 
 
-	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
-
-	function validate_id (id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(id, WrongCommentId))
-		})
-	}
-
 	comments.byId = function (id)
 	{
 		return validate_id(id)
@@ -150,6 +139,10 @@ module.exports = function Comments (db)
 			.then(oneMaybe)
 		})
 	}
+
+
+	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+	var validate_id = require('../../id').validate.promise(WrongCommentId)
 
 	return comments
 }
