@@ -19,6 +19,7 @@ var Statics = require('./api/statics/Statics')
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
+var ReqLog = require('./ReqLog')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -36,11 +37,7 @@ module.exports = function Http (app)
 
 	CrossOrigin(app.cfg, http.express)
 
-	http.express.use('/api', (rq, rs, next) =>
-	{
-		app.log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
-		next()
-	})
+	ReqLog(app.log, http.express)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.passport = Passport(http.express, app.db)
