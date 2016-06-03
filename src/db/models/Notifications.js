@@ -17,6 +17,8 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
+	var oneMaybe = db.helpers.oneMaybe
+
 	expect(db, 'Notifications depends on User').property('user')
 	var user = db.user
 
@@ -91,6 +93,14 @@ module.exports = function Notifications (db)
 
 		return paginator.paginate(queryset, options)
 		.andWhere('is_viewed', false)
+	}
+
+	notifications.byIdType = function (user_id, type)
+	{
+		return byUserId(user_id)
+		.andWhere('type', type)
+		.andWhere('is_viewed', false)
+		.then(oneMaybe)
 	}
 
 	function byUserId (user_id)
