@@ -19,7 +19,20 @@ module.exports = function (db)
 			'max_id',
 			'since_id'
 		])
-		toss(rs, investors.model.list(options))
+
+		var data =
+		investors.model.list(options)
+		.then(investors =>
+		{
+			investors.forEach(investor =>
+			{
+				investor.pic = db.pic.resolve(investor.pic, rq.hostname)
+			})
+
+			return investors
+		})
+
+		toss(rs, data)
 	})
 
 	investors.express.get('/:id', (rq, rs) =>
