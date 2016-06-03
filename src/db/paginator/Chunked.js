@@ -110,52 +110,60 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 	function order_sign (direction, since_id, max_id)
 	{
-		if (since_id && direction === 'desc')
+		var sign = '<='
+
+		if (direction === 'asc')
 		{
-			return '>'
-		}
-		else if (since_id)
-		{
-			return '>'
-		}
-		else if (direction === 'desc')
-		{
-			return '<='
+			sign = '>='
 		}
 
-		return '>='
+		if (since_id)
+		{
+			sign = invert(sign)
+		}
+
+		return sign
 	}
 
 	function real_order_sign (direction, since_id, max_id)
 	{
-		if (since_id && direction === 'desc')
+		var sign = '<'
+
+		if (direction === 'asc')
 		{
-			return '>'
-		}
-		else if (since_id)
-		{
-			return '<'
-		}
-		else if (direction === 'desc')
-		{
-			return '<'
+			sign = '>'
 		}
 
-		return '>'
+		if (since_id)
+		{
+			sign = invert(sign)
+		}
+
+		return sign
 	}
 
 	function sorting (direction, since_id, max_id)
 	{
-		if (since_id && direction === 'desc')
+		if (since_id)
 		{
-			return 'asc'
-		}
-		else if (since_id)
-		{
-			return 'desc'
+			return invert(direction)
 		}
 
 		return direction
+	}
+
+	function invert (order_or_sign)
+	{
+		switch (order_or_sign)
+		{
+			case 'asc' : return 'desc'
+			case 'desc': return 'asc'
+			case '>'   :
+			case '>='  : return '<'
+			case '<'   :
+			case '<='  : return '>'
+			default: throw Error('Invalid argument')
+		}
 	}
 
 	return paginator
