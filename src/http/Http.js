@@ -33,7 +33,6 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
-
 	if (app.cfg.env === 'dev' || app.cfg.env === 'test')
 	{
 		http.express.use((rq, rs, next) =>
@@ -52,8 +51,10 @@ module.exports = function Http (app)
 			}
 			rs.header(
 				'Access-Control-Allow-Headers',
-				'Origin, X-Requested-With, Content-Type, Accept'
+				'Origin, X-Requested-With, Content-Type, Accept, ' +
+				'Access-Control-Allow-Credentials'
 			)
+			rs.header('Access-Control-Allow-Credentials', 'true')
 
 			return next()
 		})
@@ -61,8 +62,7 @@ module.exports = function Http (app)
 
 	http.express.use('/api', (rq, rs, next) =>
 	{
-		console.info('%s %s', rq.method, rq.originalUrl)
-		console.log(rq.body)
+		app.log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
 		next()
 	})
 

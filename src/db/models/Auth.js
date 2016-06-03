@@ -202,6 +202,11 @@ function validate_email (email)
 	validate_required(email, 'email')
 	validate_empty(email, 'email')
 
+	if (email.length > 254)
+	{
+		throw WrongEmail()
+	}
+
 	var emailRe = /@/
 
 	if (! emailRe.test(email))
