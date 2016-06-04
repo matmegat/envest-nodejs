@@ -99,17 +99,17 @@ module.exports = function Notifications (db)
 
 	function get_query_group (data)
 	{
-		if (user.groups.isAdmin(group) || user.groups.isInvestor(group))
+		if (user.groups.isAdmin(data.group) || user.groups.isInvestor(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
-			.from(group)
+			.from(data.group)
 		}
-		else if (user.groups.isUser(group))
+		else if (user.groups.isUser(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, users.id', [data.type, data.event]))
-			.from(group)
+			.from(data.group)
 			.leftJoin(
 			'admins',
 			'users.id',
