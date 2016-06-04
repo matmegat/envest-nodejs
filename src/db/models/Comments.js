@@ -29,7 +29,7 @@ module.exports = function Comments (db)
 	var user = db.user
 
 	comments.table = () => knex('comments')
-	comments.abuse = Abuse(db, comments)
+	comments.abuse = Abuse(db, comments, notifications_emit)
 
 	comments.list = function (options)
 	{
