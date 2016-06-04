@@ -50,7 +50,7 @@ module.exports = function Notifications (db)
 
 	notifications.create = function (data)
 	{
-		validateNotification(data)
+		return validateNotification(data)
 		.then((data) =>
 		{
 			return notifications.table()
