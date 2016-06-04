@@ -74,7 +74,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var new_feed_comment = notifications_emit.inst('new_feed_comment')
+	var new_feed_comment = notifications_emit('new_feed_comment')
 
 	comments.create = function (data)
 	{
@@ -100,7 +100,13 @@ module.exports = function Comments (db)
 		})
 		.then(feed_item =>
 		{
-			return notifications_emit.addComments(new_feed_comment, feed_item.investor.id, 1)
+			var data = 
+			{
+				event: {feed_id: feed_item.id},
+				recipient_id: feed_item.investor.id
+			}
+
+			return new_feed_comment(data)
 		})
 	}
 

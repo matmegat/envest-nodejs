@@ -26,11 +26,32 @@ module.exports = function Notifications (db)
 
 	notifications.table = knexed(knex, 'notifications')
 
-	notifications.emit = Emit(db, notifications)
-
-	notifications.create = function (type, event, recipient_id)
+	notifications.emit = function Inst (type)
 	{
-		validateNotification(type, event, recipient_id)
+		return function EmitInst (data)
+		{
+			var emit =
+			{
+				type: type,
+				event: data.event
+			}
+
+			if(data.recipient_id) 
+			{
+				emit.recipient_id = data.recipient_id
+				return notifications.create(emit)
+			}
+			else if(data.group)
+			{
+				emit.group = data.group
+				return notifications.createBroadcast(emit)
+			}
+		}
+	}
+
+	notifications.create = function (data)
+	{
+		validateNotification(data)
 		.then((data) =>
 		{
 			return notifications.table()
@@ -40,12 +61,12 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	notifications.createBroadcast = function (type, event, group)
+	notifications.createBroadcast = function (data)
 	{
-		validateNotification(type, event)
+		return validateNotification(data)
 		.then(() =>
 		{
-			var query_group = get_query_group(type, event, group)
+			var query_group = get_query_group(data)
 
 			return notifications.table()
 			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
@@ -53,20 +74,42 @@ module.exports = function Notifications (db)
 		})
 	}
 
+	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
+
+	function validateNotification (data)
+	{
+		return new Promise(rs =>
+		{
+			validate.required(data.type, 'type')
+			validate.empty(data.type, 'type')
+
+			validate.required(data.event, 'event')
+			validate.empty(data.type, 'event')
+			//validate.json(data.event, 'event')
+
+			if (data.recipient_id)
+			{
+				validateId(WrongRecipientId, data.recipient_id)
+			}
+
+			return rs(data)
+		})
+	}
+
 	var WrongUserGroup = Err('wrong_user_group', 'Wrong user group')
 
-	function get_query_group (type, event, group)
+	function get_query_group (data)
 	{
 		if (user.groups.isAdmin(group) || user.groups.isInvestor(group))
 		{
 			return knex
-			.select(knex.raw('?, ?, user_id', [type, event]))
+			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
 			.from(group)
 		}
 		else if (user.groups.isUser(group))
 		{
 			return knex
-			.select(knex.raw('?, ?, users.id', [type, event]))
+			.select(knex.raw('?, ?, users.id', [data.type, data.event]))
 			.from(group)
 			.leftJoin(
 			'admins',
@@ -92,14 +135,12 @@ module.exports = function Notifications (db)
 		var queryset = byUserId(options.user_id)
 
 		return paginator.paginate(queryset, options)
-		.andWhere('is_viewed', false)
 	}
 
 	notifications.byIdType = function (user_id, type)
 	{
 		return byUserId(user_id)
 		.andWhere('type', type)
-		.andWhere('is_viewed', false)
 		.then(oneMaybe)
 	}
 
@@ -107,6 +148,7 @@ module.exports = function Notifications (db)
 	{
 		return notifications.table()
 		.where('recipient_id', user_id)
+		.andWhere('is_viewed', false)
 	}
 
 	notifications.setViewed = function (recipient_id, viewed_ids)
@@ -132,32 +174,6 @@ module.exports = function Notifications (db)
 			viewed_ids.forEach(validateId(WrongViewedId))
 
 			return rs()
-		})
-	}
-
-	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
-
-	function validateNotification (type, event, recipient_id)
-	{
-		return new Promise(rs =>
-		{
-			validate.required(type, 'type')
-			validate.empty(type, 'type')
-
-			validate.required(event, 'event')
-			validate.empty(type, 'event')
-			validate.json(event, 'event')
-
-			if (recipient_id)
-			{
-				validateId(WrongRecipientId, recipient_id)
-			}
-
-			return rs({
-				type: type,
-				event: event,
-				recipient_id: recipient_id
-			})
 		})
 	}
 
