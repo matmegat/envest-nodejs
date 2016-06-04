@@ -35,12 +35,12 @@ module.exports = function Notifications (db)
 				event: data.event
 			}
 
-			if(data.recipient_id) 
+			if (data.recipient_id)
 			{
 				emit.recipient_id = data.recipient_id
 				return notifications.create(emit)
 			}
-			else if(data.group)
+			else if (data.group)
 			{
 				emit.group = data.group
 				return notifications.createBroadcast(emit)

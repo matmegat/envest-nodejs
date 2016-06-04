@@ -100,9 +100,9 @@ module.exports = function Comments (db)
 		})
 		.then(feed_item =>
 		{
-			var data = 
+			var data =
 			{
-				event: {feed_id: feed_item.id},
+				event: { feed_id: feed_item.id },
 				recipient_id: feed_item.investor.id
 			}
 

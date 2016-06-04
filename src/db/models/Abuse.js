@@ -35,13 +35,14 @@ module.exports = function Abuse (db, comments, notifications_emit)
 				user_id: user_id,
 				comment_id: comment_id
 			})
+			.then(noop)
 		})
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 		.then(() =>
 		{
-			var data = 
+			var data =
 			{
-				event: {comment_id: comment_id},
+				event: { comment_id: comment_id },
 				group: 'admins'
 			}
 

@@ -22,5 +22,5 @@ exports.up = function (knex)
 
 exports.down = function (knex)
 {
-	return knex.schema.dropTableIfExists('notifications'),
+	return knex.schema.dropTableIfExists('notifications')
 }
