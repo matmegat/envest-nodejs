@@ -1,33 +1,26 @@
 
-exports.up = function (knex, Promise)
+exports.up = function (knex)
 {
-	return Promise.resolve()
-	.then(() =>
+	return knex.schema.createTable('notifications', (table) =>
 	{
-		return knex.schema.createTable('notifications', (table) =>
-		{
-			table.increments('id').primary()
+		table.increments('id').primary()
 
-			table.timestamp('timestamp').defaultTo(knex.fn.now())
+		table.timestamp('timestamp').defaultTo(knex.fn.now())
 
-			table.string('type').notNullable()
-			table.jsonb('event').notNullable()
+		table.string('type').notNullable()
+		table.jsonb('event').notNullable()
 
-			table.boolean('is_viewed').notNullable()
+		table.boolean('is_viewed').notNullable()
 			.defaultTo(false)
 
-			table.integer('recipient_id')
-				.references('users.id')
-				.onUpdate('cascade')
-				.onDelete('cascade')
-		})
+		table.integer('recipient_id')
+			.references('users.id')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 	})
 }
 
-exports.down = function (knex, Promise)
+exports.down = function (knex)
 {
-	return Promise.all(
-	[
-		knex.schema.dropTableIfExists('notifications'),
-	])
+	return knex.schema.dropTableIfExists('notifications'),
 }

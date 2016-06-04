@@ -72,15 +72,6 @@ module.exports = function User (db)
 				})
 				.then(function (id)
 				{
-					return db.notifications.viewed_table(trx)
-					.insert({
-						recipient_id: id,
-						last_viewed_id: 0
-					}, 'recipient_id')
-					.then(one)
-				})
-				.then(function (id)
-				{
 					return user.newEmailUpdate({
 						user_id: id,
 						new_email: data.email
