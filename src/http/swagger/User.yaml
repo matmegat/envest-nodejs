@@ -3,7 +3,9 @@ title: User Model
 properties:
   id:
     type: integer
-  full_name:
+  first_name:
+    type: string
+  last_name:
     type: string
   email:
     type: string
@@ -11,6 +13,7 @@ properties:
     type: string
 required:
 - id
-- full_name
+- first_name
+- last_name
 - email
 - pic

@@ -18,7 +18,8 @@ module.exports = function Auth (auth_model, passport)
 	{
 		var user_data = pick(rq.body,
 		[
-			'full_name',
+			'first_name',
+			'last_name',
 			'email',
 			'password'
 		])

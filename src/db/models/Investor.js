@@ -26,7 +26,8 @@ module.exports = function Investor (db)
 			.table()
 			.select(
 				'users.id',
-				'users.full_name',
+				'users.first_name',
+				'users.last_name',
 				'users.pic',
 				'investors.profession',
 				'investors.focus',
@@ -64,7 +65,8 @@ module.exports = function Investor (db)
 		var queryset = investor.table()
 		.select(
 			'users.id',
-			'users.full_name',
+			'users.first_name',
+			'users.last_name',
 			'users.pic',
 			'investors.focus',
 			'investors.historical_returns'
@@ -98,7 +100,8 @@ module.exports = function Investor (db)
 				return _.pick(investor,
 				[
 					'id',
-					'full_name',
+					'first_name',
+					'last_name',
 					'pic',
 					'focus',
 					'annual_return'

@@ -9,9 +9,12 @@ post:
     schema:
       type: object
       properties:
-        full_name:
+        first_name:
           type: string
-          description: Full Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        last_name:
+          type: string
+          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
         email:
           type: string
           description: Email
@@ -20,7 +23,8 @@ post:
           format: password
           description: Password
       required:
-      - full_name
+      - first_name
+      - last_name
       - email
       - password
   responses:
