@@ -2,7 +2,7 @@
 var session = require('express-session')
 var secret  = 'aoor91xck0'
 
-var jwt = require('jsonwebtoken')
+var jwt_helpers = require('../jwt-helpers')
 
 var passport = require('passport')
 var LocalStrategy = require('passport-local')
@@ -65,24 +65,21 @@ function useLocal (auth)
 	}))
 }
 
-var tokenSecret = 'asd93vzz21000dfs'
-
 function useBearerToken (user)
 {
 	passport.use(new BearerStrategy((token, done) =>
 	{
-		jwt.verify(token, tokenSecret, (err, decoded) =>
+		var decoded = jwt_helpers.verify_token(token)
+
+		if (decoded && decoded.id)
 		{
-			if (decoded && decoded.id)
-			{
-				user.byId(decoded.id)
-				.then(user => done(null, user), done)
-			}
-			else
-			{
-				done(null, false)
-			}
-		})
+			user.byId(decoded.id)
+			.then(user => done(null, user), done)
+		}
+		else
+		{
+			done(null, false)
+		}
 	}))
 }
 

@@ -10,7 +10,7 @@ var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' +
 
 exports.seed = function (knex, Promise)
 {
-	var hist_returns_default = JSON.stringify(
+	var history_default = JSON.stringify(
 	[
 		{ year: 2011, percentage: 10 },
 		{ year: 2012, percentage: 11 },
@@ -61,7 +61,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
@@ -100,7 +100,7 @@ exports.seed = function (knex, Promise)
 						profession: 'Preacher',
 						focus: focus,
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
@@ -140,7 +140,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
@@ -180,7 +180,7 @@ exports.seed = function (knex, Promise)
 						profession: 'Teacher',
 						focus: focus,
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
@@ -221,7 +221,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
@@ -261,7 +261,7 @@ exports.seed = function (knex, Promise)
 						profession: 'Liar',
 						focus: focus,
 						background: lorem,
-						historical_returns: hist_returns_default,
+						historical_returns: history_default,
 						is_public: true,
 						start_date: new Date()
 					})
