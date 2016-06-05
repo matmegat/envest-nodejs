@@ -54,9 +54,45 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
+	http.express.use((rq, rs, next) =>
+	{
+		var token = rq.get('Authorization')
+
+		if (token)
+		{
+			http.passport.authenticate('bearer', { session: false }, (err, user, info) =>
+			{
+				if (err)
+				{
+					return next(err)
+				}
+
+				rq.login(user, function (err)
+				{
+					if (err)
+					{
+
+						if (info)
+						{
+							err.message = info.message
+						}
+
+						return next(err)
+					}
+
+					next()
+				})
+			})(rq, rs, next)
+		}
+		else
+		{
+			next()
+		}
+	})
+
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
-	mount(Feed(app.db, http.passport), 'feed', 'feed')
+	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
