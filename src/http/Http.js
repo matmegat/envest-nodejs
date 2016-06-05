@@ -60,7 +60,10 @@ module.exports = function Http (app)
 
 		if (token)
 		{
-			http.passport.authenticate('bearer', { session: false }, (err, user, info) =>
+			// @todo: deal with function repeat
+			http.passport.authenticate('bearer',
+				{ session: false },
+				(err, user, info) =>
 			{
 				if (err)
 				{
