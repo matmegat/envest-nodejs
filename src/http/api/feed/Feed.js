@@ -5,13 +5,28 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
-module.exports = function Feed (db)
+module.exports = function Feed (db, passport)
 {
 	var feed = {}
 
 	feed.model = db.feed
 	feed.express = Router()
+	feed.express.use(byToken)
 	feed.express.use(authRequired)
+
+	function byToken(rq, rs, next)
+	{
+		var token = rq.get('Authorization')
+		
+		if (token)
+		{
+			passport.authenticate('bearer', { session: false })
+		}
+		else
+		{
+			next()
+		}
+	}
 
 	feed.express.get('/', (rq, rs) =>
 	{

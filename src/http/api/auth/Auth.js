@@ -7,6 +7,8 @@ var Router = require('express').Router
 var authRequired = require('../../auth-required')
 var toss = require('../../toss')
 
+var jwt = require('jsonwebtoken')
+
 module.exports = function Auth (auth_model, passport)
 {
 	var auth = {}
@@ -39,6 +41,7 @@ module.exports = function Auth (auth_model, passport)
 				}
 				else
 				{
+					rs.set('access_token', generate_token(user_data))
 					return toss.ok(rs, user_data)
 				}
 			})
@@ -69,6 +72,7 @@ module.exports = function Auth (auth_model, passport)
 					return next(err)
 				}
 
+				rs.set('access_token', generate_token(user))
 				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)
@@ -113,4 +117,11 @@ module.exports = function Auth (auth_model, passport)
 	})
 
 	return auth
+}
+
+var token_secret = "asd93vzz21000dfs"
+
+function generate_token (user)
+{
+	return jwt.sign({id: user.id}, token_secret)
 }

@@ -2,9 +2,12 @@
 var session = require('express-session')
 var secret  = 'aoor91xck0'
 
+var jwt = require('jsonwebtoken')
+
 var passport = require('passport')
 var LocalStrategy = require('passport-local')
 var FacebookStrategy = require('passport-facebook-token')
+var BearerStrategy = require('passport-http-bearer')
 
 module.exports = function (express, db)
 {
@@ -43,6 +46,7 @@ module.exports = function (express, db)
 
 	useLocal(auth)
 	useFacebookToken(auth, user)
+	useBearerToken(user)
 
 	return passport
 }
@@ -58,6 +62,27 @@ function useLocal (auth)
 	{
 		auth.login(email, password)
 		.then(user_data => done(null, user_data), done)
+	}))
+}
+
+var tokenSecret = 'asd93vzz21000dfs'
+
+function useBearerToken (user)
+{
+	passport.use(new BearerStrategy((token, done) =>
+	{
+		jwt.verify(token, tokenSecret, (err, decoded) =>
+		{
+			if (decoded && decoded.id)
+			{
+				user.byId(decoded.id)
+				.then(user => done(null, user), done)
+			}
+			else
+			{
+				done(null, false)
+			}
+		})
 	}))
 }
 
