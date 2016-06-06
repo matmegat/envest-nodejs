@@ -52,7 +52,8 @@ module.exports = function User (db)
 			{
 				return user.users_table(trx)
 				.insert({
-					full_name: data.full_name,
+					first_name: data.first_name,
+					last_name: data.last_name,
 					email: null
 				}
 				, 'id')
@@ -94,7 +95,8 @@ module.exports = function User (db)
 				'users.id AS id',
 				'password',
 				'salt',
-				'full_name',
+				'first_name',
+				'last_name',
 				'pic',
 				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 			)
@@ -118,7 +120,7 @@ module.exports = function User (db)
 	user.list = function (ids)
 	{
 		return user.users_table()
-		.select('id', 'full_name', 'pic')
+		.select('id', 'first_name', 'last_name', 'pic')
 		.whereIn('id', ids)
 	}
 
@@ -147,9 +149,10 @@ module.exports = function User (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			user.users_table(trx)
+			return user.users_table(trx)
 			.insert({
-				full_name: data.full_name,
+				first_name: data.first_name,
+				last_name: data.last_name,
 				email: null
 			}
 			, 'id')
@@ -168,8 +171,10 @@ module.exports = function User (db)
 					facebook_id: data.facebook_id
 				}, trx)
 			})
-			.then(trx.commit)
-			.catch(trx.rollback)
+			.then(() =>
+			{
+				return user.byFacebookId(data.facebook_id)
+			})
 		})
 	}
 

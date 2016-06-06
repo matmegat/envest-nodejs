@@ -14,7 +14,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'seed.1@user.com',
-				full_name: 'Seed User1',
+				first_name: 'Seed',
+				last_name: 'User1',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then(id =>
 			{
@@ -31,7 +33,8 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'seed.2@user.com',
-				full_name: 'Seed User2',
+				first_name: 'Seed',
+				last_name: 'User2'
 			}, 'id')
 			.then(id =>
 			{
@@ -48,7 +51,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'seed.3@user.com',
-				full_name: 'Seed User3',
+				first_name: 'Seed',
+				last_name: 'User3',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then(id =>
 			{

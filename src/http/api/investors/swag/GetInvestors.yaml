@@ -1,6 +1,6 @@
 get:
   description: |
-    Get list of investors in alphabetical order by **full_name** field
+    Get list of investors sorted by `last_name`
   parameters:
   - name: max_id
     in: query

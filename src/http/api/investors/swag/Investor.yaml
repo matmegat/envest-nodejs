@@ -4,9 +4,12 @@ properties:
   id:
     type: integer
     description: Investor's Id
-  full_name:
+  first_name:
     type: string
-    description: Investor's Full Name
+    description: Investor's First Name
+  last_name:
+    type: string
+    description: Investor's Last Name
   pic:
     type: string
     description: URL to Investor's image
@@ -29,7 +32,8 @@ properties:
     description: Investor's 5 year annual return in percentage
 required:
 - id
-- full_name
+- first_name
+- last_name
 - pic
 - focus
 - annual_return

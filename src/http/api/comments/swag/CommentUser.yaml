@@ -3,9 +3,13 @@ properties:
   id:
     type: number
     description: User Id
-  full_name:
+  first_name:
     type: string
-    description: User Full Name
+    description: User First Name
+  last_name:
+    type: string
+    description: User Last Name
 required:
 - id
-- full_name
+- first_name
+- last_name

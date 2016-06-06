@@ -1,44 +1,7 @@
-var Investors = require('./../investor_migration')
 
 exports.up = function (knex, Promise)
 {
-	var investor_migration = Investors(knex)
-
 	return Promise.resolve()
-	.then(() =>
-	{
-		return knex('comments').del()
-	})
-	.then(() =>
-	{
-		return knex('feed_items').del()
-	})
-	.then(() =>
-	{
-		return knex('investors').del()
-	})
-	.then(() =>
-	{
-		return knex.schema.table('feed_items', (table) =>
-		{
-			table.dropForeign('investor_id')
-		})
-	})
-	.then(() =>
-	{
-		return investor_migration.secondUp
-	})
-	.then(() =>
-	{
-		return knex.schema.table('feed_items', (table) =>
-		{
-			table
-				.foreign('investor_id')
-				.references('investors.user_id')
-				.onUpdate('cascade')
-				.onDelete('cascade')
-		})
-	})
 	.then(() =>
 	{
 		return knex.schema.createTable('brokerage', (table) =>
@@ -96,19 +59,10 @@ exports.up = function (knex, Promise)
 
 exports.down = function (knex, Promise)
 {
-	var investor_migration = Investors(knex, Promise)
-
-	return knex.schema.dropTableIfExists('portfolio_symbols')
-	.then(() =>
-	{
-		return knex.schema.dropTableIfExists('symbols')
-	})
-	.then(() =>
-	{
-		return knex.schema.dropTableIfExists('brokerage')
-	})
-	.then(() =>
-	{
-		return investor_migration.secondDown()
-	})
+	return Promise.all(
+	[
+		knex.schema.dropTableIfExists('portfolio_symbols'),
+		knex.schema.dropTableIfExists('symbols'),
+		knex.schema.dropTableIfExists('brokerage')
+	])
 }
