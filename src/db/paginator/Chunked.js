@@ -1,6 +1,6 @@
 
 var extend = require('lodash/extend')
-var _get = require('lodash/fp/get')
+var get = require('lodash/fp/get')
 
 var expect = require('chai').expect
 
@@ -90,7 +90,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 			.select(paginator_options.real_order_column)
 			.where(paginator_options.order_column, id)
 			.then(one)
-			.then(_get(column))
+			.then(get(column))
 		}
 	}
 
