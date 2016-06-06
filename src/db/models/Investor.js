@@ -69,7 +69,8 @@ module.exports = function Investor (db)
 			'users.last_name',
 			'users.pic',
 			'investors.focus',
-			'investors.historical_returns'
+			'investors.historical_returns',
+			'investors.profile_pic'
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
@@ -103,6 +104,7 @@ module.exports = function Investor (db)
 					'first_name',
 					'last_name',
 					'pic',
+					'profile_pic',
 					'focus',
 					'annual_return'
 				])

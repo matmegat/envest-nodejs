@@ -16,6 +16,7 @@ module.exports = function (db)
 	expect(db, 'api/Investors depends on Pic').property('pic')
 
 	var pic_decorator = db.pic.decorate('pic')
+	var profile_pic_decorator = db.pic.decorate('profile_pic')
 
 	investors.express.get('/', (rq, rs) =>
 	{
@@ -31,7 +32,9 @@ module.exports = function (db)
 		investors.model.list(options)
 		.then(investors =>
 		{
-			return investors.map(pic_decorator(hostname))
+			return investors
+			.map(pic_decorator(hostname))
+			.map(profile_pic_decorator(hostname))
 		})
 
 		toss(rs, data)
@@ -44,6 +47,7 @@ module.exports = function (db)
 		var data =
 		investors.model.byId(rq.params.id)
 		.then(pic_decorator(hostname))
+		.then(profile_pic_decorator(hostname))
 
 		toss(rs, data)
 	})
