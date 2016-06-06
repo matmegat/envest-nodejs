@@ -54,7 +54,7 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
-	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Auth(app.db, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')

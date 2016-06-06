@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var pick = require('lodash/pick')
 var curry = require('lodash/curry')
 
@@ -7,11 +9,14 @@ var Router = require('express').Router
 var authRequired = require('../../auth-required')
 var toss = require('../../toss')
 
-module.exports = function Auth (auth_model, passport)
+module.exports = function Auth (db, passport)
 {
 	var auth = {}
 
-	auth.model = auth_model
+	expect(db, 'api/Auth depends on Pic').property('pic')
+	var pic_decorator = db.pic.decorate('pic')
+
+	auth.model = db.auth
 	auth.express = Router()
 
 	auth.express.post('/register', (rq, rs) =>

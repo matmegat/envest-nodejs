@@ -13,7 +13,7 @@ module.exports = function (db)
 	investors.express = Router()
 	investors.express.use(authRequired)
 
-	expect(db, 'Investors depends on Pic').property('pic')
+	expect(db, 'api/Investors depends on Pic').property('pic')
 
 	var pic_decorator = db.pic.decorate('pic')
 

@@ -19,9 +19,6 @@ module.exports = function Auth (db)
 {
 	var auth = {}
 
-	expect(db, 'Auth depends on Pic').property('pic')
-	var pic = db.pic
-
 	expect(db, 'Auth depends on User').property('user')
 	var user = db.user
 
