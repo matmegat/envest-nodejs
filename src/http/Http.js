@@ -20,6 +20,7 @@ var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
 var ReqLog = require('./ReqLog')
+var CheckToken = require('./CheckToken')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -53,6 +54,8 @@ module.exports = function Http (app)
 
 		console.info('API: mount %s at %s', name, route)
 	}
+
+	CheckToken(http.express, http.passport)
 
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
