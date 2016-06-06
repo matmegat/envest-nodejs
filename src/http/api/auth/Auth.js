@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var pick = require('lodash/pick')
 var curry = require('lodash/curry')
 
@@ -9,15 +11,20 @@ var toss = require('../../toss')
 
 var jwt_helpers = require('../../../jwt-helpers')
 
-module.exports = function Auth (auth_model, passport)
+module.exports = function Auth (db, passport)
 {
 	var auth = {}
 
-	auth.model = auth_model
+	expect(db, 'api/Auth depends on Pic').property('pic')
+	var pic_decorator = db.pic.decorate('pic')
+
+	auth.model = db.auth
 	auth.express = Router()
 
 	auth.express.post('/register', (rq, rs) =>
 	{
+		var hostname = rq.hostname
+
 		var user_data = pick(rq.body,
 		[
 			'first_name',
@@ -31,6 +38,7 @@ module.exports = function Auth (auth_model, passport)
 		{
 			return auth.model.login(user_data.email, user_data.password)
 		})
+		.then(pic_decorator(hostname))
 		.then(user_data =>
 		{
 			rq.login(user_data, err =>
@@ -52,6 +60,8 @@ module.exports = function Auth (auth_model, passport)
 	// eslint-disable-next-line max-params
 	var authByProvider = curry((provider, rq, rs, next) =>
 	{
+		var hostname = rq.hostname
+
 		passport.authenticate(provider, (err, user, info) =>
 		{
 			if (err)
@@ -72,7 +82,9 @@ module.exports = function Auth (auth_model, passport)
 					return next(err)
 				}
 
+				user = pic_decorator(hostname, user)
 				user.access_token = jwt_helpers.generate(user)
+
 				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)

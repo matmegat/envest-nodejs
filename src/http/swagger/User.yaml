@@ -10,7 +10,7 @@ properties:
   email:
     type: string
   pic:
-    type: string
+    $ref: './Picture.yaml'
   access_token:
     type: string
 required:

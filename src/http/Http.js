@@ -57,7 +57,7 @@ module.exports = function Http (app)
 
 	CheckToken(http.express, http.passport)
 
-	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
+	mount(Auth(app.db, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')

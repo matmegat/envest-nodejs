@@ -11,11 +11,9 @@ properties:
     type: string
     description: Investor's Last Name
   pic:
-    type: string
-    description: URL to Investor's image
+    $ref: '../../../swagger/Picture.yaml'
   profile_pic:
-    type: string
-    description: URL to cover image of Investr's profile
+    $ref: '../../../swagger/Picture.yaml'
   profession:
     type: string
     description: Investor's profession
@@ -34,6 +32,5 @@ required:
 - id
 - first_name
 - last_name
-- pic
 - focus
 - annual_return

@@ -1,6 +1,7 @@
 
 var knex = require('knex')
 
+var Pic = require('./models/Pic')
 var User = require('./models/User')
 var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
@@ -44,6 +45,8 @@ module.exports = function name (app)
 	{
 		console.info('DB: ok')
 	})
+
+	db.pic = Pic(app.cfg)
 
 	db.user  = User(db)
 	db.auth  = Auth(db)
