@@ -1,7 +1,7 @@
 
 var expect = require('chai').expect
 
-var Paginator = require('../Paginator')
+var Paginator = require('../paginator/Ordered')
 var Abuse     = require('./Abuse')
 
 var validate = require('../validate')
@@ -20,7 +20,7 @@ module.exports = function Comments (db)
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator({ column_name: 'comments.id' })
+	var paginator = Paginator({ order_column: 'comments.id' })
 
 	expect(db, 'Comments depends on User').property('user')
 	var user = db.user

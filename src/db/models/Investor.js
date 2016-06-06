@@ -10,7 +10,7 @@ var AlreadyExists = Err('already_investor', 'This user is investor already')
 var expect = require('chai').expect
 var validate = require('../validate')
 
-var Paginator = require('../Paginator')
+var Paginator = require('../paginator/Chunked')
 
 module.exports = function Investor (db)
 {
@@ -19,22 +19,37 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
-
-	var table = knexed(knex, 'investors')
+	investor.table = knexed(knex, 'investors')
 
 	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
 	var user = db.user
 
-	var validate_id = require('../../id').validate.promise(WrongInvestorId)
+	var paging_table = function ()
+	{
+		return investor.table()
+			.select(
+				'user_id',
+				'users.first_name',
+				'users.last_name'
+			)
+			.innerJoin('users', 'investors.user_id', 'users.id')
+	}
+	var paginator = Paginator(
+    {
+        table: paging_table,
+        order_column: 'user_id',
+        real_order_column: 'last_name',
+        default_direction: 'asc'
+    })
 
 	investor.byId = function (id, trx)
 	{
-		return validate_id(id)
+		return validate_id(id, trx)
 		.then(() =>
 		{
-			return table(trx)
+			return investor
+			.table(trx)
 			.select(
 				'users.id',
 				'users.first_name',
@@ -63,6 +78,8 @@ module.exports = function Investor (db)
 		})
 	}
 
+	investor.validate_id = require('../../id').validate.promise(WrongInvestorId)
+
 	investor.list = function (options, trx)
 	{
 		options = _.extend({}, options,
@@ -71,7 +88,8 @@ module.exports = function Investor (db)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = table(trx)
+		var queryset = investor
+        .table(trx)
 		.select(
 			'users.id',
 			'users.first_name',
@@ -81,8 +99,6 @@ module.exports = function Investor (db)
 			'investors.historical_returns'
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
-
-		queryset = paginator.paginate(queryset, options)
 
 		if (options.where)
 		{
@@ -95,7 +111,7 @@ module.exports = function Investor (db)
 			)
 		}
 
-		return queryset
+		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
 		.then((investors) =>
 		{
 			return investors.map((investor) =>
@@ -147,7 +163,8 @@ module.exports = function Investor (db)
 		})
 		.then((user) =>
 		{
-			return table(trx)
+			return investor
+            .table(trx)
 			.insert(
 			{
 				user_id: user.id,

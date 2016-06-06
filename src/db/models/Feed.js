@@ -3,7 +3,9 @@ var expect = require('chai').expect
 
 var _ = require('lodash')
 
-var Paginator = require('../Paginator')
+var knexed = require('../knexed')
+
+var Paginator = require('../paginator/Chunked')
 
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
@@ -14,10 +16,14 @@ module.exports = function Feed (db)
 	var feed = {}
 
 	var knex = db.knex
-
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
+	feed.feed_table = knexed(knex, 'feed_items')
+
+	var paginator = Paginator(
+	{
+		table: feed.feed_table
+	})
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	var comments = db.comments
@@ -26,8 +32,6 @@ module.exports = function Feed (db)
 	var investor = db.investor
 
 	feed.NotFound = NotFound
-
-	feed.feed_table = () => knex('feed_items')
 
 	feed.byId = function (id)
 	{
@@ -76,10 +80,13 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
-			limit: 20
+			limit: 20,
+			column_name: 'timestamp'
 		})
 
-		return paginator.paginate(feed.feed_table(), options)
+		var queryset = feed.feed_table()
+
+		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
 		{
 			var feed_ids = _.map(feed_items, 'id')
