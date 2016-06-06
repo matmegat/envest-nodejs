@@ -21,6 +21,7 @@ var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
 var ReqLog = require('./ReqLog')
 var CheckToken = require('./CheckToken')
+var OptionsStub = require('./OptionsStub')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -44,6 +45,8 @@ module.exports = function Http (app)
 	http.passport = Passport(http.express, app.db)
 
 	CheckToken(http.express, http.passport)
+
+	OptionsStub(http.express)
 
 
 	http.api = {}
