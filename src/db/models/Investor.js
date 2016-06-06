@@ -20,7 +20,8 @@ module.exports = function Investor (db)
 		return investor.table()
 		.select(
 			'user_id',
-			'users.full_name'
+			'users.first_name',
+			'users.last_name'
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
