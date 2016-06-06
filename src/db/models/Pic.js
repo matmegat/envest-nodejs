@@ -14,15 +14,18 @@ module.exports = function Pic (cfg)
 
 	pic.resolve = function (hash, hostname)
 	{
+		var pathname = '/api/static/pic/' + hash
+
 		var uri = new Url()
 
 		/* i'm not absolutely sure this */
 		uri.hostname = hostname
 		uri.port = cfg.port
-		uri.pathname = '/api/static/pic/' + hash
+		uri.pathname = pathname
 
 		return {
 			hash: hash,
+			path: pathname,
 			resolved_uri: format(uri)
 		}
 	}
