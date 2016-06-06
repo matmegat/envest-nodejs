@@ -1,7 +1,8 @@
 
 var Router = require('express').Router
-var toss = require('../../toss')
+var expect = require('chai').expect
 var authRequired = require('../../auth-required')
+var toss = require('../../toss')
 var pick = require('lodash/pick')
 
 module.exports = function (db)
@@ -11,6 +12,8 @@ module.exports = function (db)
 	investors.model = db.investor
 	investors.express = Router()
 	investors.express.use(authRequired)
+
+	expect(db, 'Investors depends on Pic').property('pic')
 
 	var pic_decorator = db.pic.decorate('pic')
 
