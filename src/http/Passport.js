@@ -77,7 +77,8 @@ function useFacebookToken (auth, user)
 		var user_data =
 		{
 			email: profile.emails[0].value,
-			full_name: `${profile.name.givenName} ${profile.name.familyName}`,
+			first_name: profile.name.givenName,
+			last_name: profile.name.familyName,
 			facebook_id: profile.id,
 			token: accessToken
 		}

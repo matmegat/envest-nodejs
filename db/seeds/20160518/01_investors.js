@@ -10,6 +10,14 @@ var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' +
 
 exports.seed = function (knex, Promise)
 {
+	var hist_returns_default = JSON.stringify(
+	[
+		{ year: 2011, percentage: 10 },
+		{ year: 2012, percentage: 11 },
+		{ year: 2013, percentage: -8 },
+		{ year: 2014, percentage: 5 },
+		{ year: 2015, percentage: 15 },
+	])
 	/**
 	 * Algo:
 	 * 1. Take all existing investors and update them to new format
@@ -23,7 +31,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'allen.schwartz@investor.com',
-				full_name: 'Allen Schwartz',
+				first_name: 'Allen',
+				last_name: 'Schwartz',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -47,14 +57,13 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Allen',
-						last_name: 'Schwartz',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Lawyer',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -63,7 +72,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'george.masterson@investor.com',
-				full_name: 'George Masterson',
+				first_name: 'George',
+				last_name: 'Masterson',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -86,14 +97,12 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'George',
-						last_name: 'Masterson',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Preacher',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -102,7 +111,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'burt.harris@investor.com',
-				full_name: 'Burt Harris',
+				first_name: 'Burt',
+				last_name: 'Harris',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -125,14 +136,13 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Burt',
-						last_name: 'Harris',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Developer',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -141,7 +151,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'anna.brinkley@investor.com',
-				full_name: 'Anna Brinkley',
+				first_name: 'Anna',
+				last_name: 'Brinkley',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -165,14 +177,12 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Anna',
-						last_name: 'Brinkley',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Teacher',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -181,7 +191,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'david.philips@investor.com',
-				full_name: 'David M. Philips',
+				first_name: 'David',
+				last_name: 'M. Philips',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -205,14 +217,13 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'David',
-						last_name: 'M. Philips',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Witcher',
 						focus: focus,
+						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			}),
@@ -221,7 +232,9 @@ exports.seed = function (knex, Promise)
 			.insert(
 			{
 				email: 'chaenne.parson@investor.com',
-				full_name: 'Chaenne Parson',
+				first_name: 'Chaenne',
+				last_name: 'Parson',
+				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -245,14 +258,12 @@ exports.seed = function (knex, Promise)
 					.insert(
 					{
 						user_id: user_id[0],
-						first_name: 'Chaenne',
-						last_name: 'Parson',
-						icon: 'http://image.tmdb.org/t/p/w342/811DjJTon9gD6hZ8nCjSitaIXFQ.jpg',
-						cover_image: 'http://playtusu.com/wp-content/uploads/2014/06/7526.png',
 						profession: 'Liar',
 						focus: focus,
 						background: lorem,
-						is_public: true
+						historical_returns: hist_returns_default,
+						is_public: true,
+						start_date: new Date()
 					})
 				})
 			})

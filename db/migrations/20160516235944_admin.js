@@ -14,7 +14,7 @@ exports.up = function (knex)
 			.onDelete('restrict')
 			.comment('another admin who introduced this admin')
 
-		table.boolean('can_intro').default(false)
+		table.boolean('can_intro').notNullable().default(false)
 			.comment('can this admin introduce another')
 	})
 }

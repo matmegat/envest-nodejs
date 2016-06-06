@@ -18,6 +18,8 @@ var Statics = require('./api/statics/Statics')
 
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
+var CrossOrigin = require('./CrossOrigin')
+var ReqLog = require('./ReqLog')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -33,38 +35,9 @@ module.exports = function Http (app)
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json())
 
-	if (app.cfg.env === 'dev' || app.cfg.env === 'test')
-	{
-		http.express.use((rq, rs, next) =>
-		{
-			var allowedOrigins =
-			[
-				'http://127.0.0.1:' + app.cfg.port,
-				'http://localhost:' + app.cfg.port,
-				'http://nevest.dev:' + app.cfg.port,
-			]
-			var origin = rq.headers.origin
+	CrossOrigin(app.cfg, http.express)
 
-			if (allowedOrigins.indexOf(origin) > -1)
-			{
-				rs.setHeader('Access-Control-Allow-Origin', origin)
-			}
-			rs.header(
-				'Access-Control-Allow-Headers',
-				'Origin, X-Requested-With, Content-Type, Accept, ' +
-				'Access-Control-Allow-Credentials'
-			)
-			rs.header('Access-Control-Allow-Credentials', 'true')
-
-			return next()
-		})
-	}
-
-	http.express.use('/api', (rq, rs, next) =>
-	{
-		app.log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
-		next()
-	})
+	ReqLog(app.log, http.express)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.passport = Passport(http.express, app.db)
