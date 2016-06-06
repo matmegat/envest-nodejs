@@ -4,7 +4,8 @@ exports.seed = function (knex)
 {
 	return knex('investors')
 	.select('user_id as id')
-	.then((investors) => {
+	.then((investors) =>
+	{
 		var feed_items = _.times(500, (i) =>
 		{
 			var timestamp = new Date()
