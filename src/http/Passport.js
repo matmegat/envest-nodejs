@@ -69,7 +69,7 @@ function useBearerToken (user)
 {
 	passport.use(new BearerStrategy((token, done) =>
 	{
-		var decoded = jwt_helpers.verify_token(token)
+		var decoded = jwt_helpers.verify(token)
 
 		if (decoded && decoded.id)
 		{

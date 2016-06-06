@@ -20,6 +20,7 @@ var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
 var ReqLog = require('./ReqLog')
+var CheckToken = require('./CheckToken')
 
 var errorMiddleware = require('./error-middleware')
 var setErrorMode = require('./error-mode')
@@ -54,44 +55,7 @@ module.exports = function Http (app)
 		console.info('API: mount %s at %s', name, route)
 	}
 
-	http.express.use((rq, rs, next) =>
-	{
-		var token = rq.get('Authorization')
-
-		if (token)
-		{
-			// @todo: deal with function repeat
-			http.passport.authenticate('bearer',
-				{ session: false },
-				(err, user, info) =>
-			{
-				if (err)
-				{
-					return next(err)
-				}
-
-				rq.login(user, function (err)
-				{
-					if (err)
-					{
-
-						if (info)
-						{
-							err.message = info.message
-						}
-
-						return next(err)
-					}
-
-					next()
-				})
-			})(rq, rs, next)
-		}
-		else
-		{
-			next()
-		}
-	})
+	CheckToken(http.express, http.passport)
 
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')

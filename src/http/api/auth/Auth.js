@@ -41,7 +41,7 @@ module.exports = function Auth (auth_model, passport)
 				}
 				else
 				{
-					rs.set('access_token', jwt_helpers.generate(user_data))
+					user_data.access_token = jwt_helpers.generate(user_data)
 					return toss.ok(rs, user_data)
 				}
 			})
@@ -72,7 +72,7 @@ module.exports = function Auth (auth_model, passport)
 					return next(err)
 				}
 
-				rs.set('access_token', jwt_helpers.generate(user))
+				user.access_token = jwt_helpers.generate(user)
 				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)
