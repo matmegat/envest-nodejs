@@ -134,13 +134,10 @@ module.exports = function Investor (db)
 		})
 		.then((password) =>
 		{
-			var full_name = data.first_name + ' ' + data.last_name
 			var user_data = _.extend({}, data,
 			{
-				full_name: full_name,
 				password: password	/* new Investor should reset his password */
 			})
-			/* FIXME: refactor to first_name, last_name */
 
 			return auth.register(user_data)
 		})
@@ -154,8 +151,6 @@ module.exports = function Investor (db)
 			.insert(
 			{
 				user_id: user.id,
-				first_name: data.first_name,
-				last_name: data.last_name,
 				historical_returns: []
 			}, 'user_id')
 			.catch(Err.fromDb('investors_pkey', AlreadyExists))
