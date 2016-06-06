@@ -11,41 +11,9 @@ properties:
     type: string
     description: Investor's Last Name
   pic:
-    type: object
-    title: Picture
-    description: Investor's image
-    properties:
-      hash:
-        type: string
-        description: image hash (domain- and path- agnostic)
-      path:
-        type: string
-        description: path to image (domain-agnostic)
-      resolved_uri:
-        type: string
-        description: fully-qualified URI to image
-    required:
-      - hash
-      - path
-      - resolved_uri
+    $ref: './Picture.yaml'
   profile_pic:
-    type: object
-    title: Picture
-    description: Investor Profile's image
-    properties:
-      hash:
-        type: string
-        description: image hash (domain- and path- agnostic)
-      path:
-        type: string
-        description: path to image (domain-agnostic)
-      resolved_uri:
-        type: string
-        description: fully-qualified URI to image
-    required:
-      - hash
-      - path
-      - resolved_uri
+    $ref: './Picture.yaml'
   profession:
     type: string
     description: Investor's profession
