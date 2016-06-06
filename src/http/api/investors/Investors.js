@@ -36,7 +36,13 @@ module.exports = function (db)
 
 	investors.express.get('/:id', (rq, rs) =>
 	{
-		toss(rs, investors.model.byId(rq.params.id))
+		var hostname = rq.hostname
+
+		var data =
+		investors.model.byId(rq.params.id)
+		.then(pic_decorator(hostname))
+
+		toss(rs, data)
 	})
 
 	return investors
