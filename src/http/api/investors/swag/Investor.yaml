@@ -11,11 +11,41 @@ properties:
     type: string
     description: Investor's Last Name
   pic:
-    type: string
-    description: URL to Investor's image
+    type: object
+    title: Picture
+    description: Investor's image
+    properties:
+      hash:
+        type: string
+        description: image hash (domain- and path- agnostic)
+      path:
+        type: string
+        description: path to image (domain-agnostic)
+      resolved_uri:
+        type: string
+        description: fully-qualified URI to image
+    required:
+      - hash
+      - path
+      - resolved_uri
   profile_pic:
-    type: string
-    description: URL to cover image of Investr's profile
+    type: object
+    title: Picture
+    description: Investor Profile's image
+    properties:
+      hash:
+        type: string
+        description: image hash (domain- and path- agnostic)
+      path:
+        type: string
+        description: path to image (domain-agnostic)
+      resolved_uri:
+        type: string
+        description: fully-qualified URI to image
+    required:
+      - hash
+      - path
+      - resolved_uri
   profession:
     type: string
     description: Investor's profession
@@ -34,6 +64,5 @@ required:
 - id
 - first_name
 - last_name
-- pic
 - focus
 - annual_return
