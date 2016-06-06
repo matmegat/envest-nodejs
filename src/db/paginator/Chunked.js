@@ -94,7 +94,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 		}
 	}
 
-	function order_sign (direction, since_id, max_id)
+	function order_sign (direction, since_id)
 	{
 		var sign = '<='
 
@@ -111,7 +111,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 		return sign
 	}
 
-	function real_order_sign (direction, since_id, max_id)
+	function real_order_sign (direction, since_id)
 	{
 		var sign = '<'
 
@@ -128,7 +128,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 		return sign
 	}
 
-	function sorting (direction, since_id, max_id)
+	function sorting (direction, since_id)
 	{
 		if (since_id)
 		{
