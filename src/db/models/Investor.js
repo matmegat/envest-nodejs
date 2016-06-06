@@ -4,7 +4,7 @@ var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 
-var Paginator = require('../Paginator')
+var Paginator = require('../paginator/Chunked')
 
 module.exports = function Investor (db)
 {
@@ -13,9 +13,25 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	var paginator = Paginator()
-
 	investor.table = () => knex('investors')
+
+	var paging_table = function ()
+	{
+		return investor.table()
+		.select(
+			'user_id',
+			'users.first_name',
+			'users.last_name'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
+	}
+	var paginator = Paginator(
+	{
+		table: paging_table,
+		order_column: 'user_id',
+		real_order_column: 'last_name',
+		default_direction: 'asc'
+	})
 
 	investor.byId = function (id)
 	{
@@ -73,8 +89,6 @@ module.exports = function Investor (db)
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
-		queryset = paginator.paginate(queryset, options)
-
 		if (options.where)
 		{
 			// TODO: validate options.where
@@ -86,7 +100,7 @@ module.exports = function Investor (db)
 			)
 		}
 
-		return queryset
+		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
 		.then((investors) =>
 		{
 			return investors.map((investor) =>

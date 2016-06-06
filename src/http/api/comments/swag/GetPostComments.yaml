@@ -5,14 +5,14 @@ get:
     in: query
     type: integer
     description: |
-      Get comments that are added before *max_id* (inclusive)
-      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+      Get comments that are added before *max_id* (inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
   - name: since_id
     in: query
     type: integer
     description: |
-      Get comments greater than *since_id* (non inclusive)
-      [twitter guide](https://dev.twitter.com/rest/public/timelines)
+      Get comments greater than *since_id* (non inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
   - name: feed_id
     description: Post (Feed Item) id
     in: query
