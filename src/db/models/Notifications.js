@@ -25,7 +25,7 @@ module.exports = function Notifications (db)
 
 	notifications.table = knexed(knex, 'notifications')
 
-	notifications.emit = function Inst (type)
+	notifications.Emitter = function Inst (type)
 	{
 		return function EmitInst (data)
 		{

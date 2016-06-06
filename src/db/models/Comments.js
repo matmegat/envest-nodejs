@@ -21,7 +21,7 @@ module.exports = function Comments (db)
 	var oneMaybe = db.helpers.oneMaybe
 
 	expect(db, 'Comments depends on Notifications').property('notifications')
-	var notifications_emit = db.notifications.emit
+	var Emitter = db.notifications.Emitter
 
 	var paginator = Paginator({ column_name: 'comments.id' })
 
@@ -29,7 +29,7 @@ module.exports = function Comments (db)
 	var user = db.user
 
 	comments.table = () => knex('comments')
-	comments.abuse = Abuse(db, comments, notifications_emit)
+	comments.abuse = Abuse(db, comments, Emitter)
 
 	comments.list = function (options)
 	{
@@ -74,7 +74,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var new_feed_comment = notifications_emit('new_feed_comment')
+	var NewFeedComment = Emitter('new_feed_comment')
 
 	comments.create = function (data)
 	{
@@ -106,7 +106,7 @@ module.exports = function Comments (db)
 				recipient_id: feed_item.investor.id
 			}
 
-			return new_feed_comment(data)
+			return NewFeedComment(data)
 		})
 	}
 
