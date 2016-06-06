@@ -12,8 +12,12 @@ module.exports = function (db)
 	investors.express = Router()
 	investors.express.use(authRequired)
 
+	var pic_decorator = db.pic.decorate('pic')
+
 	investors.express.get('/', (rq, rs) =>
 	{
+		var hostname = rq.hostname
+
 		var options = pick(rq.query,
 		[
 			'max_id',
@@ -24,12 +28,7 @@ module.exports = function (db)
 		investors.model.list(options)
 		.then(investors =>
 		{
-			investors.forEach(investor =>
-			{
-				investor.pic = db.pic.resolve(investor.pic, rq.hostname)
-			})
-
-			return investors
+			return investors.map(pic_decorator(hostname))
 		})
 
 		toss(rs, data)

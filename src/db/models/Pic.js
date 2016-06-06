@@ -4,6 +4,10 @@ var url = require('url')
 var Url    = url.Url
 var format = url.format
 
+var curry = require('lodash/curry')
+var get   = require('lodash/get')
+var set   = require('lodash/set')
+
 module.exports = function Pic (cfg)
 {
 	var pic = {}
@@ -23,16 +27,14 @@ module.exports = function Pic (cfg)
 		}
 	}
 
-	pic.decorate = function ()
+	pic.decorate = curry((path, hostname, item) =>
 	{
-		
-	}
-	
-	function decorateItem (response)
-	{
-		
-	}
-	
+		var hash = get(item, path)
+
+		set(item, path, pic.resolve(hash, hostname))
+
+		return item
+	})
 
 	return pic
 }
