@@ -28,17 +28,9 @@ module.exports = function Investor (db)
 	{
 		table: paging_table,
 		order_column: 'user_id',
-		real_order_column: 'full_name',
+		real_order_column: 'last_name',
 		default_direction: 'asc'
 	})
-
-	function validate_id (id)
-	{
-		return new Promise(rs =>
-		{
-			return rs(validateId(id, WrongInvestorId))
-		})
-	}
 
 	investor.byId = function (id)
 	{
