@@ -21,6 +21,8 @@ module.exports = function Auth (db, passport)
 
 	auth.express.post('/register', (rq, rs) =>
 	{
+		var hostname = rq.hostname
+
 		var user_data = pick(rq.body,
 		[
 			'first_name',
@@ -34,6 +36,7 @@ module.exports = function Auth (db, passport)
 		{
 			return auth.model.login(user_data.email, user_data.password)
 		})
+		.then(pic_decorator(hostname))
 		.then(user_data =>
 		{
 			rq.login(user_data, err =>
@@ -54,6 +57,8 @@ module.exports = function Auth (db, passport)
 	// eslint-disable-next-line max-params
 	var authByProvider = curry((provider, rq, rs, next) =>
 	{
+		var hostname = rq.hostname
+
 		passport.authenticate(provider, (err, user, info) =>
 		{
 			if (err)
@@ -73,6 +78,8 @@ module.exports = function Auth (db, passport)
 
 					return next(err)
 				}
+
+				user = pic_decorator(hostname, user)
 
 				return toss.ok(rs, user)
 			})
