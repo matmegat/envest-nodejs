@@ -14,6 +14,11 @@ module.exports = function Pic (cfg)
 
 	pic.resolve = function (hash, hostname)
 	{
+		if (! hash)
+		{
+			return null
+		}
+
 		var pathname = '/api/static/pic/' + hash
 
 		var uri = new Url()
