@@ -1,0 +1,28 @@
+type: object
+title: Investor Portfolio Symbol
+properties:
+  id:
+    type: number
+    description: Symbol Id
+  ticker:
+    type: string
+    description: Symbol ticker
+  company:
+    type: string
+    description: company name corresponding to that symbol
+  allocation:
+    type: number
+    description: |
+      **Indexed Portfolio Value**
+      Allocation of Stock (Symbol) in Investor's Portfolio
+  gain:
+    type: number
+    description: |
+      Gain / Loss on symbol. Calculated on whole period of symbol
+      owning. **MOCK DATA**
+required:
+- id
+- ticker
+- company
+- allocation
+- gain

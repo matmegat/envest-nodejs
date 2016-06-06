@@ -1,0 +1,21 @@
+get:
+  description: |
+    Get Investor's [Stock Portfolio]
+    (https://weezlabs.atlassian.net/wiki/display/NET/Investor+On-Boarding)
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investors Id
+    required: true
+  responses:
+    200:
+      description: List of Investors stocks.
+      schema:
+        $ref: ./InvestorPortfolio.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors

@@ -59,6 +59,9 @@ paths:
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
 
+  '/investors/{investor_id}/portfolio':
+    $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
+
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
@@ -75,6 +78,9 @@ definitions:
 
   Symbol:
     $ref: ./Symbol.yaml
+
+  PortfolioSymbol:
+    $ref: ../api/investors/swag/InvestorPortfolioSymbol.yaml
 
   Error:
     $ref: ./Error.yaml
