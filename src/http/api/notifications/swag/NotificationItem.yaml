@@ -16,7 +16,12 @@ properties:
   recipient_id:
     type: number
     description: Recipient id
+  is_viewed:
+    type: boolean
+    description: Viewed flag
 required:
 - id
 - type
 - event
+- recipient_id
+- is_viewed

@@ -25,25 +25,25 @@ get:
   tags:
   - notifications
 post:
-  description: Set id last viewed notifications
+  description: Set ids viewed notifications
   parameters:
   - name: payload
-    description: JSON payload to create notification
+    description: JSON payload to set ids viewed notifications
     in: body
     required: true
     schema:
       type: object
       title: Notification Payload
       properties:
-        viewed_id:
-          type: integer
-          description: Id last viewed notifications
-          default: 1
+        viewed_ids:
+          type: array
+          description: An array of id viewed notifications
+          default: [1,2,3]
       required:
-      - viewed_id
+      - viewed_ids
   responses:
     200:
-      description: id last viewed the notification set
+      description: the viewed flag is set
     400:
       description: if something went wrong
       schema:
