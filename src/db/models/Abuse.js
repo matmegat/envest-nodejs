@@ -17,7 +17,13 @@ module.exports = function Abuse (db, comments, Emitter)
 
 	abuse.table = () => knex('abuse_comments')
 
-	var CommentReport = Emitter('comments_reports')
+	var emitter_options = 
+	{
+		target: 'group',
+		group:  'admins'
+	}
+
+	var CommentReport = Emitter('comments_reports', emitter_options)
 
 	abuse.create = function (user_id, comment_id)
 	{
@@ -40,13 +46,9 @@ module.exports = function Abuse (db, comments, Emitter)
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 		.then(() =>
 		{
-			var data =
-			{
-				event: { comment_id: comment_id },
-				group: 'admins'
-			}
+			var event = { comment_id: comment_id }
 
-			return CommentReport(data)
+			return CommentReport(event)
 		})
 	}
 

@@ -74,7 +74,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var NewFeedComment = Emitter('new_feed_comment')
+	var NewFeedComment = Emitter('new_feed_comment', {target: 'recipient'})
 
 	comments.create = function (data)
 	{
@@ -90,23 +90,23 @@ module.exports = function Comments (db)
 		.then(data =>
 		{
 			return comments.table()
-			.insert(data)
-			.then(noop)
+			.insert(data, 'id')
+			.then(one)
 			.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
 		})
-		.then(() =>
+		.then((comment_id) =>
 		{
 			return db.feed.byId(data.feed_id)
-		})
-		.then(feed_item =>
-		{
-			var data =
+			.then(feed_item =>
 			{
-				event: { feed_id: feed_item.id },
-				recipient_id: feed_item.investor.id
-			}
+				var event = 
+				{
+					feed_id: feed_item.id,
+					comment_id: comment_id
+				}
 
-			return NewFeedComment(data)
+				return NewFeedComment(event, feed_item.investor.id)
+			})
 		})
 	}
 

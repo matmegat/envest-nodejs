@@ -25,24 +25,24 @@ module.exports = function Notifications (db)
 
 	notifications.table = knexed(knex, 'notifications')
 
-	notifications.Emitter = function Inst (type)
+	notifications.Emitter = function Emitter (type, options)
 	{
-		return function EmitInst (data)
+		return function NotificationEmit (event, target)
 		{
 			var emit =
 			{
 				type: type,
-				event: data.event
+				event: event
 			}
 
-			if (data.recipient_id)
+			if (options.target == 'recipient')
 			{
-				emit.recipient_id = data.recipient_id
+				emit.recipient_id = target
 				return notifications.create(emit)
 			}
-			else if (data.group)
+			else if (options.target == 'group')
 			{
-				emit.group = data.group
+				emit.group = options.group
 				return notifications.createBroadcast(emit)
 			}
 		}
