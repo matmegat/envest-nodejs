@@ -45,7 +45,7 @@ module.exports = function Investor (db)
 
 	investor.byId = function (id, trx)
 	{
-		return validate_id(id, trx)
+		return investor.validate_id(id, trx)
 		.then(() =>
 		{
 			return investor
