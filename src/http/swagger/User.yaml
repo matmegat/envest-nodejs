@@ -11,6 +11,8 @@ properties:
     type: string
   pic:
     type: string
+  access_token:
+    type: string
 required:
 - id
 - first_name
