@@ -10,7 +10,7 @@ properties:
   email:
     type: string
   pic:
-    type: string
+    $ref: './Picture.yaml'
 required:
 - id
 - first_name

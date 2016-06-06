@@ -1,6 +1,6 @@
 type: object
 title: Picture
-description: Investor Profile's image
+description: Profile's image
 properties:
   hash:
     type: string
@@ -15,4 +15,3 @@ required:
   - hash
   - path
   - resolved_uri
-  
