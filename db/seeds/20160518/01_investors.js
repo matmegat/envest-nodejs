@@ -33,7 +33,7 @@ exports.seed = function (knex, Promise)
 				email: 'allen.schwartz@investor.com',
 				first_name: 'Allen',
 				last_name: 'Schwartz',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -59,7 +59,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Lawyer',
 						focus: focus,
-						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
+						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: hist_returns_default,
 						is_public: true,
@@ -74,7 +74,7 @@ exports.seed = function (knex, Promise)
 				email: 'george.masterson@investor.com',
 				first_name: 'George',
 				last_name: 'Masterson',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -113,7 +113,7 @@ exports.seed = function (knex, Promise)
 				email: 'burt.harris@investor.com',
 				first_name: 'Burt',
 				last_name: 'Harris',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -138,7 +138,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Developer',
 						focus: focus,
-						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
+						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: hist_returns_default,
 						is_public: true,
@@ -153,7 +153,7 @@ exports.seed = function (knex, Promise)
 				email: 'anna.brinkley@investor.com',
 				first_name: 'Anna',
 				last_name: 'Brinkley',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -193,7 +193,7 @@ exports.seed = function (knex, Promise)
 				email: 'david.philips@investor.com',
 				first_name: 'David',
 				last_name: 'M. Philips',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
@@ -219,7 +219,7 @@ exports.seed = function (knex, Promise)
 						user_id: user_id[0],
 						profession: 'Witcher',
 						focus: focus,
-						profile_pic: '/api/static/pic/b4f18f5b05307bd1e3cc00e0802d641b',
+						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: hist_returns_default,
 						is_public: true,
@@ -234,7 +234,7 @@ exports.seed = function (knex, Promise)
 				email: 'chaenne.parson@investor.com',
 				first_name: 'Chaenne',
 				last_name: 'Parson',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then((user_id) =>
 			{
