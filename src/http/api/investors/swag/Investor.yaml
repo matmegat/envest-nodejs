@@ -11,9 +11,11 @@ properties:
     type: string
     description: Investor's Last Name
   pic:
-    $ref: '../../../swagger/Picture.yaml'
+    type: string
+    description: URL to Investor's image
   profile_pic:
-    $ref: '../../../swagger/Picture.yaml'
+    type: string
+    description: URL to cover image of Investr's profile
   profession:
     type: string
     description: Investor's profession
