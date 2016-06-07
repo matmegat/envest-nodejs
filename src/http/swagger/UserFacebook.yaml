@@ -4,3 +4,5 @@ properties:
     type: integer
   facebook_id:
     type: integer
+  access_token:
+    type: string
