@@ -13,7 +13,7 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	investor.table = () => knex('investors')
+	investor.table = () => knex('investors').where('is_public', true)
 
 	var paging_table = function ()
 	{
@@ -23,6 +23,7 @@ module.exports = function Investor (db)
 			'users.first_name',
 			'users.last_name'
 		)
+		.where('is_public', true)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
 	var paginator = Paginator(
@@ -32,6 +33,18 @@ module.exports = function Investor (db)
 		real_order_column: 'last_name',
 		default_direction: 'asc'
 	})
+
+	investor.is = function (investor_id/*, trx*/)
+	{
+		return investor.byId(investor_id/*, trx*/)
+		.then(Boolean)
+	}
+
+	investor.ensure = function (investor_id/*, trx*/)
+	{
+		return investor.is(investor_id/*, trx*/)
+		.then(Err.falsy(WrongInvestorId))
+	}
 
 	investor.byId = function (id)
 	{

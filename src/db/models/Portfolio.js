@@ -21,20 +21,8 @@ module.exports = function Portfolio (db)
 
 	portfolio.list = function (options, trx)
 	{
-		return db.investor.validate_id(options.investor_id)
+		return db.investor.ensure(options.investor_id)
 		.then(() =>
-		{
-			return db.investor.table()
-			.select('user_id as id')
-			.where(
-			{
-				user_id: options.investor_id,
-				is_public: true
-			})
-		})
-		.then(oneMaybe)
-		.then(Err.nullish(WrongInvestorId))
-		.then((investor) =>
 		{
 			return portfolio.table(trx)
 			.select(
@@ -45,7 +33,7 @@ module.exports = function Portfolio (db)
 				'symbols.company',
 				'brokerage.multiplier'
 			])
-			.where('portfolio_symbols.investor_id', investor.id)
+			.where('portfolio_symbols.investor_id', options.investor_id)
 			.innerJoin('symbols', 'portfolio_symbols.symbol_id', 'symbols.id')
 			.innerJoin(
 				'brokerage',
