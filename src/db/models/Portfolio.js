@@ -5,11 +5,15 @@ var _ = require('lodash')
 
 var knexed = require('../knexed')
 
+var Err = require('../../Err')
+var WrongInvestorId = Err('wrong_investor_id', 'Wrong investor id')
+
 module.exports = function Portfolio (db)
 {
 	var portfolio = {}
 
-	var knex = db.knex
+	var knex     = db.knex
+	var oneMaybe = db.helpers.oneMaybe
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
 
@@ -20,6 +24,18 @@ module.exports = function Portfolio (db)
 		return db.investor.validate_id(options.investor_id)
 		.then(() =>
 		{
+			return db.investor.table()
+			.select('user_id as id')
+			.where(
+			{
+				user_id: options.investor_id,
+				is_public: true
+			})
+		})
+		.then(oneMaybe)
+		.then(Err.nullish(WrongInvestorId))
+		.then((investor) =>
+		{
 			return portfolio.table(trx)
 			.select(
 			[
@@ -29,7 +45,7 @@ module.exports = function Portfolio (db)
 				'symbols.company',
 				'brokerage.multiplier'
 			])
-			.where('portfolio_symbols.investor_id', options.investor_id)
+			.where('portfolio_symbols.investor_id', investor.id)
 			.innerJoin('symbols', 'portfolio_symbols.symbol_id', 'symbols.id')
 			.innerJoin(
 				'brokerage',
