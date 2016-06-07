@@ -5,9 +5,6 @@ module.exports = function (log, express)
 	{
 		log('%s %s\n%j', rq.method, rq.originalUrl, rq.body)
 
-		console.log(rq.hostname)
-		console.log(rq.get('Content-Type'))
-
 		next()
 	})
 }
