@@ -1,7 +1,6 @@
 get:
   description: |
-    Get Investor's [Stock Portfolio]
-    (https://weezlabs.atlassian.net/wiki/display/NET/Investor+On-Boarding)
+    Get Investor's [Stock Portfolio](https://weezlabs.atlassian.net/wiki/display/NET/Investor+On-Boarding)
   parameters:
   - name: investor_id
     in: path

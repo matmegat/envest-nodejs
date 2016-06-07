@@ -4,11 +4,11 @@ properties:
   total:
     type: integer
     description: amount of Stocks (Symbols)
-  symbols:
+  holdings:
     type: array
     description: Investor Portfolio Symbols
     items:
-    - $ref: ./InvestorPortfolioSymbol.yaml
+    - $ref: ./InvestorPortfolioHolding.yaml
 required:
 - total
-- symbols
+- holdings

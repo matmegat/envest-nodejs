@@ -79,8 +79,8 @@ definitions:
   Symbol:
     $ref: ./Symbol.yaml
 
-  PortfolioSymbol:
-    $ref: ../api/investors/swag/InvestorPortfolioSymbol.yaml
+  PortfolioHolding:
+    $ref: ../api/investors/swag/InvestorPortfolioHolding.yaml
 
   Error:
     $ref: ./Error.yaml

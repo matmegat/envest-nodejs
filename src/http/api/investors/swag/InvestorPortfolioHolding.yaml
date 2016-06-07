@@ -1,15 +1,8 @@
 type: object
-title: Investor Portfolio Symbol
+title: Investor Portfolio Holding
 properties:
-  id:
-    type: number
-    description: Symbol Id
-  ticker:
-    type: string
-    description: Symbol ticker
-  company:
-    type: string
-    description: company name corresponding to that symbol
+  symbol:
+    $ref: ../../../swagger/Symbol.yaml
   allocation:
     type: number
     description: |
@@ -21,8 +14,6 @@ properties:
       Gain / Loss on symbol. Calculated on whole period of symbol
       owning. **MOCK DATA**
 required:
-- id
-- ticker
-- company
+- symbol
 - allocation
 - gain
