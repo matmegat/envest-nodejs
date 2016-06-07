@@ -17,7 +17,7 @@ module.exports = function Abuse (db, comments, Emitter)
 
 	abuse.table = () => knex('abuse_comments')
 
-	var emitter_options = 
+	var emitter_options =
 	{
 		target: 'group',
 		group:  'admins'
@@ -46,9 +46,7 @@ module.exports = function Abuse (db, comments, Emitter)
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
 		.then(() =>
 		{
-			var event = { comment_id: comment_id }
-
-			return CommentReport(event)
+			return CommentReport({ comment_id: comment_id })
 		})
 	}
 

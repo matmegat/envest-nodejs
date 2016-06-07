@@ -27,22 +27,29 @@ module.exports = function Notifications (db)
 
 	notifications.Emitter = function Emitter (type, options)
 	{
-		return function NotificationEmit (event, target)
+		return function NotificationEmit (target_or_event, event)
 		{
 			var emit =
 			{
-				type: type,
-				event: event
+				type: type
 			}
 
-			if (options.target == 'recipient')
+			if (options.target === 'recipient')
 			{
-				emit.recipient_id = target
+				expect(target_or_event).a('number')
+
+				emit.recipient_id = target_or_event
+				emit.event        = event
+
 				return notifications.create(emit)
 			}
-			else if (options.target == 'group')
+			else if (options.target === 'group')
 			{
+				expect(target_or_event).a('object')
+
 				emit.group = options.group
+				emit.event = target_or_event
+
 				return notifications.createBroadcast(emit)
 			}
 		}
@@ -75,6 +82,7 @@ module.exports = function Notifications (db)
 
 	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
 
+// eslint-disable-next-line id-length
 	function validateNotification (data)
 	{
 		return new Promise(rs =>
@@ -111,9 +119,9 @@ module.exports = function Notifications (db)
 			.select(knex.raw('?, ?, users.id', [data.type, data.event]))
 			.from(data.group)
 			.leftJoin(
-			'admins',
-			'users.id',
-			'admins.user_id'
+				'admins',
+				'users.id',
+				'admins.user_id'
 			)
 			.leftJoin(
 				'investors',

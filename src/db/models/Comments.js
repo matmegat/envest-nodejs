@@ -9,7 +9,6 @@ var validate = require('../validate')
 var Err = require('../../Err')
 
 var _ = require('lodash')
-var noop = _.noop
 
 module.exports = function Comments (db)
 {
@@ -74,7 +73,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var NewFeedComment = Emitter('new_feed_comment', {target: 'recipient'})
+	var NewFeedComment = Emitter('new_feed_comment', { target: 'recipient' })
 
 	comments.create = function (data)
 	{
@@ -99,13 +98,11 @@ module.exports = function Comments (db)
 			return db.feed.byId(data.feed_id)
 			.then(feed_item =>
 			{
-				var event = 
+				return NewFeedComment(feed_item.investor.id,
 				{
 					feed_id: feed_item.id,
 					comment_id: comment_id
-				}
-
-				return NewFeedComment(event, feed_item.investor.id)
+				})
 			})
 		})
 	}
