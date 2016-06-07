@@ -17,7 +17,7 @@ module.exports = function Portfolio (db)
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
 
-	expect(db, 'Portfolio depends on api/Investor').property('investor')
+	expect(db, 'Portfolio depends on Investor').property('investor')
 
 	portfolio.list = function (options, trx)
 	{
