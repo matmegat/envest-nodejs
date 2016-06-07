@@ -33,23 +33,35 @@ module.exports = function Portfolio (db)
 				'brokerage.investor_id'
 			)
 		})
-		.then((portfolio_symbols) =>
+		.then((portfolio_holdings) =>
 		{
-			portfolio_symbols = portfolio_symbols.map((portfolio_symbol) =>
+			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
 			{
 				var random_price = _.random(50.0, 150.0, true)
-				portfolio_symbol.allocation =
-					portfolio_symbol.amount *
+				portfolio_holding.allocation =
+					portfolio_holding.amount *
 					random_price *
-					portfolio_symbol.multiplier
-				portfolio_symbol.gain = _.random(-10.0, 10.0, true)
+					portfolio_holding.multiplier
 
-				return _.omit(portfolio_symbol, [ 'amount', 'multiplier' ])
+				portfolio_holding.gain = _.random(-10.0, 10.0, true)
+				portfolio_holding.symbol = _.pick(portfolio_holding,
+				[
+					'id',
+					'ticker',
+					'company'
+				])
+
+				return _.pick(portfolio_holding,
+				[
+					'symbol',
+					'allocation',
+					'gain'
+				])
 			})
 
 			return {
-				total: portfolio_symbols.length,
-				symbols: _.orderBy(portfolio_symbols, 'allocation', 'desc')
+				total: portfolio_holdings.length,
+				holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc')
 			}
 		})
 	}
