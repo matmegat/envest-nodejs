@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var _ = require('lodash')
 
 var knexed = require('../knexed')
@@ -10,6 +12,8 @@ module.exports = function Portfolio (db)
 	var knex = db.knex
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
+
+	expect(db, 'Portfolio depends on api/Investor').property('investor')
 
 	portfolio.list = function (options, trx)
 	{
