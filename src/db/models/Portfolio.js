@@ -21,7 +21,7 @@ module.exports = function Portfolio (db)
 
 	portfolio.list = function (options, trx)
 	{
-		return db.investor.ensure(options.investor_id)
+		return db.investor.ensure(options.investor_id, trx)
 		.then(() =>
 		{
 			return portfolio.table(trx)

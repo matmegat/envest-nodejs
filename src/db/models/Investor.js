@@ -1,5 +1,7 @@
 var _ = require('lodash')
 
+var knexed = require('../knexed')
+
 var Err = require('../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
@@ -13,17 +15,16 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	investor.table = () => knex('investors').where('is_public', true)
+	investor.table = knexed(knex, 'investors')
 
-	var paging_table = function ()
+	var paging_table = function (trx)
 	{
-		return investor.table()
+		return investor.table(trx)
 		.select(
 			'user_id',
 			'users.first_name',
 			'users.last_name'
 		)
-		.where('is_public', true)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
 	var paginator = Paginator(
@@ -34,25 +35,25 @@ module.exports = function Investor (db)
 		default_direction: 'asc'
 	})
 
-	investor.is = function (investor_id/*, trx*/)
+	investor.is = function (investor_id, trx)
 	{
-		return investor.byId(investor_id/*, trx*/)
+		return investor.byId(investor_id, trx)
 		.then(Boolean)
 	}
 
-	investor.ensure = function (investor_id/*, trx*/)
+	investor.ensure = function (investor_id, trx)
 	{
-		return investor.is(investor_id/*, trx*/)
+		return investor.is(investor_id, trx)
 		.then(Err.falsy(WrongInvestorId))
 	}
 
-	investor.byId = function (id)
+	investor.byId = function (id, trx)
 	{
 		return investor.validate_id(id)
 		.then(() =>
 		{
 			return investor
-			.table()
+			.table(trx)
 			.select(
 				'users.id',
 				'users.first_name',
@@ -66,6 +67,7 @@ module.exports = function Investor (db)
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
+			.where('is_public', true)
 		})
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
@@ -83,7 +85,7 @@ module.exports = function Investor (db)
 
 	investor.validate_id = require('../../id').validate.promise(WrongInvestorId)
 
-	investor.list = function (options)
+	investor.list = function (options, trx)
 	{
 		options = _.extend({}, options,
 		{
@@ -91,7 +93,7 @@ module.exports = function Investor (db)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = investor.table()
+		var queryset = investor.table(trx)
 		.select(
 			'users.id',
 			'users.first_name',
