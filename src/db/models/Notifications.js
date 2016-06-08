@@ -82,7 +82,7 @@ module.exports = function Notifications (db)
 
 	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
 
-// eslint-disable-next-line id-length
+	// eslint-disable-next-line id-length
 	function validateNotification (data)
 	{
 		return new Promise(rs =>
@@ -92,7 +92,7 @@ module.exports = function Notifications (db)
 
 			validate.required(data.event, 'event')
 			validate.empty(data.type, 'event')
-			//validate.json(data.event, 'event')
+			// validate.json(data.event, 'event')
 
 			if (data.recipient_id)
 			{
@@ -105,6 +105,7 @@ module.exports = function Notifications (db)
 
 	var WrongUserGroup = Err('wrong_user_group', 'Wrong user group')
 
+	// eslint-disable-next-line complexity
 	function get_query_group (data)
 	{
 		if (user.groups.isAdmin(data.group) || user.groups.isInvestor(data.group))
