@@ -123,8 +123,9 @@ module.exports = function Investor (db)
 		if (options.where)
 		{
 			// TODO: validate options.where
-			queryset
-			.where(
+
+			// WHAT with this?
+			queryset.where(
 				options.where.column_name,
 				options.where.clause,
 				options.where.argument
@@ -158,12 +159,13 @@ module.exports = function Investor (db)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
-		return new Promise((resolve) =>
+		return new Promise(rs =>
 		{
 			validate.required(data.first_name, 'first_name')
 			validate.required(data.last_name, 'last_name')
 			validate.required(data.email, 'email')
-			resolve()
+
+			rs()
 		})
 		.then(() =>
 		{
@@ -173,7 +175,7 @@ module.exports = function Investor (db)
 		{
 			var user_data = _.extend({}, data,
 			{
-				password: password	/* new Investor should reset his password */
+				password: password /* new Investor should reset his password */
 			})
 
 			return auth.register(user_data)
