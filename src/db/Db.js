@@ -6,7 +6,7 @@ var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
-var Investor = require('./models/Investor')
+var Investor = require('./models/investor/Investor')
 var Portfolio = require('./models/Portfolio')
 
 module.exports = function name (app)

@@ -1,18 +1,18 @@
 var _ = require('lodash')
 
-var generate_code = require('../../crypto-helpers').generate_code
+var generate_code = require('../../../crypto-helpers').generate_code
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var AlreadyExists = Err('already_investor', 'This user is investor already')
 
 var expect = require('chai').expect
-var validate = require('../validate')
+var validate = require('../../validate')
 
-var Paginator = require('../paginator/Chunked')
+var Paginator = require('../../paginator/Chunked')
 
 module.exports = function Investor (db)
 {
@@ -98,7 +98,7 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../id').validate.promise(WrongInvestorId)
+	investor.validate_id = require('../../../id').validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)
 	{
