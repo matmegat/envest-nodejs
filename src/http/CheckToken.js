@@ -17,6 +17,11 @@ module.exports = function (express, passport)
 					return next(err)
 				}
 
+				if(! user)
+				{
+					return next()
+				}
+
 				rq.login(user, function (err)
 				{
 					if (err)
