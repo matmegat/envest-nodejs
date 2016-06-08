@@ -15,7 +15,16 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	investor.table = knexed(knex, 'investors')
+	investor.table = knexed(
+		knex,
+		knex.raw(
+			'(' +
+				'SELECT * ' +
+				'FROM investors ' +
+				'WHERE is_public = TRUE' +
+			') AS investors'
+		)
+	)
 
 	var paging_table = function (trx)
 	{
@@ -67,7 +76,6 @@ module.exports = function Investor (db)
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
-			.where('is_public', true)
 		})
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
