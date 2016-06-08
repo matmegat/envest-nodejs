@@ -21,16 +21,13 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	investor.table = knexed(
-		knex,
-		knex.raw(
-			'(' +
-				'SELECT * ' +
-				'FROM investors ' +
-				'WHERE is_public = TRUE' +
-			') AS investors'
-		)
-	)
+	investor.table = knexed(knex, 'investors')
+
+	investor.table_public = (trx) =>
+	{
+		return investor.table(trx)
+		.where('is_public')
+	}
 
 	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
@@ -38,7 +35,7 @@ module.exports = function Investor (db)
 
 	var paging_table = function (trx)
 	{
-		return investor.table(trx)
+		return investor.table_public(trx)
 		.select(
 			'user_id',
 			'users.first_name',
@@ -72,7 +69,7 @@ module.exports = function Investor (db)
 		.then(() =>
 		{
 			return investor
-			.table(trx)
+			.table_public(trx)
 			.select(
 				'users.id',
 				'users.first_name',
@@ -111,7 +108,7 @@ module.exports = function Investor (db)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = investor.table(trx)
+		var queryset = investor.table_public(trx)
 		.select(
 			'users.id',
 			'users.first_name',
@@ -187,13 +184,13 @@ module.exports = function Investor (db)
 		})
 		.then((user) =>
 		{
-			return investor
-            .table(trx)
+			return investor.table_public(trx)
 			.insert(
 			{
 				user_id: user.id,
 				historical_returns: []
-			}, 'user_id')
+			}
+			, 'user_id')
 			.catch(Err.fromDb('investors_pkey', AlreadyExists))
 		})
 		.then(oneMaybe)
