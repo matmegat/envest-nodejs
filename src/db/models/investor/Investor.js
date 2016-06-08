@@ -98,7 +98,8 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../../id').validate.promise(WrongInvestorId)
+	investor.validate_id = require('../../../id')
+	.validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)
 	{
