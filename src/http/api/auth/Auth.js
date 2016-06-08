@@ -7,6 +7,8 @@ var Router = require('express').Router
 var authRequired = require('../../auth-required')
 var toss = require('../../toss')
 
+var jwt_helpers = require('../../../jwt-helpers')
+
 module.exports = function Auth (auth_model, passport)
 {
 	var auth = {}
@@ -39,6 +41,7 @@ module.exports = function Auth (auth_model, passport)
 				}
 				else
 				{
+					user_data.access_token = jwt_helpers.generate(user_data)
 					return toss.ok(rs, user_data)
 				}
 			})
@@ -69,6 +72,7 @@ module.exports = function Auth (auth_model, passport)
 					return next(err)
 				}
 
+				user.access_token = jwt_helpers.generate(user)
 				return toss.ok(rs, user)
 			})
 		})(rq, rs, next)

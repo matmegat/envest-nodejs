@@ -27,6 +27,13 @@ module.exports = function (db, http)
 		toss(rs, investors.model.byId(rq.params.id))
 	})
 
+	investors.express.get('/:id/portfolio', (rq, rs) =>
+	{
+		var options = { investor_id: rq.params.id }
+
+		toss(rs, db.portfolio.list(options))
+	})
+
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.create(rq.body))

@@ -16,7 +16,7 @@ exports.seed = function (knex, Promise)
 				email: 'seed.1@user.com',
 				first_name: 'Seed',
 				last_name: 'User1',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then(id =>
 			{
@@ -53,7 +53,7 @@ exports.seed = function (knex, Promise)
 				email: 'seed.3@user.com',
 				first_name: 'Seed',
 				last_name: 'User3',
-				pic: '/api/static/pic/ee11cbb19052e40b07aac0ca060c23ee'
+				pic: 'ee11cbb19052e40b07aac0ca060c23ee'
 			}, 'id')
 			.then(id =>
 			{

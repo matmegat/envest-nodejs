@@ -7,6 +7,7 @@ var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
 var Investor = require('./models/Investor')
+var Portfolio = require('./models/Portfolio')
 
 module.exports = function name (app)
 {
@@ -51,6 +52,7 @@ module.exports = function name (app)
 
 	db.comments = Comments(db)
 	db.investor = Investor(db)
+	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
 	return db

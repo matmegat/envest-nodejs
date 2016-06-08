@@ -4,9 +4,16 @@
 # this is called Symbol
 type: object
 properties:
+  id:
+    type: integer
+    description: Symbol Id
   ticker:
     type: string
     description: Symbol ticker
   company:
     type: string
     description: company name corresponding to that symbol
+required:
+- id
+- ticker
+- company

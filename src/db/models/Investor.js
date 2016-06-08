@@ -1,5 +1,7 @@
 var _ = require('lodash')
+
 var generate_code = require('../../crypto-helpers').generate_code
+
 var knexed = require('../knexed')
 
 var Err = require('../../Err')
@@ -19,21 +21,30 @@ module.exports = function Investor (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 
-	investor.table = knexed(knex, 'investors')
+	investor.table = knexed(
+		knex,
+		knex.raw(
+			'(' +
+				'SELECT * ' +
+				'FROM investors ' +
+				'WHERE is_public = TRUE' +
+			') AS investors'
+		)
+	)
 
 	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
 	var user = db.user
 
-	var paging_table = function ()
+	var paging_table = function (trx)
 	{
-		return investor.table()
-			.select(
-				'user_id',
-				'users.first_name',
-				'users.last_name'
-			)
-			.innerJoin('users', 'investors.user_id', 'users.id')
+		return investor.table(trx)
+		.select(
+			'user_id',
+			'users.first_name',
+			'users.last_name'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
 	var paginator = Paginator(
     {
@@ -43,9 +54,21 @@ module.exports = function Investor (db)
         default_direction: 'asc'
     })
 
+	investor.is = function (investor_id, trx)
+	{
+		return investor.byId(investor_id, trx)
+		.then(Boolean)
+	}
+
+	investor.ensure = function (investor_id, trx)
+	{
+		return investor.is(investor_id, trx)
+		.then(Err.falsy(WrongInvestorId))
+	}
+
 	investor.byId = function (id, trx)
 	{
-		return investor.validate_id(id, trx)
+		return investor.validate_id(id)
 		.then(() =>
 		{
 			return investor
@@ -88,15 +111,15 @@ module.exports = function Investor (db)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = investor
-        .table(trx)
+		var queryset = investor.table(trx)
 		.select(
 			'users.id',
 			'users.first_name',
 			'users.last_name',
 			'users.pic',
 			'investors.focus',
-			'investors.historical_returns'
+			'investors.historical_returns',
+			'investors.profile_pic'
 		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
@@ -128,6 +151,7 @@ module.exports = function Investor (db)
 					'first_name',
 					'last_name',
 					'pic',
+					'profile_pic',
 					'focus',
 					'annual_return'
 				])
@@ -175,15 +199,18 @@ module.exports = function Investor (db)
 		.then(oneMaybe)
 		.then((investor_id) =>
 		{
-			// TODO: sent welcome email
+			/* TODO: sent welcome email
+			* - email verification link: ...
+			* - link to 'set new password'
+			* */
+			/* TODO: add notification: 'investor created'
+			* - to all admins?
+			* - to parent admin?
+			* - to created investor?
+			* */
 			return investor.byId(investor_id, trx)
 		})
 	})
-
-	// investor.update = knexed.transact(knex, (trx, id, data) =>
-	// {
-	//
-	// })
 
 	return investor
 }

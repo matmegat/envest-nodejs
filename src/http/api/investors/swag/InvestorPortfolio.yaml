@@ -1,0 +1,14 @@
+title: Investor Stocks (Symbols) Portfolio
+type: object
+properties:
+  total:
+    type: integer
+    description: amount of Stocks (Symbols)
+  holdings:
+    type: array
+    description: Investor Portfolio Symbols
+    items:
+    - $ref: ./InvestorPortfolioHolding.yaml
+required:
+- total
+- holdings

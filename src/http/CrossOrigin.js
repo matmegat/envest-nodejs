@@ -21,7 +21,7 @@ module.exports = function (cfg, express)
 
 			rs.header(
 				'Access-Control-Allow-Headers',
-				'Origin, X-Requested-With, Content-Type, Accept, ' +
+				'Authorization, Origin, X-Requested-With, Content-Type, Accept, ' +
 				'Access-Control-Allow-Credentials'
 			)
 			rs.header('Access-Control-Allow-Credentials', 'true')
