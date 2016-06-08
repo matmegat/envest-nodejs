@@ -53,6 +53,9 @@ paths:
   '/comments/abuse':
     $ref: ../api/comments/swag/Abuse.yaml
 
+  '/notifications':
+    $ref: ../api/notifications/swag/GetPostNotifications.yaml
+
   '/investors':
     $ref: ../api/investors/swag/GetInvestors.yaml
 
@@ -96,3 +99,9 @@ definitions:
 
   CommentUser:
     $ref: ../api/comments/swag/CommentUser.yaml
+
+  Notifications:
+    $ref: ../api/notifications/swag/Notifications.yaml
+
+  NotificationsItem:
+    $ref: ../api/notifications/swag/NotificationItem.yaml

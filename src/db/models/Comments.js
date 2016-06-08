@@ -9,7 +9,6 @@ var validate = require('../validate')
 var Err = require('../../Err')
 
 var _ = require('lodash')
-var noop = _.noop
 
 module.exports = function Comments (db)
 {
@@ -20,13 +19,16 @@ module.exports = function Comments (db)
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
+	expect(db, 'Comments depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+
 	var paginator = Paginator({ order_column: 'comments.id' })
 
 	expect(db, 'Comments depends on User').property('user')
 	var user = db.user
 
 	comments.table = () => knex('comments')
-	comments.abuse = Abuse(db, comments)
+	comments.abuse = Abuse(db, comments, Emitter)
 
 	comments.list = function (options)
 	{
@@ -71,6 +73,8 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
+	var NewFeedComment = Emitter('new_feed_comment', { target: 'recipient' })
+
 	comments.create = function (data)
 	{
 		return new Promise(rs =>
@@ -85,9 +89,21 @@ module.exports = function Comments (db)
 		.then(data =>
 		{
 			return comments.table()
-			.insert(data)
-			.then(noop)
+			.insert(data, 'id')
+			.then(one)
 			.catch(Err.fromDb('comments_feed_id_foreign', db.feed.NotFound))
+		})
+		.then((comment_id) =>
+		{
+			return db.feed.byId(data.feed_id)
+			.then(feed_item =>
+			{
+				return NewFeedComment(feed_item.investor.id,
+				{
+					feed_id: feed_item.id,
+					comment_id: comment_id
+				})
+			})
 		})
 	}
 

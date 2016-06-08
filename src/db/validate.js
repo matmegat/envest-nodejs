@@ -24,3 +24,27 @@ validate.empty = function validate__empty (field, name)
 		throw FieldEmpty({ field: name })
 	}
 }
+
+var WrongJSON = Err('wrong_json', 'Wrong JSON')
+
+validate.json = function validate__json (json, name)
+{
+	try
+	{
+		JSON.parse(json)
+	}
+	catch (e)
+	{
+		throw WrongJSON({ field: name })
+	}
+}
+
+var ArrayRequired = Err('array_required', 'Requires array')
+
+validate.array = function validate__array (ar, name)
+{
+	if (! Array.isArray(ar))
+	{
+		throw ArrayRequired({ field: name })
+	}
+}
