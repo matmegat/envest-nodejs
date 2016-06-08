@@ -17,7 +17,7 @@ module.exports = function (express, passport)
 					return next(err)
 				}
 
-				if(! user)
+				if (! user)
 				{
 					return next()
 				}
