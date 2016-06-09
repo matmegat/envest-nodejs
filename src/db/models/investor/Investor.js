@@ -201,17 +201,31 @@ module.exports = function Investor (db)
 		.then((investor_id) =>
 		{
 			/* TODO: sent welcome email
-			* - email verification link: ...
-			* - link to 'set new password'
-			* */
+			 * - email verification link: ...
+			 * - link to 'set new password'
+			 * REQUIRED FIELDS:
+			 * - first_name
+			 * - last_name
+			 * - host
+			 * - password_url (password reset url)
+			 * - password_code (password reset code)
+			 * */
 			var mailer = Mailer()
-			mailer.send(data.email)
+			mailer.send(data.email, 'welcome',
+			{
+				first_name: data.first_name,
+				last_name: data.last_name,
+				host: 'localhost:8000',
+				password_url: '/api/auth/change-password',
+				password_code: 'PASTE IT HERE'
+			})
 
 			/* TODO: add notification: 'investor created'
 			* - to all admins?
 			* - to parent admin?
 			* - to created investor?
 			* */
+
 			return investor.byId(investor_id, trx)
 		})
 	})
