@@ -14,6 +14,8 @@ var validate = require('../../validate')
 
 var Paginator = require('../../paginator/Chunked')
 
+var Mailer = require('../../../Mailer')
+
 module.exports = function Investor (db)
 {
 	var investor = {}
@@ -202,6 +204,9 @@ module.exports = function Investor (db)
 			* - email verification link: ...
 			* - link to 'set new password'
 			* */
+			var mailer = Mailer()
+			mailer.send(data.email)
+
 			/* TODO: add notification: 'investor created'
 			* - to all admins?
 			* - to parent admin?
