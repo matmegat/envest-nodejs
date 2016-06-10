@@ -15,18 +15,8 @@ module.exports = function Field (options)
 var extend = require('lodash/extend')
 var expect = require('chai').expect
 
+
 var same   = require('lodash/identity')
-
-/*function converter (convert)
-{
-	if (typeof convert !== 'function')
-	{
-		convert = same
-	}
-
-	return (value) => convert(value)
-}
-*/
 
 function validator (validate)
 {
