@@ -22,10 +22,12 @@ module.exports = function Feed (db)
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
-	var paginator = PaginatorChunked(
+	var paginator_chunked = PaginatorChunked(
 	{
 		table: feed.feed_table
 	})
+	
+	var paginator_booked = PaginatorBooked()
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	var comments = db.comments
@@ -82,16 +84,12 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
-			limit: 20,
 			column_name: 'timestamp'
 		})
 
-		if (options.page)
-		{
-			paginator = PaginatorBooked()
-		}
-
 		var queryset = feed.feed_table()
+
+		var paginator = options.page ? paginator_booked : paginator_chunked
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
