@@ -3,7 +3,7 @@ module.exports = function Field (options)
 {
 	options = extend({}, defaults, options)
 
-	expect(options.set || options.name, '`set` or field `name` required').ok
+	expect(options.set, '`set` is required').ok
 
 	var field = {}
 
@@ -22,8 +22,7 @@ var defaults =
 	validate: same,
 
 	get: null,
-	set: null,
-	name: null
+	set: null
 }
 
 /*function converter (convert)
