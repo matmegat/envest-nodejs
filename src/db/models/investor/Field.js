@@ -38,7 +38,7 @@ function setter (field, set)
 {
 	expect(set).a('function')
 
-	return (value) =>
+	return (value, queryset) =>
 	{
 		return field.validate(value)
 		.then(value =>
@@ -46,7 +46,7 @@ function setter (field, set)
 			/* to capture validator not returning */
 			expect(value).ok
 
-			return Promise.resolve()
+			return set(value, queryset)
 		})
 	}
 }
@@ -55,8 +55,8 @@ function getter (field, get)
 {
 	expect(get).a('function')
 
-	return () =>
+	return (queryset) =>
 	{
-		return Promise.resolve(null)
+		return get(queryset)
 	}
 }

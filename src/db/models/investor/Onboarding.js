@@ -25,13 +25,15 @@ function Profession (investor)
 			validate.empty(value)
 			return value
 		},
-		set: (value) =>
+		set: (value, queryset) =>
 		{
-
+			return queryset.update({ profession: value })
 		},
-		get: () =>
+		get: (queryset) =>
 		{
-
+			return queryset.select('profession')
+			.then(rows => rows[0])
+			.then(row  => row.profession)
 		}
 	})
 }
