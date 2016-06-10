@@ -46,12 +46,12 @@ module.exports = function Investor (db)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
 	var paginator = Paginator(
-    {
-        table: paging_table,
-        order_column: 'user_id',
-        real_order_column: 'last_name',
-        default_direction: 'asc'
-    })
+	{
+		table: paging_table,
+		order_column: 'user_id',
+		real_order_column: 'last_name',
+		default_direction: 'asc'
+	})
 
 	investor.is = function (investor_id, trx)
 	{
@@ -100,7 +100,8 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../../id').validate.promise(WrongInvestorId)
+	investor.validate_id = require('../../../id')
+	.validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)
 	{
