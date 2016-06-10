@@ -5,7 +5,8 @@ var _ = require('lodash')
 
 var knexed = require('../knexed')
 
-var Paginator = require('../paginator/Chunked')
+var PaginatorChunked = require('../paginator/Chunked')
+var PaginatorBooked  = require('../paginator/Booked')
 
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
@@ -20,7 +21,7 @@ module.exports = function Feed (db)
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
-	var paginator = Paginator(
+	var paginator = PaginatorChunked(
 	{
 		table: feed.feed_table
 	})
@@ -83,6 +84,11 @@ module.exports = function Feed (db)
 			limit: 20,
 			column_name: 'timestamp'
 		})
+
+		if(options.page)
+		{
+			paginator = PaginatorBooked()
+		}
 
 		var queryset = feed.feed_table()
 
