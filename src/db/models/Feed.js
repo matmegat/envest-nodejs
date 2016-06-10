@@ -18,6 +18,7 @@ module.exports = function Feed (db)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
+	var one = db.helpers.one
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
@@ -85,7 +86,7 @@ module.exports = function Feed (db)
 			column_name: 'timestamp'
 		})
 
-		if(options.page)
+		if (options.page)
 		{
 			paginator = PaginatorBooked()
 		}
@@ -123,14 +124,30 @@ module.exports = function Feed (db)
 			})
 			.then((investors) =>
 			{
-				var response =
+				return feed.count()
+				.then((count) =>
 				{
-					feed: feed_items,
-					investors: investors,
-				}
+					var response =
+					{
+						feed: feed_items,
+						total: count,
+						investors: investors,
+					}
 
-				return response
+					return response
+				})
 			})
+		})
+	}
+
+	feed.count = function ()
+	{
+		return feed.feed_table()
+		.count()
+		.then(one)
+		.then((count) =>
+		{
+			return count.count
 		})
 	}
 
