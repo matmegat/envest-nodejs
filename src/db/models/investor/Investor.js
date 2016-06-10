@@ -12,6 +12,8 @@ var AlreadyExists = Err('already_investor', 'This user is investor already')
 var expect = require('chai').expect
 var validate = require('../../validate')
 
+var Onboarding = require('./Onboarding')
+
 var Paginator = require('../../paginator/Chunked')
 
 module.exports = function Investor (db)
@@ -32,6 +34,8 @@ module.exports = function Investor (db)
 	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
 	var user = db.user
+
+	investor.onboarding = Onboarding(db, investor)
 
 	var paging_table = function (trx)
 	{
