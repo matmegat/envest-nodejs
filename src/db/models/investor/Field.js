@@ -1,7 +1,7 @@
 
 module.exports = function Field (options)
 {
-	options = extend({}, defaults, options)
+	options = extend({}, options)
 
 	expect(options.set, '`set` is required').ok
 
@@ -16,14 +16,6 @@ var extend = require('lodash/extend')
 var expect = require('chai').expect
 
 var same   = require('lodash/identity')
-
-var defaults =
-{
-	validate: same,
-
-	get: null,
-	set: null
-}
 
 /*function converter (convert)
 {
