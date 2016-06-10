@@ -8,14 +8,18 @@ var toId = require('../../id').toId
 
 var one = require('../helpers').one
 
-var defaults =
+var defaults = require('./options')
+
+var chunked_defaults =
 {
 	order_column: 'id',
 	real_order_column: 'timestamp',
 	default_direction: 'desc',
-	table: null,
-	limit: 20
+	table: null
 }
+
+defaults = extend({}, chunked_defaults, defaults)
+
 
 module.exports = function Paginator__Chunked (paginator_options)
 {

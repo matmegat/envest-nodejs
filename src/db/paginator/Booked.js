@@ -3,10 +3,7 @@ var extend = require('lodash/extend')
 
 var toId = require('../../id').toId
 
-var defaults =
-{
-	limit: 20
-}
+var defaults = require('./options')
 
 module.exports = function Paginator__Booked (paginator_options)
 {
