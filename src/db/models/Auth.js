@@ -130,8 +130,8 @@ function validate_register (credentials)
 {
 	return new Promise(rs =>
 	{
-		validate_name(credentials.first_name)
-		validate_name(credentials.last_name)
+		validate_name(credentials.first_name, 'first_name')
+		validate_name(credentials.last_name, 'last_name')
 		validate_password(credentials.password)
 		validate_email(credentials.email)
 
@@ -173,10 +173,10 @@ var XRegExp = require('xregexp')
 
 var WrongName = Err('wrong_name_format', 'Wrong name format')
 
-function validate_name (name)
+function validate_name (name, field_name)
 {
-	validate_required(name, 'name')
-	validate_empty(name, 'name')
+	validate_required(name, field_name)
+	validate_empty(name, field_name)
 
 	/*
 	   Two words minimum, separated by space.
