@@ -19,7 +19,7 @@ module.exports = function Paginator__Booked (paginator_options)
 		options = extend({}, paginator_options, options)
 
 		var limit  = Math.min(options.limit, defaults.limit)
-		var offset = toId(options.page) * limit
+		var offset = (toId(options.page) - 1) * limit //toId ипользуется т.к его логика подходит для проверки page
 
 		queryset.limit(limit)
 
