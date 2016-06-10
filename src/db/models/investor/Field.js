@@ -3,17 +3,17 @@ module.exports = function Field (options)
 {
 	options = extend({}, options)
 
-	expect(options.set, '`set` is required').ok
-
 	var field = {}
 
 	field.validate = validator(options.validate)
+
+	field.set = setter(field, options.set)
+	field.get = getter(field, options.get)
 
 	return field
 }
 
 var extend = require('lodash/extend')
-var expect = require('chai').expect
 
 
 var same   = require('lodash/identity')
@@ -28,5 +28,35 @@ function validator (validate)
 	return (value) =>
 	{
 		return new Promise(rs => rs(validate(value)))
+	}
+}
+
+
+var expect = require('chai').expect
+
+function setter (field, set)
+{
+	expect(set).a('function')
+
+	return (value) =>
+	{
+		return field.validate(value)
+		.then(value =>
+		{
+			/* to capture validator not returning */
+			expect(value).ok
+
+			return Promise.resolve()
+		})
+	}
+}
+
+function getter (field, get)
+{
+	expect(get).a('function')
+
+	return () =>
+	{
+		return Promise.resolve(null)
 	}
 }
