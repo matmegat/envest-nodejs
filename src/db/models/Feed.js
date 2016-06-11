@@ -26,7 +26,7 @@ module.exports = function Feed (db)
 	{
 		table: feed.feed_table
 	})
-	
+
 	var paginator_booked = PaginatorBooked()
 
 	expect(db, 'Feed depends on Comments').property('comments')
@@ -84,12 +84,21 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
+			limit: 20,
 			column_name: 'timestamp'
 		})
 
 		var queryset = feed.feed_table()
 
-		var paginator = options.page ? paginator_booked : paginator_chunked
+		var paginator
+		if (options.page)
+		{
+			paginator = paginator_booked
+		}
+		else
+		{
+			paginator = paginator_chunked
+		}
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
@@ -122,18 +131,24 @@ module.exports = function Feed (db)
 			})
 			.then((investors) =>
 			{
-				return feed.count()
-				.then((count) =>
+				var response =
 				{
-					var response =
-					{
-						feed: feed_items,
-						total: count,
-						investors: investors,
-					}
+					feed: feed_items,
+					investors: investors,
+				}
 
-					return response
-				})
+				if (options.page)
+				{
+					return feed.count()
+					.then((count) =>
+					{
+						response.total = count
+						response.pages = Math.floor( count / options.limit )
+						return response
+					})
+				}
+
+				return response
 			})
 		})
 	}
@@ -143,10 +158,7 @@ module.exports = function Feed (db)
 		return feed.feed_table()
 		.count()
 		.then(one)
-		.then((count) =>
-		{
-			return count.count
-		})
+		.then(row => row.count)
 	}
 
 	return feed
