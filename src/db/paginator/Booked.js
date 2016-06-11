@@ -3,6 +3,10 @@ var extend = require('lodash/extend')
 
 var toId = require('../../id').toId
 
+var validateId = require('../../id').validate
+var Err = require('../../Err')
+var WrongPageNumber = Err('wrong_page_number', 'Wrong Page Number')
+
 var defaults = require('./options')
 
 module.exports = function Paginator__Booked (paginator_options)
@@ -15,8 +19,12 @@ module.exports = function Paginator__Booked (paginator_options)
 	{
 		options = extend({}, paginator_options, options)
 
+		//toId и validateId ипользуются т.к их логика подходит для проверки page
+		var page = toId(options.page)
+		validateId(WrongPageNumber, page)
+
 		var limit  = Math.min(options.limit, defaults.limit)
-		var offset = (toId(options.page) - 1) * limit //toId ипользуется т.к его логика подходит для проверки page
+		var offset = ( page - 1 ) * limit
 
 		queryset.limit(limit)
 
