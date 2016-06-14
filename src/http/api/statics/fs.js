@@ -19,9 +19,17 @@ module.exports = function(rootpath)
 	{
 		switch (mime)
 		{
-			case 'image/png' : return  'png';
-			case 'image/jpeg': return 'jpeg';
+			case 'image/png' : return  'png'
+			case 'image/jpeg': return 'jpeg'
+			default: return 'jpeg'
 		}
+	}
+
+	fs.getFilename = function (id, mime)
+	{
+		var ext = fs.ext(mime)
+
+		return `${id}.${ext}`
 	}
 
 	fs.tuple = function (filename)
@@ -38,22 +46,28 @@ module.exports = function(rootpath)
 		return rootpath(imgFolder, tuple[0], tuple[1])
 	}
 
+	function tuple_to_filename (tuple)
+	{
+		return rootpath(imgFolder, tuple[0], tuple[1], tuple[2])
+	}
+
 	fs.save = function (file)
 	{
 		console.log(file)
 
 		var id = fs.id()
-		var tuple = fs.tuple(id)
-		var ext = fs.ext(file.mimetype)
+		var filename = fs.getFilename(id, file.mimetype)
+
+		var tuple = fs.tuple(filename)
+
 		var dirname = tuple_to_dir(tuple)
-		var filename = `${tuple[2]}.${ext}`
-		var filenameFull = `${dirname}/${filename}`
+		var filenameFull = tuple_to_filename(tuple)
 
 		return mkdirp(dirname)
 		.then(() =>
 		{
 			console.log('Folder created: ')
-			console.log(`id: ${id}, ext: ${ext}, dirname: ${dirname}, filename: ${filename}, filenameFull: ${filenameFull}`)
+			console.log(`id: ${id}, dirname: ${dirname}, filename: ${filename}, filenameFull: ${filenameFull}`)
 			writeTo(filenameFull).end(file.buffer)
 		})
 	}
