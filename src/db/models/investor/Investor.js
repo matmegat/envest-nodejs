@@ -31,8 +31,10 @@ module.exports = function Investor (db)
 		.where('is_public')
 	}
 
-	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
+	var auth = db.auth
+
+	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
 
 	investor.onboarding = Onboarding(db, investor)
