@@ -89,6 +89,9 @@
     "rootpath":
       "StreetStrider/rootpath#v1.4.0",
 
+    "sendgrid":
+      "^2.0",
+
     "swagger-parser":
       "^3.4.1",
 
