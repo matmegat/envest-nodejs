@@ -10,7 +10,6 @@ var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var AlreadyExists = Err('already_investor', 'This user is investor already')
 
 var expect = require('chai').expect
-var validate = require('../../validate')
 
 var Paginator = require('../../paginator/Chunked')
 
@@ -28,7 +27,7 @@ module.exports = function Investor (db)
 	investor.table_public = (trx) =>
 	{
 		return investor.table(trx)
-		.where('is_public')
+		.where('is_public', true)
 	}
 
 	var auth = db.auth
@@ -162,18 +161,7 @@ module.exports = function Investor (db)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
-		return new Promise(rs =>
-		{
-			validate.required(data.first_name, 'first_name')
-			validate.required(data.last_name, 'last_name')
-			validate.required(data.email, 'email')
-
-			rs()
-		})
-		.then(() =>
-		{
-			return generate_code()
-		})
+		return generate_code()
 		.then((password) =>
 		{
 			var user_data = _.extend({}, data,
@@ -185,11 +173,21 @@ module.exports = function Investor (db)
 		})
 		.then(() =>
 		{
+			return user.email_confirms(trx)
+			.where('new_email', data.email)
+			.then(oneMaybe)
+			.then((user_confirm) =>
+			{
+				return auth.emailConfirm(user_confirm.code)
+			})
+		})
+		.then(() =>
+		{
 			return user.byEmail(data.email, trx)
 		})
 		.then((user) =>
 		{
-			return investor.table_public(trx)
+			return investor.table(trx)
 			.insert(
 			{
 				user_id: user.id,
@@ -227,7 +225,7 @@ module.exports = function Investor (db)
 			* - to created investor?
 			* */
 
-			return investor.byId(investor_id, trx)
+			return { investor_id: investor_id }
 		})
 	})
 
