@@ -18,7 +18,6 @@ module.exports = function Feed (db)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
-	var one = db.helpers.one
 	var feed_count = db.helpers.count
 
 	feed.feed_table = knexed(knex, 'feed_items')
