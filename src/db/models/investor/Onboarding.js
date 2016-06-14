@@ -7,8 +7,26 @@ module.exports = function Onboarding (db, investor)
 
 	onb.fields.profession = Profession(investor)
 
+	onb.update = function update (investor_id, field, value)
+	{
+		return new Promise(rs =>
+		{
+			if (! (field in onb.fields))
+			{
+				throw WrongField({ field: field })
+			}
+
+			field = onb.fields[field]
+
+			rs(field.set(investor_id, value))
+		})
+	}
+
 	return onb
 }
+
+var Err = require('../../../Err')
+var WrongField = Err('wrong_field', 'Wrong Onboarding field')
 
 
 var Field = require('./Field')
