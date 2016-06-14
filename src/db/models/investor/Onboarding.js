@@ -17,7 +17,7 @@ var validate = require('../../validate')
 
 function Profession (investor)
 {
-	return Field(
+	return Field(investor,
 	{
 		validate: (value) =>
 		{

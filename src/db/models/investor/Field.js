@@ -1,10 +1,11 @@
 
-module.exports = function Field (options)
+module.exports = function Field (investor, options)
 {
 	options = extend({}, options)
 
 	var field = {}
 
+	field.investor = investor
 	field.validate = validator(options.validate)
 
 	field.set = setter(field, options.set)
@@ -16,7 +17,7 @@ module.exports = function Field (options)
 var extend = require('lodash/extend')
 
 
-var same   = require('lodash/identity')
+var same = require('lodash/identity')
 
 function validator (validate)
 {
@@ -38,9 +39,13 @@ function setter (field, set)
 {
 	expect(set).a('function')
 
-	return (value, queryset) =>
+	return (investor_id, value) =>
 	{
-		return field.validate(value)
+		return field.investor.ensure(investor_id)
+		.then(() =>
+		{
+			return field.validate(value)
+		})
 		.then(value =>
 		{
 			/* to capture validator not returning */
