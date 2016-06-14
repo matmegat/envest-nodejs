@@ -28,7 +28,7 @@ module.exports = function Investor (db)
 	investor.table_public = (trx) =>
 	{
 		return investor.table(trx)
-		.where('is_public')
+		.where('is_public', true)
 	}
 
 	expect(db, 'Investors depends on Auth').property('auth')
