@@ -47,6 +47,12 @@
     "multer":
       "^1.1.0",
 
+    "shortid":
+      "^2.2.6",
+
+    "mkdirp":
+      "^0.5.1",
+
     "express-session":
       "^1.13.0",
 

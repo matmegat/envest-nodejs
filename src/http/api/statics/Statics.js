@@ -1,16 +1,22 @@
+'use strict'
 
 var Router = require('express').Router
 
 var authRequired = require('../../auth-required')
 
 var fs = require('fs')
+var picfs = require('./fs')
+
 var mime = require('mime')
 var multer = require('multer')
+var upload = multer()
 
 module.exports = function Statics (rootpath)
 {
 	var statics = {}
 	var default_filename = rootpath('static/images/default.png')
+
+	statics.fs = picfs(rootpath)
 
 	statics.express = Router()
 
@@ -32,25 +38,11 @@ module.exports = function Statics (rootpath)
 		})
 	})
 
-
-	var storage = multer.diskStorage({
-		destination: (rq, file, done) =>
-		{
-			done(null, rootpath('static/images/'))
-		},
-		filename: (rq, file, done) =>
-		{
-			console.log(file)
-			done(null, file.fieldname + '.png')
-		}
-	})
-	var upload = multer({ storage: storage })
-
 	statics.express.post('/pic/upload', upload.single('avatar'), /*authRequired,*/ (rq, rs) =>
 	{
-		console.log('pic/upload route')
+		var file = rq.file
 
-		console.log(rq.file)
+		statics.fs.save(file)
 		rs.end()
 	})
 

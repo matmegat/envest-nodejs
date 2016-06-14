@@ -280,5 +280,10 @@ module.exports = function User (db)
 		})
 	})
 
+	user.addPic = function ()
+	{
+		
+	}
+
 	return user
 }
