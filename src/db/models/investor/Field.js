@@ -33,6 +33,8 @@ function validator (validate)
 		{
 			/* to capture validator not returning */
 			expect(value).ok
+
+			return value
 		})
 	}
 }
