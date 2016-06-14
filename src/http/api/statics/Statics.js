@@ -1,9 +1,12 @@
 
 var Router = require('express').Router
 
+var authRequired = require('../../auth-required')
+
 var fs = require('fs')
 var mime = require('mime')
-var busboy = require('connect-busboy')
+var multer = require('multer')
+var upload = multer()
 
 module.exports = function Statics (rootpath)
 {
@@ -28,6 +31,14 @@ module.exports = function Statics (rootpath)
 			rs.setHeader('content-type', type)
 			fs.createReadStream(filename).pipe(rs)
 		})
+	})
+
+	statics.express.post('/pic/upload', upload.single('avatar'), /*authRequired,*/ (rq, rs) =>
+	{
+		console.log('pic/upload route')
+
+		console.log(rq.file)
+		rs.end()
 	})
 
 	return statics
