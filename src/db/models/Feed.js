@@ -19,6 +19,7 @@ module.exports = function Feed (db)
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
 	var one = db.helpers.one
+	var feed_count = db.helpers.count
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
@@ -140,7 +141,7 @@ module.exports = function Feed (db)
 
 				if (options.page)
 				{
-					return feed.count(count_queryset)
+					return feed_count(count_queryset)
 					.then((count) =>
 					{
 						return paginator.total(response, count)
@@ -150,14 +151,6 @@ module.exports = function Feed (db)
 				return response
 			})
 		})
-	}
-
-	feed.count = function (queryset)
-	{
-		return queryset
-		.count()
-		.then(one)
-		.then(row => row.count)
 	}
 
 	return feed
