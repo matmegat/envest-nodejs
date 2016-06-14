@@ -6,7 +6,7 @@ var noop = require('lodash/noop')
 
 var validate   = require('../validate')
 var validateId = require('../../id').validate
-var Paginator  = require('../Paginator')
+var Paginator  = require('../paginator/Ordered')
 
 var Err = require('../../Err')
 

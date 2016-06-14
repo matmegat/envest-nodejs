@@ -1,23 +1,33 @@
 
 var Router = require('express').Router
 
-var stream = require('fs').createReadStream
+var fs = require('fs')
 var mime = require('mime')
 var busboy = require('connect-busboy')
 
 module.exports = function Statics (rootpath)
 {
 	var statics = {}
-	var filename = rootpath('static/images/default.png')
+	var default_filename = rootpath('static/images/default.png')
 
 	statics.express = Router()
 
 	statics.express.get('/pic/:hash', (rq, rs) =>
 	{
-		var type = mime.lookup(filename)
+		fs.access(rootpath('static/images/', rq.params.hash), fs.F_OK, (err) =>
+		{
+			var type = mime.lookup(default_filename)
+			var filename = default_filename
 
-		rs.setHeader('content-type', type)
-		stream(filename).pipe(rs)
+			if (! err)
+			{
+				type = mime.lookup(rootpath('static/images/', rq.params.hash))
+				filename = rootpath('static/images/', rq.params.hash)
+			}
+
+			rs.setHeader('content-type', type)
+			fs.createReadStream(filename).pipe(rs)
+		})
 	})
 
 	return statics

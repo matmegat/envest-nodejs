@@ -5,15 +5,11 @@ var _ = require('lodash')
 
 var knexed = require('../knexed')
 
-var Err = require('../../Err')
-var WrongInvestorId = Err('wrong_investor_id', 'Wrong investor id')
-
 module.exports = function Portfolio (db)
 {
 	var portfolio = {}
 
 	var knex     = db.knex
-	var oneMaybe = db.helpers.oneMaybe
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
 
