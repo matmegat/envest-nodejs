@@ -51,20 +51,13 @@ module.exports = function Paginator__Chunked (paginator_options)
 			.where(function ()
 			{
 				var sign = order_sign(default_dir, since_id, max_id)
+				var real_sign = real_order_sign(default_dir, since_id, max_id)
 
 				if (current_chunk)
 				{
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
-				}
-			})
-			.orWhere(function ()
-			{
-				var sign = real_order_sign(default_dir, since_id, max_id)
-
-				if (current_chunk)
-				{
-					this.where(real_order_column, sign, current_chunk)
+					this.orWhere(real_order_column, real_sign, current_chunk)
 				}
 			})
 
