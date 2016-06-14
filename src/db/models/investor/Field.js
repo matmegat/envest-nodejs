@@ -29,6 +29,11 @@ function validator (validate)
 	return (value) =>
 	{
 		return new Promise(rs => rs(validate(value)))
+		.then(value =>
+		{
+			/* to capture validator not returning */
+			expect(value).ok
+		})
 	}
 }
 
@@ -48,8 +53,8 @@ function setter (field, set)
 		})
 		.then(value =>
 		{
-			/* to capture validator not returning */
-			expect(value).ok
+			var queryset = field.investor.table()
+			.where('user_id', investor_id)
 
 			return set(value, queryset)
 		})
