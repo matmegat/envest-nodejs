@@ -6,7 +6,6 @@ var authRequired = require('../../auth-required')
 var fs = require('fs')
 var mime = require('mime')
 var multer = require('multer')
-var upload = multer()
 
 module.exports = function Statics (rootpath)
 {
@@ -32,6 +31,20 @@ module.exports = function Statics (rootpath)
 			fs.createReadStream(filename).pipe(rs)
 		})
 	})
+
+
+	var storage = multer.diskStorage({
+		destination: (rq, file, done) =>
+		{
+			done(null, rootpath('static/images/'))
+		},
+		filename: (rq, file, done) =>
+		{
+			console.log(file)
+			done(null, file.fieldname + '.png')
+		}
+	})
+	var upload = multer({ storage: storage })
 
 	statics.express.post('/pic/upload', upload.single('avatar'), /*authRequired,*/ (rq, rs) =>
 	{
