@@ -41,6 +41,7 @@ function validator (validate)
 
 
 var expect = require('chai').expect
+var noop = require('lodash/noop')
 
 function setter (field, set)
 {
@@ -60,6 +61,7 @@ function setter (field, set)
 
 			return set(value, queryset)
 		})
+		.then(noop)
 	}
 }
 
