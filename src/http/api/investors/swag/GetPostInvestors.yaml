@@ -55,7 +55,14 @@ post:
     200:
       description: Investor
       schema:
-        $ref: ./Investor.yaml
+        type: object
+        description: ID of created Investor
+        title: Investor Create Response
+        properties:
+          investor_id:
+            type: integer
+        required:
+        - investor_id
     400:
       $ref: ./400.yaml
   tags:
