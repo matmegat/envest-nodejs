@@ -3,6 +3,7 @@ var Router = require('express').Router
 
 var stream = require('fs').createReadStream
 var mime = require('mime')
+var busboy = require('connect-busboy')
 
 module.exports = function Statics (rootpath)
 {
