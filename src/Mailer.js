@@ -4,8 +4,10 @@ var _ = require('lodash')
 var SendGrid = require('sendgrid')
 
 
-module.exports = function Mailer () {
+module.exports = function Mailer ()
+{
 	var mailer = {}
+	// eslint-disable-next-line max-len
 	var API_key = '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'
 	var sendgrid = SendGrid(API_key)
 
@@ -53,7 +55,8 @@ module.exports = function Mailer () {
 			{
 				console.error(err)
 			}
-			else {
+			else
+			{
 				console.log('Welcome Email Sent to', to_email)
 				console.log(response)
 			}
