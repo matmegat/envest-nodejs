@@ -36,5 +36,13 @@ module.exports = function Paginator__Booked (paginator_options)
 		return queryset
 	}
 
+	paginator.total = function (response, count)
+	{
+		response.total = count
+		response.pages = Math.floor( count / paginator_options.limit )
+
+		return response
+	}
+
 	return paginator
 }

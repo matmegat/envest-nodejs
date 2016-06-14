@@ -84,7 +84,6 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
-			limit: 20,
 			column_name: 'timestamp'
 		})
 
@@ -99,6 +98,8 @@ module.exports = function Feed (db)
 		{
 			paginator = paginator_chunked
 		}
+
+		var count_queryset = queryset.clone()
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
@@ -139,12 +140,10 @@ module.exports = function Feed (db)
 
 				if (options.page)
 				{
-					return feed.count()
+					return feed.count(count_queryset)
 					.then((count) =>
 					{
-						response.total = count
-						response.pages = Math.floor( count / options.limit )
-						return response
+						return paginator.total(response, count)
 					})
 				}
 
@@ -153,9 +152,9 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.count = function ()
+	feed.count = function (queryset)
 	{
-		return feed.feed_table()
+		return queryset
 		.count()
 		.then(one)
 		.then(row => row.count)
