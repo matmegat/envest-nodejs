@@ -5,12 +5,10 @@ var toId = require('../../id').toId
 
 var defaults = require('./options')
 
-var ordered_defaults =
+defaults = extend({}, defaults,
 {
 	order_column: 'id'
-}
-
-defaults = extend({}, ordered_defaults, defaults)
+})
 
 module.exports = function Paginator__Ordered (paginator_options)
 {

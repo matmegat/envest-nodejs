@@ -10,15 +10,13 @@ var one = require('../helpers').one
 
 var defaults = require('./options')
 
-var chunked_defaults =
+defaults = extend({}, defaults,
 {
 	order_column: 'id',
 	real_order_column: 'timestamp',
 	default_direction: 'desc',
 	table: null
-}
-
-defaults = extend({}, chunked_defaults, defaults)
+})
 
 
 module.exports = function Paginator__Chunked (paginator_options)
