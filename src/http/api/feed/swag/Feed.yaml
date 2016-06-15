@@ -8,6 +8,10 @@ properties:
     type: array
     items:
     - $ref: ../../investors/swag/Investor.yaml
+  total:
+    type: integer
+  pages:
+    type: integer
 required:
 - feed
 - investors

@@ -18,7 +18,8 @@ module.exports = function Feed (db)
 		var options = _.pick(rq.query,
 		[
 			'max_id',
-			'since_id'
+			'since_id',
+			'page'
 		])
 
 		toss(rs, feed.model.list(options))
