@@ -3,13 +3,14 @@
 var Router = require('express').Router
 
 var authRequired = require('../../auth-required')
+var Err = require('../../../Err')
+var toss = require('../../toss')
 
 var fs = require('fs')
 var picfs = require('./fs')
 
 var mime = require('mime')
 var multer = require('multer')
-var upload = multer()
 
 module.exports = function Statics (rootpath, db)
 {
@@ -40,24 +41,35 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
+	var upload_pic = multer().single('user_pic')
+	var UploadError = Err('upload_error', 'Upload error')
+
 	statics.express.post('/pic/upload',
-		upload.single('avatar'),
 		authRequired,
 		(rq, rs) =>
 	{
-		var file = rq.file
-		var user_id = rq.user.id
-
-		statics.fs.save(file)
-		.then(hash =>
+		upload_pic(rq, rs, (err) =>
 		{
-			return statics.user_model.addPic(
+			if (err)
 			{
-				user_id: user_id,
-				hash: hash
+				return toss.err(rs, UploadError(err))
+			}
+
+			var file = rq.file
+			var user_id = rq.user.id
+
+			statics.fs.save(file)
+			.then(hash =>
+			{
+				return statics.user_model.addPic(
+				{
+					user_id: user_id,
+					hash: hash
+				})
 			})
+
+			rs.end()
 		})
-		rs.end()
 	})
 
 	return statics
