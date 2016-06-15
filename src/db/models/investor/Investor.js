@@ -210,14 +210,15 @@ module.exports = function Investor (db)
 			 * - password_code (password reset code)
 			 * */
 			var mailer = Mailer()
-			mailer.send(data.email, 'welcome',
+			mailer.send(
 			{
+				to: data.email,
 				first_name: data.first_name,
 				last_name: data.last_name,
-				host: 'localhost:8000',
+				host: 'localhost:8080',
 				password_url: '/api/auth/change-password',
 				password_code: 'PASTE IT HERE'
-			})
+			}, 'welcome')
 
 			/* TODO: add notification: 'investor created'
 			* - to all admins?
