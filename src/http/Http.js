@@ -68,7 +68,7 @@ module.exports = function Http (app)
 	mount(Feed(app.db), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Investors(app.db), 'investors', 'investors')
-	mount(Statics(app.root), 'static', 'static')
+	mount(Statics(app.root, app.db), 'static', 'static')
 	mount(Notifications(app.db), 'notifications', 'notifications')
 
 

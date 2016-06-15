@@ -11,9 +11,11 @@ var mime = require('mime')
 var multer = require('multer')
 var upload = multer()
 
-module.exports = function Statics (rootpath)
+module.exports = function Statics (rootpath, db)
 {
 	var statics = {}
+	statics.user_model = db.user
+
 	var default_filename = rootpath('static/images/default.png')
 
 	statics.fs = picfs(rootpath)
@@ -38,11 +40,26 @@ module.exports = function Statics (rootpath)
 		})
 	})
 
-	statics.express.post('/pic/upload', upload.single('avatar'), /*authRequired,*/ (rq, rs) =>
+	statics.express.post('/pic/upload', upload.single('avatar'), authRequired, (rq, rs) =>
 	{
 		var file = rq.file
+		var user_id = rq.user.id
 
 		statics.fs.save(file)
+		.then(hash =>
+		{
+			console.log(`user_id ${user_id}`)
+			console.log(`file hash ${hash}`)
+			statics.user_model.addPic(
+			{
+				user_id: user_id,
+				hash: hash
+			})
+			.then(() =>
+			{
+				console.log('added')
+			})
+		})
 		rs.end()
 	})
 

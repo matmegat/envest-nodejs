@@ -280,9 +280,14 @@ module.exports = function User (db)
 		})
 	})
 
-	user.addPic = function ()
+	user.addPic = function (data)
 	{
-		
+		return user.users_table()
+		.update(
+		{
+			pic: data.hash
+		})
+		.where('id', data.user_id)
 	}
 
 	return user

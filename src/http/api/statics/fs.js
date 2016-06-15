@@ -53,10 +53,8 @@ module.exports = function(rootpath)
 
 	fs.save = function (file)
 	{
-		console.log(file)
-
-		var id = fs.id()
-		var filename = fs.getFilename(id, file.mimetype)
+		var hash = fs.id()
+		var filename = fs.getFilename(hash, file.mimetype)
 
 		var tuple = fs.tuple(filename)
 
@@ -66,9 +64,9 @@ module.exports = function(rootpath)
 		return mkdirp(dirname)
 		.then(() =>
 		{
-			console.log('Folder created: ')
-			console.log(`id: ${id}, dirname: ${dirname}, filename: ${filename}, filenameFull: ${filenameFull}`)
 			writeTo(filenameFull).end(file.buffer)
+
+			return hash
 		})
 	}
 
