@@ -25,41 +25,49 @@ module.exports = function Mailer ()
 		welcome: '5ef32fb6-9c55-416b-ae81-0d2df70aa56e'
 	}
 
-	mailer.send = function (to_email, template_type, data)
+	mailer.send = function (data, template_type)
 	{
-		var email = new sendgrid.Email(_.extend({}, defaults, { to: to_email }))
+		var email_data = _.pick(data, ['to', 'subject', 'text', 'html'])
+		var email = new sendgrid.Email(_.extend({}, defaults, email_data))
+
 		var substitutions = {}
+		var template_id = templates[template_type]
 
-		email.setFilters(
+		if (template_id)
 		{
-			templates:
+			email.setFilters(
 			{
-				settings:
+				templates:
 				{
-					enable: 1,
-					template_id: templates[template_type],
+					settings:
+					{
+						enable: 1,
+						template_id: templates[template_type],
+					}
 				}
-			}
-		})
+			})
 
-		_.forEach(data, (value, key) =>
-		{
-			_.set(substitutions, '%' + key + '%', [ value ])
-		})
-
-		email.setSubstitutions(substitutions)
-
-		sendgrid.send(email, (err, response) =>
-		{
-			if (err)
+			_.forEach(_.omit(data, 'text', 'html'), (value, key) =>
 			{
-				console.error(err)
-			}
-			else
+				_.set(substitutions, '%' + key + '%', [ value ])
+			})
+
+			email.setSubstitutions(substitutions)
+		}
+
+		return new Promise((resolve, reject) =>
+		{
+			sendgrid.send(email, (err, response) =>
 			{
-				console.log('Welcome Email Sent to', to_email)
-				console.log(response)
-			}
+				if (err)
+				{
+					reject(err)
+				}
+				else
+				{
+					resolve(response)
+				}
+			})
 		})
 	}
 
