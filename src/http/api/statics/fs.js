@@ -5,7 +5,7 @@ var mkdirp = promisify(require('mkdirp'))
 
 var writeTo = require('fs').createWriteStream
 
-module.exports = function(rootpath)
+module.exports = function (rootpath)
 {
 	var fs = {}
 	var imgFolder = rootpath('static/images/userpic')

@@ -40,7 +40,10 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
-	statics.express.post('/pic/upload', upload.single('avatar'), authRequired, (rq, rs) =>
+	statics.express.post('/pic/upload',
+		upload.single('avatar'),
+		authRequired,
+		(rq, rs) =>
 	{
 		var file = rq.file
 		var user_id = rq.user.id
@@ -48,16 +51,10 @@ module.exports = function Statics (rootpath, db)
 		statics.fs.save(file)
 		.then(hash =>
 		{
-			console.log(`user_id ${user_id}`)
-			console.log(`file hash ${hash}`)
-			statics.user_model.addPic(
+			return statics.user_model.addPic(
 			{
 				user_id: user_id,
 				hash: hash
-			})
-			.then(() =>
-			{
-				console.log('added')
 			})
 		})
 		rs.end()
