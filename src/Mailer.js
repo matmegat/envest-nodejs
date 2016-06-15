@@ -3,6 +3,8 @@ var _ = require('lodash')
 
 var SendGrid = require('sendgrid')
 
+var Err = require('./Err')
+var SendgridError = Err('sendgrid_error', 'Sendgrid error.')
 
 module.exports = function Mailer ()
 {
@@ -61,7 +63,7 @@ module.exports = function Mailer ()
 			{
 				if (err)
 				{
-					reject(err)
+					reject(SendgridError(err))
 				}
 				else
 				{
