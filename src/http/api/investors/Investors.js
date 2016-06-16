@@ -19,12 +19,12 @@ module.exports = function (db, http)
 			'max_id',
 			'since_id'
 		])
-		toss(rs, investors.model.list(options))
+		toss(rs, investors.model.public.list(options))
 	})
 
 	investors.express.get('/:id', (rq, rs) =>
 	{
-		toss(rs, investors.model.byId(rq.params.id))
+		toss(rs, investors.model.public.byId(rq.params.id))
 	})
 
 	investors.express.get('/:id/portfolio', (rq, rs) =>
