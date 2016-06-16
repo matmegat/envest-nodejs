@@ -24,3 +24,14 @@ validate.empty = function validate__empty (field, name)
 		throw FieldEmpty({ field: name })
 	}
 }
+
+
+var FieldType = Err('field_wrong_type', 'Field must have certain type')
+
+validate.string = function validate__string (field, name)
+{
+	if (typeof field !== 'string')
+	{
+		throw FieldType({ field: name, type: 'string' })
+	}
+}

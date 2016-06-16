@@ -62,6 +62,9 @@ paths:
   '/investors/{investor_id}/portfolio':
     $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
 
+  '/investors/{investor_id}/field':
+    $ref: ../api/investors/swag/Field.yaml
+
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 

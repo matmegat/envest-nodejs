@@ -11,6 +11,8 @@ var AlreadyExists = Err('already_investor', 'This user is investor already')
 
 var expect = require('chai').expect
 
+var Onboarding = require('./Onboarding')
+
 var Paginator = require('../../paginator/Chunked')
 
 var Mailer = require('../../../Mailer')
@@ -30,9 +32,13 @@ module.exports = function Investor (db)
 		.where('is_public', true)
 	}
 
-	var auth = db.auth
 	expect(db, 'Investors depends on Auth').property('auth')
+	var auth = db.auth
+
+	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
+
+	investor.onboarding = Onboarding(db, investor)
 
 	var paging_table = function (trx)
 	{
@@ -66,7 +72,7 @@ module.exports = function Investor (db)
 
 	investor.byId = function (id, trx)
 	{
-		return investor.validate_id(id)
+		return validate_id(id)
 		.then(() =>
 		{
 			return investor
@@ -99,7 +105,7 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../../id')
+	var validate_id = require('../../../id')
 	.validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)

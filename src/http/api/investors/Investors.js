@@ -39,5 +39,15 @@ module.exports = function (db, http)
 		toss(rs, investors.model.create(rq.body))
 	})
 
+	investors.express.post('/:id/field', http.adminRequired, (rq, rs) =>
+	{
+		var investor_id = rq.params.id
+
+		var field = rq.body.field
+		var value = rq.body.value
+
+		toss(rs, investors.model.onboarding.update(investor_id, field, value))
+	})
+
 	return investors
 }

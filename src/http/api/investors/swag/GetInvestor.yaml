@@ -4,7 +4,7 @@ get:
   - name: investor_id
     in: path
     type: number
-    description: Feed Item ID
+    description: Investor ID
     required: true
   responses:
     200:
