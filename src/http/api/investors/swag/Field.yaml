@@ -1,0 +1,39 @@
+post:
+  description: update Investor field while Onboarding
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor ID
+    required: true
+  - name: payload
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Field Value pair
+      properties:
+        field:
+          type: string
+          description: field name to update
+        value:
+          type: string
+          description: field value to update (each value has its own specific validations)
+      required:
+      - field
+      - value
+
+  responses:
+    200:
+      description: field updated
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors
