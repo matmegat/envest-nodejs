@@ -27,6 +27,15 @@ helpers.one = function one (queryset)
 	return queryset[0]
 }
 
+helpers.count = function count (queryset)
+{
+	return queryset
+	.count()
+	.then(helpers.one)
+	.then(row => row.count)
+	.then(Number)
+}
+
 function ensureNotMultiple (queryset)
 {
 	if (! Array.isArray(queryset))

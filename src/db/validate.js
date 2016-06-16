@@ -25,7 +25,6 @@ validate.empty = function validate__empty (field, name)
 	}
 }
 
-
 var FieldType = Err('field_wrong_type', 'Field must have certain type')
 
 validate.string = function validate__string (field, name)
@@ -33,5 +32,25 @@ validate.string = function validate__string (field, name)
 	if (typeof field !== 'string')
 	{
 		throw FieldType({ field: name, type: 'string' })
+	}
+}
+
+validate.json = function validate__json (json, name)
+{
+	try
+	{
+		JSON.parse(json)
+	}
+	catch (e)
+	{
+		throw FieldType({ field: name, type: 'json' })
+	}
+}
+
+validate.array = function validate__array (ar, name)
+{
+	if (! Array.isArray(ar))
+	{
+		throw FieldType({ field: name, type: 'array' })
 	}
 }

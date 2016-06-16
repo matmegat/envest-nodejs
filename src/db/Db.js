@@ -8,6 +8,7 @@ var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
 var Investor = require('./models/investor/Investor')
 var Portfolio = require('./models/Portfolio')
+var Notifications = require('./models/Notifications')
 
 module.exports = function name (app)
 {
@@ -47,6 +48,7 @@ module.exports = function name (app)
 	})
 
 	db.user  = User(db)
+	db.notifications = Notifications(db)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
 
