@@ -35,3 +35,19 @@ validate.string = function validate__string (field, name)
 		throw FieldType({ field: name, type: 'string' })
 	}
 }
+
+
+var FieldLength = Err('field_wrong_length', 'Field must have certain type')
+
+validate.length = function validate__length (max)
+{
+	return (field, name) =>
+	{
+		var actual = field.length
+
+		if (actual > max)
+		{
+			throw FieldLength({ field: name, actual: actual, max: max })
+		}
+	}
+}

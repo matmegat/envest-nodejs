@@ -6,6 +6,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields = {}
 
 	onb.fields.profession = Profession(investor)
+	onb.fields.focus = Focus(investor)
 
 	onb.update = function update (investor_id, field, value)
 	{
@@ -53,5 +54,27 @@ function Profession (investor)
 			.then(rows => rows[0])
 			.then(row  => row.profession)
 		}
+	})
+}
+
+
+var validateFocusLength = validate.length(250)
+
+function Focus (investor)
+{
+	return Field(investor,
+	{
+		value: (value) =>
+		{
+			validate.string(value)
+			validate.empty(value)
+			validateFocusLength(value)
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ focus: value })
+		},
+		get: () => {}
 	})
 }
