@@ -41,7 +41,21 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
-	var upload_pic = multer().single('user_pic')
+	var MimeError = Err('wrong_file', 'File has no mimetype')
+
+	var upload_pic = multer({
+		fileFilter: function (req, file, done)
+		{
+			if (! file.mimetype)
+			{
+				done(MimeError())
+			}
+
+			done(null, true)
+		}
+	})
+	.single('user_pic')
+
 	var UploadError = Err('upload_error', 'Upload error')
 
 	statics.express.post('/pic/upload', authRequired, (rq, rs) =>
