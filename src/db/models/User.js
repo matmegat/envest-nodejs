@@ -4,6 +4,8 @@ var knexed = require('../knexed')
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
+var Password = require('./Password')
+
 var Err = require('../../Err')
 var Groups = require('./Groups')
 var NotFound = Err('user_not_found', 'User not found')
@@ -24,6 +26,8 @@ module.exports = function User (db)
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 	user.auth_local     = knexed(knex, 'auth_local')
+
+	user.password = Password(db, user)
 
 	user.NotFound = NotFound
 
