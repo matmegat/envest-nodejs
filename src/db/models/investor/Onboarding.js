@@ -50,12 +50,6 @@ function Profession (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ profession: value })
-		},
-		get: (queryset) =>
-		{
-			return queryset.select('profession')
-			.then(rows => rows[0])
-			.then(row  => row.profession)
 		}
 	})
 }
@@ -77,7 +71,6 @@ function Focus (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ focus: value })
-		},
-		get: () => {}
+		}
 	})
 }

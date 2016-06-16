@@ -9,7 +9,7 @@ module.exports = function Field (investor, options)
 	field.validate = validator(options.validate)
 
 	field.set = setter(field, options.set)
-	field.get = getter(field, options.get)
+	// field.get = getter(field, options.get)
 
 	return field
 }
