@@ -8,6 +8,7 @@ var Err = require('../../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 
+var Paginator = require('../../paginator/Chunked')
 
 module.exports = function Meta (knexed_table, options)
 {
@@ -75,7 +76,81 @@ module.exports = function Meta (knexed_table, options)
 		})
 	}
 
-	meta.list = function (options, trx) {}
+	var paging_table = function (trx)
+	{
+		return table(trx)
+		.select(
+			'user_id',
+			'users.first_name',
+			'users.last_name'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
+	}
+
+	var paginator = Paginator(
+	{
+		table: paging_table,
+		order_column: 'user_id',
+		real_order_column: 'last_name',
+		default_direction: 'asc'
+	})
+
+	meta.list = function (options, trx)
+	{
+		options = _.extend({}, options,
+		{
+			limit: 20,
+			column_name: 'investors.user_id'
+		})
+
+		var queryset = table(trx)
+		.select(
+			'users.id',
+			'users.first_name',
+			'users.last_name',
+			'users.pic',
+			'investors.focus',
+			'investors.historical_returns',
+			'investors.profile_pic'
+		)
+		.innerJoin('users', 'investors.user_id', 'users.id')
+
+		if (options.where)
+		{
+			// TODO: validate options.where
+
+			// WHAT with this?
+			queryset.where(
+				options.where.column_name,
+				options.where.clause,
+				options.where.argument
+			)
+		}
+
+		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
+		.then((investors) =>
+		{
+			return investors.map((investor) =>
+			{
+				investor.annual_return = _.sumBy(
+					investor.historical_returns,
+					'percentage'
+				) / investor.historical_returns.length
+				// FIXME: refactor annual return when it comes more complicated
+
+				return _.pick(investor,
+				[
+					'id',
+					'first_name',
+					'last_name',
+					'pic',
+					'profile_pic',
+					'focus',
+					'annual_return'
+				])
+			})
+		})
+	}
 
 
 	return meta

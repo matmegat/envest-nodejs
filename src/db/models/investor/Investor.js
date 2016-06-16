@@ -9,8 +9,6 @@ var AlreadyExists = Err('already_investor', 'This user is investor already')
 
 var expect = require('chai').expect
 
-var Paginator = require('../../paginator/Chunked')
-
 var Mailer = require('../../../Mailer')
 
 var Meta = require('./Meta')
@@ -34,85 +32,8 @@ module.exports = function Investor (db)
 	expect(db, 'Investors depends on Auth').property('auth')
 	var user = db.user
 
-	var paging_table = function (trx)
-	{
-		return investor.table_public(trx)
-		.select(
-			'user_id',
-			'users.first_name',
-			'users.last_name'
-		)
-		.innerJoin('users', 'investors.user_id', 'users.id')
-	}
-	var paginator = Paginator(
-	{
-		table: paging_table,
-		order_column: 'user_id',
-		real_order_column: 'last_name',
-		default_direction: 'asc'
-	})
-
 	investor.all    = Meta(investor.table, {})
 	investor.public = Meta(investor.table, { is_public: true })
-
-/*
-	investor.list = function (options, trx)
-	{
-		options = _.extend({}, options,
-		{
-			limit: 20,
-			column_name: 'investors.user_id'
-		})
-
-		var queryset = investor.table_public(trx)
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			'investors.focus',
-			'investors.historical_returns',
-			'investors.profile_pic'
-		)
-		.innerJoin('users', 'investors.user_id', 'users.id')
-
-		if (options.where)
-		{
-			// TODO: validate options.where
-
-			// WHAT with this?
-			queryset.where(
-				options.where.column_name,
-				options.where.clause,
-				options.where.argument
-			)
-		}
-
-		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
-		.then((investors) =>
-		{
-			return investors.map((investor) =>
-			{
-				investor.annual_return = _.sumBy(
-					investor.historical_returns,
-					'percentage'
-				) / investor.historical_returns.length
-				// FIXME: refactor annual return when it comes more complicated
-
-				return _.pick(investor,
-				[
-					'id',
-					'first_name',
-					'last_name',
-					'pic',
-					'profile_pic',
-					'focus',
-					'annual_return'
-				])
-			})
-		})
-	}
-*/
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
@@ -180,7 +101,7 @@ module.exports = function Investor (db)
 			* - to created investor?
 			* */
 
-			return { investor_id: investor_id }
+			return investor.all.byId(investor_id, trx)
 		})
 	})
 
