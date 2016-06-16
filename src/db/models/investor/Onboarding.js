@@ -40,8 +40,8 @@ function Profession (investor)
 	{
 		validate: (value) =>
 		{
-			validate.string(value)
-			validate.empty(value)
+			validate.string(value, 'profession')
+			validate.empty(value, 'profession')
 			return value
 		},
 		set: (value, queryset) =>
@@ -66,9 +66,9 @@ function Focus (investor)
 	{
 		value: (value) =>
 		{
-			validate.string(value)
-			validate.empty(value)
-			validateFocusLength(value)
+			validate.string(value, 'focus')
+			validate.empty(value, 'focus')
+			validateFocusLength(value, 'focus')
 			return value
 		},
 		set: (value, queryset) =>
