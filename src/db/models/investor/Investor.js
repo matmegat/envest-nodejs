@@ -5,8 +5,6 @@ var generate_code = require('../../../crypto-helpers').generate_code
 var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
-var NotFound = Err('investor_not_found', 'Investor not found')
-var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var AlreadyExists = Err('already_investor', 'This user is investor already')
 
 var expect = require('chai').expect
@@ -14,6 +12,8 @@ var expect = require('chai').expect
 var Paginator = require('../../paginator/Chunked')
 
 var Mailer = require('../../../Mailer')
+
+var Meta = require('./Meta')
 
 module.exports = function Investor (db)
 {
@@ -52,56 +52,10 @@ module.exports = function Investor (db)
 		default_direction: 'asc'
 	})
 
-	investor.is = function (investor_id, trx)
-	{
-		return investor.byId(investor_id, trx)
-		.then(Boolean)
-	}
+	investor.all    = Meta(investor.table, {})
+	investor.public = Meta(investor.table, { is_public: true })
 
-	investor.ensure = function (investor_id, trx)
-	{
-		return investor.is(investor_id, trx)
-		.then(Err.falsy(WrongInvestorId))
-	}
-
-	investor.byId = function (id, trx)
-	{
-		return investor.validate_id(id)
-		.then(() =>
-		{
-			return investor
-			.table_public(trx)
-			.select(
-				'users.id',
-				'users.first_name',
-				'users.last_name',
-				'users.pic',
-				'investors.profession',
-				'investors.focus',
-				'investors.background',
-				'investors.historical_returns',
-				'investors.profile_pic'
-			)
-			.innerJoin('users', 'investors.user_id', 'users.id')
-			.where('user_id', id)
-		})
-		.then(oneMaybe)
-		.then(Err.nullish(NotFound))
-		.then((investor) =>
-		{
-			investor.annual_return = _.sumBy(
-				investor.historical_returns,
-				'percentage'
-			) / investor.historical_returns.length
-			// FIXME: refactor annual return when it comes more complecated
-
-			return _.omit(investor, [ 'historical_returns' ])
-		})
-	}
-
-	investor.validate_id = require('../../../id')
-	.validate.promise(WrongInvestorId)
-
+/*
 	investor.list = function (options, trx)
 	{
 		options = _.extend({}, options,
@@ -158,6 +112,7 @@ module.exports = function Investor (db)
 			})
 		})
 	}
+*/
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
