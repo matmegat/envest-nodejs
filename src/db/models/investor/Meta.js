@@ -8,7 +8,8 @@ var Err = require('../../../Err')
 var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 
-var Paginator = require('../../paginator/Chunked')
+var ChunkedPaginator = require('../../paginator/Chunked')
+var BookedPaginator = require('../../paginator/Booked')
 
 module.exports = function Meta (knexed_table, options)
 {
@@ -87,11 +88,16 @@ module.exports = function Meta (knexed_table, options)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 	}
 
-	var paginator = Paginator(
+	var paginator_chunked = ChunkedPaginator(
 	{
 		table: paging_table,
 		order_column: 'user_id',
 		real_order_column: 'last_name',
+		default_direction: 'asc'
+	})
+	var paginator_booked = BookedPaginator(
+	{
+		order_column: 'last_name',
 		default_direction: 'asc'
 	})
 
@@ -125,6 +131,16 @@ module.exports = function Meta (knexed_table, options)
 				options.where.clause,
 				options.where.argument
 			)
+		}
+
+		var paginator
+		if (options.page)
+		{
+			paginator = paginator_booked
+		}
+		else
+		{
+			paginator = paginator_chunked
 		}
 
 		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))

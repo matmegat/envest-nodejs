@@ -17,7 +17,8 @@ module.exports = function (db, http)
 		var options = pick(rq.query,
 		[
 			'max_id',
-			'since_id'
+			'since_id',
+			'page'
 		])
 		toss(rs, investors.model.public.list(options))
 	})
