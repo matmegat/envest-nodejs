@@ -34,6 +34,8 @@ var Field = require('./Field')
 var validate = require('../../validate')
 
 
+var validateProfLength = validate.length(50)
+
 function Profession (investor)
 {
 	return Field(investor,
@@ -42,6 +44,7 @@ function Profession (investor)
 		{
 			validate.string(value, 'profession')
 			validate.empty(value, 'profession')
+			validateProfLength(value, 'profession')
 			return value
 		},
 		set: (value, queryset) =>
