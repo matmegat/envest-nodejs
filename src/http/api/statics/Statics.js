@@ -44,9 +44,7 @@ module.exports = function Statics (rootpath, db)
 	var upload_pic = multer().single('user_pic')
 	var UploadError = Err('upload_error', 'Upload error')
 
-	statics.express.post('/pic/upload',
-		authRequired,
-		(rq, rs) =>
+	statics.express.post('/pic/upload', authRequired, (rq, rs) =>
 	{
 		upload_pic(rq, rs, (err) =>
 		{
@@ -58,17 +56,32 @@ module.exports = function Statics (rootpath, db)
 			var file = rq.file
 			var user_id = rq.user.id
 
-			statics.fs.save(file)
-			.then(hash =>
+			statics.user_model.picByUserId(user_id)
+			.then(result =>
 			{
-				return statics.user_model.addPic(
+				var pic = result.pic || ''
+
+				if (pic)
+				{
+					return statics.fs.remove(pic)
+				}
+			})
+			.then(() =>
+			{
+				return statics.fs.save(file)
+			})
+			.then(filename =>
+			{
+				return statics.user_model.updatePic(
 				{
 					user_id: user_id,
-					hash: hash
+					hash: filename
 				})
 			})
-
-			rs.end()
+			.then(() =>
+			{
+				rs.end()
+			})
 		})
 	})
 

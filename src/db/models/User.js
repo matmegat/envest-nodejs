@@ -280,7 +280,14 @@ module.exports = function User (db)
 		})
 	})
 
-	user.addPic = function (data)
+	user.picByUserId = function (id)
+	{
+		return user.users_table()
+		.where('id', id)
+		.then(oneMaybe)
+	}
+
+	user.updatePic = function (data)
 	{
 		return user.users_table()
 		.update(
