@@ -37,6 +37,15 @@ validate.string = function validate__string (field, name)
 }
 
 
+validate.array = function validate__array (field, name)
+{
+	if (! Array.isArray(field))
+	{
+		throw FieldType({ field: name, type: 'array' })
+	}
+}
+
+
 var FieldLength = Err('field_wrong_length', 'Field must have certain type')
 
 validate.length = function validate__length (max)

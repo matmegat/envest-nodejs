@@ -98,12 +98,62 @@ function Background ()
 	})
 }
 
+
+var WrongHistFormat = Err('wrong_hist_return',
+   'Wrong historical returns format')
+
+var isInteger = require('lodash/isinteger')
+var isFinite = require('lodash/isfinite')
+var inRange = require('lodash/inrange')
+
 function HistReturn ()
 {
+	function vrow (row)
+	{
+		expect(row).ok
+		expect(row).an('object')
+
+		try
+		{
+			if (! isInteger(row.year)) throw new Error
+			if (! inRange(1900, 2050)) throw new Error
+		}
+		catch (e)
+		{
+			throw WrongHistFormat({ field: 'hist_return', subfield: 'year' })
+		}
+
+		try
+		{
+			if (! isFinite(row.percentage)) throw new Error
+		}
+		catch (e)
+		{
+			throw WrongHistFormat({ field: 'hist_return', subfield: 'percentage' })
+		}
+	}
+
 	return Field(investor,
 	{
 		validate: (value) =>
 		{
+			try
+			{
+				validate.array(value, 'hist_return')
+
+				value.forEach(vrow)
+			}
+			catch (error)
+			{
+				if (Err.is(e))
+				{
+					throw error
+				}
+				else
+				{
+					throw WrongHistFormat({ field: 'hist_return' })
+				}
+			}
 
 			return value
 		},
