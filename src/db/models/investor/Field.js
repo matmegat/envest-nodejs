@@ -65,6 +65,7 @@ function setter (field, set)
 	}
 }
 
+/*
 function getter (field, get)
 {
 	expect(get).a('function')
@@ -74,3 +75,4 @@ function getter (field, get)
 		return get(queryset)
 	}
 }
+*/
