@@ -15,25 +15,42 @@ module.exports = function Password (db, user)
 
 	var generate_salt = cr_helpers.generate_salt
 	var encrypt_pass  = cr_helpers.encrypt_pass
-	var generate_code  = cr_helpers.generate_code
+	var generate_code = cr_helpers.generate_code
+	var compare_passwords = cr_helpers.compare_passwords
 
 	password.reset_table = knexed(knex, 'pass_reset')
 
 	password.update = function (user_id, new_pass, trx)
 	{
+		return validate_pass(new_pass)
+		.then(() =>
+		{
+			return password.genHashSalt(new_pass)
+			.then(data =>
+			{
+				return user.auth_local(trx)
+				.update(data)
+				.where('user_id', user_id)
+				.then(noop)
+			})
+		})
+	}
+
+	password.genHashSalt = function (pass)
+	{
 		return generate_salt()
 		.then(salt =>
 		{
-			return encrypt_pass(new_pass, salt)
-			.then(new_pass_hash =>
+			return encrypt_pass(pass, salt)
+			.then(hash =>
 			{
-				return user.auth_local(trx)
-				.update({
-					password: new_pass_hash,
+				var data = 
+				{
+					password: hash,
 					salt: salt
-				})
-				.where('user_id', user_id)
-				.then(noop)
+				}
+
+				return data
 			})
 		})
 	}
@@ -42,22 +59,20 @@ module.exports = function Password (db, user)
 
 	password.change = function (user_id, pass, new_pass)
 	{
-		return user.auth_local()
-		.where('user_id', user_id)
-		.then(one)
-		.then(user =>
+		return validate_pass(password)
+		.then(() =>
 		{
-			return encrypt_pass(pass, user.salt)
-			.then(pass_hash =>
+			return user.auth_local()
+			.where('user_id', user_id)
+			.then(one)
+			.then(user =>
 			{
-				if (pass_hash === user.password)
+				return compare_passwords(user.password, pass, user.salt)
+				.then(Err.falsy(WrongPass))
+				.then(() =>
 				{
 					return password.update(user_id, new_pass)
-				}
-				else
-				{
-					WrongPass()
-				}
+				})
 			})
 		})
 	}
@@ -142,6 +157,38 @@ module.exports = function Password (db, user)
 			}
 		})
 	})
+
+	var validate = require('../validate')
+
+	var validate_required = validate.required
+	var validate_empty = validate.empty
+
+	var TooShortPassword = Err('too_short_password', 'Password is too short')
+	var TooLongPassword  = Err('too_long_password', 'Password is too long')
+
+	password.validate = function (password)
+	{
+		validate_required(password, 'password')
+		validate_empty(password, 'password')
+
+		if (password.length < 6)
+		{
+			throw TooShortPassword()
+		}
+		if (password.length > 100)
+		{
+			throw TooLongPassword()
+		}
+	}
+
+	function validate_pass (pass)
+	{
+		return new Promise(rs =>
+		{
+			password.validate(pass)
+			return rs()
+		})
+	}
 
 	return password
 }
