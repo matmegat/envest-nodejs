@@ -12,6 +12,8 @@ var picfs = require('./fs')
 var mime = require('mime')
 var multer = require('multer')
 
+var gm = require('gm')
+
 module.exports = function Statics (rootpath, db)
 {
 	var statics = {}
@@ -52,9 +54,6 @@ module.exports = function Statics (rootpath, db)
 			}
 
 			done(null, true)
-		},
-		limits: {
-			fileSize: 10 * 1024 * 1024
 		}
 	})
 	.single('user_pic')
@@ -73,7 +72,11 @@ module.exports = function Statics (rootpath, db)
 			var file = rq.file
 			var user_id = rq.user.id
 
-			statics.user_model.picByUserId(user_id)
+			validate_img(file)
+			.then(() =>
+			{
+				return statics.user_model.picByUserId(user_id)
+			})
 			.then(result =>
 			{
 				var pic = result.pic || ''
@@ -104,4 +107,54 @@ module.exports = function Statics (rootpath, db)
 	})
 
 	return statics
+}
+
+function validate_img (img)
+{
+	return new Promise(rs =>
+	{
+		validate_size(img)
+		validate_aspect(img)
+
+		return rs()
+	})
+}
+
+var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
+var max_size = 10 * 1024 * 1024
+
+function validate_size (img)
+{
+	if (img.size > max_size)
+	{
+		throw SizeErr()
+	}
+}
+
+var aspect_width = 15
+var aspect_height = 11
+
+var GMError = Err('reading_file_error', 'Reading File Error')
+var ReadDimErr = Err('reading_dimensions_error', 'Reading Dimensions Error')
+var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
+
+function validate_aspect (img)
+{
+	gm(img.buffer).size((err, value) =>
+	{
+		if (err)
+		{
+			throw GMError(err)
+		}
+
+		if (!value || ! value.width || ! value.height)
+		{
+			throw ReadDimErr()
+		}
+
+		if ( aspect_width / aspect_height !== value.width / value.height )
+		{
+			throw WrongAspect()
+		}
+	})
 }
