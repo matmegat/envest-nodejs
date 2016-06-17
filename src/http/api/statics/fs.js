@@ -11,12 +11,14 @@ var unlink = promisify(fs.unlink)
 
 var streamToPromise = require('stream-to-promise')
 
+var Err = require('../../../Err')
+
 module.exports = function (rootpath)
 {
-	var static_ctrl = {}
+	var static = {}
 	var root_img = rootpath.partial('static/images/userpic')
 
-	static_ctrl.remove = function (hash)
+	static.remove = function (hash)
 	{
 		var t = tuple(hash)
 		var path = tuple_to_filename(t)
@@ -32,7 +34,10 @@ module.exports = function (rootpath)
 		})
 	}
 
-	static_ctrl.save = function (file)
+	var AlreadyExists = Err('file_already_exists', 'File already exists')
+	var FileSavingErr = Err('file_saving_error', 'File Saving Error')
+
+	static.save = function (file)
 	{
 		var hash = uid()
 		var filename = get_filename(hash, file.mimetype)
@@ -42,9 +47,22 @@ module.exports = function (rootpath)
 		var dirname = tuple_to_dir(t)
 		var filenameFull = tuple_to_filename(t)
 
-		console.log(filenameFull)
-
-		return mkdirp(dirname)
+		return stat(filenameFull)
+		.then(() =>
+		{
+			throw AlreadyExists()
+		})
+		.catch(err =>
+		{
+			if (err.code === 'ENOENT')
+			{
+				return mkdirp(dirname)
+			}
+			else
+			{
+				throw FileSavingErr(err)
+			}
+		})
 		.then(() =>
 		{
 			writeTo(filenameFull).end(file.buffer)
@@ -92,5 +110,5 @@ module.exports = function (rootpath)
 		return root_img(tuple)
 	}
 
-	return static_ctrl
+	return static
 }
