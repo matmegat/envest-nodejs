@@ -57,7 +57,7 @@ function Profession (investor)
 }
 
 
-var validateFocusLength = validate.length(250)
+var validateFocLength = validate.length(250)
 
 function Focus (investor)
 {
@@ -67,7 +67,7 @@ function Focus (investor)
 		{
 			validate.string(value, 'focus')
 			validate.empty(value, 'focus')
-			validateFocusLength(value, 'focus')
+			validateFocLength(value, 'focus')
 			return value
 		},
 		set: (value, queryset) =>
