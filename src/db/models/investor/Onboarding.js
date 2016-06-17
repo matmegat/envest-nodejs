@@ -145,11 +145,11 @@ function HistReturn (investor)
 
 				value.forEach(vrow)
 			}
-			catch (error)
+			catch (e)
 			{
 				if (Err.is(e))
 				{
-					throw error
+					throw e
 				}
 				else
 				{
