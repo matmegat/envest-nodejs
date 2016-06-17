@@ -114,9 +114,12 @@ function validate_img (img)
 	return new Promise(rs =>
 	{
 		validate_size(img)
-		validate_aspect(img)
 
 		return rs()
+	})
+	.then(() =>
+	{
+		return validate_aspect(img)
 	})
 }
 
@@ -140,21 +143,26 @@ var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
 
 function validate_aspect (img)
 {
-	gm(img.buffer).size((err, value) =>
+	return new Promise((rs, rj) =>
 	{
-		if (err)
+		gm(img.buffer).size((err, value) =>
 		{
-			throw GMError(err)
-		}
+			if (err)
+			{
+				return rj(GMError(err))
+			}
 
-		if (!value || ! value.width || ! value.height)
-		{
-			throw ReadDimErr()
-		}
+			if (!value || ! value.width || ! value.height)
+			{
+				return rj(ReadDimErr())
+			}
 
-		if ( aspect_width / aspect_height !== value.width / value.height )
-		{
-			throw WrongAspect()
-		}
+			if ( aspect_width / aspect_height !== value.width / value.height )
+			{
+				return rj(WrongAspect())
+			}
+
+			return rs()
+		})
 	})
 }
