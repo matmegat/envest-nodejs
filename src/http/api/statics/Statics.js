@@ -99,6 +99,7 @@ module.exports = function Statics (rootpath, db)
 			{
 				rs.end()
 			})
+			.catch(toss.err(rs))
 		})
 	})
 
