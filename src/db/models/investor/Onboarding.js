@@ -159,7 +159,7 @@ function HistReturn ()
 		},
 		set: (value, queryset) =>
 		{
-			// return queryset.update({ background: value })
+			return queryset.update({ historical_returns: value })
 		}
 	})
 }
