@@ -41,17 +41,20 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
-	var MimeError = Err('wrong_file', 'File has no mimetype')
+	var FileError = Err('wrong_file', 'Wrong file')
 
 	var upload_pic = multer({
 		fileFilter: function (req, file, done)
 		{
-			if (! file.mimetype)
+			if (! file || ! file.mimetype)
 			{
-				done(MimeError())
+				done(FileError())
 			}
 
 			done(null, true)
+		},
+		limits: {
+			fileSize: 10 * 1024 * 1024
 		}
 	})
 	.single('user_pic')
