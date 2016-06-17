@@ -7,6 +7,8 @@ module.exports = function Onboarding (db, investor)
 
 	onb.fields.profession = Profession(investor)
 	onb.fields.focus = Focus(investor)
+	onb.fields.background = Background(investor)
+	onb.fields.hist_return = HistReturn(investor)
 
 	onb.update = function update (investor_id, field, value)
 	{
@@ -71,6 +73,43 @@ function Focus (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ focus: value })
+		}
+	})
+}
+
+
+var validateBackLength = validate.length(3000)
+
+function Background ()
+{
+	return Field(investor,
+	{
+		validate: (value) =>
+		{
+			validate.string(value, 'background')
+			validate.empty(value, 'background')
+			validateBackLength(value, 'background')
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ background: value })
+		}
+	})
+}
+
+function HistReturn ()
+{
+	return Field(investor,
+	{
+		validate: (value) =>
+		{
+
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			// return queryset.update({ background: value })
 		}
 	})
 }
