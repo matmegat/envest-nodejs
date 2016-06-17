@@ -102,9 +102,9 @@ function Background ()
 var WrongHistFormat = Err('wrong_hist_return',
    'Wrong historical returns format')
 
-var isInteger = require('lodash/isinteger')
-var isFinite = require('lodash/isfinite')
-var inRange = require('lodash/inrange')
+var isInteger = require('lodash/isInteger')
+var isFinite = require('lodash/isFinite')
+var inRange = require('lodash/inRange')
 
 function HistReturn ()
 {
