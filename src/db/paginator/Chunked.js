@@ -29,6 +29,14 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 	var table = paginator_options.table
 
+	paginator.total = function (response, count)
+	{
+		response.total = count
+		response.pages = Math.floor(count / paginator_options.limit)
+
+		return response
+	}
+
 	paginator.paginate = function (queryset, options)
 	{
 		options = extend({}, paginator_options, options)
@@ -42,13 +50,11 @@ module.exports = function Paginator__Chunked (paginator_options)
 		var order_column = options.order_column
 		var real_order_column = options.real_order_column
 
+		var limit  = Math.min(options.limit, defaults.limit)
+
 		return get_current_chunk(current_id, real_order_column)
 		.then(current_chunk =>
 		{
-			var limit = options.limit
-
-			limit = Math.min(limit, defaults.limit)
-
 			queryset
 			.where(function ()
 			{

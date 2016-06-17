@@ -110,17 +110,9 @@ module.exports = function Meta (knexed_table, options)
 		})
 
 		var queryset = table(trx)
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			'investors.focus',
-			'investors.historical_returns',
-			'investors.profile_pic'
-		)
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
+		/* begin of all where clauses */
 		if (options.where)
 		{
 			// TODO: validate options.where
@@ -132,6 +124,21 @@ module.exports = function Meta (knexed_table, options)
 				options.where.argument
 			)
 		}
+
+
+		var count_queryset = queryset.clone()
+		/* end of all where clauses */
+
+		queryset
+		.select(
+			'users.id',
+			'users.first_name',
+			'users.last_name',
+			'users.pic',
+			'investors.focus',
+			'investors.historical_returns',
+			'investors.profile_pic'
+		)
 
 		var paginator
 		if (options.page)
@@ -146,28 +153,38 @@ module.exports = function Meta (knexed_table, options)
 		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
 		.then((investors) =>
 		{
-			return investors.map((investor) =>
+			var response =
 			{
-				investor.annual_return = _.sumBy(
-					investor.historical_returns,
-					'percentage'
-				) / investor.historical_returns.length
-				// FIXME: refactor annual return when it comes more complicated
+				investors: investors.map(transform_investor)
+			}
 
-				return _.pick(investor,
-				[
-					'id',
-					'first_name',
-					'last_name',
-					'pic',
-					'profile_pic',
-					'focus',
-					'annual_return'
-				])
+			return helpers.count(count_queryset)
+			.then((count) =>
+			{
+				return paginator.total(response, count)
 			})
 		})
 	}
 
+	function transform_investor (investor)
+	{
+		investor.annual_return = _.sumBy(
+			investor.historical_returns,
+			'percentage'
+		) / investor.historical_returns.length
+		// FIXME: refactor annual return when it comes more complicated
+
+		return _.pick(investor,
+		[
+			'id',
+			'first_name',
+			'last_name',
+			'pic',
+			'profile_pic',
+			'focus',
+			'annual_return'
+		])
+	}
 
 	return meta
 }
