@@ -1,5 +1,5 @@
 post:
-  description: update Investor field while Onboarding
+  description: update Investor field while Onboarding following [Field Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Onboarding+Fields)
   parameters:
   - name: investor_id
     in: path

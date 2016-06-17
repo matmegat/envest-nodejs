@@ -35,6 +35,7 @@ validate.string = function validate__string (field, name)
 	}
 }
 
+
 validate.json = function validate__json (json, name)
 {
 	try
@@ -47,10 +48,27 @@ validate.json = function validate__json (json, name)
 	}
 }
 
-validate.array = function validate__array (ar, name)
+
+validate.array = function validate__array (field, name)
 {
-	if (! Array.isArray(ar))
+	if (! Array.isArray(field))
 	{
 		throw FieldType({ field: name, type: 'array' })
+	}
+}
+
+
+var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
+
+validate.length = function validate__length (max)
+{
+	return (field, name) =>
+	{
+		var actual = field.length
+
+		if (actual > max)
+		{
+			throw FieldLength({ field: name, actual: actual, max: max })
+		}
 	}
 }
