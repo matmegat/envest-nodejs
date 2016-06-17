@@ -59,6 +59,9 @@ paths:
   '/investors':
     $ref: ../api/investors/swag/GetPostInvestors.yaml
 
+  '/investors/admin':
+    $ref: ../api/investors/swag/Get-InvestorsByAdmin.yaml
+
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
 
@@ -81,6 +84,9 @@ definitions:
 
   Investor:
     $ref: ../api/investors/swag/Investor.yaml
+
+  Investors:
+    $ref: ../api/investors/swag/Investors.yaml
 
   Symbol:
     $ref: ./Symbol.yaml

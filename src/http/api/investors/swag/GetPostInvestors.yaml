@@ -64,3 +64,4 @@ post:
       $ref: ./400.yaml
   tags:
   - investors
+  - admin
