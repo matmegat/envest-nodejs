@@ -83,7 +83,7 @@ module.exports = function (rootpath)
 		]
 	}
 
-	function get_ext (mime)
+	static.get_ext = function (mime)
 	{
 		switch (mime)
 		{
@@ -95,7 +95,7 @@ module.exports = function (rootpath)
 
 	function get_filename (id, mime)
 	{
-		var ext = get_ext(mime)
+		var ext = static.get_ext(mime)
 
 		return `${id}.${ext}`
 	}

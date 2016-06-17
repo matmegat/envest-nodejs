@@ -12,7 +12,8 @@ var picfs = require('./fs')
 var mime = require('mime')
 var multer = require('multer')
 
-var gm = require('gm')
+var lwip = require('lwip')
+var round = require('lodash/round')
 
 module.exports = function Statics (rootpath, db)
 {
@@ -106,63 +107,61 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
-	return statics
-}
 
-function validate_img (img)
-{
-	return new Promise(rs =>
+	function validate_img (img)
 	{
-		validate_size(img)
-
-		return rs()
-	})
-	.then(() =>
-	{
-		return validate_aspect(img)
-	})
-}
-
-var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
-var max_size = 10 * 1024 * 1024
-
-function validate_size (img)
-{
-	if (img.size > max_size)
-	{
-		throw SizeErr()
-	}
-}
-
-var aspect_width = 15
-var aspect_height = 11
-
-var GMError = Err('reading_file_error', 'Reading File Error')
-var ReadDimErr = Err('reading_dimensions_error', 'Reading Dimensions Error')
-var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
-
-function validate_aspect (img)
-{
-	return new Promise((rs, rj) =>
-	{
-		gm(img.buffer).size((err, value) =>
+		return new Promise(rs =>
 		{
-			if (err)
-			{
-				return rj(GMError(err))
-			}
-
-			if (!value || ! value.width || ! value.height)
-			{
-				return rj(ReadDimErr())
-			}
-
-			if ( aspect_width / aspect_height !== value.width / value.height )
-			{
-				return rj(WrongAspect())
-			}
+			validate_size(img)
 
 			return rs()
 		})
-	})
+		.then(() =>
+		{
+			return validate_aspect(img)
+		})
+	}
+
+	var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
+	var max_size = 10 * 1024 * 1024
+
+	function validate_size (img)
+	{
+		if (img.size > max_size)
+		{
+			throw SizeErr()
+		}
+	}
+
+	var aspect_width = 15
+	var aspect_height = 11
+
+	var GMError = Err('reading_file_error', 'Reading File Error')
+	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
+
+	function validate_aspect (img)
+	{
+		return new Promise((rs, rj) =>
+		{
+			lwip.open(img.buffer, statics.fs.get_ext(img.mimetype), (err, image) =>
+			{
+				if (err)
+				{
+					return rj(GMError(err))
+				}
+
+				var aspect_ratio = round(aspect_width / aspect_height, 1)
+				var real_ratio = round(image.width() / image.height(), 1)
+
+				if ( aspect_ratio !== real_ratio )
+				{
+					return rj(WrongAspect())
+				}
+
+				return rs()
+			})
+		})
+	}
+
+	return statics
 }
