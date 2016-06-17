@@ -80,7 +80,7 @@ function Focus (investor)
 
 var validateBackLength = validate.length(3000)
 
-function Background ()
+function Background (investor)
 {
 	return Field(investor,
 	{
@@ -106,7 +106,7 @@ var isInteger = require('lodash/isInteger')
 var isFinite = require('lodash/isFinite')
 var inRange = require('lodash/inRange')
 
-function HistReturn ()
+function HistReturn (investor)
 {
 	function vrow (row)
 	{
