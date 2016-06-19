@@ -83,12 +83,12 @@ module.exports = function Statics (rootpath, db)
 
 				if (pic)
 				{
-					return statics.fs.remove(pic)
+					return statics.static_model.remove(pic)
 				}
 			})
 			.then(() =>
 			{
-				return statics.fs.save(file)
+				return statics.static_model.save(file)
 			})
 			.then(filename =>
 			{
@@ -106,6 +106,11 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
+	statics.express.post('/background/upload', authRequired, (rq, rs) =>
+	{
+		
+	})
+
 
 	function validate_img (img)
 	{
@@ -113,12 +118,9 @@ module.exports = function Statics (rootpath, db)
 		{
 			expect_file(img)
 			validate_size(img)
+			//validate_aspect(img)
 
 			return rs()
-		})
-		.then(() =>
-		{
-			return validate_aspect(img)
 		})
 	}
 
@@ -137,7 +139,7 @@ module.exports = function Statics (rootpath, db)
 
 	function expect_file (file)
 	{
-		if (! file || file.size)
+		if (! file || ! file.size)
 		{
 			throw ReadErr()
 		}
@@ -153,7 +155,7 @@ module.exports = function Statics (rootpath, db)
 	{
 		return new Promise((rs, rj) =>
 		{
-			lwip.open(img.buffer, statics.fs.get_ext(img.mimetype), (err, image) =>
+			lwip.open(img.buffer, statics.static_model.get_ext(img.mimetype), (err, image) =>
 			{
 				if (err)
 				{

@@ -16,7 +16,7 @@ var Err = require('../../Err')
 module.exports = function (rootpath)
 {
 	var static = {}
-	var root_img = rootpath.partial('static/images/userpic')
+	var root_img = rootpath.partial('static/images')
 
 	static.remove = function (hash)
 	{
