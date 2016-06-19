@@ -7,7 +7,6 @@ var Err = require('../../../Err')
 var toss = require('../../toss')
 
 var fs = require('fs')
-var picfs = require('./fs')
 
 var mime = require('mime')
 var multer = require('multer')
@@ -22,7 +21,7 @@ module.exports = function Statics (rootpath, db)
 
 	var default_filename = rootpath('static/images/default.png')
 
-	statics.fs = picfs(rootpath)
+	statics.static_model = db.static
 
 	statics.express = Router()
 
@@ -112,6 +111,7 @@ module.exports = function Statics (rootpath, db)
 	{
 		return new Promise(rs =>
 		{
+			expect_file(img)
 			validate_size(img)
 
 			return rs()
@@ -130,6 +130,16 @@ module.exports = function Statics (rootpath, db)
 		if (img.size > max_size)
 		{
 			throw SizeErr()
+		}
+	}
+
+	var ReadErr = Err('wrong_file', 'Wrong File')
+
+	function expect_file (file)
+	{
+		if (! file || file.size)
+		{
+			throw ReadErr()
 		}
 	}
 

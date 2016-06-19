@@ -11,7 +11,7 @@ var unlink = promisify(fs.unlink)
 
 var streamToPromise = require('stream-to-promise')
 
-var Err = require('../../../Err')
+var Err = require('../../Err')
 
 module.exports = function (rootpath)
 {
