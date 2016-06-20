@@ -1,8 +1,6 @@
 
 var expect = require('chai').expect
 
-var clone = require('lodash/clone')
-
 var Err = require('../../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
@@ -23,7 +21,7 @@ module.exports = function Auth (db)
 	auth.register = function (userdata)
 	{
 		return validate_register(userdata)
-		.then(data =>
+		.then(() =>
 		{
 			return user.create(userdata)
 		})
@@ -197,7 +195,6 @@ module.exports = function Auth (db)
 			throw WrongEmail()
 		}
 	}
-
 
 	return auth
 }

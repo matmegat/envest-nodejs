@@ -1,6 +1,7 @@
 
 var Router = require('express').Router
 var toss = require('../../toss')
+var noop = require('lodash/noop')
 var authRequired = require('../../auth-required')
 
 module.exports = function Password (user_model)
@@ -22,7 +23,9 @@ module.exports = function Password (user_model)
 
 	password.express.post('/change', authRequired, (rq, rs) =>
 	{
-		toss(rs, password.model.change(rq.user.id, rq.body.pass, rq.body.new_pass))
+		toss(rs,
+		password.model.change(rq.user.id, rq.body.pass, rq.body.new_pass)
+		.then(noop))
 	})
 
 	return password

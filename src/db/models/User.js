@@ -25,7 +25,6 @@ module.exports = function User (db)
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
-	user.auth_local     = knexed(knex, 'auth_local')
 
 	user.password = Password(db, user)
 

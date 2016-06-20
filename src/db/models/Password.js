@@ -19,43 +19,43 @@ module.exports = function Password (db, user)
 	var compare_passwords = cr_helpers.compare_passwords
 
 	password.reset_table = knexed(knex, 'pass_reset')
+	var auth_local       = knexed(knex, 'auth_local')
+
 
 	password.create = function (user_id, new_pass, trx)
 	{
 		return validate_pass(new_pass)
 		.then(() =>
 		{
-			return password.genHashSalt(new_pass)
-			.then(data =>
+			return genHashSalt(new_pass)
+		})
+		.then(data =>
+		{
+			return auth_local(trx)
+			.insert(
 			{
-				return user.auth_local(trx)
-				.insert(
+				user_id: user_id,
+				password: data.password,
+				salt: data.salt
+			}, 'user_id')
+			.catch(err =>
+			{
+				if (err.constraint === 'auth_local_pkey')
 				{
-					user_id: user_id,
-					password: data.password,
-					salt: data.salt
-				}, 'user_id')
-				.then(one)
-				.catch(err =>
+					return auth_local(trx)
+					.update(data, 'user_id')
+					.where('user_id', user_id)
+				}
+				else
 				{
-					if (err.constraint === 'pass_reset_pkey')
-					{
-						return user.auth_local(trx)
-						.update(data, 'user_id')
-						.where('user_id', user_id)
-						.then(one)
-					}
-					else
-					{
-						throw err
-					}
-				})
-				
+					throw err
+				}
 			})
+			.then(one)
 		})
 	}
 
-	password.genHashSalt = function (pass)
+	function genHashSalt (pass)
 	{
 		return generate_salt()
 		.then(salt =>
@@ -63,7 +63,7 @@ module.exports = function Password (db, user)
 			return encrypt_pass(pass, salt)
 			.then(hash =>
 			{
-				var data = 
+				var data =
 				{
 					password: hash,
 					salt: salt
@@ -76,31 +76,31 @@ module.exports = function Password (db, user)
 
 	var WrongPass = Err('wrong_pass', 'Wrong password')
 
-	password.change = function (user_id, pass, new_pass)
+	password.change = knexed.transact(knex, (trx, user_id, pass, new_pass) =>
 	{
 		return validate_pass(pass)
 		.then(() =>
 		{
-			return user.auth_local()
+			return auth_local(trx)
 			.where('user_id', user_id)
 			.then(one)
-			.then(user =>
+		})
+		.then(user =>
+		{
+			return compare_passwords(user.password, pass, user.salt)
+			.then(Err.falsy(WrongPass))
+			.then(() =>
 			{
-				return compare_passwords(user.password, pass, user.salt)
-				.then(Err.falsy(WrongPass))
-				.then(() =>
-				{
-					return password.create(user_id, new_pass)
-				})
+				return password.create(user_id, new_pass, trx)
 			})
 		})
-	}
+	})
 
 	var EmailNotFound = Err('email_not_found', 'Email not found')
 
 	password.reqReset = knexed.transact(knex, (trx, email, timestamp) =>
 	{
-		//add validate_emeil(email)
+		//add validate_email(email)
 		return user.byEmail(email)
 		.then(Err.nullish(EmailNotFound))
 		.then(user =>
@@ -126,7 +126,7 @@ module.exports = function Password (db, user)
 				{
 					if (err.constraint === 'pass_reset_pkey')
 					{
-						return password.reset_table()
+						return password.reset_table(trx)
 						.update(
 						{
 							code: code,
@@ -157,10 +157,7 @@ module.exports = function Password (db, user)
 		.then(one)
 		.then(data =>
 		{
-			var red_line = (new Date).getTime() - lifetime_code
-			var сurrent_time = new Date(data.timestamp).getTime()
-
-			if (сurrent_time > red_line || ! data.timestamp)
+			if (timeIsValid(data.timestamp, lifetime_code))
 			{
 				return password.create(data.user_id, new_pass, trx)
 				.then(() =>
@@ -177,6 +174,14 @@ module.exports = function Password (db, user)
 			}
 		})
 	})
+
+	function timeIsValid (timestamp, lifetime_code)
+	{
+		var red_line = (new Date).getTime() - lifetime_code
+		var сurrent_time = new Date(timestamp).getTime()
+
+		return сurrent_time > red_line || ! timestamp
+	}
 
 	var validate = require('../validate')
 
