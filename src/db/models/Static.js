@@ -22,6 +22,7 @@ module.exports = function (rootpath, db)
 {
 	var static = {}
 	var user_model = db.user
+	var investor_model = db.investor
 	var root_img = rootpath.partial('static/images')
 
 	static.upload_pic = function (rq, rs)
@@ -50,6 +51,40 @@ module.exports = function (rootpath, db)
 		.then(filename =>
 		{
 			return user_model.updatePic(
+			{
+				user_id: user_id,
+				hash: filename
+			})
+		})
+		.then(noop)
+	}
+
+	static.upload_profile_pic = function (rq, rs)
+	{
+		var file = rq.file
+		var user_id = rq.user.id
+
+		return validate_img(file)
+		.then(() =>
+		{
+			return investor_model.bgByUserId(user_id)
+		})
+		.then(result =>
+		{
+			var pic = result.pic || ''
+
+			if (pic)
+			{
+				return static.remove(pic)
+			}
+		})
+		.then(() =>
+		{
+			return static.save(file)
+		})
+		.then(filename =>
+		{
+			return investor_model.update_profile_pic(
 			{
 				user_id: user_id,
 				hash: filename

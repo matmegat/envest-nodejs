@@ -57,9 +57,19 @@ module.exports = function Statics (rootpath, db)
 		})
 	})
 
-	statics.express.post('/background/upload', authRequired, (rq, rs) =>
+	var investor_bg = multer().single('investor_bg')
+
+	statics.express.post('/bg/upload', authRequired, (rq, rs) =>
 	{
-		
+		investor_bg(rq, rs, (err) =>
+		{
+			if (err)
+			{
+				return toss.err(rs, UploadError(err))
+			}
+
+			toss(rs, statics.static_model.upload_profile_pic(rq, rs))
+		})
 	})
 
 	return statics
