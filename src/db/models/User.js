@@ -69,11 +69,7 @@ module.exports = function User (db)
 				.then(one)
 				.then(function (id)
 				{
-					return createLocalCreds({
-						user_id: id,
-						password: data.password,
-						salt: data.salt
-					}, trx)
+					return user.password.create(id, data.password, trx)
 				})
 				.then(function (id)
 				{
@@ -206,13 +202,6 @@ module.exports = function User (db)
 	function createFacebookUser (data, trx)
 	{
 		return user.auth_facebook(trx)
-		.insert(data, 'user_id')
-		.then(one)
-	}
-
-	function createLocalCreds (data, trx)
-	{
-		return user.auth_local(trx)
 		.insert(data, 'user_id')
 		.then(one)
 	}

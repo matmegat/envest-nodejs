@@ -22,18 +22,9 @@ module.exports = function Auth (db)
 
 	auth.register = function (userdata)
 	{
-		userdata = clone(userdata)
-
 		return validate_register(userdata)
-		.then(() =>
-		{
-			return user.password.genHashSalt(userdata.password)
-		})
 		.then(data =>
 		{
-			userdata.password = data.password
-			userdata.salt     = data.salt
-
 			return user.create(userdata)
 		})
 	}
@@ -123,7 +114,6 @@ module.exports = function Auth (db)
 		{
 			validate_name(credentials.first_name, 'first_name')
 			validate_name(credentials.last_name, 'last_name')
-			user.password.validate(credentials.password)
 			validate_email(credentials.email)
 
 			return rs()

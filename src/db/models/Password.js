@@ -20,7 +20,7 @@ module.exports = function Password (db, user)
 
 	password.reset_table = knexed(knex, 'pass_reset')
 
-	password.update = function (user_id, new_pass, trx)
+	password.create = function (user_id, new_pass, trx)
 	{
 		return validate_pass(new_pass)
 		.then(() =>
@@ -29,9 +29,28 @@ module.exports = function Password (db, user)
 			.then(data =>
 			{
 				return user.auth_local(trx)
-				.update(data)
-				.where('user_id', user_id)
-				.then(noop)
+				.insert(
+				{
+					user_id: user_id,
+					password: data.password,
+					salt: data.salt
+				}, 'user_id')
+				.then(one)
+				.catch(err =>
+				{
+					if (err.constraint === 'pass_reset_pkey')
+					{
+						return user.auth_local(trx)
+						.update(data, 'user_id')
+						.where('user_id', user_id)
+						.then(one)
+					}
+					else
+					{
+						throw err
+					}
+				})
+				
 			})
 		})
 	}
@@ -59,7 +78,7 @@ module.exports = function Password (db, user)
 
 	password.change = function (user_id, pass, new_pass)
 	{
-		return validate_pass(password)
+		return validate_pass(pass)
 		.then(() =>
 		{
 			return user.auth_local()
@@ -71,7 +90,7 @@ module.exports = function Password (db, user)
 				.then(Err.falsy(WrongPass))
 				.then(() =>
 				{
-					return password.update(user_id, new_pass)
+					return password.create(user_id, new_pass)
 				})
 			})
 		})
@@ -81,6 +100,7 @@ module.exports = function Password (db, user)
 
 	password.reqReset = knexed.transact(knex, (trx, email, timestamp) =>
 	{
+		//add validate_emeil(email)
 		return user.byEmail(email)
 		.then(Err.nullish(EmailNotFound))
 		.then(user =>
@@ -142,7 +162,7 @@ module.exports = function Password (db, user)
 
 			if (сurrent_time > red_line || ! data.timestamp)
 			{
-				return password.update(data.user_id, new_pass, trx)
+				return password.create(data.user_id, new_pass, trx)
 				.then(() =>
 				{
 					return password.reset_table(trx)
