@@ -30,7 +30,13 @@ module.exports = function (rootpath, db)
 		var file = rq.file
 		var user_id = rq.user.id
 
-		return validate_img(file)
+		var validation_settings = {
+			max_size: 10 * 1024 * 1024,
+			aspect_width: 15,
+			aspect_height: 11
+		}
+
+		return validate_img(file, validation_settings)
 		.then(() =>
 		{
 			return user_model.picByUserId(user_id)
@@ -64,7 +70,13 @@ module.exports = function (rootpath, db)
 		var file = rq.file
 		var user_id = rq.user.id
 
-		return validate_img(file)
+		var validation_settings = {
+			max_size: 10 * 1024 * 1024,
+			aspect_width: 15,
+			aspect_height: 11
+		}
+
+		return validate_img(file, validation_settings)
 		.then(() =>
 		{
 			return investor_model.bgByUserId(user_id)
@@ -186,19 +198,23 @@ module.exports = function (rootpath, db)
 	}
 
 
-	function validate_img (img)
+	function validate_img (img, settings)
 	{
+		var max_size = settings.max_size
+		var aspect_width = settings.aspect_width
+		var aspect_height = settings.aspect_height
+
 		return new Promise((rs, rj) =>
 		{
 			expect_file(img)
 			.then(() =>
 			{
-				return validate_size(img)
+				return validate_size(img, max_size)
 			})
-			// .then(() =>
-			// {
-			// 	return validate_aspect(img)
-			// })
+			.then(() =>
+			{
+				return validate_aspect(img, aspect_width, aspect_height)
+			})
 			.then(() =>
 			{
 				return rs()
@@ -210,21 +226,6 @@ module.exports = function (rootpath, db)
 		})
 	}
 
-	var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
-	var max_size = 10 * 1024 * 1024
-
-	function validate_size (img)
-	{
-		return new Promise(rs =>
-		{
-			if (img.size > max_size)
-			{
-				throw SizeErr()
-			}
-
-			return rs()
-		})
-	}
 
 	var ReadErr = Err('wrong_file', 'Wrong File')
 
@@ -241,13 +242,25 @@ module.exports = function (rootpath, db)
 		})
 	}
 
-	var aspect_width = 15
-	var aspect_height = 11
+	var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
+
+	function validate_size (img, max_size)
+	{
+		return new Promise(rs =>
+		{
+			if (img.size > max_size)
+			{
+				throw SizeErr()
+			}
+
+			return rs()
+		})
+	}
 
 	var GMError = Err('reading_file_error', 'Reading File Error')
 	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
-
-	function validate_aspect (img)
+	
+	function validate_aspect (img, aspect_width, aspect_height)
 	{
 		return new Promise((rs, rj) =>
 		{
