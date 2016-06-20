@@ -36,6 +36,15 @@ module.exports = function Investor (db)
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
 
+	expect(db, 'Investors depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+	var emiter_options =
+	{
+		target: 'group',
+		group:  'admins'
+	}
+	var InvestorCreatedReport = Emitter('investor_reports', emiter_options)
+
 	investor.onboarding = Onboarding(db, investor)
 
 	investor.all    = Meta(investor.table, {})
@@ -102,11 +111,11 @@ module.exports = function Investor (db)
 				password_code: 'PASTE IT HERE'
 			}, 'welcome')
 
-			/* TODO: add notification: 'investor created'
+			/* notification: 'investor created'
 			* - to all admins?
-			* - to parent admin?
 			* - to created investor?
 			* */
+			InvestorCreatedReport({ investor_id: investor_id })
 
 			return investor.all.byId(investor_id, trx)
 		})
