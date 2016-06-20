@@ -14,10 +14,8 @@ var multer = require('multer')
 module.exports = function Statics (rootpath, db)
 {
 	var statics = {}
-	statics.user_model = db.user
-
 	statics.static_model = db.static
-
+	
 	statics.express = Router()
 
 	var AccessErr = Err('static_img_access_denied', 'Static Img Access Denied')
