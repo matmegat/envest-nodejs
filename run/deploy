@@ -158,6 +158,10 @@ rev()
 }))
 .then(() =>
 {
+	return scp(rootpath('cfg/nginx.conf'), target('cfg/'))
+})
+.then(() =>
+{
 	return ssh(f('"mkdir -p %s"', remote_rootpath('var/')))
 })
 .then(outputify('run remote', () =>
