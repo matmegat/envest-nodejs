@@ -30,10 +30,10 @@ module.exports = function Statics (rootpath, db, http)
 			}
 
 			var hash = rq.params.hash
-			var filename = statics.static_model.path_by_hash(hash)
+			var filename = statics.static_model.pathByHash(hash)
 			var type = mime.lookup(filename)
 
-			statics.static_model.exists_file(filename)
+			statics.static_model.existsFile(filename)
 			.then(exists =>
 			{
 				if (! exists)
@@ -62,7 +62,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.upload_pic(rq))
+			toss(rs, statics.static_model.uploadPic(rq))
 		})
 	})
 
@@ -77,7 +77,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.upload_profile_pic(rq))
+			toss(rs, statics.static_model.uploadProfilePic(rq))
 		})
 	})
 

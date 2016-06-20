@@ -27,7 +27,7 @@ module.exports = function (rootpath, db)
 
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
 
-	static.upload_pic = function (rq)
+	static.uploadPic = function (rq)
 	{
 		var file = rq.file
 		var user_id = rq.user.id
@@ -72,7 +72,7 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
-	static.upload_profile_pic = function (rq)
+	static.uploadProfilePic = function (rq)
 	{
 		var file = rq.file
 		var user_id = rq.user.id
@@ -117,11 +117,24 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
-	static.path_by_hash = function (hash)
+	static.pathByHash = function (hash)
 	{
 		var t = tuple(hash)
 
 		return tuple_to_filename(t)
+	}
+
+	static.existsFile = function (path)
+	{
+		return stat(path)
+		.then(() =>
+		{
+			return true
+		})
+		.catch(() =>
+		{
+			return false
+		})
 	}
 
 	function remove_file (hash)
@@ -129,7 +142,7 @@ module.exports = function (rootpath, db)
 		var t = tuple(hash)
 		var path = tuple_to_filename(t)
 
-		return static.exists_file(path)
+		return static.existsFile(path)
 		.then(exists =>
 		{
 			if (exists)
@@ -140,19 +153,6 @@ module.exports = function (rootpath, db)
 			{
 				return
 			}
-		})
-	}
-
-	static.exists_file = function (path)
-	{
-		return stat(path)
-		.then(() =>
-		{
-			return true
-		})
-		.catch(() =>
-		{
-			return false
 		})
 	}
 
