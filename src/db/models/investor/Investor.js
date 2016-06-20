@@ -38,12 +38,21 @@ module.exports = function Investor (db)
 
 	expect(db, 'Investors depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
-	var emiter_options =
+	var EmiterOptions =
 	{
-		target: 'group',
-		group:  'admins'
+		admins_created:   { target: 'group',    group: 'admins' },
+		investor_created: { target: 'recipient' }
 	}
-	var InvestorCreatedReport = Emitter('investor_reports', emiter_options)
+
+	var InvestorReposts = {}
+	InvestorReposts.admins_created = Emitter(
+		'investor_reports',
+		EmiterOptions.admins_created
+	)
+	InvestorReposts.investor_created = Emitter(
+		'investor_reports',
+		EmiterOptions.investor_created
+	)
 
 	investor.onboarding = Onboarding(db, investor)
 
@@ -115,7 +124,11 @@ module.exports = function Investor (db)
 			* - to all admins?
 			* - to created investor?
 			* */
-			InvestorCreatedReport({ investor_id: investor_id })
+			InvestorReposts.admins_created({ investor_id: investor_id })
+			InvestorReposts.investor_created(
+				investor_id,
+				{ admin_id: 'TODO: paste it here' }
+			)
 
 			return investor.all.byId(investor_id, trx)
 		})
