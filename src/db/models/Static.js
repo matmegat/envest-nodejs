@@ -32,8 +32,8 @@ module.exports = function (rootpath, db)
 
 		var validation_settings = {
 			max_size: 10 * 1024 * 1024,
-			aspect_width: 15,
-			aspect_height: 11
+			aspect_width: 1,
+			aspect_height: 1
 		}
 
 		return validate_img(file, validation_settings)
