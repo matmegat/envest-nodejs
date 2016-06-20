@@ -211,6 +211,7 @@ module.exports = function (rootpath, db)
 		{
 			case 'image/png' : return  'png'
 			case 'image/jpeg': return 'jpeg'
+			case 'image/jpg': return 'jpg'
 			default: return 'jpeg'
 		}
 	}
@@ -245,6 +246,10 @@ module.exports = function (rootpath, db)
 			.then(() =>
 			{
 				return validate_size(img, max_size)
+			})
+			.then(() =>
+			{
+				return validate_extension(img)
 			})
 			.then(() =>
 			{
@@ -316,6 +321,28 @@ module.exports = function (rootpath, db)
 
 				return rs()
 			})
+		})
+	}
+
+	var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
+	function validate_extension (img)
+	{
+		if (! img || ! img.mimetype)
+		{
+			throw WrongExtension()
+		}
+
+		var exts = ['image/png', 'image/jpg', 'image/jpeg']
+		var result = exts.indexOf(img.mimetype)
+
+		return new Promise(rs =>
+		{
+			if (result === -1)
+			{
+				throw WrongExtension()
+			}
+
+			return rs()
 		})
 	}
 
