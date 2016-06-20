@@ -25,7 +25,7 @@ module.exports = function (rootpath, db)
 	var investor_model = db.investor
 	var root_img = rootpath.partial('static/images')
 
-	static.upload_pic = function (rq, rs)
+	static.upload_pic = function (rq)
 	{
 		var file = rq.file
 		var user_id = rq.user.id
@@ -41,12 +41,12 @@ module.exports = function (rootpath, db)
 
 			if (pic)
 			{
-				return static.remove(pic)
+				return remove_file(pic)
 			}
 		})
 		.then(() =>
 		{
-			return static.save(file)
+			return save_file(file)
 		})
 		.then(filename =>
 		{
@@ -59,7 +59,7 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
-	static.upload_profile_pic = function (rq, rs)
+	static.upload_profile_pic = function (rq)
 	{
 		var file = rq.file
 		var user_id = rq.user.id
@@ -71,16 +71,16 @@ module.exports = function (rootpath, db)
 		})
 		.then(result =>
 		{
-			var pic = result.pic || ''
+			var pic = result.profile_pic || ''
 
 			if (pic)
 			{
-				return static.remove(pic)
+				return remove_file(pic)
 			}
 		})
 		.then(() =>
 		{
-			return static.save(file)
+			return save_file(file)
 		})
 		.then(filename =>
 		{
@@ -93,7 +93,7 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
-	static.remove = function (hash)
+	function remove_file (hash)
 	{
 		var t = tuple(hash)
 		var path = tuple_to_filename(t)
@@ -103,7 +103,7 @@ module.exports = function (rootpath, db)
 		{
 			return unlink(path)
 		})
-		.catch(() =>
+		.catch((err) =>
 		{
 			return
 		})
@@ -112,7 +112,7 @@ module.exports = function (rootpath, db)
 	var AlreadyExists = Err('file_already_exists', 'File already exists')
 	var FileSavingErr = Err('file_saving_error', 'File Saving Error')
 
-	static.save = function (file)
+	function save_file (file)
 	{
 		var hash = uid()
 		var filename = get_filename(hash, file.mimetype)
@@ -158,7 +158,7 @@ module.exports = function (rootpath, db)
 		]
 	}
 
-	static.get_ext = function (mime)
+	function get_ext (mime)
 	{
 		switch (mime)
 		{
@@ -170,7 +170,7 @@ module.exports = function (rootpath, db)
 
 	function get_filename (id, mime)
 	{
-		var ext = static.get_ext(mime)
+		var ext = get_ext(mime)
 
 		return `${id}.${ext}`
 	}
@@ -188,13 +188,25 @@ module.exports = function (rootpath, db)
 
 	function validate_img (img)
 	{
-		return new Promise(rs =>
+		return new Promise((rs, rj) =>
 		{
 			expect_file(img)
-			validate_size(img)
-			//validate_aspect(img)
-
-			return rs()
+			.then(() =>
+			{
+				return validate_size(img)
+			})
+			// .then(() =>
+			// {
+			// 	return validate_aspect(img)
+			// })
+			.then(() =>
+			{
+				return rs()
+			})
+			.catch(err =>
+			{
+				return rj(err)
+			})
 		})
 	}
 
@@ -203,20 +215,30 @@ module.exports = function (rootpath, db)
 
 	function validate_size (img)
 	{
-		if (img.size > max_size)
+		return new Promise(rs =>
 		{
-			throw SizeErr()
-		}
+			if (img.size > max_size)
+			{
+				throw SizeErr()
+			}
+
+			return rs()
+		})
 	}
 
 	var ReadErr = Err('wrong_file', 'Wrong File')
 
 	function expect_file (file)
 	{
-		if (! file || ! file.size)
+		return new Promise(rs =>
 		{
-			throw ReadErr()
-		}
+			if (! file || ! file.size)
+			{
+				throw ReadErr()
+			}
+
+			return rs()
+		})
 	}
 
 	var aspect_width = 15
@@ -229,7 +251,7 @@ module.exports = function (rootpath, db)
 	{
 		return new Promise((rs, rj) =>
 		{
-			lwip.open(img.buffer, static.get_ext(img.mimetype), (err, image) =>
+			lwip.open(img.buffer, get_ext(img.mimetype), (err, image) =>
 			{
 				if (err)
 				{

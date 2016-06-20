@@ -39,7 +39,7 @@ module.exports = function Statics (rootpath, db)
 			fs.createReadStream(filename).pipe(rs)
 		})
 	})
-	
+
 	var UploadError = Err('upload_error', 'Upload error')
 
 	var upload_pic = multer().single('user_pic')
@@ -53,7 +53,7 @@ module.exports = function Statics (rootpath, db)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.upload_pic(rq, rs))
+			toss(rs, statics.static_model.upload_pic(rq))
 		})
 	})
 
@@ -68,7 +68,7 @@ module.exports = function Statics (rootpath, db)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.upload_profile_pic(rq, rs))
+			toss(rs, statics.static_model.upload_profile_pic(rq))
 		})
 	})
 
