@@ -45,7 +45,7 @@ module.exports = function (rootpath, db)
 		})
 		.then(result =>
 		{
-			var pic = result.pic || ''
+			var pic = result.pic
 
 			return remove_file(pic)
 		})
@@ -86,11 +86,11 @@ module.exports = function (rootpath, db)
 		return validate_img(file, validation_data)
 		.then(() =>
 		{
-			return investor_model.bgByUserId(user_id)
+			return investor_model.profilePicByUserId(user_id)
 		})
 		.then(result =>
 		{
-			var pic = result.profile_pic || ''
+			var pic = result.profile_pic
 
 			return remove_file(pic)
 		})
@@ -100,7 +100,7 @@ module.exports = function (rootpath, db)
 		})
 		.then(filename =>
 		{
-			return investor_model.update_profile_pic(
+			return investor_model.updateProfilePic(
 			{
 				user_id: user_id,
 				hash: filename
