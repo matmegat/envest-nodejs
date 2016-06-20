@@ -59,7 +59,7 @@ module.exports = function name (app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
-	db.static = Static(rootpath)
+	db.static = Static(rootpath, db)
 
 	return db
 }
