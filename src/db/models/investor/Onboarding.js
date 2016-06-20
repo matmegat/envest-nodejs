@@ -72,7 +72,7 @@ function Focus (investor)
 			value.forEach((focus_item, i) =>
 			{
 				validate.string(focus_item, `focus[${i}]`)
-				validate.focus_item(value, `focus[${i}]`)
+				validate.empty(focus_item, `focus[${i}]`)
 				validateFocItemLength(focus_item, `focus[${i}]`)
 			})
 			return value
