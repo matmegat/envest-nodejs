@@ -68,6 +68,15 @@ paths:
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
+  '/password/req-reset':
+    $ref: ../api/password/swag/ReqReset.yaml
+
+  '/password/reset':
+    $ref: ../api/password/swag/Reset.yaml
+
+  '/password/change':
+    $ref: ../api/password/swag/Change.yaml
+
 definitions:
 
   Feed:
