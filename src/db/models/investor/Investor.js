@@ -127,7 +127,7 @@ module.exports = function Investor (db)
 			InvestorReposts.admins_created({ investor_id: investor_id })
 			InvestorReposts.investor_created(
 				investor_id,
-				{ admin_id: 'TODO: paste it here' }
+				{ admin_id: data.admin_id }
 			)
 
 			return investor.all.byId(investor_id, trx)

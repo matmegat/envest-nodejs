@@ -3,6 +3,7 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
+var extend = require('lodash/extend')
 
 module.exports = function (db, http)
 {
@@ -48,7 +49,8 @@ module.exports = function (db, http)
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
-		toss(rs, investors.model.create(rq.body))
+		var data = extend({}, rq.body, { admin_id: rq.user.id })
+		toss(rs, investors.model.create(data))
 	})
 
 	investors.express.post('/:id/field', http.adminRequired, (rq, rs) =>
