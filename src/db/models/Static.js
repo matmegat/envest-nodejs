@@ -25,6 +25,8 @@ module.exports = function (rootpath, db)
 	var investor_model = db.investor
 	var root_img = rootpath.partial('static/images')
 
+	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
+
 	static.upload_pic = function (rq)
 	{
 		var file = rq.file
@@ -45,10 +47,7 @@ module.exports = function (rootpath, db)
 		{
 			var pic = result.pic || ''
 
-			if (pic)
-			{
-				return remove_file(pic)
-			}
+			return remove_file(pic)
 		})
 		.then(() =>
 		{
@@ -60,6 +59,14 @@ module.exports = function (rootpath, db)
 			{
 				user_id: user_id,
 				hash: filename
+			})
+			.catch(() =>
+			{
+				return remove_file(filename)
+				.then(() =>
+				{
+					throw UpdateErr()
+				})
 			})
 		})
 		.then(noop)
@@ -85,10 +92,7 @@ module.exports = function (rootpath, db)
 		{
 			var pic = result.profile_pic || ''
 
-			if (pic)
-			{
-				return remove_file(pic)
-			}
+			return remove_file(pic)
 		})
 		.then(() =>
 		{
@@ -100,6 +104,14 @@ module.exports = function (rootpath, db)
 			{
 				user_id: user_id,
 				hash: filename
+			})
+			.catch(() =>
+			{
+				return remove_file(filename)
+				.then(() =>
+				{
+					throw UpdateErr()
+				})
 			})
 		})
 		.then(noop)
