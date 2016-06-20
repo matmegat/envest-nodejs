@@ -20,12 +20,19 @@ module.exports = function Statics (rootpath, db)
 
 	statics.express = Router()
 
+	var AccessErr = Err('static_img_access_denied', 'Static Img Access Denied')
+
 	statics.express.get('/pic/:hash', (rq, rs) =>
 	{
 		fs.access(rootpath('static/images/', rq.params.hash), fs.F_OK, (err) =>
 		{
+			if (err)
+			{
+				toss.err(AccessErr)
+			}
+
 			var hash = rq.params.hash
-			var filename = statics.static_model.by_hash(rq.params.hash)
+			var filename = statics.static_model.path_by_hash(hash)
 			var type = mime.lookup(filename)
 
 			statics.static_model.exists_file(filename)

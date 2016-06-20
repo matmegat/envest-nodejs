@@ -30,13 +30,13 @@ module.exports = function (rootpath, db)
 		var file = rq.file
 		var user_id = rq.user.id
 
-		var validation_settings = {
+		var validation_data = {
 			max_size: 10 * 1024 * 1024,
 			aspect_width: 1,
 			aspect_height: 1
 		}
 
-		return validate_img(file, validation_settings)
+		return validate_img(file, validation_data)
 		.then(() =>
 		{
 			return user_model.picByUserId(user_id)
@@ -70,13 +70,13 @@ module.exports = function (rootpath, db)
 		var file = rq.file
 		var user_id = rq.user.id
 
-		var validation_settings = {
+		var validation_data = {
 			max_size: 10 * 1024 * 1024,
 			aspect_width: 15,
 			aspect_height: 11
 		}
 
-		return validate_img(file, validation_settings)
+		return validate_img(file, validation_data)
 		.then(() =>
 		{
 			return investor_model.bgByUserId(user_id)
@@ -105,7 +105,7 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
-	static.by_hash = function (hash)
+	static.path_by_hash = function (hash)
 	{
 		var t = tuple(hash)
 
