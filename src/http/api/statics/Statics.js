@@ -11,11 +11,11 @@ var fs = require('fs')
 var mime = require('mime')
 var multer = require('multer')
 
-module.exports = function Statics (rootpath, db)
+module.exports = function Statics (rootpath, db, http)
 {
 	var statics = {}
 	statics.static_model = db.static
-	
+
 	statics.express = Router()
 
 	var AccessErr = Err('static_img_access_denied', 'Static Img Access Denied')
@@ -68,7 +68,7 @@ module.exports = function Statics (rootpath, db)
 
 	var investor_bg = multer().single('investor_bg')
 
-	statics.express.post('/bg/upload', authRequired, (rq, rs) =>
+	statics.express.post('/bg/upload', http.investorRequired, (rq, rs) =>
 	{
 		investor_bg(rq, rs, (err) =>
 		{
