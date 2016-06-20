@@ -105,19 +105,42 @@ module.exports = function (rootpath, db)
 		.then(noop)
 	}
 
+	static.by_hash = function (hash)
+	{
+		var t = tuple(hash)
+
+		return tuple_to_filename(t)
+	}
+
 	function remove_file (hash)
 	{
 		var t = tuple(hash)
 		var path = tuple_to_filename(t)
 
+		return static.exists_file(path)
+		.then(exists =>
+		{
+			if (exists)
+			{
+				return unlink(path)
+			}
+			else
+			{
+				return
+			}
+		})
+	}
+
+	static.exists_file = function (path)
+	{
 		return stat(path)
 		.then(() =>
 		{
-			return unlink(path)
+			return true
 		})
-		.catch((err) =>
+		.catch(() =>
 		{
-			return
+			return false
 		})
 	}
 
@@ -259,7 +282,7 @@ module.exports = function (rootpath, db)
 
 	var GMError = Err('reading_file_error', 'Reading File Error')
 	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
-	
+
 	function validate_aspect (img, aspect_width, aspect_height)
 	{
 		return new Promise((rs, rj) =>

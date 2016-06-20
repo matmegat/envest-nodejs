@@ -16,8 +16,6 @@ module.exports = function Statics (rootpath, db)
 	var statics = {}
 	statics.user_model = db.user
 
-	var default_filename = rootpath('static/images/default.png')
-
 	statics.static_model = db.static
 
 	statics.express = Router()
@@ -26,17 +24,23 @@ module.exports = function Statics (rootpath, db)
 	{
 		fs.access(rootpath('static/images/', rq.params.hash), fs.F_OK, (err) =>
 		{
-			var type = mime.lookup(default_filename)
-			var filename = default_filename
+			var hash = rq.params.hash
+			var filename = statics.static_model.by_hash(rq.params.hash)
+			var type = mime.lookup(filename)
 
-			if (! err)
+			statics.static_model.exists_file(filename)
+			.then(exists =>
 			{
-				type = mime.lookup(rootpath('static/images/', rq.params.hash))
-				filename = rootpath('static/images/', rq.params.hash)
-			}
-
-			rs.setHeader('content-type', type)
-			fs.createReadStream(filename).pipe(rs)
+				if (! exists)
+				{
+					rs.sendStatus(404)
+				}
+				else
+				{
+					rs.setHeader('content-type', type)
+					fs.createReadStream(filename).pipe(rs)
+				}
+			})
 		})
 	})
 
