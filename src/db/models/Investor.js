@@ -152,7 +152,7 @@ module.exports = function Investor (db)
 	/*TODO: deal with second table*/
 	var investor_table = knexed(knex, 'investors')
 
-	investor.profilePicByUserId = function (user_id)
+	investor.profilePicById = function (user_id)
 	{
 		return investor_table()
 		.where('user_id', user_id)

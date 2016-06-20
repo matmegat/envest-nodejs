@@ -41,7 +41,7 @@ module.exports = function (rootpath, db)
 		return validate_img(file, validation_data)
 		.then(() =>
 		{
-			return user_model.picByUserId(user_id)
+			return user_model.picById(user_id)
 		})
 		.then(result =>
 		{
@@ -86,7 +86,7 @@ module.exports = function (rootpath, db)
 		return validate_img(file, validation_data)
 		.then(() =>
 		{
-			return investor_model.profilePicByUserId(user_id)
+			return investor_model.profilePicById(user_id)
 		})
 		.then(result =>
 		{

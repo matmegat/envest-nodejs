@@ -280,7 +280,7 @@ module.exports = function User (db)
 		})
 	})
 
-	user.picByUserId = function (id)
+	user.picById = function (id)
 	{
 		return user.users_table()
 		.where('id', id)
