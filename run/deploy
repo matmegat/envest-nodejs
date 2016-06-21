@@ -169,7 +169,8 @@ rev()
 	return ssh(
 		f( '"cd %s;'
 		 + ' npm install --production --no-optional;'
-		 + 'sudo npm run restart"', remote_rootpath()
+		 + 'sudo npm run restart;'
+		 + 'sudo nginx -s reload || true;"', remote_rootpath()
 	))
 }))
 .then(() =>
