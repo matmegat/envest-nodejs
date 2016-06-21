@@ -5,10 +5,12 @@ module.exports = function (cfg, express)
 	{
 		var allowedOrigins =
 		[
-			'http://127.0.0.1:'  + cfg.port,
-			'http://localhost:'  + cfg.port,
-			'http://nevest.dev:' + cfg.port,
+			'http://127.0.0.1',
+			'http://localhost',
+			'http://nevest.dev',
+			'http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 		]
+		.map(it => it + ':' + cfg.port)
 
 		express.use((rq, rs, next) =>
 		{
