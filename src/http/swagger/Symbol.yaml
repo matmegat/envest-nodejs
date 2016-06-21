@@ -7,6 +7,9 @@ properties:
   id:
     type: integer
     description: Symbol Id
+  exchange:
+    type: string
+    description: Symbol exchange
   ticker:
     type: string
     description: Symbol ticker
