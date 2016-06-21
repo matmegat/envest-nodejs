@@ -1,0 +1,44 @@
+get:
+  description: |
+    Get Watchlist for certain Investor
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor Id
+    required: true
+  responses:
+    200:
+      description: Investor Watchlist
+      schema:
+        title: Watchlist
+        type: object
+        properties:
+          exchange:
+            type: string
+            description: Symbol's exchange
+          ticker:
+            type: string
+            description: Symbol's ticker
+          price:
+            type: number
+            description: current price of asset
+          target_price:
+            type: number
+            description: Investor's target price of asset
+        required:
+          - exchange
+          - ticker
+          - price
+          - target_price
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - watchlist

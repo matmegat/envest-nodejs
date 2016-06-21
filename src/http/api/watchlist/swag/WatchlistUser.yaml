@@ -1,0 +1,38 @@
+get:
+  description: |
+    Get Watchlist for current user
+  responses:
+    200:
+      description: User Watchlist
+      schema:
+        title: Watchlist
+        type: object
+        properties:
+          exchange:
+            type: string
+            description: Symbol's exchange
+          ticker:
+            type: string
+            description: Symbol's ticker
+          price:
+            type: number
+            description: current price of asset
+          gain:
+            type: number
+            description: asset's gain in current day
+        required:
+          - exchange
+          - ticker
+          - price
+          - gain
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - watchlist
