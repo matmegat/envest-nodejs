@@ -5,15 +5,22 @@ var _ = require('lodash')
 
 var knexed = require('../knexed')
 
+var Err = require('../../Err')
+var WrongBrokerageId = Err('wrong_brokerage_id', 'Wrong Brokerage Id')
+var BrokerageNotFound = Err('brokerage_not_found', 'Wrong Brokerage Id')
+
 module.exports = function Portfolio (db)
 {
 	var portfolio = {}
 
-	var knex     = db.knex
+	var knex    = db.knex
+	var helpers = db.helpers
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
+	portfolio.brokerage_table = knexed(knex, 'brokerage')
 
 	expect(db, 'Portfolio depends on Investor').property('investor')
+	var investor = db.investor
 
 	portfolio.list = function (options, trx)
 	{
@@ -69,6 +76,60 @@ module.exports = function Portfolio (db)
 			}
 		})
 	}
+
+	var brokerage = {}
+	portfolio.brokerage = brokerage
+
+	brokerage.is = function (investor_id, trx)
+	{
+		return validate_id(investor_id)
+		.then(() =>
+		{
+			return portfolio.brokerage_table(trx)
+			.where('investor_id', investor_id)
+			.then(helpers.oneMaybe)
+			.then(Boolean)
+		})
+	}
+
+	var validate_id = require('../../id')
+	.validate.promise(WrongBrokerageId)
+
+	brokerage.ensure = function (investor_id, trx)
+	{
+		return brokerage.is(investor_id, trx)
+		.then(Err.falsy(BrokerageNotFound))
+	}
+
+	brokerage.set = knex.transact(knex, (trx, data) =>
+	{
+		return investor.all.ensure(data.investor_id, trx)
+		.then(() =>
+		{
+			return brokerage.is(data.investor_id, trx)
+			.then((is_brokerage) =>
+			{
+				var queryset = portfolio.brokerage_table(trx)
+
+				if (is_brokerage)
+				{
+					queryset.where('investor_id', data.investor_id)
+					.update({ cash_value: data.brokerage })
+				}
+				else
+				{
+					queryset.insert(
+					{
+						investor_id: data.investor_id,
+						cash_value: data.brokerage,
+						multiplier: 1.0
+					})
+				}
+
+				return queryset
+			})
+		})
+	})
 
 	return portfolio
 }
