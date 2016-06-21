@@ -9,6 +9,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.focus = Focus(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
+	onb.fields.brokerage = Brokerage(investor)
 
 	onb.update = function update (investor_id, field, value)
 	{
@@ -169,6 +170,31 @@ function HistReturn (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ historical_returns: value })
+		}
+	})
+}
+
+var WrongBrokerageFormat = Err('wrong_brokerage_format',
+	'Wrong brokerage format')
+
+function Brokerage (investor)
+{
+	return Field(investor,
+	{
+		validate: (value) =>
+		{
+			if (! isFinite(value) || value < 0)
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage' })
+			}
+
+			return value
+		},
+		set: (value, investor_queryset) =>
+		{
+			/* TODO: work with brokerage model */
+
+			return investor_queryset
 		}
 	})
 }

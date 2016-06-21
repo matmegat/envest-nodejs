@@ -32,7 +32,9 @@ function validator (validate)
 		.then(value =>
 		{
 			/* to capture validator not returning */
-			expect(value).ok
+			expect(value).to.be.not.null
+			expect(value).to.be.not.undefined
+			/* it will allow to return 0 */
 
 			return value
 		})
