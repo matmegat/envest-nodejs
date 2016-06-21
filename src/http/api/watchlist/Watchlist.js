@@ -43,9 +43,9 @@ var clone = _.clone
 
 function RandomEntry (type)
 {
-	var entry = sample(tickers)
+	var entry = {}
 
-	entry = clone(entry)
+	entry.symbol = clone(sample(tickers))
 
 	entry.price = RandomEntry.price()
 

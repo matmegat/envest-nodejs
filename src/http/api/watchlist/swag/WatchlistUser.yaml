@@ -8,12 +8,8 @@ get:
         title: Watchlist
         type: object
         properties:
-          exchange:
-            type: string
-            description: Symbol's exchange
-          ticker:
-            type: string
-            description: Symbol's ticker
+          symbol:
+            $ref: ../../../swagger/Symbol.yaml
           price:
             type: number
             description: current price of asset
