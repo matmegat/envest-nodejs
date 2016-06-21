@@ -101,7 +101,7 @@ module.exports = function Portfolio (db)
 		.then(Err.falsy(BrokerageNotFound))
 	}
 
-	brokerage.set = knex.transact(knex, (trx, data) =>
+	brokerage.set = knexed.transact(knex, (trx, data) =>
 	{
 		return investor.all.ensure(data.investor_id, trx)
 		.then(() =>

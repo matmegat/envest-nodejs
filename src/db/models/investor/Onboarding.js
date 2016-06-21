@@ -9,7 +9,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.focus = Focus(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
-	onb.fields.brokerage = Brokerage(investor)
+	onb.fields.brokerage = Brokerage(investor, db)
 
 	onb.update = function update (investor_id, field, value)
 	{
@@ -59,6 +59,7 @@ function Profession (investor)
 
 
 var validateFocLength = validate.length(3)
+// eslint-disable-next-line id-length
 var validateFocItemLength = validate.length(250)
 
 function Focus (investor)
@@ -174,12 +175,13 @@ function HistReturn (investor)
 	})
 }
 
+// eslint-disable-next-line id-length
 var WrongBrokerageFormat = Err('wrong_brokerage_format',
 	'Wrong brokerage format')
 
-function Brokerage (investor)
+function Brokerage (investor_model, db)
 {
-	return Field(investor,
+	return Field(investor_model,
 	{
 		validate: (value) =>
 		{
@@ -192,9 +194,19 @@ function Brokerage (investor)
 		},
 		set: (value, investor_queryset) =>
 		{
-			/* TODO: work with brokerage model */
+			var brokerage = db.portfolio.brokerage
 
 			return investor_queryset
+			.select('user_id')
+			.then(db.helpers.one)
+			.then((investor) =>
+			{
+				return brokerage.set(
+				{
+					investor_id: investor.user_id,
+					brokerage: value
+				})
+			})
 		}
 	})
 }
