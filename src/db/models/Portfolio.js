@@ -9,6 +9,8 @@ var Err = require('../../Err')
 var WrongBrokerageId = Err('wrong_brokerage_id', 'Wrong Brokerage Id')
 var BrokerageNotFound = Err('brokerage_not_found', 'Wrong Brokerage Id')
 
+var validate = require('../validate')
+
 module.exports = function Portfolio (db)
 {
 	var portfolio = {}
@@ -130,6 +132,88 @@ module.exports = function Portfolio (db)
 			})
 		})
 	})
+
+	brokerage.update = knexed.transact(knex, (trx, data) =>
+	{
+		/* operation with validation procedure:
+		* - deposit
+		* - withdraw
+		* - transactional fee
+		* - interest
+		* - trade
+		*
+		* data =
+		* {
+		*   operation: 'deposit' | 'withdraw' | 'fee' | 'interest' | 'trade'
+		*   investor_id: integer,
+		*   amount: number
+		* }
+		* */
+		var valid_operations =
+		[
+			'deposit',
+			'withdraw',
+			'fee',
+			'interest',
+			'trade',
+		]
+
+		return investor.all.ensure(data.investor_id, trx)
+		.then(() =>
+		{
+			return brokerage.ensure(data.investor_id, trx)
+		})
+		.then(() =>
+		{
+			return portfolio.brokerage_table(trx)
+			.where('investor_id', data.investor_id)
+			.then(helpers.one)
+		})
+		.then((brokerage) =>
+		{
+			/* Validations:
+			* deposit: is number, amount > 0
+			* withdraw: is number, 0 < amount <= brokerage
+			* transactional fee: is number, 0 < amount <= brokerage
+			* interest: is number, amount > 0
+			* trade:
+			* - is number
+			* - buy: amount < 0, abs(amount) <= brokerage
+			* - sold: amount > 0
+			* */
+
+			validate.required(data.operation, 'operation')
+			validate.required(data.amount, 'amount')
+
+			validate.string(data.operation, 'operation')
+			validate.number(data.amount, 'amount')
+
+			if (valid_operations.indexOf(data.operation) === -1)
+			{
+				throw InvalidOperation()
+			}
+			if (data.amount === 0)
+			{
+				throw InvalidAmount()
+			}
+
+			if (brokerage.cash_value + data.amount < 0)
+			{
+				throw InvalidAmount(
+				{
+					data: 'Brokerage may not become less than zero'
+				})
+			}
+
+			return brokerage
+		})
+	})
+
+	var InvalidOperation = Err('invalid_portfolio_operation',
+		'Invalid Portfolio Operation')
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
+
 
 	return portfolio
 }

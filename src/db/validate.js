@@ -58,6 +58,15 @@ validate.array = function validate__array (field, name)
 }
 
 
+validate.number = function validate__number (field, name)
+{
+	if (typeof field !== 'number' || ! isFinite(field))
+	{
+		throw FieldType({ field: name, type: 'number' })
+	}
+}
+
+
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
 validate.length = function validate__length (max)
