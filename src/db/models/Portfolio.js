@@ -205,7 +205,21 @@ module.exports = function Portfolio (db)
 				})
 			}
 
-			return brokerage
+			return portfolio.brokerage_table(trx)
+			.where('investor_id', data.investor_id)
+			.update({ cash_value: brokerage.cash_value + data.amount })
+		})
+		.then(() =>
+		{
+			if (data.operation === 'deposit' || data.operation === 'withdraw')
+			{
+				/* TODO: call update multiplier */
+				return true
+			}
+			else
+			{
+				return false
+			}
 		})
 	})
 
