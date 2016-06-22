@@ -20,6 +20,12 @@ paths:
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
+  '/feed/trades':
+    $ref: ../api/feed/swag/FeedByTrade.yaml
+
+  '/feed/updates':
+    $ref: ../api/feed/swag/FeedByUpdate.yaml
+
   '/feed/{feed_id}/comments':
     $ref: ../api/feed/swag/GetPostFeedComments.yaml
 
