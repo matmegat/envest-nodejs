@@ -11,5 +11,20 @@
 
     "database": "netvest",
     "user": "netvest"
+  },
+
+  "cors":
+  {
+    "hosts":
+    [
+      "http://127.0.0.1",
+      "http://localhost",
+      "http://nevest.dev",
+      "http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com"
+    ],
+    "ports":
+    [
+      8080, 8081
+    ]
   }
 }

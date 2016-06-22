@@ -3,26 +3,26 @@ module.exports = function (cfg, express)
 {
 	if (cfg.env === 'dev' || cfg.env === 'test')
 	{
-		var allowedOrigins =
-		[
-			'http://127.0.0.1',
-			'http://localhost',
-			'http://nevest.dev',
-			'http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
-		]
-		.map(it => it + ':' + cfg.port)
+		var cors = cfg.cors
+		var allowed = cors.hosts.map(host =>
+		{
+			return cors.ports.map(port => host + ':' + port)
+		})
+
+		allowed = [].concat.apply([], allowed)
 
 		express.use((rq, rs, next) =>
 		{
 			var origin = rq.headers.origin
 
-			if (allowedOrigins.indexOf(origin) > -1)
+			if (~ allowed.indexOf(origin))
 			{
 				rs.setHeader('Access-Control-Allow-Origin', origin)
 			}
 
 			rs.header(
 				'Access-Control-Allow-Headers',
+
 				'Authorization, Origin, X-Requested-With, Content-Type, Accept, ' +
 				'Access-Control-Allow-Credentials'
 			)
