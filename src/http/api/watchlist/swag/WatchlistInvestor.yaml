@@ -23,8 +23,7 @@ get:
             type: number
             description: Investor's target price of asset
         required:
-          - exchange
-          - ticker
+          - symbol
           - price
           - target_price
 

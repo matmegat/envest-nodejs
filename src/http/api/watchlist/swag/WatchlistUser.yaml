@@ -17,8 +17,7 @@ get:
             type: number
             description: asset's gain in current day
         required:
-          - exchange
-          - ticker
+          - symbol
           - price
           - gain
 
