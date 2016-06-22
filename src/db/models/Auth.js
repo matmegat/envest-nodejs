@@ -154,13 +154,13 @@ module.exports = function Auth (db)
 
 	var WrongName = Err('wrong_name_format', 'Wrong name format')
 
+	var validateNameLength = validate_length(255)
+
 	function validate_name (name, field_name)
 	{
-		var name_max_length = 255
-
 		validate_required(name, field_name)
 		validate_empty(name, field_name)
-		validate_length(name, field_name, name_max_length)
+		validateNameLength(name, field_name)
 
 		/*
 		   Two words minimum, separated by space.

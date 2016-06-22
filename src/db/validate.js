@@ -25,14 +25,18 @@ validate.empty = function validate__empty (field, name)
 	}
 }
 
-var FieldLengthExceeded =
-	Err('field_max_length_exceeded', 'Field max length exceeded')
+var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
-validate.length = function validate__length (field, name, length)
+validate.length = function validate__length (max)
 {
-	if (field.length > length)
+	return (field, name) =>
 	{
-		throw FieldLengthExceeded({ field: name })
+		var actual = field.length
+
+		if (actual > max)
+		{
+			throw FieldLength({ field: name, actual: actual, max: max })
+		}
 	}
 }
 
