@@ -147,15 +147,20 @@ module.exports = function Auth (db)
 
 	var validate_empty = validate.empty
 
+	var validate_length = validate.length
+
 
 	var XRegExp = require('xregexp')
 
 	var WrongName = Err('wrong_name_format', 'Wrong name format')
 
+	var validateNameLength = validate_length(255)
+
 	function validate_name (name, field_name)
 	{
 		validate_required(name, field_name)
 		validate_empty(name, field_name)
+		validateNameLength(name, field_name)
 
 		/*
 		   Two words minimum, separated by space.
