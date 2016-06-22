@@ -15,8 +15,25 @@ module.exports = function Feed (db)
 
 	feed.express.get('/', (rq, rs) =>
 	{
-		toss(rs, feed.model.list(rq.query))
+		var options = _.pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page',
+			'type',
+			'investors',
+			'days',
+			'months',
+			'name',
+			'minyear',
+			'maxyear'
+		])
+
+		toss(rs, feed.model.list(options))
 	})
+
+	feed.express.get('/trades', by_type('trade'))
+	feed.express.get('/updates', by_type('update'))
 
 	feed.express.get('/:id', (rq, rs) =>
 	{
@@ -45,6 +62,25 @@ module.exports = function Feed (db)
 		toss(rs, db.comments.create(comment_data))
 	})
 
+	function by_type (type)
+	{
+		return function (rq, rs)
+		{
+			var options = _.pick(rq.query,
+			[
+				'max_id',
+				'since_id',
+				'page'
+			])
+
+			options.type = type
+
+			toss(rs, feed.model.list(options))
+		}
+	}
+
 	return feed
 }
+
+
 
