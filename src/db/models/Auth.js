@@ -106,6 +106,11 @@ module.exports = function Auth (db)
 	}
 
 	/* validations */
+	var validate = require('../validate')
+
+	var validate_name = validate.name
+	var validate_email = validate.email
+
 	function validate_register (credentials)
 	{
 		return new Promise(rs =>
@@ -138,62 +143,6 @@ module.exports = function Auth (db)
 
 			return rs()
 		})
-	}
-
-
-	var validate = require('../validate')
-
-	var validate_required = validate.required
-
-	var validate_empty = validate.empty
-
-
-	var XRegExp = require('xregexp')
-
-	var WrongName = Err('wrong_name_format', 'Wrong name format')
-
-	function validate_name (name, field_name)
-	{
-		validate_required(name, field_name)
-		validate_empty(name, field_name)
-
-		/*
-		   Two words minimum, separated by space.
-		   Any alphabet letters,
-		   dashes, dots and spaces (not more than one successively).
-
-		   Should begin with a letter and end with a letter or dot.
-		*/
-		var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
-		{
-			word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
-		},
-		'x')
-
-		if (! re.test(name))
-		{
-			throw WrongName()
-		}
-	}
-
-	var WrongEmail = Err('wrong_email_format', 'Wrong email format')
-
-	function validate_email (email)
-	{
-		validate_required(email, 'email')
-		validate_empty(email, 'email')
-
-		if (email.length > 254)
-		{
-			throw WrongEmail()
-		}
-
-		var emailRe = /@/
-
-		if (! emailRe.test(email))
-		{
-			throw WrongEmail()
-		}
 	}
 
 	return auth

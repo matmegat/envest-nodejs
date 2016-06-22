@@ -1,12 +1,13 @@
 
 var Err = require('../Err')
+var XRegExp = require('xregexp')
 
 var validate = module.exports = {}
 
 
 var FieldRequired = Err('field_required', 'Field is required')
 
-validate.required = function valudate__required (field, name)
+validate.required = function validate__required (field, name)
 {
 	if (field == null)
 	{
@@ -46,5 +47,51 @@ validate.array = function validate__array (ar, name)
 	if (! Array.isArray(ar))
 	{
 		throw ArrayRequired({ field: name })
+	}
+}
+
+var WrongName = Err('wrong_name_format', 'Wrong name format')
+
+validate.name = function validate__name (name, field_name)
+{
+	validate.required(name, field_name)
+	validate.empty(name, field_name)
+
+	/*
+	   Two words minimum, separated by space.
+	   Any alphabet letters,
+	   dashes, dots and spaces (not more than one successively).
+
+	   Should begin with a letter and end with a letter or dot.
+	*/
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
+	{
+		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+	},
+	'x')
+
+	if (! re.test(name))
+	{
+		throw WrongName()
+	}
+}
+
+var WrongEmail = Err('wrong_email_format', 'Wrong email format')
+
+validate.email = function validate__email (email)
+{
+	validate.required(email, 'email')
+	validate.empty(email, 'email')
+
+	if (email.length > 254)
+	{
+		throw WrongEmail()
+	}
+
+	var emailRe = /@/
+
+	if (! emailRe.test(email))
+	{
+		throw WrongEmail()
 	}
 }
