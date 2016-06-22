@@ -1,19 +1,20 @@
 
-var extend = require('lodash/extend')
 var moment = require('moment')
 
 var toId = require('../../id').toId
 
 var validateId = require('../../id').validate
-var validate   = require('../validate')
+var validateMany = require('../../id').validateMany
+var validateName = require('../validate').name
 
 var Err = require('../../Err')
 
-var clauses = 
+var clauses =
 {
 	type: by_type,
 	investors: by_ids,
-	days: by_days,
+	days: by_date(WrongDaysFilter, 'days'),
+	months: by_date(WrongMonthFilter, 'months'),
 	name: by_name,
 	minyear: by_year('>='),
 	maxyear: by_year('<=')
@@ -21,7 +22,7 @@ var clauses =
 
 module.exports = function Filter (queryset, options)
 {
-	for(var key in options)
+	for (var key in options)
 	{
 		if (key in clauses)
 		{
@@ -35,35 +36,39 @@ module.exports = function Filter (queryset, options)
 function by_type (queryset, value)
 {
 	return queryset
-	.andWhere('type', value)
+	.where('type', value)
 }
+
+var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id') //заглушка
 
 function by_ids (queryset, investors)
 {
 	var ids = investors.split(',')
 
-	return validateIds(ids)
-	.then(() =>
-	{
-		return queryset
-		.whereIn('investor_id', ids)
-	})
-}
-
-var WrongDaysFilter = Err('wrong_days_filter', 'Wrong days filter')
-
-function by_days (queryset, days)
-{
-	//toId и validateId ипользуются т.к их логика подходит для проверки days
-	days = toId(days)
-	validateId(WrongDaysFilter, days)
-
-	var date =  moment()
-	.subtract(days, 'days')
-	.format('YYYY-MM-DD')
+	validateMany(WrongInvestorId, ids)
 
 	return queryset
-	.andWhereRaw('timestamp >= ?', date)
+	.whereIn('investor_id', ids)
+}
+
+var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
+var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
+
+function by_date (err, unit)
+{
+	return function (queryset, value)
+	{
+		//toId и validateId ипользуются т.к их логика подходит
+		value = toId(value)
+		validateId(err, value)
+
+		var date =  moment()
+		.subtract(value, unit)
+		.format('YYYY-MM-DD')
+
+		return queryset
+		.where('timestamp', '>=', date)
+	}
 }
 
 var WrongYearFilter = Err('wrong_year_filter', 'Wrong year filter')
@@ -79,28 +84,18 @@ function by_year (when)
 		var pattern = year + '-01-01'
 
 		return queryset
-		.andWhere('timestamp', when, pattern)
+		.where('timestamp', when, pattern)
 	}
 }
 
 function by_name (queryset, name)
 {
-	var pattern = '%'+name.toLowerCase()+'%'
+	validateName(name, 'name')
+
+	var pattern = '%' + name.toLowerCase() + '%'
+
 	return queryset
 	.leftJoin('users', 'users.id', 'feed_items.investor_id')
-	.andWhereRaw('lower(users.first_name) LIKE ?', pattern)
-	.orWhereRaw('lower(users.last_name) LIKE ?', pattern)
-}
-
-var WrongInvestorId = Err('wrong_investor_id', 'Wrong investor id')
-
-function validateIds (ids)
-{
-	return new Promise(rs =>
-	{
-		validate.array(ids, 'investors')
-		ids.forEach(validateId(WrongInvestorId))
-
-		return rs()
-	})
+	.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
+	pattern)
 }
