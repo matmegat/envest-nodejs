@@ -100,9 +100,9 @@ module.exports = function Feed (db)
 			paginator = paginator_chunked
 		}
 
-		var count_queryset = queryset.clone()
-
 		queryset = Filter(queryset, options)
+
+		var count_queryset = queryset.clone()
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
