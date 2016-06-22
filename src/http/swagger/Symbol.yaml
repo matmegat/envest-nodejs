@@ -16,3 +16,4 @@ properties:
 required:
 - exchange
 - ticker
+- company

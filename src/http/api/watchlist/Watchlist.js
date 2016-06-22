@@ -68,10 +68,10 @@ function RandomEntry (type)
 
 var tickers =
 [
-	{ exchange: 'NASDAQ', ticker: 'GOOG' },
-	{ exchange: 'MOEX',   ticker: 'YNDX' },
-	{ exchange: 'NASDAQ', ticker: 'TSLA' },
-	{ exchange: 'AMEX',   ticker: 'GLD' }
+	{ exchange: 'NASDAQ', ticker: 'GOOG', company: 'Alphabet Inc.' },
+	{ exchange: 'MOEX',   ticker: 'YNDX', company: 'Yandex NV' },
+	{ exchange: 'NASDAQ', ticker: 'TSLA', company: 'Tesla Motors Inc' },
+	{ exchange: 'AMEX',   ticker: 'GLD',  company: 'SPDR Gold Trust' }
 ]
 
 
