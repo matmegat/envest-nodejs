@@ -204,7 +204,7 @@ function Brokerage (investor_model, db)
 				return brokerage.set(
 				{
 					investor_id: investor.user_id,
-					brokerage: value
+					cash_value: value
 				})
 			})
 		}

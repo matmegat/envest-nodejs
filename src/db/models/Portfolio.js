@@ -116,14 +116,14 @@ module.exports = function Portfolio (db)
 				if (is_brokerage)
 				{
 					queryset.where('investor_id', data.investor_id)
-					.update({ cash_value: data.brokerage })
+					.update(_.pick(['cash_value', 'multiplier']))
 				}
 				else
 				{
 					queryset.insert(
 					{
 						investor_id: data.investor_id,
-						cash_value: data.brokerage,
+						cash_value: data.cash_value,
 						multiplier: 1.0
 					})
 				}
