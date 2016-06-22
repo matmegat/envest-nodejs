@@ -7,6 +7,7 @@ var knexed = require('../knexed')
 
 var PaginatorChunked = require('../paginator/Chunked')
 var PaginatorBooked  = require('../paginator/Booked')
+var Filter = require('./Filter')
 
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
@@ -100,6 +101,8 @@ module.exports = function Feed (db)
 		}
 
 		var count_queryset = queryset.clone()
+
+		queryset = Filter(queryset, options)
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
