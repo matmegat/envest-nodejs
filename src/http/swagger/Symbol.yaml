@@ -4,9 +4,6 @@
 # this is called Symbol
 type: object
 properties:
-  id:
-    type: integer
-    description: Symbol Id
   exchange:
     type: string
     description: Symbol exchange
@@ -17,6 +14,6 @@ properties:
     type: string
     description: company name corresponding to that symbol
 required:
-- id
+- exchange
 - ticker
 - company
