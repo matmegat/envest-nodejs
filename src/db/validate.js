@@ -6,7 +6,7 @@ var validate = module.exports = {}
 
 var FieldRequired = Err('field_required', 'Field is required')
 
-validate.required = function valudate__required (field, name)
+validate.required = function validate__required (field, name)
 {
 	if (field == null)
 	{
@@ -22,6 +22,17 @@ validate.empty = function validate__empty (field, name)
 	if (field === '')
 	{
 		throw FieldEmpty({ field: name })
+	}
+}
+
+var FieldLengthExceeded =
+	Err('field_max_length_exceeded', 'Field max length exceeded')
+
+validate.length = function validate__length (field, name, length)
+{
+	if (field.length > length)
+	{
+		throw FieldLengthExceeded({ field: name })
 	}
 }
 

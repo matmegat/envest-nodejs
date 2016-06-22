@@ -147,6 +147,8 @@ module.exports = function Auth (db)
 
 	var validate_empty = validate.empty
 
+	var validate_length = validate.length
+
 
 	var XRegExp = require('xregexp')
 
@@ -154,8 +156,11 @@ module.exports = function Auth (db)
 
 	function validate_name (name, field_name)
 	{
+		var name_max_length = 255
+
 		validate_required(name, field_name)
 		validate_empty(name, field_name)
+		validate_length(name, field_name, name_max_length)
 
 		/*
 		   Two words minimum, separated by space.
