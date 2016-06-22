@@ -38,7 +38,7 @@ var fade =
 
 var secrets =
 {
-	'password': 1,
-	'pass': 1,
-	'new_pass': 1
+	password: 1,
+	pass: 1,
+	new_pass: 1
 }
