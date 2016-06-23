@@ -118,20 +118,19 @@ module.exports = function Portfolio (db)
 	function validate_multiplier (value)
 	{
 		value.number(value, 'multiplier')
+		if (value <= 0)
+		{
+			throw InvalidAmount({ field: 'multiplier' })
+		}
 	}
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
+
 	brokerage.update = knexed.transact(knex, (trx, data) =>
 	{
 		/* operation with validation procedure:
-		* - deposit
-		* - withdraw
-		* - transactional fee
-		* - interest
-		* - trade
-		*
 		* data =
 		* {
 		*   operation: 'deposit' | 'withdraw' | 'fee' | 'interest' | 'trade'
@@ -139,14 +138,8 @@ module.exports = function Portfolio (db)
 		*   amount: number
 		* }
 		* */
-		var valid_operations =
-		[
-			'deposit',
-			'withdraw',
-			'fee',
-			'interest',
-			'trade',
-		]
+		var operation = data.operation
+		var amount = data.amount
 
 		return investor.all.ensure(data.investor_id, trx)
 		.then(() =>
@@ -161,41 +154,16 @@ module.exports = function Portfolio (db)
 		})
 		.then((brokerage) =>
 		{
-			/* Validations:
-			* deposit: is number, amount > 0
-			* withdraw: is number, 0 < amount <= brokerage
-			* transactional fee: is number, 0 < amount <= brokerage
-			* interest: is number, amount > 0
-			* trade:
-			* - is number
-			* - buy: amount < 0, abs(amount) <= brokerage
-			* - sold: amount > 0
-			* */
-
-			validate.required(data.operation, 'operation')
-			validate.required(data.amount, 'amount')
-
-			validate.string(data.operation, 'operation')
-			validate.number(data.amount, 'amount')
-
-			if (valid_operations.indexOf(data.operation) === -1)
+			if (operation in valid_operations)
+			{
+				valid_operations[operation](amount, brokerage)
+			}
+			else
 			{
 				throw InvalidOperation()
 			}
-			if (data.amount === 0)
-			{
-				throw InvalidAmount()
-			}
 
-			if (brokerage.cash_value + data.amount < 0)
-			{
-				throw InvalidAmount(
-				{
-					data: 'Brokerage may not become less than zero'
-				})
-			}
-
-			data.cash_value = brokerage.cash_value + data.amount
+			data.cash_value = brokerage.cash_value + amount
 			return set_brokerage(trx, data)
 		})
 		.then(() =>
@@ -211,6 +179,67 @@ module.exports = function Portfolio (db)
 			}
 		})
 	})
+
+	var valid_operations =
+	{
+		deposit: validate_positive,
+		withdraw: validate_negative,
+		interest: validate_positive,
+		fee: validate_negative,
+		trade: validate_deal
+	}
+
+	function validate_deal (amount, brokerage)
+	{
+		/* Validations:
+		 * deposit: is number, amount > 0
+		 * withdraw: is number, 0 < amount <= brokerage
+		 * transactional fee: is number, 0 < amount <= brokerage
+		 * interest: is number, amount > 0
+		 * trade:
+		 * - is number
+		 * - buy: amount < 0, abs(amount) <= brokerage
+		 * - sold: amount > 0
+		 * */
+
+		validate.required(amount, 'amount')
+		validate.number(amount, 'amount')
+		if (amount === 0)
+		{
+			throw InvalidAmount()
+		}
+		if (brokerage.cash_value + amount < 0)
+		{
+			throw InvalidAmount(
+				{
+					data: 'Brokerage may not become less than zero'
+				})
+		}
+	}
+
+	function validate_positive (amount, brokerage)
+	{
+		validate_deal(amount, brokerage)
+		if (amount < 0)
+		{
+			throw InvalidAmount(
+				{
+					data: 'Amount should be positive for this operation'
+				})
+		}
+	}
+
+	function validate_negative (amount, brokerage)
+	{
+		validate_deal(amount, brokerage)
+		if (amount > 0)
+		{
+			throw InvalidAmount(
+				{
+					data: 'Amount should be negative for this operation'
+				})
+		}
+	}s
 
 	var InvalidOperation = Err('invalid_portfolio_operation',
 		'Invalid Portfolio Operation')
