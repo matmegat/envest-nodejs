@@ -86,9 +86,9 @@ validate.name = function validate__name (name, field_name)
 
 	   Should begin with a letter and end with a letter or dot.
 	*/
-	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? $`,
 	{
-		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+		word: XRegExp(`\\pL+ ([' -] \\pL+)* \\.?`, 'x')
 	},
 	'x')
 
