@@ -6,8 +6,6 @@ var _ = require('lodash')
 var knexed = require('../knexed')
 
 var Err = require('../../Err')
-var WrongBrokerageId = Err('wrong_brokerage_id', 'Wrong Brokerage Id')
-var BrokerageNotFound = Err('brokerage_not_found', 'Wrong Brokerage Id')
 
 var validate = require('../validate')
 
@@ -90,6 +88,7 @@ module.exports = function Portfolio (db)
 		return portfolio.brokerage_table(trx)
 		.where(where_clause)
 		.update(update_clause)
+		.debug(true)
 	}
 
 	brokerage.set = knexed.transact(knex, (trx, data) =>
@@ -144,10 +143,6 @@ module.exports = function Portfolio (db)
 		return investor.all.ensure(data.investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.ensure(data.investor_id, trx)
-		})
-		.then(() =>
-		{
 			return portfolio.brokerage_table(trx)
 			.where('investor_id', data.investor_id)
 			.then(helpers.one)
@@ -163,15 +158,14 @@ module.exports = function Portfolio (db)
 				throw InvalidOperation()
 			}
 
-			data.cash_value = brokerage.cash_value + amount
+			data.cash_value = amount + brokerage.cash_value
 			return set_brokerage(trx, data)
 		})
 		.then(() =>
 		{
-			if (data.operation === 'deposit' || data.operation === 'withdraw')
+			if (operation in multiplier_update)
 			{
-				/* TODO: call update multiplier */
-				return true
+				return multiplier_update[operation](trx, data.investor_id)
 			}
 			else
 			{
@@ -187,6 +181,12 @@ module.exports = function Portfolio (db)
 		interest: validate_positive,
 		fee: validate_negative,
 		trade: validate_deal
+	}
+
+	var multiplier_update =
+	{
+		deposit: calc_multiplier,
+		withdraw: calc_multiplier
 	}
 
 	function validate_deal (amount, brokerage)
@@ -208,7 +208,7 @@ module.exports = function Portfolio (db)
 		{
 			throw InvalidAmount()
 		}
-		if (brokerage.cash_value + amount < 0)
+		if (amount + brokerage.cash_value < 0)
 		{
 			throw InvalidAmount(
 				{
@@ -239,11 +239,53 @@ module.exports = function Portfolio (db)
 					data: 'Amount should be negative for this operation'
 				})
 		}
-	}s
+	}
 
 	var InvalidOperation = Err('invalid_portfolio_operation',
 		'Invalid Portfolio Operation')
 
+	function calc_multiplier (trx, investor_id)
+	{
+		return portfolio.brokerage_table(trx)
+		.where('investor_id', investor_id)
+		.then(helpers.one)
+		.then((brokerage) =>
+		{
+			return portfolio.table(trx)
+			.where('investor_id', investor_id)
+			.then((holdings) =>
+			{
+				return {
+					brokerage: brokerage,
+					holdings: holdings
+				}
+			})
+		})
+		.then((full_portfolio) =>
+		{
+			var indexed_amount = 100000
+			var real_allocation = full_portfolio.brokerage.cash_value
+
+			full_portfolio.holdings.forEach((holding) =>
+			{
+				var symbol_allocation =
+					holding.amount *
+					(holding.buy_price || _.random(10.0, 100.0, true))
+					/* TODO: migrate to buy_price */
+
+				real_allocation += symbol_allocation
+			})
+
+			var multiplier = indexed_amount / real_allocation
+
+			return set_brokerage(
+			trx,
+			{
+				investor_id: investor_id,
+				multiplier: multiplier
+			})
+		})
+	}
 
 	return portfolio
 }
