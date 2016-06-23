@@ -127,7 +127,17 @@ module.exports = function Investor (db)
 				{ admin_id: data.admin_id }
 			)
 
-			return investor.all.byId(investor_id, trx)
+			return db.portfolio.brokerage_table(trx)
+			.insert(
+			{
+				investor_id: investor_id,
+				cash_value: 0.0,
+				multiplier: 1.0
+			})
+			.then(() =>
+			{
+				return investor.all.byId(investor_id, trx)
+			})
 		})
 	})
 
