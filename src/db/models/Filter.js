@@ -12,6 +12,7 @@ var Err = require('../../Err')
 var clauses =
 {
 	type: by_type,
+	investor: by_id,
 	investors: by_ids,
 	days: by_date(WrongDaysFilter, 'days'),
 	months: by_date(WrongMonthFilter, 'months'),
@@ -40,6 +41,15 @@ function by_type (queryset, value)
 }
 
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id') //заглушка
+
+function by_id (queryset, investor)
+{
+	var id = toId(investor)
+	validateId(WrongInvestorId, id)
+
+	return queryset
+	.where('investor_id', id)
+}
 
 function by_ids (queryset, investors)
 {
@@ -95,7 +105,6 @@ function by_name (queryset, name)
 	var pattern = '%' + name.toLowerCase() + '%'
 
 	return queryset
-	.leftJoin('users', 'users.id', 'feed_items.investor_id')
-	.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
-	pattern)
+	.innerJoin('users', 'users.id', 'feed_items.investor_id')
+	.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?", pattern)
 }
