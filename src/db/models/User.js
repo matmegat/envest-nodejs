@@ -4,6 +4,9 @@ var knexed = require('../knexed')
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
+var pick = require('lodash/pick')
+var assign = require('lodash/assign')
+
 var Password = require('./Password')
 
 var Err = require('../../Err')
@@ -47,6 +50,97 @@ module.exports = function User (db)
 			.where('id', id)
 			.then(oneMaybe)
 		})
+	}
+
+	user.infoById = function (id)
+	{
+		return knex.select('*')
+		.from(function ()
+		{
+			this.select(
+				'users.id AS id',
+				'auth_facebook.facebook_id AS facebook_id',
+				'users.first_name AS first_name',
+				'users.last_name AS last_name',
+				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
+				'users.pic AS pic',
+				'investors.user_id AS investor_user_id',
+				'investors.profile_pic AS profile_pic',
+				'investors.profession AS profession',
+				'investors.background AS background',
+				'investors.historical_returns AS historical_returns',
+				'investors.is_public AS is_public',
+				'investors.start_date AS start_date',
+				'admins.user_id AS admin_user_id',
+				'admins.parent AS parent',
+				'admins.can_intro AS can_intro'
+			)
+			.from('users')
+			.leftJoin(
+				'auth_facebook',
+				'users.id',
+				'auth_facebook.user_id'
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
+			.leftJoin(
+				'investors',
+				'users.id',
+				'investors.user_id'
+			)
+			.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+			)
+			.as('ignored_alias')
+			.where('id', id)
+		})
+		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
+		.then(result =>
+		{
+			var user_data = {}
+			var investor_data = {}
+			var admin_data = {}
+
+			user_data = pick(result,
+			[
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'pic'
+			])
+
+			if (result.investor_user_id)
+			{
+				investor_data = pick(result,
+				[
+					'profile_pic',
+					'profession',
+					'background',
+					'historical_returns',
+					'is_public',
+					'start_date',
+				])
+			}
+
+			if (result.admin_user_id)
+			{
+				admin_data = pick(result,
+				[
+					'parent',
+					'can_intro'
+				])
+			}
+
+			return assign({}, user_data, investor_data, admin_data)
+		})
+
 	}
 
 	var validate_id = require('../../id').validate.promise(WrongUserId)
@@ -138,9 +232,8 @@ module.exports = function User (db)
 				'auth_facebook.facebook_id as facebook_id',
 				'first_name',
 				'last_name',
-				'email',
-				'pic',
-				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
+				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
+				'pic'
 			)
 			.from('users')
 			.leftJoin(

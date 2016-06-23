@@ -10,6 +10,7 @@ var AdminRequired = require('./admin-required')
 var Auth = require('./api/auth/Auth')
 var Admin = require('./api/admin/Admin')
 var Password = require('./api/password/Password')
+var Users = require('./api/users/Users')
 
 var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
@@ -72,6 +73,7 @@ module.exports = function Http (app)
 	mount(Statics(app.root), 'static', 'static')
 	mount(Notifications(app.db), 'notifications', 'notifications')
 	mount(Password(app.db.user), 'password', 'password')
+	mount(Users(app.db.user), 'users', 'users')
 
 
 	http.express.use(errorMiddleware)
