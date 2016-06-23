@@ -24,6 +24,9 @@ module.exports = function Onboarding (db, investor)
 
 	onb.update = function update (whom_id, investor_id, field, value)
 	{
+		whom_id = Number(whom_id)
+		investor_id = Number(investor_id)
+
 		return ensure_can_edit(whom_id, investor_id)
 		.then(mode =>
 		{
