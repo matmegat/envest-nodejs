@@ -130,18 +130,28 @@ module.exports = function User (db)
 
 	user.byFacebookId = function (facebook_id)
 	{
-		return knex.select('id', 'facebook_id')
+		return knex.select('*')
 		.from(function ()
 		{
 			this.select(
-				'users.id AS id',
-				'auth_facebook.facebook_id AS facebook_id'
+				'users.id as id',
+				'auth_facebook.facebook_id as facebook_id',
+				'first_name',
+				'last_name',
+				'email',
+				'pic',
+				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 			)
 			.from('users')
 			.leftJoin(
 				'auth_facebook',
 				'users.id',
 				'auth_facebook.user_id'
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
 			)
 			.as('ignored_alias')
 		})
