@@ -22,6 +22,7 @@ module.exports = function Feed (db)
 			'page',
 			'type',
 			'investors',
+			'investor',
 			'days',
 			'months',
 			'name',
@@ -43,7 +44,8 @@ module.exports = function Feed (db)
 			[
 				'max_id',
 				'since_id',
-				'page'
+				'page',
+				'investor'
 			])
 
 			options.type = type
