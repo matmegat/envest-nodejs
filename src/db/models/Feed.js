@@ -7,7 +7,7 @@ var knexed = require('../knexed')
 
 var PaginatorChunked = require('../paginator/Chunked')
 var PaginatorBooked  = require('../paginator/Booked')
-var Filter = require('./Filter')
+var Filter = require('../Filter')
 
 var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
@@ -27,6 +27,24 @@ module.exports = function Feed (db)
 	{
 		table: feed.feed_table
 	})
+
+	var filter = Filter()
+
+	var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
+	var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
+	var WrongInvestorId  = db.investor.WrongInvestorId
+
+	filter.clauses =
+	{
+		type: filter.clausesByStr('type', '='),
+		investor: filter.clausesById(WrongInvestorId, 'investor_id'),
+		investors: filter.clausesByIds(WrongInvestorId, 'investor_id'),
+		days: filter.clausesByDateSubtract(WrongDaysFilter, 'timestamp', 'days'),
+		months: filter.clausesByDateSubtract(WrongMonthFilter, 'timestamp', 'months'),
+		name: filter.clausesByName('feed_items.investor_id'),
+		minyear: filter.clausesByYear('timestamp', '>='),
+		maxyear: filter.clausesByYear('timestamp', '<=')
+	}
 
 	var paginator_booked = PaginatorBooked()
 
@@ -85,7 +103,8 @@ module.exports = function Feed (db)
 	{
 		options = _.extend({}, options,
 		{
-			column_name: 'timestamp'
+			order_column: 'feed_items.id',
+			real_order_column: 'feed_items.timestamp',
 		})
 
 		var queryset = feed.feed_table()
@@ -100,7 +119,7 @@ module.exports = function Feed (db)
 			paginator = paginator_chunked
 		}
 
-		queryset = Filter(queryset, options)
+		queryset = filter.filtrate(queryset, options)
 
 		var count_queryset = queryset.clone()
 
