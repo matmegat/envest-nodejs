@@ -15,6 +15,13 @@ module.exports = function Onboarding (db, investor)
 	expect(db, 'Onboarding depends on Admin').property('admin')
 	var admin = db.admin
 
+	expect(db, 'Onboarding depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+
+	var FieldEditedA = Emitter('field_edited', { target: 'group', group: 'admins' })
+	var FieldEditedI = Emitter('field_edited', { target: 'recipient' })
+
+
 	onb.update = function update (whom_id, investor_id, field, value)
 	{
 		return ensure_can_edit(whom_id, investor_id)
@@ -36,7 +43,14 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then(mode =>
 		{
-			// notify
+			if (mode === 'mode:investor')
+			{
+				FieldEditedA({ by: 'investor', investor_id: investor_id })
+			}
+			else
+			{
+				FieldEditedI(investor_id, { by: 'admin', admin_id: whom_id })
+			}
 		})
 	}
 
