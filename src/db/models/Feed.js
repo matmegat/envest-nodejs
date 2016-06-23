@@ -28,23 +28,21 @@ module.exports = function Feed (db)
 		table: feed.feed_table
 	})
 
-	var filter = Filter()
-
 	var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
 	var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
 	var WrongInvestorId  = db.investor.WrongInvestorId
 
-	filter.clauses =
+	var filter = Filter(
 	{
-		type: filter.clausesByStr('type', '='),
-		investor: filter.clausesById(WrongInvestorId, 'investor_id'),
-		investors: filter.clausesByIds(WrongInvestorId, 'investor_id'),
-		days: filter.clausesByDateSubtract(WrongDaysFilter, 'timestamp', 'days'),
-		months: filter.clausesByDateSubtract(WrongMonthFilter, 'timestamp', 'months'),
-		name: filter.clausesByName('feed_items.investor_id'),
-		minyear: filter.clausesByYear('timestamp', '>='),
-		maxyear: filter.clausesByYear('timestamp', '<=')
-	}
+		type: Filter.by.str('type', '='),
+		investor: Filter.by.id(WrongInvestorId, 'investor_id'),
+		investors: Filter.by.ids(WrongInvestorId, 'investor_id'),
+		days: Filter.by.dateSubtract(WrongDaysFilter, 'timestamp', 'days'),
+		months: Filter.by.dateSubtract(WrongMonthFilter, 'timestamp', 'months'),
+		name: Filter.by.name('feed_items.investor_id'),
+		minyear: Filter.by.year('timestamp', '>='),
+		maxyear: Filter.by.year('timestamp', '<=')
+	})
 
 	var paginator_booked = PaginatorBooked()
 
@@ -119,13 +117,25 @@ module.exports = function Feed (db)
 			paginator = paginator_chunked
 		}
 
-		queryset = filter.filtrate(queryset, options)
+		queryset = filter(queryset, options)
 
 		var count_queryset = queryset.clone()
 
 		return paginator.paginate(queryset, options)
 		.then((feed_items) =>
 		{
+			feed_items = _.map(feed_items, (obj) =>
+			{
+				return _.pick(obj,
+				[
+					'id',
+					'timestamp',
+					'investor_id',
+					'type',
+					'data'
+				])
+			})
+
 			var feed_ids = _.map(feed_items, 'id')
 
 			return comments
