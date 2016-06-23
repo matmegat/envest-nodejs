@@ -56,7 +56,7 @@ module.exports = function Onboarding (db, investor)
 
 	function ensure_can_edit (whom_id, investor_id)
 	{
-		return Promise.all(admin.is(whom_id), investor.is(whom_id))
+		return Promise.all([ admin.is(whom_id), investor.all.is(whom_id) ])
 		.then(so =>
 		{
 			var is_admin    = so[0]
