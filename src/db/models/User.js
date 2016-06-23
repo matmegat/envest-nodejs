@@ -5,6 +5,8 @@ var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
 var Err = require('../../Err')
+var Groups = require('./Groups')
+var NotFound = Err('user_not_found', 'User not found')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
@@ -23,6 +25,9 @@ module.exports = function User (db)
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 	user.auth_local     = knexed(knex, 'auth_local')
 
+	user.NotFound = NotFound
+
+	user.groups = Groups(db, user)
 
 	user.ensure = function (id, trx)
 	{

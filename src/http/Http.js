@@ -16,6 +16,8 @@ var Investors = require('./api/investors/Investors')
 
 var Statics = require('./api/statics/Statics')
 
+var Notifications = require('./api/notifications/Notifications')
+
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
@@ -67,6 +69,8 @@ module.exports = function Http (app)
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Investors(app.db, http), 'investors', 'investors')
 	mount(Statics(app.root), 'static', 'static')
+	mount(Notifications(app.db), 'notifications', 'notifications')
+
 
 	http.express.use(errorMiddleware)
 

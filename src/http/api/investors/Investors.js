@@ -3,6 +3,7 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
+var extend = require('lodash/extend')
 
 module.exports = function (db, http)
 {
@@ -17,14 +18,26 @@ module.exports = function (db, http)
 		var options = pick(rq.query,
 		[
 			'max_id',
-			'since_id'
+			'since_id',
+			'page'
 		])
-		toss(rs, investors.model.list(options))
+		toss(rs, investors.model.public.list(options))
+	})
+
+	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
+	{
+		var options = pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page'
+		])
+		toss(rs, investors.model.all.list(options))
 	})
 
 	investors.express.get('/:id', (rq, rs) =>
 	{
-		toss(rs, investors.model.byId(rq.params.id))
+		toss(rs, investors.model.public.byId(rq.params.id))
 	})
 
 	investors.express.get('/:id/portfolio', (rq, rs) =>
@@ -36,7 +49,8 @@ module.exports = function (db, http)
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
-		toss(rs, investors.model.create(rq.body))
+		var data = extend({}, rq.body, { admin_id: rq.user.id })
+		toss(rs, investors.model.create(data))
 	})
 
 	investors.express.post('/:id/field', (rq, rs) =>

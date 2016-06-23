@@ -1,5 +1,7 @@
 get:
-  description: latest 20 Feed posts for current user
+  description: |
+    Get list of investors sorted by `last_name`. Response exrended with
+    investor fields: `is_public`, ~~`is_featured`~~, ~~`category`~~
   parameters:
   - name: max_id
     in: query
@@ -15,12 +17,18 @@ get:
       [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
   - name: page
     in: query
-    type: number
+    type: integer
     description: Page number
   responses:
     200:
-      description: user's Feed
+      description: Investors list
       schema:
-        $ref: ./Feed.yaml
+        $ref: ./Investors.yaml
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
   tags:
-  - feed
+  - admin

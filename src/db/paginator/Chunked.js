@@ -8,14 +8,16 @@ var toId = require('../../id').toId
 
 var one = require('../helpers').one
 
-var defaults =
+var defaults = require('./options')
+
+defaults = extend({}, defaults,
 {
 	order_column: 'id',
 	real_order_column: 'timestamp',
 	default_direction: 'desc',
-	table: null,
-	limit: 20
-}
+	table: null
+})
+
 
 module.exports = function Paginator__Chunked (paginator_options)
 {
@@ -26,6 +28,14 @@ module.exports = function Paginator__Chunked (paginator_options)
 	expect(paginator_options.table, 'paginator target relation').a('function')
 
 	var table = paginator_options.table
+
+	paginator.total = function (response, count)
+	{
+		response.total = count
+		response.pages = Math.floor(count / paginator_options.limit)
+
+		return response
+	}
 
 	paginator.paginate = function (queryset, options)
 	{
@@ -40,31 +50,22 @@ module.exports = function Paginator__Chunked (paginator_options)
 		var order_column = options.order_column
 		var real_order_column = options.real_order_column
 
+		var limit  = Math.min(options.limit, defaults.limit)
+
 		return get_current_chunk(current_id, real_order_column)
 		.then(current_chunk =>
 		{
-			var limit = options.limit
-
-			limit = Math.min(limit, defaults.limit)
-
 			queryset
 			.where(function ()
 			{
 				var sign = order_sign(default_dir, since_id, max_id)
+				var real_sign = real_order_sign(default_dir, since_id, max_id)
 
 				if (current_chunk)
 				{
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
-				}
-			})
-			.orWhere(function ()
-			{
-				var sign = real_order_sign(default_dir, since_id, max_id)
-
-				if (current_chunk)
-				{
-					this.where(real_order_column, sign, current_chunk)
+					this.orWhere(real_order_column, real_sign, current_chunk)
 				}
 			})
 

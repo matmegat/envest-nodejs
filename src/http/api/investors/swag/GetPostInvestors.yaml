@@ -14,6 +14,10 @@ get:
     description: |
       Get feed items greater than *since_id* (non inclusive) with applied sorting
       [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: page
+    in: query
+    type: integer
+    description: Page number
   responses:
     200:
       description: Investors list
@@ -60,3 +64,4 @@ post:
       $ref: ./400.yaml
   tags:
   - investors
+  - admin

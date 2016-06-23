@@ -9,13 +9,21 @@ var YourComments
 
 var noop = require('lodash/noop')
 
-module.exports = function Abuse (db, comments)
+module.exports = function Abuse (db, comments, Emitter)
 {
 	var abuse = {}
 
 	var knex = db.knex
 
 	abuse.table = () => knex('abuse_comments')
+
+	var emitter_options =
+	{
+		target: 'group',
+		group:  'admins'
+	}
+
+	var CommentReport = Emitter('comments_reports', emitter_options)
 
 	abuse.create = function (user_id, comment_id)
 	{
@@ -36,6 +44,10 @@ module.exports = function Abuse (db, comments)
 			.then(noop)
 		})
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
+		.then(() =>
+		{
+			return CommentReport({ comment_id: comment_id })
+		})
 	}
 
 	return abuse

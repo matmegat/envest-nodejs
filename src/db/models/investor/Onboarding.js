@@ -104,22 +104,29 @@ function Profession (investor)
 }
 
 
-var validateFocLength = validate.length(250)
+var validateFocLength = validate.length(3)
+var validateFocItemLength = validate.length(250)
 
 function Focus (investor)
 {
 	return Field(investor,
 	{
-		value: (value) =>
+		validate: (value) =>
 		{
-			validate.string(value, 'focus')
-			validate.empty(value, 'focus')
+			validate.array(value, 'focus')
 			validateFocLength(value, 'focus')
+			/* validate each element of array */
+			value.forEach((focus_item, i) =>
+			{
+				validate.string(focus_item, `focus[${i}]`)
+				validate.empty(focus_item, `focus[${i}]`)
+				validateFocItemLength(focus_item, `focus[${i}]`)
+			})
 			return value
 		},
 		set: (value, queryset) =>
 		{
-			return queryset.update({ focus: value })
+			return queryset.update({ focus: JSON.stringify(value) })
 		}
 	})
 }
