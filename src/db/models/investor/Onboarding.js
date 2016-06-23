@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 module.exports = function Onboarding (db, investor)
 {
 	var onb = {}
@@ -10,27 +12,72 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
 
-	onb.update = function update (investor_id, field, value)
+	expect(db, 'Onboarding depends on Admin').property('admin')
+	var admin = db.admin
+
+	onb.update = function update (whom_id, investor_id, field, value)
 	{
-		return new Promise(rs =>
+		return ensure_can_edit(whom_id, investor_id)
+		.then(mode =>
 		{
 			if (! (field in onb.fields))
 			{
 				throw WrongField({ field: field })
 			}
 
+			return mode
+		})
+		.then(mode =>
+		{
 			field = onb.fields[field]
 
-			rs(field.set(investor_id, value))
+			return field.set(investor_id, value)
+			.then(() => mode) /* pass mode */
+		})
+		.then(mode =>
+		{
+			// notify
+		})
+	}
+
+	function ensure_can_edit (whom_id, investor_id)
+	{
+		return Promise.all(admin.is(whom_id), investor.is(whom_id))
+		.then(so =>
+		{
+			var is_admin    = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return 'mode:admin'
+			}
+			else if (is_investor)
+			{
+				if (whom_id === investor_id)
+				{
+					return 'mode:investor'
+				}
+				else
+				{
+					throw CantEdit()
+				}
+			}
+			else
+			{
+				throw CantEdit()
+			}
 		})
 	}
 
 	return onb
 }
 
+
 var Err = require('../../../Err')
 var WrongField = Err('wrong_field', 'Wrong Onboarding field')
 
+var CantEdit = Err('cant_edit', 'This user must be an admin or onboarded investor')
 
 var Field = require('./Field')
 var validate = require('../../validate')
