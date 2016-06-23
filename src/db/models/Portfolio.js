@@ -82,25 +82,14 @@ module.exports = function Portfolio (db)
 	var brokerage = {}
 	portfolio.brokerage = brokerage
 
-	brokerage.is = function (investor_id, trx)
+	function set_brokerage (trx, data)
 	{
-		return validate_id(investor_id)
-		.then(() =>
-		{
-			return portfolio.brokerage_table(trx)
-			.where('investor_id', investor_id)
-			.then(helpers.oneMaybe)
-			.then(Boolean)
-		})
-	}
+		var where_clause = _.pick(data, ['investor_id'])
+		var update_clause = _.pick(data, ['cash_value', 'multiplier'])
 
-	var validate_id = require('../../id')
-	.validate.promise(WrongBrokerageId)
-
-	brokerage.ensure = function (investor_id, trx)
-	{
-		return brokerage.is(investor_id, trx)
-		.then(Err.falsy(BrokerageNotFound))
+		return portfolio.brokerage_table(trx)
+		.where(where_clause)
+		.update(update_clause)
 	}
 
 	brokerage.set = knexed.transact(knex, (trx, data) =>
@@ -108,30 +97,31 @@ module.exports = function Portfolio (db)
 		return investor.all.ensure(data.investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.is(data.investor_id, trx)
-			.then((is_brokerage) =>
+			/* validate update keys */
+			validate.required(data.cash_value, 'cash_value')
+			validate.number(data.cash_value, 'cash_value')
+			if (data.cash_value < 0)
 			{
-				var queryset = portfolio.brokerage_table(trx)
+				throw InvalidAmount({ field: 'cash_value' })
+			}
 
-				if (is_brokerage)
-				{
-					queryset.where('investor_id', data.investor_id)
-					.update(_.pick(['cash_value', 'multiplier']))
-				}
-				else
-				{
-					queryset.insert(
-					{
-						investor_id: data.investor_id,
-						cash_value: data.cash_value,
-						multiplier: 1.0
-					})
-				}
+			if ('multiplier' in data)
+			{
+				validate_multiplier(data.multiplier)
+			}
 
-				return queryset
-			})
+			return set_brokerage(trx, data)
 		})
 	})
+
+	// eslint-disable-next-line id-length
+	function validate_multiplier (value)
+	{
+		value.number(value, 'multiplier')
+	}
+
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
 
 	brokerage.update = knexed.transact(knex, (trx, data) =>
 	{
@@ -205,9 +195,8 @@ module.exports = function Portfolio (db)
 				})
 			}
 
-			return portfolio.brokerage_table(trx)
-			.where('investor_id', data.investor_id)
-			.update({ cash_value: brokerage.cash_value + data.amount })
+			data.cash_value = brokerage.cash_value + data.amount
+			return set_brokerage(trx, data)
 		})
 		.then(() =>
 		{
@@ -225,8 +214,6 @@ module.exports = function Portfolio (db)
 
 	var InvalidOperation = Err('invalid_portfolio_operation',
 		'Invalid Portfolio Operation')
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
 
 
 	return portfolio
