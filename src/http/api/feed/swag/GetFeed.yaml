@@ -17,6 +17,38 @@ get:
     in: query
     type: number
     description: Page number
+  - name: type
+    in: query
+    type: string
+    description: Type feed
+  - name: investor
+    in: query
+    type: number
+    description: Investor Id
+  - name: investors
+    in: query
+    type: string
+    description: Investor Ids - 1,2,...6,7
+  - name: days
+    in: query
+    type: number
+    description: Feeds for days
+  - name: months
+    in: query
+    type: number
+    description: Feeds for months
+  - name: name
+    in: query
+    type: string
+    description: User name
+  - name: maxyear
+    in: query
+    type: number
+    description: Feed up to a year
+  - name: minyear
+    in: query
+    type: number
+    description: Feed after a year
   responses:
     200:
       description: user's Feed
