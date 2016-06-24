@@ -62,7 +62,7 @@ rsync_clean = partial(rsync, '--delete')
 
 function outputify (name, fn)
 {
-	return () =>
+	return function ()
 	{
 		console.info('START', name)
 
