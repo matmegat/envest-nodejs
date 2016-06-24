@@ -66,7 +66,10 @@ function outputify (name, fn)
 	{
 		console.info('START', name)
 
-		var r = fn.apply(this, arguments)
+		var r = new Promise(rs =>
+		{
+			rs(fn.apply(this, arguments))
+		})
 
 		return r.then(() =>
 		{
