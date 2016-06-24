@@ -9,7 +9,6 @@ module.exports = function Field (investor, options)
 	field.validate = validator(options.validate)
 
 	field.set = setter(field, options.set)
-	// field.get = getter(field, options.get)
 
 	return field
 }
@@ -64,15 +63,3 @@ function setter (field, set)
 		.then(noop)
 	}
 }
-
-/*
-function getter (field, get)
-{
-	expect(get).a('function')
-
-	return (queryset) =>
-	{
-		return get(queryset)
-	}
-}
-*/
