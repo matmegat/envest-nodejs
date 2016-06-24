@@ -19,7 +19,7 @@ module.exports = function Feed (db)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
-	var feed_count = db.helpers.count
+	var count = db.helpers.count
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
@@ -172,8 +172,8 @@ module.exports = function Feed (db)
 
 				if (options.page)
 				{
-					return feed_count(count_queryset)
-					.then((count) =>
+					return count(count_queryset)
+					.then(count =>
 					{
 						return paginator.total(response, count)
 					})
@@ -186,29 +186,25 @@ module.exports = function Feed (db)
 
 	feed.counts = function ()
 	{
-		return feed_type_count('trade')
-		.then((trades) =>
+		return Promise.all(
+		[
+			count_by('trade'),
+			count_by('watchlist'),
+			count_by('update'),
+		])
+		.then(counts =>
 		{
-			return feed_type_count('watchlist')
-			.then((watchlist) =>
-			{
-				return feed_type_count('update')
-				.then((updates) =>
-				{
-					return {
-					"trades": trades,
-					"watchlist": watchlist,
-					"updates": updates}
-				})
-			})
+			return {
+				trades:     counts[0],
+				watchlists: counts[1],
+				updates:    counts[2]
+			}
 		})
 	}
 
-	function feed_type_count (type)
+	function count_by (type)
 	{
-		return feed_count(
-		filter(feed.feed_table(),
-		{ type: type }))
+		return count(filter(feed.feed_table(), { type: type }))
 	}
 
 	return feed
