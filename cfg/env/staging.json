@@ -8,5 +8,7 @@
   {
     "database": "netvest_staging",
     "password": "ovjms3lmzf"
-  }
+  },
+
+  "nginx": true
 }
