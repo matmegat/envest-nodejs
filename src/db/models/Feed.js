@@ -184,6 +184,33 @@ module.exports = function Feed (db)
 		})
 	}
 
+	feed.counts = function ()
+	{
+		return feed_type_count('trade')
+		.then((trades) =>
+		{
+			return feed_type_count('watchlist')
+			.then((watchlist) =>
+			{
+				return feed_type_count('update')
+				.then((updates) =>
+				{
+					return {
+					"trades": trades,
+					"watchlist": watchlist,
+					"updates": updates}
+				})
+			})
+		})
+	}
+
+	function feed_type_count (type)
+	{
+		return feed_count(
+		filter(feed.feed_table(),
+		{ type: type }))
+	}
+
 	return feed
 }
 

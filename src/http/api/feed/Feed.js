@@ -33,6 +33,11 @@ module.exports = function Feed (db)
 		toss(rs, feed.model.list(options))
 	})
 
+	feed.express.get('/counts', (rq, rs) =>
+	{
+		toss(rs, feed.model.counts())
+	})
+
 	feed.express.get('/trades',  by_type('trade'))
 	feed.express.get('/updates', by_type('update'))
 
