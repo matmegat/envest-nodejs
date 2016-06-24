@@ -181,7 +181,6 @@ function HistReturn (investor)
 {
 	function vrow (row)
 	{
-		expect(row).ok
 		expect(row).an('object')
 
 		try
