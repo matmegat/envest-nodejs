@@ -195,6 +195,7 @@ rev()
 .catch(error =>
 {
 	console.error(error)
+	console.error(error.stack)
 
 	slack.failure(env)
 	.then(() =>
