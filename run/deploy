@@ -160,7 +160,14 @@ rev()
 }))
 .then(() =>
 {
-	return scp(rootpath('cfg/nginx.conf'), target('cfg/'))
+	var template = load(rootpath('cfg/env/_nginx.conf'))
+
+	var config = template
+
+	var tmp = rootpath('var/deploy-nginx.conf')
+	dump(tmp, config)
+
+	return scp(tmp, target('cfg/nginx.conf'))
 })
 .then(() =>
 {
