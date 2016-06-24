@@ -15,6 +15,8 @@ var Mailer = require('../../../Mailer')
 
 var Meta = require('./Meta')
 
+var Portfolio = require('./Portfolio')
+
 module.exports = function Investor (db)
 {
 	var investor = {}
@@ -127,7 +129,7 @@ module.exports = function Investor (db)
 				{ admin_id: data.admin_id }
 			)
 
-			return db.portfolio.brokerage_table(trx)
+			return investor.portfolio.brokerage_table(trx)
 			.insert(
 			{
 				investor_id: investor_id,
@@ -141,5 +143,6 @@ module.exports = function Investor (db)
 		})
 	})
 
+	investor.portfolio = Portfolio(db, investor)
 	return investor
 }

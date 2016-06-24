@@ -44,7 +44,7 @@ module.exports = function (db, http)
 	{
 		var options = { investor_id: rq.params.id }
 
-		toss(rs, db.portfolio.list(options))
+		toss(rs, db.investor.portfolio.list(options))
 	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>

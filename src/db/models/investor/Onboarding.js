@@ -194,7 +194,7 @@ function Brokerage (investor_model, db)
 		},
 		set: (value, investor_queryset) =>
 		{
-			var brokerage = db.portfolio.brokerage
+			var brokerage = db.investor.portfolio.brokerage
 
 			return investor_queryset
 			.select('user_id')
