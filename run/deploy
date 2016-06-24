@@ -166,26 +166,32 @@ rev()
 	return scp(tmp, target('cfg/config.json'))
 	.then(() => config)
 }))
-.then(
-outputify('compile nginx config, copy cfg/', config =>
+.then(config =>
 {
-	console.log(config)
-	var render = require('mustache').render
-
-	var template = read(rootpath('cfg/env/_nginx.conf'))
-	var port = config.port
-
-	var config = render(template,
+	if (! config.nginx)
 	{
-		port: port,
-		port_nginx: port - 1
-	})
+		return
+	}
 
-	var tmp = rootpath('var/deploy-nginx.conf')
-	write(tmp, config)
+	return outputify('compile nginx config, copy cfg/', () =>
+	{
+		var render = require('mustache').render
 
-	return scp(tmp, target('cfg/nginx.conf'))
-}))
+		var template = read(rootpath('cfg/env/_nginx.conf'))
+		var port = config.port
+
+		var config = render(template,
+		{
+			port: port,
+			port_nginx: port - 1
+		})
+
+		var tmp = rootpath('var/deploy-nginx.conf')
+		write(tmp, config)
+
+		return scp(tmp, target('cfg/nginx.conf'))
+	})()
+})
 .then(() =>
 {
 	return ssh(f('"mkdir -p %s"', remote_rootpath('var/')))

@@ -8,5 +8,7 @@
   {
     "database": "netvest_test",
     "password": "ovjms3lmzf"
-  }
+  },
+
+  "nginx": true
 }
