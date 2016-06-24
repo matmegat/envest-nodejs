@@ -34,7 +34,7 @@ module.exports = function Notifications (db)
 				type: type
 			}
 
-			if (options.target === 'recipient')
+			if (! options.group) /* single*/
 			{
 				expect(target_or_event).a('number')
 
@@ -43,7 +43,7 @@ module.exports = function Notifications (db)
 
 				return notifications.create(emit)
 			}
-			else if (options.target === 'group')
+			else /* group */
 			{
 				expect(target_or_event).a('object')
 

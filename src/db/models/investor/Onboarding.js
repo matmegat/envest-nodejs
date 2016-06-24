@@ -18,8 +18,8 @@ module.exports = function Onboarding (db, investor)
 	expect(db, 'Onboarding depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
 
-	var FieldEditedA = Emitter('field_edited', { target: 'group', group: 'admins' })
-	var FieldEditedI = Emitter('field_edited', { target: 'recipient' })
+	var FieldEditedA = Emitter('field_edited', { group: 'admins' })
+	var FieldEditedI = Emitter('field_edited')
 
 
 	onb.update = function update (whom_id, investor_id, field, value)

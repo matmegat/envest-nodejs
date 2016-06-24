@@ -73,7 +73,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var NewFeedComment = Emitter('new_feed_comment', { target: 'recipient' })
+	var NewFeedComment = Emitter('new_feed_comment')
 
 	comments.create = function (data)
 	{

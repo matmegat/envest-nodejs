@@ -41,14 +41,8 @@ module.exports = function Investor (db)
 
 	var emits =
 	{
-		NewAdmins: Emitter(
-			'investor_reports',
-			{ target: 'group', group: 'admins' }
-		),
-		NewInvestor: Emitter(
-			'investor_reports',
-			{ target: 'recipient' }
-		)
+		NewAdmins:   Emitter('investor_reports', { group: 'admins' }),
+		NewInvestor: Emitter('investor_reports')
 	}
 
 	investor.onboarding = Onboarding(db, investor)
@@ -122,10 +116,7 @@ module.exports = function Investor (db)
 			* - to created investor?
 			* */
 			emits.NewAdmins({ investor_id: investor_id })
-			emits.NewInvestor(
-				investor_id,
-				{ admin_id: data.admin_id }
-			)
+			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
 
 			return investor.all.byId(investor_id, trx)
 		})
