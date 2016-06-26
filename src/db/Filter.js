@@ -5,9 +5,10 @@ var moment = require('moment')
 
 var toId = require('../id').toId
 
+var validate = require('./validate')
+
 var validateId = require('../id').validate
 var validateMany = require('../id').validateMany
-var validateName = require('./validate').name
 
 var Err = require('../Err')
 
@@ -102,7 +103,7 @@ Filter.by.name = function by_name (when_column)
 {
 	return function (queryset, name)
 	{
-		validateName(name, 'name')
+		validate.name(name, 'name')
 
 		var pattern = '%' + name.toLowerCase() + '%'
 
@@ -110,5 +111,15 @@ Filter.by.name = function by_name (when_column)
 		.innerJoin('users', 'users.id', when_column)
 		.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
 		pattern)
+	}
+}
+
+Filter.by.dateRange = (column)
+{
+	column || (column = 'timestamp')
+
+	return (queryset, range) =>
+	{
+		
 	}
 }
