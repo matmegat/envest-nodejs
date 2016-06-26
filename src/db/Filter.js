@@ -1,4 +1,6 @@
 
+var curry = require('lodash/curry')
+
 var moment = require('moment')
 
 var toId = require('../id').toId
@@ -27,14 +29,14 @@ var Filter = module.exports = function Filter (clauses)
 
 Filter.by = {}
 
-Filter.by.str = function (column, operator)
+Filter.by.operator = curry((operator, column) =>
 {
-	return function (queryset, str)
+	return function (queryset, value)
 	{
 		return queryset
-		.where(column, operator, str)
+		.where(column, operator, value)
 	}
-}
+})
 
 Filter.by.id = function (err, column)
 {
