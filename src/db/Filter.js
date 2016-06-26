@@ -48,7 +48,7 @@ Filter.by.id = function (err, column)
 		validateId(err, id)
 
 		return queryset
-		.whereIn(column, id)
+		.where(column, id)
 	}
 }
 
