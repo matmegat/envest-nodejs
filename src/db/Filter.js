@@ -120,6 +120,13 @@ Filter.by.dateRange = (column)
 
 	return (queryset, range) =>
 	{
-		
+		var from = Number(range[0])
+		var to   = Number(range[1])
+
+		from = moment(from)
+		to   = moment(to)
+
+		return queryset
+		.whereBetween(column, [ from, to ])
 	}
 }

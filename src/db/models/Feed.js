@@ -45,7 +45,8 @@ module.exports = function Feed (db)
 		months: Filter.by.dateSubtract(WrongMonthFilter, 'timestamp', 'months'),
 		name: Filter.by.name('feed_items.investor_id'),
 		minyear: Filter.by.year('timestamp', '>='),
-		maxyear: Filter.by.year('timestamp', '<=')
+		maxyear: Filter.by.year('timestamp', '<='),
+		date_range: Filter.by.dateRange()
 	})
 
 	expect(db, 'Feed depends on Comments').property('comments')
