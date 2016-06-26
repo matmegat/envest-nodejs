@@ -114,7 +114,7 @@ Filter.by.name = function by_name (when_column)
 	}
 }
 
-Filter.by.dateRange = (column)
+Filter.by.dateRange = (column) =>
 {
 	column || (column = 'timestamp')
 
