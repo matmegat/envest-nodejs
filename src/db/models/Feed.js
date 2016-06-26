@@ -38,7 +38,7 @@ module.exports = function Feed (db)
 
 	var filter = Filter(
 	{
-		type: Filter.by.operator('=', 'type'),
+		type: Filter.by.equal('type'),
 		investor: Filter.by.id(WrongInvestorId, 'investor_id'),
 		investors: Filter.by.ids(WrongInvestorId, 'investor_id'),
 		days: Filter.by.dateSubtract(WrongDaysFilter, 'timestamp', 'days'),

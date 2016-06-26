@@ -38,6 +38,9 @@ Filter.by.operator = curry((operator, column) =>
 	}
 })
 
+Filter.by.equal = Filter.by.operator('=')
+
+
 Filter.by.id = function (err, column)
 {
 	return function by_id (queryset, id)
