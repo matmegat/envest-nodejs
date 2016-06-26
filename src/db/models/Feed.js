@@ -23,10 +23,14 @@ module.exports = function Feed (db)
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
-	var paginator_chunked = PaginatorChunked(
+	var paginators = {}
+
+	paginators.chunked = PaginatorChunked(
 	{
 		table: feed.feed_table
 	})
+
+	paginators.booked = PaginatorBooked()
 
 	var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
 	var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
@@ -43,8 +47,6 @@ module.exports = function Feed (db)
 		minyear: Filter.by.year('timestamp', '>='),
 		maxyear: Filter.by.year('timestamp', '<=')
 	})
-
-	var paginator_booked = PaginatorBooked()
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	var comments = db.comments
@@ -108,13 +110,14 @@ module.exports = function Feed (db)
 		var queryset = feed.feed_table()
 
 		var paginator
+
 		if (options.page)
 		{
-			paginator = paginator_booked
+			paginator = paginators.booked
 		}
 		else
 		{
-			paginator = paginator_chunked
+			paginator = paginators.chunked
 		}
 
 		queryset = filter(queryset, options)
