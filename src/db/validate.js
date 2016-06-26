@@ -26,6 +26,18 @@ validate.empty = function validate__empty (field, name)
 	}
 }
 
+
+var FieldType = Err('field_wrong_type', 'Field must have certain type')
+
+validate.string = function validate__string (field, name)
+{
+	if (typeof field !== 'string')
+	{
+		throw FieldType({ field: name, type: 'string' })
+	}
+}
+
+
 var WrongJSON = Err('wrong_json', 'Wrong JSON')
 
 validate.json = function validate__json (json, name)
@@ -40,13 +52,37 @@ validate.json = function validate__json (json, name)
 	}
 }
 
-var ArrayRequired = Err('array_required', 'Requires array')
 
 validate.array = function validate__array (ar, name)
 {
 	if (! Array.isArray(ar))
 	{
-		throw ArrayRequired({ field: name })
+		throw FieldType({ field: name, type: 'array' })
+	}
+}
+
+
+validate.number = function validate__number (field, name)
+{
+	if (typeof field !== 'number' || ! isFinite(field))
+	{
+		throw FieldType({ field: name, type: 'number' })
+	}
+}
+
+
+var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
+
+validate.length = function validate__length (max)
+{
+	return (field, name) =>
+	{
+		var actual = field.length
+
+		if (actual > max)
+		{
+			throw FieldLength({ field: name, actual: actual, max: max })
+		}
 	}
 }
 
