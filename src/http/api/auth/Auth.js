@@ -16,7 +16,7 @@ module.exports = function Auth (auth_model, passport)
 	auth.model = auth_model
 	auth.express = Router()
 
-	function filter_userdata(userdata)
+	function filter_userdata (userdata)
 	{
 		return pick(userdata,
 		[
