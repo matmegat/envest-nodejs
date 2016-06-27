@@ -185,7 +185,7 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.counts = function ()
+	feed.count = function ()
 	{
 		return Promise.all(
 		[
