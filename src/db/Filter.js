@@ -26,7 +26,7 @@ var Filter = module.exports = function Filter (clauses)
 			}
 			else
 			{
-				throw ClauseNotFound({clause: key})
+				throw ClauseNotFound({ clause: key })
 			}
 		}
 
