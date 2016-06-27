@@ -1,0 +1,10 @@
+type: array
+items:
+  type: object
+  properties:
+    year:
+      type: number
+      description: year
+    percentage:
+      type: number
+      description: percentage

@@ -4,6 +4,8 @@ var knexed = require('../knexed')
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
+var pick = require('lodash/pick')
+
 var Password = require('./Password')
 
 var Err = require('../../Err')
@@ -46,6 +48,94 @@ module.exports = function User (db)
 			return user.users_table(trx)
 			.where('id', id)
 			.then(oneMaybe)
+		})
+	}
+
+	user.infoById = function (id)
+	{
+		return knex.select('*')
+		.from(function ()
+		{
+			this.select(
+				'users.id AS id',
+				'auth_facebook.facebook_id AS facebook_id',
+				'users.first_name AS first_name',
+				'users.last_name AS last_name',
+				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
+				'users.pic AS pic',
+				'investors.user_id AS investor_user_id',
+				'investors.profile_pic AS profile_pic',
+				'investors.profession AS profession',
+				'investors.background AS background',
+				'investors.historical_returns AS historical_returns',
+				'investors.is_public AS is_public',
+				'investors.start_date AS start_date',
+				'admins.user_id AS admin_user_id',
+				'admins.parent AS parent',
+				'admins.can_intro AS can_intro'
+			)
+			.from('users')
+			.leftJoin(
+				'auth_facebook',
+				'users.id',
+				'auth_facebook.user_id'
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
+			.leftJoin(
+				'investors',
+				'users.id',
+				'investors.user_id'
+			)
+			.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+			)
+			.as('ignored_alias')
+			.where('id', id)
+		})
+		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
+		.then(result =>
+		{
+			var user_data = {}
+
+			user_data = pick(result,
+			[
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'pic'
+			])
+
+			if (result.investor_user_id)
+			{
+				user_data.investor = pick(result,
+				[
+					'profile_pic',
+					'profession',
+					'background',
+					'historical_returns',
+					'is_public',
+					'start_date',
+				])
+			}
+
+			if (result.admin_user_id)
+			{
+				user_data.admin = pick(result,
+				[
+					'parent',
+					'can_intro'
+				])
+			}
+
+			return user_data
 		})
 	}
 
@@ -130,21 +220,13 @@ module.exports = function User (db)
 
 	user.byFacebookId = function (facebook_id)
 	{
-		return knex.select('id', 'facebook_id')
-		.from(function ()
-		{
-			this.select(
-				'users.id AS id',
-				'auth_facebook.facebook_id AS facebook_id'
-			)
-			.from('users')
-			.leftJoin(
-				'auth_facebook',
-				'users.id',
-				'auth_facebook.user_id'
-			)
-			.as('ignored_alias')
-		})
+		return knex.select('*')
+		.from('users')
+		.leftJoin(
+			'auth_facebook',
+			'users.id',
+			'auth_facebook.user_id'
+		)
 		.where('facebook_id', facebook_id)
 		.then(oneMaybe)
 	}
@@ -161,14 +243,14 @@ module.exports = function User (db)
 			}
 			, 'id')
 			.then(one)
-			.then(function (id)
+			.then(id =>
 			{
 				return user.newEmailUpdate({
 					user_id: id,
 					new_email: data.email
 				}, trx)
 			})
-			.then(function (id)
+			.then(id =>
 			{
 				return createFacebookUser({
 					user_id: id,
@@ -178,6 +260,10 @@ module.exports = function User (db)
 			.then(() =>
 			{
 				return user.byFacebookId(data.facebook_id)
+			})
+			.then(result =>
+			{
+				return result.id
 			})
 		})
 	}
@@ -191,10 +277,12 @@ module.exports = function User (db)
 			{
 				return user.createFacebook(data)
 			}
-			else
-			{
-				return result
-			}
+
+			return result.id
+		})
+		.then(id =>
+		{
+			return user.infoById(id)
 		})
 	}
 
