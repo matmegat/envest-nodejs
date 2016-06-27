@@ -70,6 +70,27 @@ validate.number = function validate__number (field, name)
 }
 
 
+var isInteger = require('lodash/isInteger')
+
+validate.integer = function validate__integer (field, name)
+{
+	if (! isInteger(field))
+	{
+		throw FieldType({ field: name, type: 'integer' })
+	}
+}
+
+validate.integer.positive = function validate__integer__positive (field, name)
+{
+	validate.integer(field, name)
+
+	if (! (field > 0))
+	{
+		throw FieldType({ field: name, type: 'integer/positive' })
+	}
+}
+
+
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
 validate.length = function validate__length (max)
