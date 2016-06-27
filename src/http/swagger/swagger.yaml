@@ -20,8 +20,8 @@ paths:
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
-  '/feed/count':
-    $ref: ../api/feed/swag/FeedByCount.yaml
+  '/feed/counts':
+    $ref: ../api/feed/swag/FeedByCounts.yaml
 
   '/feed/trades':
     $ref: ../api/feed/swag/FeedByTrade.yaml
@@ -103,8 +103,8 @@ definitions:
   FeedItem:
     $ref: ../api/feed/swag/FeedItem.yaml
 
-  FeedCount:
-    $ref: ../api/feed/swag/FeedCount.yaml
+  FeedCounts:
+    $ref: ../api/feed/swag/FeedCounts.yaml
 
   Investor:
     $ref: ../api/investors/swag/Investor.yaml

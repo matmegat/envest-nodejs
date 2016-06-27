@@ -4,7 +4,7 @@ get:
     200:
       description: Сount of each type of Feed
       schema:
-        $ref: ./FeedCount.yaml
+        $ref: ./FeedCounts.yaml
     400:
       description: Handled Error
       schema:

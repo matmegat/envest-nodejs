@@ -185,13 +185,13 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.count = function ()
+	feed.counts = function (options)
 	{
 		return Promise.all(
 		[
-			count_by('trade'),
-			count_by('watchlist'),
-			count_by('update'),
+			count_by(options, 'trade'),
+			count_by(options, 'watchlist'),
+			count_by(options, 'update'),
 		])
 		.then(counts =>
 		{
@@ -203,9 +203,11 @@ module.exports = function Feed (db)
 		})
 	}
 
-	function count_by (type)
+	function count_by (options, type)
 	{
-		return count(filter(feed.feed_table(), { type: type }))
+		options.type = type
+
+		return count(filter(feed.feed_table(), options))
 	}
 
 	return feed
