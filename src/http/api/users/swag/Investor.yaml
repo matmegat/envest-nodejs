@@ -1,0 +1,23 @@
+type: object
+description: |
+  Investor's info if User is investor
+properties:
+  profile_pic:
+    type: string
+    description: URL to cover image of Investor's profile
+  profession:
+    type: string
+    description: Investor's profession
+  background:
+    type: string
+    description: Investor's background
+  historical_returns:
+    type: array
+    items:
+      - $ref: ./HistoricalReturns.yaml
+  is_public:
+    type: boolean
+    description: If Investor is public
+  start_date: 
+    type: string
+    description: Date of Investor's publicity
