@@ -41,6 +41,24 @@ module.exports = function Feed (db)
 		toss(rs, feed.model.list(options))
 	})
 
+	feed.express.get('/counts', (rq, rs) =>
+	{
+		var options = _.pick(rq.query,
+		[
+			'investors',
+			'investor',
+			'last_days',
+			'last_weeks',
+			'last_months',
+			'last_years',
+			'name',
+			'mindate',
+			'maxdate'
+		])
+
+		toss(rs, feed.model.counts(options))
+	})
+
 	feed.express.get('/trades',  by_type('trade'))
 	feed.express.get('/updates', by_type('update'))
 

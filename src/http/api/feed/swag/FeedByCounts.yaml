@@ -1,0 +1,13 @@
+get:
+  description: Get count of each type of Feed.
+  responses:
+    200:
+      description: Сount of each type of Feed
+      schema:
+        $ref: ./FeedCounts.yaml
+    400:
+      description: Handled Error
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed
