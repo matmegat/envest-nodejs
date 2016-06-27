@@ -118,7 +118,7 @@ module.exports = function User (db)
 
 			if (result.investor_user_id)
 			{
-				investor_data = pick(result,
+				user_data.investor = pick(result,
 				[
 					'profile_pic',
 					'profession',
@@ -131,14 +131,14 @@ module.exports = function User (db)
 
 			if (result.admin_user_id)
 			{
-				admin_data = pick(result,
+				user_data.admin = pick(result,
 				[
 					'parent',
 					'can_intro'
 				])
 			}
 
-			return assign({}, user_data, investor_data, admin_data)
+			return user_data
 		})
 	}
 
