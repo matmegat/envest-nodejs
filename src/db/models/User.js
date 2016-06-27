@@ -5,7 +5,6 @@ var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
 var pick = require('lodash/pick')
-var assign = require('lodash/assign')
 
 var Password = require('./Password')
 
@@ -104,8 +103,6 @@ module.exports = function User (db)
 		.then(result =>
 		{
 			var user_data = {}
-			var investor_data = {}
-			var admin_data = {}
 
 			user_data = pick(result,
 			[
