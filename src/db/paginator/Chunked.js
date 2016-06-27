@@ -59,15 +59,16 @@ module.exports = function Paginator__Chunked (paginator_options)
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
 				}
-			})
-			.orWhere(function ()
-			{
-				var sign = real_order_sign(default_dir, since_id, max_id)
 
-				if (current_chunk)
+				this.orWhere(function ()
 				{
-					this.where(real_order_column, sign, current_chunk)
-				}
+					var sign = real_order_sign(default_dir, since_id, max_id)
+
+					if (current_chunk)
+					{
+						this.where(real_order_column, sign, current_chunk)
+					}
+				})
 			})
 
 			var dir = sorting(default_dir, since_id, max_id)

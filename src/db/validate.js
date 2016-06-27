@@ -25,6 +25,7 @@ validate.empty = function validate__empty (field, name)
 	}
 }
 
+
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
 validate.length = function validate__length (max)
@@ -40,6 +41,7 @@ validate.length = function validate__length (max)
 	}
 }
 
+
 var WrongJSON = Err('wrong_json', 'Wrong JSON')
 
 validate.json = function validate__json (json, name)
@@ -54,6 +56,7 @@ validate.json = function validate__json (json, name)
 	}
 }
 
+
 var ArrayRequired = Err('array_required', 'Requires array')
 
 validate.array = function validate__array (ar, name)
@@ -61,5 +64,57 @@ validate.array = function validate__array (ar, name)
 	if (! Array.isArray(ar))
 	{
 		throw ArrayRequired({ field: name })
+	}
+}
+
+
+var XRegExp = require('xregexp')
+var WrongName = Err('wrong_name_format', 'Wrong name format')
+
+var validateNameLength = validate.length(255)
+
+validate.name = function validate__name (name, field_name)
+{
+	validate.required(name, field_name)
+	validate.empty(name, field_name)
+	validateNameLength(name, field_name)
+
+	/*
+	   Two words minimum, separated by space.
+	   Any alphabet letters,
+	   dashes, dots and spaces (not more than one successively).
+
+	   Should begin with a letter and end with a letter or dot.
+	*/
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})* $`,
+	{
+		word: XRegExp(`\\pL+ ([' -] \\pL+)* \\.?`, 'x')
+	},
+	'x')
+
+	if (! re.test(name))
+	{
+		throw WrongName()
+	}
+}
+
+
+var WrongEmail = Err('wrong_email_format', 'Wrong email format')
+
+validate.email = function validate__email (email)
+{
+	validate.required(email, 'email')
+	validate.empty(email, 'email')
+
+	if (email.length > 254)
+	{
+		throw WrongEmail()
+	}
+
+	var emailRe = /@/
+
+	if (! emailRe.test(email))
+	{
+		throw WrongEmail()
 	}
 }

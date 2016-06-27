@@ -15,6 +15,7 @@ var Users = require('./api/users/Users')
 var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
 var Investors = require('./api/investors/Investors')
+var Watchlist = require('./api/watchlist/Watchlist')
 
 var Statics = require('./api/statics/Statics')
 
@@ -74,6 +75,7 @@ module.exports = function Http (app)
 	mount(Notifications(app.db), 'notifications', 'notifications')
 	mount(Password(app.db.user), 'password', 'password')
 	mount(Users(app.db.user), 'users', 'users')
+	mount(Watchlist(), 'watchlist', 'watchlist')
 
 
 	http.express.use(errorMiddleware)

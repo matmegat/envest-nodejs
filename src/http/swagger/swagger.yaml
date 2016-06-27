@@ -20,6 +20,12 @@ paths:
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
+  '/feed/trades':
+    $ref: ../api/feed/swag/FeedByTrade.yaml
+
+  '/feed/updates':
+    $ref: ../api/feed/swag/FeedByUpdate.yaml
+
   '/feed/{feed_id}/comments':
     $ref: ../api/feed/swag/GetPostFeedComments.yaml
 
@@ -64,6 +70,12 @@ paths:
 
   '/investors/{investor_id}/portfolio':
     $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
+
+  '/watchlist':
+    $ref: ../api/watchlist/swag/WatchlistUser.yaml
+
+  '/watchlist/investor/{investor_id}':
+    $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
 
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
