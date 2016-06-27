@@ -266,7 +266,7 @@ module.exports = function User (db)
 			})
 			.then(result =>
 			{
-				return user.infoById(result.id)
+				return result.id
 			})
 		})
 	}
@@ -280,10 +280,12 @@ module.exports = function User (db)
 			{
 				return user.createFacebook(data)
 			}
-			else
-			{
-				return user.infoById(result.id)
-			}
+
+			return result.id
+		})
+		.then(id =>
+		{
+			return user.infoById(id)
 		})
 	}
 
