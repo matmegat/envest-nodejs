@@ -2,7 +2,7 @@
   "dev":  true,
   "env": "dev",
 
-  "port": 8000,
+  "port": 8001,
 
   "pg":
   {

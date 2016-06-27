@@ -106,11 +106,6 @@ module.exports = function Auth (db)
 	}
 
 	/* validations */
-	var validate = require('../validate')
-
-	var validate_name = validate.name
-	var validate_email = validate.email
-
 	function validate_register (credentials)
 	{
 		return new Promise(rs =>
@@ -144,6 +139,11 @@ module.exports = function Auth (db)
 			return rs()
 		})
 	}
+
+	var validate = require('../validate')
+
+	var validate_name = validate.name
+	var validate_email = validate.email
 
 	return auth
 }

@@ -1,6 +1,5 @@
 
 var Err = require('../Err')
-var XRegExp = require('xregexp')
 
 var validate = module.exports = {}
 
@@ -86,12 +85,17 @@ validate.length = function validate__length (max)
 	}
 }
 
+
+var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
+
+var validateNameLength = validate.length(255)
 
 validate.name = function validate__name (name, field_name)
 {
 	validate.required(name, field_name)
 	validate.empty(name, field_name)
+	validateNameLength(name, field_name)
 
 	/*
 	   Two words minimum, separated by space.
@@ -100,9 +104,9 @@ validate.name = function validate__name (name, field_name)
 
 	   Should begin with a letter and end with a letter or dot.
 	*/
-	var re = XRegExp.build(`^ {{word}} (\\s {{word}})? \\.? $`,
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})* $`,
 	{
-		word: XRegExp(`\\pL+ ([. ' -] \\pL+)*`, 'x')
+		word: XRegExp(`\\pL+ ([' -] \\pL+)* \\.?`, 'x')
 	},
 	'x')
 
@@ -111,6 +115,7 @@ validate.name = function validate__name (name, field_name)
 		throw WrongName()
 	}
 }
+
 
 var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 

@@ -71,6 +71,12 @@ paths:
   '/investors/{investor_id}/portfolio':
     $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
 
+  '/watchlist':
+    $ref: ../api/watchlist/swag/WatchlistUser.yaml
+
+  '/watchlist/investor/{investor_id}':
+    $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
+
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
