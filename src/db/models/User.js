@@ -140,7 +140,6 @@ module.exports = function User (db)
 
 			return assign({}, user_data, investor_data, admin_data)
 		})
-
 	}
 
 	var validate_id = require('../../id').validate.promise(WrongUserId)
@@ -225,29 +224,12 @@ module.exports = function User (db)
 	user.byFacebookId = function (facebook_id)
 	{
 		return knex.select('*')
-		.from(function ()
-		{
-			this.select(
-				'users.id as id',
-				'auth_facebook.facebook_id as facebook_id',
-				'first_name',
-				'last_name',
-				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
-				'pic'
-			)
-			.from('users')
-			.leftJoin(
-				'auth_facebook',
-				'users.id',
-				'auth_facebook.user_id'
-			)
-			.leftJoin(
-				'email_confirms',
-				'users.id',
-				'email_confirms.user_id'
-			)
-			.as('ignored_alias')
-		})
+		.from('users')
+		.leftJoin(
+			'auth_facebook',
+			'users.id',
+			'auth_facebook.user_id'
+		)
 		.where('facebook_id', facebook_id)
 		.then(oneMaybe)
 	}
@@ -264,14 +246,14 @@ module.exports = function User (db)
 			}
 			, 'id')
 			.then(one)
-			.then(function (id)
+			.then(id =>
 			{
 				return user.newEmailUpdate({
 					user_id: id,
 					new_email: data.email
 				}, trx)
 			})
-			.then(function (id)
+			.then(id =>
 			{
 				return createFacebookUser({
 					user_id: id,
@@ -281,6 +263,10 @@ module.exports = function User (db)
 			.then(() =>
 			{
 				return user.byFacebookId(data.facebook_id)
+			})
+			.then(result =>
+			{
+				return user.infoById(result.id)
 			})
 		})
 	}
@@ -296,7 +282,7 @@ module.exports = function User (db)
 			}
 			else
 			{
-				return result
+				return user.infoById(result.id)
 			}
 		})
 	}

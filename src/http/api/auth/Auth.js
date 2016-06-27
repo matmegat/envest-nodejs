@@ -16,6 +16,19 @@ module.exports = function Auth (auth_model, passport)
 	auth.model = auth_model
 	auth.express = Router()
 
+	function filter_userdata(userdata)
+	{
+		return pick(userdata,
+		[
+			'id',
+			'first_name',
+			'last_name',
+			'email',
+			'pic',
+			'access_token'
+		])
+	}
+
 	auth.express.post('/register', (rq, rs) =>
 	{
 		var user_data = pick(rq.body,
@@ -42,7 +55,7 @@ module.exports = function Auth (auth_model, passport)
 				else
 				{
 					user_data.access_token = jwt_helpers.generate(user_data)
-					return toss.ok(rs, user_data)
+					return toss.ok(rs, filter_userdata(user_data))
 				}
 			})
 		})
@@ -73,7 +86,7 @@ module.exports = function Auth (auth_model, passport)
 				}
 
 				user.access_token = jwt_helpers.generate(user)
-				return toss.ok(rs, user)
+				return toss.ok(rs, filter_userdata(user))
 			})
 		})(rq, rs, next)
 	})

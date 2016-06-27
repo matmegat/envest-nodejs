@@ -4,7 +4,6 @@ var expect = require('chai').expect
 var Err = require('../../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
-var pick = require('lodash/pick')
 var noop = require('lodash/noop')
 
 var cr_helpers = require('../../crypto-helpers')
@@ -55,14 +54,7 @@ module.exports = function Auth (db)
 			.then(Err.falsy(WrongLogin))
 			.then(() =>
 			{
-				return pick(user_data,
-				[
-					'id',
-					'first_name',
-					'last_name',
-					'email',
-					'pic'
-				])
+				return user.infoById(user_data.id)
 			})
 		})
 	}
