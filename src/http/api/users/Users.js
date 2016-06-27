@@ -1,7 +1,6 @@
 
 var Router = require('express').Router
 
-var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
 module.exports = function Users (user_model)
@@ -12,9 +11,9 @@ module.exports = function Users (user_model)
 	users.express.use(authRequired)
 	users.model = user_model
 
-	users.express.get('/:id', (rq, rs) =>
+	users.express.get('/current', (rq, rs) =>
 	{
-		toss(rs, users.model.infoById(rq.params.id))
+		rs.send(rq.user)
 	})
 
 	return users
