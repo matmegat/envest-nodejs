@@ -61,9 +61,11 @@ validate.array = function validate__array (ar, name)
 }
 
 
+var isFinite = require('lodash/isFinite')
+
 validate.number = function validate__number (field, name)
 {
-	if (typeof field !== 'number' || ! isFinite(field))
+	if (! isFinite(field))
 	{
 		throw FieldType({ field: name, type: 'number' })
 	}
