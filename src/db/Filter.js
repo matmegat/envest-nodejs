@@ -48,24 +48,28 @@ Filter.by.operator = curry((operator, column) =>
 Filter.by.equal = Filter.by.operator('=')
 
 
-Filter.by.id = function (err, column)
+Filter.by.id = function (column)
 {
+	var val_id = validateId(wrong_filter('id'))
+
 	return function by_id (queryset, id)
 	{
-		validateId(err, id)
+		val_id(id)
 
 		return queryset
 		.where(column, id)
 	}
 }
 
-Filter.by.ids = function (err, column)
+Filter.by.ids = function (column)
 {
+	var val_ids = validateMany(wrong_filter('ids'))
+
 	return function by_ids (queryset, ids)
 	{
 		var ids = ids.split(',')
 
-		validateMany(err, ids)
+		val_ids(ids)
 
 		return queryset
 		.whereIn(column, ids)
@@ -74,11 +78,13 @@ Filter.by.ids = function (err, column)
 
 Filter.by.dateSubtract = curry((unit, column) =>
 {
+	var val_id = validateId(wrong_filter(unit))
+
 	return function (queryset, value)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
 		value = toId(value)
-		validateId(wrong_filter(unit), value)
+		val_id(value)
 
 		var date =  moment()
 		.subtract(value, unit)
@@ -92,25 +98,6 @@ Filter.by.days   = Filter.by.dateSubtract('days')
 Filter.by.weeks  = Filter.by.dateSubtract('weeks')
 Filter.by.months = Filter.by.dateSubtract('months')
 Filter.by.years  = Filter.by.dateSubtract('years')
-
-
-Filter.by.year = curry((operator, column) =>
-{
-	return function (queryset, year)
-	{
-		//toId и validateId ипользуются т.к их логика подходит
-		year = toId(year)
-		validateId(wrong_filter('year'), year)
-
-		var pattern = moment({ year: year })
-
-		return queryset
-		.where(column, operator, pattern)
-	}
-})
-
-Filter.by.minyear = Filter.by.year('>=')
-Filter.by.maxyear = Filter.by.year('<=')
 
 
 var WrongDateFilter = wrong_filter('date')

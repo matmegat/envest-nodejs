@@ -27,8 +27,6 @@ module.exports = function Feed (db)
 			'last_months',
 			'last_years',
 			'name',
-			'minyear',
-			'maxyear',
 			'mindate',
 			'maxdate'
 		])

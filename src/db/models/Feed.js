@@ -32,20 +32,16 @@ module.exports = function Feed (db)
 
 	paginators.booked = PaginatorBooked()
 
-	var WrongInvestorId  = db.investor.WrongInvestorId
-
 	var filter = Filter(
 	{
 		type: Filter.by.equal('type'),
-		investor: Filter.by.id(WrongInvestorId, 'investor_id'),
-		investors: Filter.by.ids(WrongInvestorId, 'investor_id'),
+		investor: Filter.by.id('investor_id'),
+		investors: Filter.by.ids('investor_id'),
 		last_days: Filter.by.days('timestamp'),
 		last_weeks: Filter.by.weeks('timestamp'),
 		last_months: Filter.by.months('timestamp'),
 		last_years: Filter.by.years('timestamp'),
 		name: Filter.by.name('feed_items.investor_id'),
-		minyear: Filter.by.minyear('timestamp'),
-		maxyear: Filter.by.maxyear('timestamp'),
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
 	})
@@ -175,7 +171,7 @@ module.exports = function Feed (db)
 					investors: investors,
 				}
 
-				if (options.paginator.page)
+				if (paginator.total)
 				{
 					return feed_count(count_queryset)
 					.then((count) =>
