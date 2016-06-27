@@ -74,8 +74,6 @@ Filter.by.ids = function (err, column)
 
 Filter.by.dateSubtract = curry((unit, column) =>
 {
-	column || (column = 'timestamp')
-
 	return function (queryset, value)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
@@ -98,8 +96,6 @@ Filter.by.years  = Filter.by.dateSubtract('years')
 
 Filter.by.year = curry((operator, column) =>
 {
-	column || (column = 'timestamp')
-
 	return function (queryset, year)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
@@ -121,8 +117,6 @@ var WrongDateFilter = wrong_filter('date')
 
 Filter.by.date = curry((operator, column) =>
 {
-	column || (column = 'timestamp')
-
 	return (queryset, date) =>
 	{
 		date = moment(date)
