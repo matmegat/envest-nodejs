@@ -80,6 +80,9 @@ paths:
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
+  '/users/current':
+    $ref: ../api/users/swag/UserCurrent.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 

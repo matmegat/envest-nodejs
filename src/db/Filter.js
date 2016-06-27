@@ -1,13 +1,18 @@
 
+var curry = require('lodash/curry')
+
 var moment = require('moment')
 
 var toId = require('../id').toId
 
+var validate = require('./validate')
+
 var validateId = require('../id').validate
 var validateMany = require('../id').validateMany
-var validateName = require('./validate').name
 
 var Err = require('../Err')
+
+var ClauseNotFound = Err('clause_not_found', 'Clause not found')
 
 var Filter = module.exports = function Filter (clauses)
 {
@@ -19,6 +24,10 @@ var Filter = module.exports = function Filter (clauses)
 			{
 				queryset = clauses[key](queryset, options[key])
 			}
+			else
+			{
+				throw ClauseNotFound({ clause: key })
+			}
 		}
 
 		return queryset
@@ -27,46 +36,55 @@ var Filter = module.exports = function Filter (clauses)
 
 Filter.by = {}
 
-Filter.by.str = function (column, operator)
+Filter.by.operator = curry((operator, column) =>
 {
-	return function (queryset, str)
+	return function (queryset, value)
 	{
 		return queryset
-		.where(column, operator, str)
+		.where(column, operator, value)
 	}
-}
+})
 
-Filter.by.id = function (err, column)
+Filter.by.equal = Filter.by.operator('=')
+
+
+Filter.by.id = function (column)
 {
+	var val_id = validateId(wrong_filter('id'))
+
 	return function by_id (queryset, id)
 	{
-		validateId(err, id)
+		val_id(id)
 
 		return queryset
-		.whereIn(column, id)
+		.where(column, id)
 	}
 }
 
-Filter.by.ids = function (err, column)
+Filter.by.ids = function (column)
 {
+	var val_ids = validateMany(wrong_filter('ids'))
+
 	return function by_ids (queryset, ids)
 	{
 		var ids = ids.split(',')
 
-		validateMany(err, ids)
+		val_ids(ids)
 
 		return queryset
 		.whereIn(column, ids)
 	}
 }
 
-Filter.by.dateSubtract = function by_date (err, column, unit)
+Filter.by.dateSubtract = curry((unit, column) =>
 {
+	var val_id = validateId(wrong_filter(unit))
+
 	return function (queryset, value)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
 		value = toId(value)
-		validateId(err, value)
+		val_id(value)
 
 		var date =  moment()
 		.subtract(value, unit)
@@ -74,22 +92,45 @@ Filter.by.dateSubtract = function by_date (err, column, unit)
 		return queryset
 		.where(column, '>=', date)
 	}
-}
+})
 
-var WrongYearFilter = Err('wrong_year_filter', 'Wrong year filter')
+Filter.by.days   = Filter.by.dateSubtract('days')
+Filter.by.weeks  = Filter.by.dateSubtract('weeks')
+Filter.by.months = Filter.by.dateSubtract('months')
+Filter.by.years  = Filter.by.dateSubtract('years')
 
-Filter.by.year = function by_year (column, operator)
+
+var WrongDateFilter = wrong_filter('date')
+
+Filter.by.date = curry((operator, column) =>
 {
-	return function (queryset, year)
+	return (queryset, date) =>
 	{
-		//toId и validateId ипользуются т.к их логика подходит
-		year = toId(year)
-		validateId(WrongYearFilter, year)
+		date = moment(date)
 
-		var pattern = moment({ year: year })
+		if (! date.isValid())
+		{
+			throw WrongDateFilter()
+		}
+		else
+		{
+			return queryset
+			.where(column, operator, date)
+		}
+	}
+})
 
-		return queryset
-		.where(column, operator, pattern)
+Filter.by.mindate = Filter.by.date('>=')
+Filter.by.maxdate = Filter.by.date('<=')
+
+
+var WrongFilter = Err('wrong_filter', 'Wrong filter')
+
+function wrong_filter (name)
+{
+	return function ()
+	{
+		return WrongFilter( { name: name } )
 	}
 }
 
@@ -97,7 +138,7 @@ Filter.by.name = function by_name (when_column)
 {
 	return function (queryset, name)
 	{
-		validateName(name, 'name')
+		validate.name(name, 'name')
 
 		var pattern = '%' + name.toLowerCase() + '%'
 

@@ -23,28 +23,28 @@ module.exports = function Feed (db)
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
-	var paginator_chunked = PaginatorChunked(
+	var paginators = {}
+
+	paginators.chunked = PaginatorChunked(
 	{
 		table: feed.feed_table
 	})
 
-	var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
-	var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
-	var WrongInvestorId  = db.investor.WrongInvestorId
+	paginators.booked = PaginatorBooked()
 
 	var filter = Filter(
 	{
-		type: Filter.by.str('type', '='),
-		investor: Filter.by.id(WrongInvestorId, 'investor_id'),
-		investors: Filter.by.ids(WrongInvestorId, 'investor_id'),
-		days: Filter.by.dateSubtract(WrongDaysFilter, 'timestamp', 'days'),
-		months: Filter.by.dateSubtract(WrongMonthFilter, 'timestamp', 'months'),
+		type: Filter.by.equal('type'),
+		investor: Filter.by.id('investor_id'),
+		investors: Filter.by.ids('investor_id'),
+		last_days: Filter.by.days('timestamp'),
+		last_weeks: Filter.by.weeks('timestamp'),
+		last_months: Filter.by.months('timestamp'),
+		last_years: Filter.by.years('timestamp'),
 		name: Filter.by.name('feed_items.investor_id'),
-		minyear: Filter.by.year('timestamp', '>='),
-		maxyear: Filter.by.year('timestamp', '<=')
+		mindate: Filter.by.mindate('timestamp'),
+		maxdate: Filter.by.maxdate('timestamp'),
 	})
-
-	var paginator_booked = PaginatorBooked()
 
 	expect(db, 'Feed depends on Comments').property('comments')
 	var comments = db.comments
@@ -99,7 +99,7 @@ module.exports = function Feed (db)
 
 	feed.list = function (options)
 	{
-		options = _.extend({}, options,
+		options.paginator = _.extend({}, options.paginator,
 		{
 			order_column: 'feed_items.id',
 			real_order_column: 'feed_items.timestamp',
@@ -108,20 +108,21 @@ module.exports = function Feed (db)
 		var queryset = feed.feed_table()
 
 		var paginator
-		if (options.page)
+
+		if (options.paginator.page)
 		{
-			paginator = paginator_booked
+			paginator = paginators.booked
 		}
 		else
 		{
-			paginator = paginator_chunked
+			paginator = paginators.chunked
 		}
 
-		queryset = filter(queryset, options)
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 
-		return paginator.paginate(queryset, options)
+		return paginator.paginate(queryset, options.paginator)
 		.then((feed_items) =>
 		{
 			feed_items = _.map(feed_items, (obj) =>
@@ -170,7 +171,7 @@ module.exports = function Feed (db)
 					investors: investors,
 				}
 
-				if (options.page)
+				if (paginator.total)
 				{
 					return count(count_queryset)
 					.then(count =>
