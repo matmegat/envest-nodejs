@@ -15,19 +15,29 @@ module.exports = function Feed (db)
 
 	feed.express.get('/', (rq, rs) =>
 	{
-		var options = _.pick(rq.query,
+		var options = {}
+
+		options.filter = _.pick(rq.query,
 		[
-			'max_id',
-			'since_id',
-			'page',
 			'type',
 			'investors',
 			'investor',
-			'days',
-			'months',
+			'last_days',
+			'last_weeks',
+			'last_months',
+			'last_years',
 			'name',
 			'minyear',
-			'maxyear'
+			'maxyear',
+			'mindate',
+			'maxdate'
+		])
+
+		options.paginator = _.pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page'
 		])
 
 		toss(rs, feed.model.list(options))

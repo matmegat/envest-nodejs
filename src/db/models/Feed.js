@@ -32,8 +32,6 @@ module.exports = function Feed (db)
 
 	paginators.booked = PaginatorBooked()
 
-	var WrongDaysFilter  = Err('wrong_days_filter', 'Wrong days filter')
-	var WrongMonthFilter = Err('wrong_month_filter', 'Wrong month filter')
 	var WrongInvestorId  = db.investor.WrongInvestorId
 
 	var filter = Filter(
@@ -41,12 +39,15 @@ module.exports = function Feed (db)
 		type: Filter.by.equal('type'),
 		investor: Filter.by.id(WrongInvestorId, 'investor_id'),
 		investors: Filter.by.ids(WrongInvestorId, 'investor_id'),
-		days: Filter.by.dateSubtract(WrongDaysFilter, 'timestamp', 'days'),
-		months: Filter.by.dateSubtract(WrongMonthFilter, 'timestamp', 'months'),
+		last_days: Filter.by.days('timestamp'),
+		last_weeks: Filter.by.weeks('timestamp'),
+		last_months: Filter.by.months('timestamp'),
+		last_years: Filter.by.years('timestamp'),
 		name: Filter.by.name('feed_items.investor_id'),
-		minyear: Filter.by.year('timestamp', '>='),
-		maxyear: Filter.by.year('timestamp', '<='),
-		date_range: Filter.by.dateRange()
+		minyear: Filter.by.minyear('timestamp'),
+		maxyear: Filter.by.maxyear('timestamp'),
+		mindate: Filter.by.mindate('timestamp'),
+		maxdate: Filter.by.maxdate('timestamp'),
 	})
 
 	expect(db, 'Feed depends on Comments').property('comments')
@@ -102,7 +103,7 @@ module.exports = function Feed (db)
 
 	feed.list = function (options)
 	{
-		options = _.extend({}, options,
+		options.paginator = _.extend({}, options.paginator,
 		{
 			order_column: 'feed_items.id',
 			real_order_column: 'feed_items.timestamp',
@@ -112,7 +113,7 @@ module.exports = function Feed (db)
 
 		var paginator
 
-		if (options.page)
+		if (options.paginator.page)
 		{
 			paginator = paginators.booked
 		}
@@ -121,11 +122,11 @@ module.exports = function Feed (db)
 			paginator = paginators.chunked
 		}
 
-		queryset = filter(queryset, options)
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 
-		return paginator.paginate(queryset, options)
+		return paginator.paginate(queryset, options.paginator)
 		.then((feed_items) =>
 		{
 			feed_items = _.map(feed_items, (obj) =>
@@ -174,7 +175,7 @@ module.exports = function Feed (db)
 					investors: investors,
 				}
 
-				if (options.page)
+				if (options.paginator.page)
 				{
 					return feed_count(count_queryset)
 					.then((count) =>

@@ -12,6 +12,8 @@ var validateMany = require('../id').validateMany
 
 var Err = require('../Err')
 
+var ClauseNotFound = Err('clause_not_found', 'Clause not found')
+
 var Filter = module.exports = function Filter (clauses)
 {
 	return function (queryset, options)
@@ -21,6 +23,10 @@ var Filter = module.exports = function Filter (clauses)
 			if (key in clauses)
 			{
 				queryset = clauses[key](queryset, options[key])
+			}
+			else
+			{
+				throw ClauseNotFound({clause: key})
 			}
 		}
 
@@ -66,13 +72,15 @@ Filter.by.ids = function (err, column)
 	}
 }
 
-Filter.by.dateSubtract = function by_date (err, column, unit)
+Filter.by.dateSubtract = curry((unit, column) =>
 {
+	column || (column = 'timestamp')
+
 	return function (queryset, value)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
 		value = toId(value)
-		validateId(err, value)
+		validateId(wrong_filter(unit), value)
 
 		var date =  moment()
 		.subtract(value, unit)
@@ -80,22 +88,68 @@ Filter.by.dateSubtract = function by_date (err, column, unit)
 		return queryset
 		.where(column, '>=', date)
 	}
-}
+})
 
-var WrongYearFilter = Err('wrong_year_filter', 'Wrong year filter')
+Filter.by.days   = Filter.by.dateSubtract('days')
+Filter.by.weeks  = Filter.by.dateSubtract('weeks')
+Filter.by.months = Filter.by.dateSubtract('months')
+Filter.by.years  = Filter.by.dateSubtract('years')
 
-Filter.by.year = function by_year (column, operator)
+
+Filter.by.year = curry((operator, column) =>
 {
+	column || (column = 'timestamp')
+
 	return function (queryset, year)
 	{
 		//toId и validateId ипользуются т.к их логика подходит
 		year = toId(year)
-		validateId(WrongYearFilter, year)
+		validateId(wrong_filter('year'), year)
 
 		var pattern = moment({ year: year })
 
 		return queryset
 		.where(column, operator, pattern)
+	}
+})
+
+Filter.by.minyear = Filter.by.year('>=')
+Filter.by.maxyear = Filter.by.year('<=')
+
+
+var WrongDateFilter = wrong_filter('date')
+
+Filter.by.date = curry((operator, column) =>
+{
+	column || (column = 'timestamp')
+
+	return (queryset, date) =>
+	{
+		date = moment(date)
+
+		if (! date.isValid())
+		{
+			throw WrongDateFilter()
+		}
+		else
+		{
+			return queryset
+			.where(column, operator, date)
+		}
+	}
+})
+
+Filter.by.mindate = Filter.by.date('>=')
+Filter.by.maxdate = Filter.by.date('<=')
+
+
+var WrongFilter = Err('wrong_filter', 'Wrong filter')
+
+function wrong_filter (name)
+{
+	return function ()
+	{
+		return WrongFilter( { name: name } )
 	}
 }
 
@@ -111,22 +165,5 @@ Filter.by.name = function by_name (when_column)
 		.innerJoin('users', 'users.id', when_column)
 		.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
 		pattern)
-	}
-}
-
-Filter.by.dateRange = (column) =>
-{
-	column || (column = 'timestamp')
-
-	return (queryset, range) =>
-	{
-		var from = Number(range[0])
-		var to   = Number(range[1])
-
-		from = moment(from)
-		to   = moment(to)
-
-		return queryset
-		.whereBetween(column, [ from, to ])
 	}
 }
