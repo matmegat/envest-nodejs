@@ -204,10 +204,7 @@ module.exports = function Brokerage (db, investor)
 			full_portfolio.holdings.forEach((holding) =>
 			{
 
-				real_allocation +=
-					holding.amount *
-					(holding.buy_price || _.random(10.0, 100.0, true))
-					/* TODO: migrate to buy_price */
+				real_allocation += holding.amount * holding.buy_price
 			})
 
 			var multiplier = indexed_amount / real_allocation
