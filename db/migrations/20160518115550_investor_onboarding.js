@@ -47,6 +47,8 @@ exports.up = function (knex, Promise)
 
 			table.integer('amount').notNullable()
 				.comment('Number of Shares')
+
+			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ])
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
