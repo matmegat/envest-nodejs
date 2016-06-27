@@ -37,15 +37,16 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()
-			table.integer('amount').notNullable().comment('Number of Shares')
 
-			table.integer('investor_id')
-			.notNullable()
-			.references('investors.user_id')
-			.onUpdate('cascade')
-			.onDelete('cascade')
+			table.integer('investor_id').notNullable()
+				.references('investors.user_id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			symbol.schema.columns('symbol_', table) // REF symbols
+
+			table.integer('amount').notNullable()
+				.comment('Number of Shares')
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
