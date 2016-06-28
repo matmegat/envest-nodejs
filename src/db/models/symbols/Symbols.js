@@ -6,7 +6,7 @@ var Symbol = module.exports = function Symbol (cfg)
 	var xign = Xign(cfg.xignite)
 
 	xign.fundamentals('GOOG')
-	.then(rs => console.log(rs.data), console.error)
+	.then(rs => console.log(rs), console.error)
 }
 
 Symbol.schema = {}

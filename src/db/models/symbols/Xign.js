@@ -44,6 +44,8 @@ module.exports = function Xign (cfg)
 		})
 
 		return request(uri)
+		.then(unwrap.data)
+		.then(unwrap.first)
 	}
 
 	function apidate (it)
@@ -52,4 +54,18 @@ module.exports = function Xign (cfg)
 	}
 
 	return X
+}
+
+var unwrap = {}
+
+unwrap.data  = (rs) => rs.data
+
+unwrap.first = (rs) => rs[0]
+
+unwrap.success = (rs) =>
+{
+	if (rs.Outcome !== 'Success')
+	{
+		throw rs
+	}
 }
