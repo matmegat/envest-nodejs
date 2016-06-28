@@ -34,7 +34,7 @@ module.exports = function (db)
 		{
 			var hash = result.pic
 
-			return static_model.remove(file)
+			return static_model.remove(hash)
 		})
 		.then(()=>
 		{

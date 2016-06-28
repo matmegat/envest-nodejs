@@ -64,14 +64,19 @@ module.exports = function (rootpath)
 
 	function remove_file (hash)
 	{
-		return exists(hash)
+		if (! hash)
+		{
+			return
+		}
+
+		var t = tuple(hash)
+		var path = tuple_to_filename(t)
+
+		return exists(path)
 		.then(exists =>
 		{
 			if (exists)
 			{
-				var t = tuple(hash)
-				var path = tuple_to_filename(t)
-
 				return unlink(path)
 			}
 		})
