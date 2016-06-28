@@ -66,15 +66,21 @@ module.exports = function Feed (db)
 	{
 		return function (rq, rs)
 		{
-			var options = _.pick(rq.query,
+			var options = {}
+
+			options.paginator = _.pick(rq.query,
 			[
 				'max_id',
 				'since_id',
-				'page',
+				'page'
+			])
+
+			options.filter = _.pick(rq.query,
+			[
 				'investor'
 			])
 
-			options.type = type
+			options.filter.type = type
 
 			toss(rs, feed.model.list(options))
 		}
