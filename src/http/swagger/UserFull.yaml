@@ -1,0 +1,69 @@
+type: object
+title: Authenticated User's data
+properties:
+  id:
+    type: integer
+    description: User's Id
+  first_name:
+    type: string
+    description: User's First Name
+  last_name:
+    type: string
+    description: User's Last Name
+  email:
+    type: string
+    description: User's Email
+  pic:
+    type: string
+    description: URL to User's image
+  investor:
+    type: object
+    description: |
+      Investor's info if User is investor
+    properties:
+      profile_pic:
+        type: string
+        description: URL to cover image of Investor's profile
+      profession:
+        type: string
+        description: Investor's profession
+      background:
+        type: string
+        description: Investor's background
+      historical_returns:
+        type: array
+        items:
+          type: object
+          properties:
+            year:
+              type: number
+              description: year
+            percentage:
+              type: number
+              description: percentage
+      is_public:
+        type: boolean
+        description: If Investor is public
+      start_date: 
+        type: string
+        description: Date of Investor's publicity
+  admin:
+    type: object
+    description: |
+      Investor's info if User is admin
+    properties:
+      parent:
+        type: integer
+        description: Parent admin
+      can_intro:
+        type: boolean
+        description: Opportunity to invite new admins
+  access_token:
+    type: string
+required:
+- id
+- first_name
+- last_name
+- pic
+- email
+- access_token
