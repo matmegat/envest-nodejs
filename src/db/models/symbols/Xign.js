@@ -39,7 +39,7 @@ module.exports = function Xign (cfg)
 				ExcludeRestated: 'false',
 				UpdatedSince: '',
 
-				_Token: '5198053EF65A4DE691F4D622001DEE79'
+				_Token: token
 			}
 		})
 
