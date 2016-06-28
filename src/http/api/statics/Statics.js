@@ -38,7 +38,10 @@ module.exports = function Statics (rootpath, db, http)
 				rs.setHeader('content-type', rs_obj.type)
 				rs_obj.stream.pipe(rs)
 			})
-			.catch(toss.err(rs))
+			.catch(() => 
+			{
+				rs.send(404)
+			})
 		})
 	})
 
@@ -55,7 +58,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.pic_model.upload(rq.file, rq.user.id))
+			toss(rs, statics.pic_model.update(rq.file, rq.user.id))
 		})
 	})
 
@@ -70,7 +73,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.pic_model.uploadProfile(rq.file, rq.user.id))
+			toss(rs, statics.pic_model.updateProfile(rq.file, rq.user.id))
 		})
 	})
 

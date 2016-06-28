@@ -6,13 +6,12 @@ var Err = require('../../Err')
 var lwip = require('lwip')
 var round = require('lodash/round')
 
-var static_model = require('./Static2.js')
-
 module.exports = function (db)
 {
 	var pic = {}
 	var user_model = db.user
 	var investor_model = db.investor
+	var static_model = db.static
 
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
 
@@ -33,9 +32,13 @@ module.exports = function (db)
 		})
 		.then(result =>
 		{
-			var pic = result.pic
+			var hash = result.pic
 
-			return static_model.store(pic)
+			return static_model.remove(file)
+		})
+		.then(()=>
+		{
+			return static_model.store(file)
 		})
 		.then(hash =>
 		{
@@ -75,6 +78,10 @@ module.exports = function (db)
 		{
 			var pic = result.pic
 
+			return static_model.remove(pic)
+		})
+		.then(() =>
+		{
 			return static_model.store(pic)
 		})
 		.then(hash =>
@@ -100,8 +107,7 @@ module.exports = function (db)
 	function validate_img (img, settings)
 	{
 		var max_size = settings.max_size
-		var aspect_width = settings.aspect_width
-		var aspect_height = settings.aspect_height
+		var ratio = settings.ratio
 
 		return new Promise((rs, rj) =>
 		{
@@ -116,7 +122,7 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				return validate_aspect(img, aspect_width, aspect_height)
+				return validate_aspect(img, ratio)
 			})
 			.then(() =>
 			{
@@ -166,7 +172,7 @@ module.exports = function (db)
 	{
 		return new Promise((rs, rj) =>
 		{
-			lwip.open(img.buffer, get_ext(img.mimetype), (err, image) =>
+			lwip.open(img.buffer, static_model.getExt(img.mimetype), (err, image) =>
 			{
 				if (err)
 				{

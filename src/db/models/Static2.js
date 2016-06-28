@@ -1,4 +1,3 @@
-var uid = require('shortid').generate
 
 var uid = require('shortid').generate
 var promisify = require('promisify-node')
@@ -9,6 +8,7 @@ var mime = require('mime')
 var fs = require('fs')
 var stat = promisify(fs.stat)
 var unlink = promisify(fs.unlink)
+var writeTo = require('fs').createWriteStream
 
 var streamToPromise = require('stream-to-promise')
 
@@ -21,35 +21,31 @@ module.exports = function (rootpath)
 
 	static.store = function (file)
 	{
-		return remove_file(hash)
-		.then(() =>
-		{
-			return save_file(file)
-		})
+		return save_file(file)
 		.then(hash =>
 		{
 			return hash
 		})
 	}
 
-	var NotExists = Err('file_does_not_exists', 'File does not exists')
+	var NotExists = Err('file_not_found', 'File not found')
 
 	static.get = function (hash)
 	{
 		var path = path_by_hash(hash)
-		var mime = mime.lookup(path)
+		var mimetype = mime.lookup(path)
 
 		return exists(path)
 		.then(exists =>
 		{
 			if (! exists)
 			{
-				throw NotExists
+				throw NotExists()
 			}
 			else
 			{
 				return {
-					type: mime,
+					type: mimetype,
 					stream: fs.createReadStream(filename)
 				}
 			}
@@ -61,16 +57,21 @@ module.exports = function (rootpath)
 		return remove_file(hash)
 	}
 
+	static.getExt = function (mime)
+	{
+		return get_ext(mime)
+	}
+
 	function remove_file (hash)
 	{
-		var t = tuple(hash)
-		var path = tuple_to_filename(t)
-
-		return exists(path)
+		return exists(hash)
 		.then(exists =>
 		{
 			if (exists)
 			{
+				var t = tuple(hash)
+				var path = tuple_to_filename(t)
+
 				return unlink(path)
 			}
 		})
