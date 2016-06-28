@@ -72,7 +72,7 @@ module.exports = function (db)
 		})
 		.then(result =>
 		{
-			var hash = result.pic
+			var hash = result.profile_pic
 
 			return update_pic(hash, file)
 		})
