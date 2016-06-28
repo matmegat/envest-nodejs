@@ -14,6 +14,7 @@ module.exports = (err, rq, rs, next) =>
 	else
 	{
 		console.error(err)
+		console.error(err.stack)
 
 		return toss.err(rs, MiddlewareError())
 	}
