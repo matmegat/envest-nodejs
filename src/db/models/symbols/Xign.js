@@ -46,6 +46,7 @@ module.exports = function Xign (cfg)
 		return request(uri)
 		.then(unwrap.data)
 		.then(unwrap.first)
+		.then(unwrap.success)
 	}
 
 	function apidate (it)
