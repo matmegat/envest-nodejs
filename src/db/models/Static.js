@@ -22,10 +22,6 @@ module.exports = function (rootpath)
 	static.store = function (file)
 	{
 		return save_file(file)
-		.then(hash =>
-		{
-			return hash
-		})
 	}
 
 	var NotExists = Err('file_not_found', 'File not found')
@@ -66,7 +62,10 @@ module.exports = function (rootpath)
 	{
 		if (! hash)
 		{
-			return
+			return new Promise(rs =>
+			{
+				return rs()
+			})
 		}
 
 		var t = tuple(hash)
