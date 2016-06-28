@@ -15,6 +15,7 @@ module.exports = function Statics (rootpath, db, http)
 {
 	var statics = {}
 	statics.static_model = db.static
+	statics.pic_model = db.pic
 
 	statics.express = Router()
 
@@ -30,22 +31,14 @@ module.exports = function Statics (rootpath, db, http)
 			}
 
 			var hash = rq.params.hash
-			var filename = statics.static_model.pathByHash(hash)
-			var type = mime.lookup(filename)
 
-			statics.static_model.existsFile(filename)
-			.then(exists =>
+			statics.static_model.get(hash)
+			.then(rs_obj =>
 			{
-				if (! exists)
-				{
-					rs.sendStatus(404)
-				}
-				else
-				{
-					rs.setHeader('content-type', type)
-					fs.createReadStream(filename).pipe(rs)
-				}
+				rs.setHeader('content-type', rs_obj.type)
+				rs_obj.stream.pipe(rs)
 			})
+			.catch(toss.err(rs))
 		})
 	})
 
@@ -62,7 +55,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.uploadPic(rq))
+			toss(rs, statics.pic_model.upload(rq.file, rq.user.id))
 		})
 	})
 
@@ -77,7 +70,7 @@ module.exports = function Statics (rootpath, db, http)
 				return toss.err(rs, UploadError(err))
 			}
 
-			toss(rs, statics.static_model.uploadProfilePic(rq))
+			toss(rs, statics.pic_model.uploadProfile(rq.file, rq.user.id))
 		})
 	})
 
