@@ -4,6 +4,7 @@ var knexed = require('../knexed')
 var Err = require('../../Err')
 var noop = require('lodash/noop')
 var cr_helpers = require('../../crypto-helpers')
+var validate_email = require('../validate').email
 
 module.exports = function Password (db, user)
 {
@@ -100,8 +101,15 @@ module.exports = function Password (db, user)
 
 	password.reqReset = knexed.transact(knex, (trx, email, timestamp) =>
 	{
-		//add validate_email(email)
-		return user.byEmail(email)
+		return new Promise(rs =>
+		{
+			validate_email(email)
+			return rs()
+		})
+		.then(() =>
+		{
+			return user.byEmail(email)
+		})
 		.then(Err.nullish(EmailNotFound))
 		.then(user =>
 		{

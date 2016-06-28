@@ -14,6 +14,7 @@ var NotFound = Err('user_not_found', 'User not found')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
+var validate_email = require('../validate').email
 
 module.exports = function User (db)
 {
@@ -181,34 +182,42 @@ module.exports = function User (db)
 
 	user.byEmail = function (email, trx)
 	{
-		return knex.select('*')
-		.transacting(trx)
-		.from(function ()
+		return new Promise(rs =>
 		{
-			this.select(
-				'users.id AS id',
-				'password',
-				'salt',
-				'first_name',
-				'last_name',
-				'pic',
-				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
-			)
-			.from('users')
-			.leftJoin(
-				'email_confirms',
-				'users.id',
-				'email_confirms.user_id'
-			)
-			.leftJoin(
-				'auth_local',
-				'users.id',
-				'auth_local.user_id'
-			)
-			.as('ignored_alias')
+			validate_email(email)
+			return rs()
 		})
-		.where('email', email.toLowerCase())
-		.then(oneMaybe)
+		.then(() =>
+		{
+			return knex.select('*')
+			.transacting(trx)
+			.from(function ()
+			{
+				this.select(
+					'users.id AS id',
+					'password',
+					'salt',
+					'first_name',
+					'last_name',
+					'pic',
+					knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
+				)
+				.from('users')
+				.leftJoin(
+					'email_confirms',
+					'users.id',
+					'email_confirms.user_id'
+				)
+				.leftJoin(
+					'auth_local',
+					'users.id',
+					'auth_local.user_id'
+				)
+				.as('ignored_alias')
+			})
+			.where('email', email.toLowerCase())
+			.then(oneMaybe)
+		})
 	}
 
 	user.list = function (ids)
