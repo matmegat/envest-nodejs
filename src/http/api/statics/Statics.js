@@ -8,7 +8,6 @@ var toss = require('../../toss')
 
 var fs = require('fs')
 
-var mime = require('mime')
 var multer = require('multer')
 
 module.exports = function Statics (rootpath, db, http)
@@ -38,7 +37,7 @@ module.exports = function Statics (rootpath, db, http)
 				rs.setHeader('content-type', rs_obj.type)
 				rs_obj.stream.pipe(rs)
 			})
-			.catch(() => 
+			.catch(() =>
 			{
 				rs.sendStatus(404)
 			})

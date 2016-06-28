@@ -26,7 +26,7 @@ module.exports = function (db)
 		}
 
 		return validate_img(file, validation_data)
-		.then(() => 
+		.then(() =>
 		{
 			return user_model.picById(id)
 		})
