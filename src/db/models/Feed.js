@@ -104,7 +104,12 @@ module.exports = function Feed (db)
 			order_column: 'feed_items.id'
 		})
 
-		var queryset = feed.feed_table()
+		var queryset = feed.feed_table().select(
+		'feed_items.id',
+		'feed_items.timestamp',
+		'feed_items.investor_id',
+		'feed_items.type',
+		'feed_items.data')
 
 		var paginator
 
@@ -124,18 +129,6 @@ module.exports = function Feed (db)
 		return paginator.paginate(queryset, options.paginator)
 		.then((feed_items) =>
 		{
-			feed_items = _.map(feed_items, (obj) =>
-			{
-				return _.pick(obj,
-				[
-					'id',
-					'timestamp',
-					'investor_id',
-					'type',
-					'data'
-				])
-			})
-
 			var feed_ids = _.map(feed_items, 'id')
 
 			return comments
