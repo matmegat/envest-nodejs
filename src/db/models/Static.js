@@ -1,157 +1,83 @@
 
-var noop = require('lodash/noop')
-
 var uid = require('shortid').generate
 var promisify = require('promisify-node')
 var mkdirp = promisify(require('mkdirp'))
 
-var writeTo = require('fs').createWriteStream
+var mime = require('mime')
 
 var fs = require('fs')
 var stat = promisify(fs.stat)
 var unlink = promisify(fs.unlink)
+var writeTo = require('fs').createWriteStream
 
 var streamToPromise = require('stream-to-promise')
 
 var Err = require('../../Err')
 
-var lwip = require('lwip')
-var round = require('lodash/round')
-
-module.exports = function (rootpath, db)
+module.exports = function (rootpath)
 {
 	var static = {}
-	var user_model = db.user
-	var investor_model = db.investor
 	var root_img = rootpath.partial('static/images')
 
-	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
-
-	static.uploadPic = function (rq)
+	static.store = function (file)
 	{
-		var file = rq.file
-		var user_id = rq.user.id
-
-		var validation_data = {
-			max_size: 10 * 1024 * 1024,
-			aspect_width: 1,
-			aspect_height: 1
-		}
-
-		return validate_img(file, validation_data)
-		.then(() =>
+		return save_file(file)
+		.then(hash =>
 		{
-			return user_model.picById(user_id)
+			return hash
 		})
-		.then(result =>
-		{
-			var pic = result.pic
-
-			return remove_file(pic)
-		})
-		.then(() =>
-		{
-			return save_file(file)
-		})
-		.then(filename =>
-		{
-			return user_model.updatePic(
-			{
-				user_id: user_id,
-				hash: filename
-			})
-			.catch(() =>
-			{
-				return remove_file(filename)
-				.then(() =>
-				{
-					throw UpdateErr()
-				})
-			})
-		})
-		.then(noop)
 	}
 
-	static.uploadProfilePic = function (rq)
+	var NotExists = Err('file_not_found', 'File not found')
+
+	static.get = function (hash)
 	{
-		var file = rq.file
-		var user_id = rq.user.id
+		var path = path_by_hash(hash)
+		var mimetype = mime.lookup(path)
 
-		var validation_data = {
-			max_size: 10 * 1024 * 1024,
-			aspect_width: 15,
-			aspect_height: 11
-		}
-
-		return validate_img(file, validation_data)
-		.then(() =>
+		return exists(path)
+		.then(exists =>
 		{
-			return investor_model.profilePicById(user_id)
-		})
-		.then(result =>
-		{
-			var pic = result.profile_pic
-
-			return remove_file(pic)
-		})
-		.then(() =>
-		{
-			return save_file(file)
-		})
-		.then(filename =>
-		{
-			return investor_model.updateProfilePic(
+			if (! exists)
 			{
-				user_id: user_id,
-				hash: filename
-			})
-			.catch(() =>
+				throw NotExists()
+			}
+			else
 			{
-				return remove_file(filename)
-				.then(() =>
-				{
-					throw UpdateErr()
-				})
-			})
+				return {
+					type: mimetype,
+					stream: fs.createReadStream(path)
+				}
+			}
 		})
-		.then(noop)
 	}
 
-	static.pathByHash = function (hash)
+	static.remove = function (hash)
 	{
-		var t = tuple(hash)
-
-		return tuple_to_filename(t)
+		return remove_file(hash)
 	}
 
-	static.existsFile = function (path)
+	static.getExt = function (mime)
 	{
-		return stat(path)
-		.then(() =>
-		{
-			return true
-		})
-		.catch(() =>
-		{
-			return false
-		})
+		return get_ext(mime)
 	}
 
 	function remove_file (hash)
 	{
+		if (! hash)
+		{
+			return
+		}
+
 		var t = tuple(hash)
 		var path = tuple_to_filename(t)
 
-		return static.existsFile(path)
+		return exists(path)
 		.then(exists =>
 		{
 			if (exists)
 			{
 				return unlink(path)
-			}
-			else
-			{
-				return
 			}
 		})
 	}
@@ -196,6 +122,26 @@ module.exports = function (rootpath, db)
 		})
 	}
 
+	function path_by_hash (hash)
+	{
+		var t = tuple(hash)
+
+		return tuple_to_filename(t)
+	}
+
+	function exists (path)
+	{
+		return stat(path)
+		.then(() =>
+		{
+			return true
+		})
+		.catch(() =>
+		{
+			return false
+		})
+	}
+
 	function tuple (filename)
 	{
 		return [
@@ -231,119 +177,6 @@ module.exports = function (rootpath, db)
 	function tuple_to_filename (tuple)
 	{
 		return root_img(tuple)
-	}
-
-
-	function validate_img (img, settings)
-	{
-		var max_size = settings.max_size
-		var aspect_width = settings.aspect_width
-		var aspect_height = settings.aspect_height
-
-		return new Promise((rs, rj) =>
-		{
-			expect_file(img)
-			.then(() =>
-			{
-				return validate_size(img, max_size)
-			})
-			.then(() =>
-			{
-				return validate_extension(img)
-			})
-			.then(() =>
-			{
-				return validate_aspect(img, aspect_width, aspect_height)
-			})
-			.then(() =>
-			{
-				return rs()
-			})
-			.catch(err =>
-			{
-				return rj(err)
-			})
-		})
-	}
-
-
-	var ReadErr = Err('wrong_file', 'Wrong File')
-
-	function expect_file (file)
-	{
-		return new Promise(rs =>
-		{
-			if (! file || ! file.size)
-			{
-				throw ReadErr()
-			}
-
-			return rs()
-		})
-	}
-
-	var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
-
-	function validate_size (img, max_size)
-	{
-		return new Promise(rs =>
-		{
-			if (img.size > max_size)
-			{
-				throw SizeErr()
-			}
-
-			return rs()
-		})
-	}
-
-	var GMError = Err('reading_file_error', 'Reading File Error')
-	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
-
-	function validate_aspect (img, aspect_width, aspect_height)
-	{
-		return new Promise((rs, rj) =>
-		{
-			lwip.open(img.buffer, get_ext(img.mimetype), (err, image) =>
-			{
-				if (err)
-				{
-					return rj(GMError(err))
-				}
-
-				var aspect_ratio = round(aspect_width / aspect_height, 1)
-				var real_ratio = round(image.width() / image.height(), 1)
-
-				if ( aspect_ratio !== real_ratio )
-				{
-					return rj(WrongAspect())
-				}
-
-				return rs()
-			})
-		})
-	}
-
-	var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
-	function validate_extension (img)
-	{
-		if (! img || ! img.mimetype)
-		{
-			throw WrongExtension()
-		}
-
-		var exts = ['image/png', 'image/jpg', 'image/jpeg']
-		var result = exts.indexOf(img.mimetype)
-
-		return new Promise(rs =>
-		{
-			if (result === -1)
-			{
-				throw WrongExtension()
-			}
-
-			return rs()
-		})
 	}
 
 	return static
