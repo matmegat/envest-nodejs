@@ -6,6 +6,8 @@ var format = require('url').format
 
 var request = require('axios')
 
+var moment = require('moment')
+
 module.exports = function Xign (cfg)
 {
 	expect(cfg).property('token')
@@ -30,8 +32,9 @@ module.exports = function Xign (cfg)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				AsOfDate: '6/27/2016',
+
+				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
 				ExcludeRestated: 'false',
 				UpdatedSince: '',
@@ -41,6 +44,11 @@ module.exports = function Xign (cfg)
 		})
 
 		return request(uri)
+	}
+
+	function apidate (it)
+	{
+		return moment(it).format('M/DD/YYYY')
 	}
 
 	return X
