@@ -34,11 +34,7 @@ module.exports = function (db)
 		{
 			var hash = result.pic
 
-			return static_model.remove(hash)
-		})
-		.then(()=>
-		{
-			return static_model.store(file)
+			return update_pic(hash, file)
 		})
 		.then(hash =>
 		{
@@ -76,13 +72,9 @@ module.exports = function (db)
 		})
 		.then(result =>
 		{
-			var pic = result.pic
+			var hash = result.pic
 
-			return static_model.remove(pic)
-		})
-		.then(() =>
-		{
-			return static_model.store(pic)
+			return update_pic(hash, file)
 		})
 		.then(hash =>
 		{
@@ -101,6 +93,15 @@ module.exports = function (db)
 			})
 		})
 		.then(noop)
+	}
+
+	function update_pic (hash, file)
+	{
+		return static_model.remove(hash)
+		.then(() =>
+		{
+			return static_model.store(file)
+		})
 	}
 
 
