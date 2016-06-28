@@ -1,6 +1,5 @@
 
 var extend = require('lodash/extend')
-var get = require('lodash/fp/get')
 
 var expect = require('chai').expect
 
@@ -9,6 +8,8 @@ var toId = require('../../id').toId
 var one = require('../helpers').one
 
 var defaults = require('./options')
+
+var Err = require('../../Err')
 
 defaults = extend({}, defaults,
 {
@@ -56,19 +57,12 @@ module.exports = function Paginator__Chunked (paginator_options)
 
 				if (current_chunk)
 				{
+					var real_sign = real_order_sign(default_dir, since_id, max_id)
+
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
+					this.orWhere(real_order_column, real_sign, current_chunk)
 				}
-
-				this.orWhere(function ()
-				{
-					var sign = real_order_sign(default_dir, since_id, max_id)
-
-					if (current_chunk)
-					{
-						this.where(real_order_column, sign, current_chunk)
-					}
-				})
 			})
 
 			var dir = sorting(default_dir, since_id, max_id)
@@ -81,6 +75,8 @@ module.exports = function Paginator__Chunked (paginator_options)
 		})
 	}
 
+	var IdPageNotFound = Err('id_page_not_found', 'Id page not found')
+
 	function get_current_chunk (id, column)
 	{
 		if (! id)
@@ -92,8 +88,12 @@ module.exports = function Paginator__Chunked (paginator_options)
 			return table()
 			.select(paginator_options.real_order_column)
 			.where(paginator_options.order_column, id)
+			.then(Err.emptish(IdPageNotFound))
 			.then(one)
-			.then(get(column))
+			.then((obj) =>
+			{
+				return obj[column]
+			})
 		}
 	}
 

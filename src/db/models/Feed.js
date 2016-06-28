@@ -101,8 +101,7 @@ module.exports = function Feed (db)
 	{
 		options.paginator = _.extend({}, options.paginator,
 		{
-			order_column: 'feed_items.id',
-			real_order_column: 'feed_items.timestamp',
+			order_column: 'feed_items.id'
 		})
 
 		var queryset = feed.feed_table()
