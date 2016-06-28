@@ -1,5 +1,5 @@
 
-var symbol = require('../../src/db/models/symbol/Symbol')
+var Symbols = require('../../src/db/models/symbols/Symbols')
 
 exports.up = function (knex, Promise)
 {
@@ -26,7 +26,7 @@ exports.up = function (knex, Promise)
 	{
 		return knex.schema.createTable('symbols', (table) =>
 		{
-			symbol.schema.columns('', table)
+			Symbols.schema.columns('', table)
 
 			/* additional */
 			table.string('company').notNullable()
@@ -43,7 +43,7 @@ exports.up = function (knex, Promise)
 				.onUpdate('cascade')
 				.onDelete('cascade')
 
-			symbol.schema.columns('symbol_', table) // REF symbols
+			Symbols.schema.columns('symbol_', table) // REF symbols
 
 			table.integer('amount').notNullable()
 				.comment('Number of Shares')
