@@ -46,30 +46,28 @@ module.exports = function Paginator__Chunked (paginator_options)
 		return get_current_chunk(current_id, real_order_column)
 		.then(current_chunk =>
 		{
-			var limit = options.limit
-
-			limit = Math.min(limit, defaults.limit)
-
-			queryset
-			.where(function ()
+			if (current_chunk)
 			{
-				var sign = order_sign(default_dir, since_id, max_id)
-
-				if (current_chunk)
+				queryset.where(function ()
 				{
-					var real_sign = real_order_sign(default_dir, since_id, max_id)
+					var sign = order_sign(default_dir, since_id, max_id)
 
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
+
+					var real_sign = real_order_sign(default_dir, since_id, max_id)
+
 					this.orWhere(real_order_column, real_sign, current_chunk)
-				}
-			})
+				})
+			}
 
 			var dir = sorting(default_dir, since_id, max_id)
 
 			queryset
 			.orderBy(real_order_column, dir)
 			.orderBy(order_column, dir)
+
+			var limit = Math.min(options.limit, defaults.limit)
 
 			return queryset.limit(limit)
 		})
@@ -90,10 +88,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 			.where(paginator_options.order_column, id)
 			.then(Err.emptish(IdPageNotFound))
 			.then(one)
-			.then((obj) =>
-			{
-				return obj[column]
-			})
+			.then(row => row[column])
 		}
 	}
 
