@@ -28,7 +28,7 @@ var ReqLog = require('./ReqLog')
 var CheckToken = require('./CheckToken')
 var OptionsStub = require('./OptionsStub')
 
-var errorMiddleware = require('./error-middleware')
+var internalError = require('./internal-error')
 var setErrorMode = require('./error-mode')
 
 module.exports = function Http (app)
@@ -78,7 +78,7 @@ module.exports = function Http (app)
 	mount(Watchlist(), 'watchlist', 'watchlist')
 
 
-	http.express.use(errorMiddleware)
+	http.express.use(internalError)
 
 	app.swagger = Swagger(app, http.express)
 
