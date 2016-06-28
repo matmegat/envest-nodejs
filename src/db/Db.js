@@ -57,5 +57,10 @@ module.exports = function name (app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
+	db.xign = require('./models/symbols/Xign')(app.cfg.xignite)
+
+	db.xign.fundamentals('GOOG')
+	.then(rs => console.log(rs.data), console.error)
+
 	return db
 }

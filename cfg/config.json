@@ -11,5 +11,10 @@
 
     "database": "netvest",
     "user": "netvest"
+  },
+
+  "xignite":
+  {
+    "token": "5198053EF65A4DE691F4D622001DEE79"
   }
 }
