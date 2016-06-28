@@ -1,13 +1,13 @@
 type: object
 properties:
   trades:
-    type: number
+    type: integer
     description: Count 'trade' Feeds
   watchlists:
-    type: number
+    type: integer
     description: Count 'watchlists' Feeds
   updates:
-    type: number
+    type: integer
     description: Count 'updates' Feeds
 required:
 - trades

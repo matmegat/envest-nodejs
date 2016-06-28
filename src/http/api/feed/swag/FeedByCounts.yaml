@@ -3,7 +3,7 @@ get:
   parameters:
   - name: investor
     in: query
-    type: number
+    type: integer
     description: Investor Id
   - name: investors
     in: query
@@ -11,19 +11,19 @@ get:
     description: Investor Ids - 1,2,...6,7
   - name: last_days
     in: query
-    type: number
+    type: integer
     description: Feeds for days
   - name: last_weeks
     in: query
-    type: number
+    type: integer
     description: Feeds for weeks
   - name: last_months
     in: query
-    type: number
+    type: integer
     description: Feeds for months
   - name: last_years
     in: query
-    type: number
+    type: integer
     description: Feeds for years
   - name: name
     in: query

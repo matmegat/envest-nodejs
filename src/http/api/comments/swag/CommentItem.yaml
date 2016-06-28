@@ -1,7 +1,7 @@
 type: object
 properties:
   id:
-    type: number
+    type: integer
     description: Comment Id
   timestamp:
     type: string
@@ -11,7 +11,7 @@ properties:
     type: string
     description: Text of comment
   user_id:
-    type: number
+    type: integer
     description: Comment author Id
   is_abuse:
     type: boolean
