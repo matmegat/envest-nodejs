@@ -46,7 +46,7 @@ module.exports = function (rootpath)
 			{
 				return {
 					type: mimetype,
-					stream: fs.createReadStream(filename)
+					stream: fs.createReadStream(path)
 				}
 			}
 		})

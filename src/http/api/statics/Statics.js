@@ -40,7 +40,7 @@ module.exports = function Statics (rootpath, db, http)
 			})
 			.catch(() => 
 			{
-				rs.send(404)
+				rs.sendStatus(404)
 			})
 		})
 	})
