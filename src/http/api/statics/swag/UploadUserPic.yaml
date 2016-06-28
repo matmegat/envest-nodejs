@@ -1,0 +1,20 @@
+post:
+  description: Upload user avatar
+  consumes:
+  - multipart/form-data
+  parameters:
+  - name: user_pic
+    description: |
+      Picture for user avatar
+    in: formData
+    required: true
+    type: file
+    format: binary
+  responses:
+    200:
+      description: user's avatar updated
+    400:
+      description: if something went wrong
+
+  tags:
+  - static
