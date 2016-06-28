@@ -32,10 +32,10 @@ module.exports = function Statics (rootpath, db, http)
 			var hash = rq.params.hash
 
 			statics.static_model.get(hash)
-			.then(rs_obj =>
+			.then(file_data =>
 			{
-				rs.setHeader('content-type', rs_obj.type)
-				rs_obj.stream.pipe(rs)
+				rs.setHeader('content-type', file_data.type)
+				file_data.stream.pipe(rs)
 			})
 			.catch(() =>
 			{
