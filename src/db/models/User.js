@@ -207,7 +207,7 @@ module.exports = function User (db)
 			)
 			.as('ignored_alias')
 		})
-		.where('email', email)
+		.where('email', email.toLowerCase())
 		.then(oneMaybe)
 	}
 
