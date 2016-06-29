@@ -10,8 +10,6 @@ var stat = promisify(fs.stat)
 var unlink = promisify(fs.unlink)
 var writeTo = require('fs').createWriteStream
 
-var streamToPromise = require('stream-to-promise')
-
 var Err = require('../../Err')
 
 module.exports = function (rootpath)
@@ -112,11 +110,12 @@ module.exports = function (rootpath)
 		})
 		.then(() =>
 		{
-			writeTo(filenameFull).end(file.buffer)
-
-			return streamToPromise(writeTo).then(() =>
+			return new Promise(rs =>
 			{
-				return filename
+				writeTo(filenameFull).end(file.buffer, () =>
+				{
+					return rs(filename)
+				})
 			})
 		})
 	}
