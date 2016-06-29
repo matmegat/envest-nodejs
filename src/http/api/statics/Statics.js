@@ -46,11 +46,11 @@ module.exports = function Statics (rootpath, db, http)
 
 	var UploadError = Err('upload_error', 'Upload error')
 
-	var upload_pic = multer().single('user_pic')
+	var pic = multer().single('pic')
 
-	statics.express.post('/pic/upload', authRequired, (rq, rs) =>
+	statics.express.post('/upload/pic', authRequired, (rq, rs) =>
 	{
-		upload_pic(rq, rs, (err) =>
+		pic(rq, rs, (err) =>
 		{
 			if (err)
 			{
@@ -61,11 +61,11 @@ module.exports = function Statics (rootpath, db, http)
 		})
 	})
 
-	var investor_bg = multer().single('investor_bg')
+	var profile_pic = multer().single('profile_pic')
 
-	statics.express.post('/bg/upload', http.investorRequired, (rq, rs) =>
+	statics.express.post('/upload/profile_pic', http.investorRequired, (rq, rs) =>
 	{
-		investor_bg(rq, rs, (err) =>
+		profile_pic(rq, rs, (err) =>
 		{
 			if (err)
 			{

@@ -3,7 +3,7 @@ post:
   consumes:
   - multipart/form-data
   parameters:
-  - name: user_pic
+  - name: pic
     description: |
       Picture for user avatar
     in: formData

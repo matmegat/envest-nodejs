@@ -68,11 +68,11 @@ paths:
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
-  '/static/pic/upload':
+  '/static/upload/pic':
     $ref: ../api/statics/swag/UploadUserPic.yaml
 
-  '/static/bg/upload':
-    $ref: ../api/statics/swag/UploadInvestorBg.yaml
+  '/static/upload/profile_pic':
+    $ref: ../api/statics/swag/UploadProfilePic.yaml
 
 definitions:
 

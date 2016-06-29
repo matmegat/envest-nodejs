@@ -3,7 +3,7 @@ post:
   consumes:
   - multipart/form-data
   parameters:
-  - name: investor_bg
+  - name: profile_pic
     description: |
       Picture for investor background
     in: formData
