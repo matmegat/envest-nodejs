@@ -11,13 +11,13 @@ var expect = require('chai').expect
 
 var Onboarding = require('./Onboarding')
 
-var Mailer = require('../../../Mailer')
-
 var Meta = require('./Meta')
 
-module.exports = function Investor (db)
+module.exports = function Investor (db, app)
 {
 	var investor = {}
+
+	var mailer = app.mail
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
@@ -100,7 +100,6 @@ module.exports = function Investor (db)
 			 * - password_url (password reset url)
 			 * - password_code (password reset code)
 			 * */
-			var mailer = Mailer()
 			mailer.send(
 			{
 				to: data.email,
