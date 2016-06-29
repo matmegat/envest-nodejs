@@ -118,119 +118,119 @@ module.exports = function (db)
 		.then(noop)
 	}
 
+	return pic
+}
 
-	function validate_img (img, settings)
+
+function validate_img (img, settings)
+{
+	var max_size = settings.max_size
+	var ratio = settings.ratio
+
+	return new Promise((rs, rj) =>
 	{
-		var max_size = settings.max_size
-		var ratio = settings.ratio
-
-		return new Promise((rs, rj) =>
+		expect_file(img)
+		.then(() =>
 		{
-			expect_file(img)
-			.then(() =>
-			{
-				return validate_size(img, max_size)
-			})
-			.then(() =>
-			{
-				return validate_mime(img)
-			})
-			.then(() =>
-			{
-				return validate_aspect(img, ratio)
-			})
-			.then(() =>
-			{
-				return rs()
-			})
-			.catch(err =>
-			{
-				return rj(err)
-			})
+			return validate_size(img, max_size)
 		})
-	}
-
-	var ReadErr = Err('wrong_file', 'Wrong File')
-
-	function expect_file (file)
-	{
-		return new Promise(rs =>
+		.then(() =>
 		{
-			if (! file || ! file.size)
+			return validate_mime(img)
+		})
+		.then(() =>
+		{
+			return validate_aspect(img, ratio)
+		})
+		.then(() =>
+		{
+			return rs()
+		})
+		.catch(err =>
+		{
+			return rj(err)
+		})
+	})
+}
+
+var ReadErr = Err('wrong_file', 'Wrong File')
+
+function expect_file (file)
+{
+	return new Promise(rs =>
+	{
+		if (! file || ! file.size)
+		{
+			throw ReadErr()
+		}
+
+		return rs()
+	})
+}
+
+var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
+
+function validate_size (img, max_size)
+{
+	return new Promise(rs =>
+	{
+		if (img.size > max_size)
+		{
+			throw SizeErr()
+		}
+
+		return rs()
+	})
+}
+
+var LwipError = Err('reading_file_error', 'Reading File Error')
+var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
+
+function validate_aspect (img, ratio)
+{
+	return new Promise((rs, rj) =>
+	{
+		lwip.open(img.buffer,
+			mime.extension(img.mimetype),
+			(err, image) =>
+		{
+			if (err)
 			{
-				throw ReadErr()
+				return rj(LwipError(err))
+			}
+
+			var aspect_ratio =
+				round(ratio.aspect_width / ratio.aspect_height, 1)
+			var real_ratio = round(image.width() / image.height(), 1)
+
+			if ( aspect_ratio !== real_ratio )
+			{
+				return rj(WrongAspect())
 			}
 
 			return rs()
 		})
+	})
+}
+
+var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
+function validate_mime (img)
+{
+	if (! img || ! img.mimetype)
+	{
+		throw WrongExtension()
 	}
 
-	var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
+	var exts = ['image/png', 'image/jpg', 'image/jpeg']
+	var result = exts.indexOf(img.mimetype)
 
-	function validate_size (img, max_size)
+	return new Promise(rs =>
 	{
-		return new Promise(rs =>
-		{
-			if (img.size > max_size)
-			{
-				throw SizeErr()
-			}
-
-			return rs()
-		})
-	}
-
-	var LwipError = Err('reading_file_error', 'Reading File Error')
-	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
-
-	function validate_aspect (img, ratio)
-	{
-		return new Promise((rs, rj) =>
-		{
-			lwip.open(img.buffer,
-				mime.extension(img.mimetype),
-				(err, image) =>
-			{
-				if (err)
-				{
-					return rj(LwipError(err))
-				}
-
-				var aspect_ratio =
-					round(ratio.aspect_width / ratio.aspect_height, 1)
-				var real_ratio = round(image.width() / image.height(), 1)
-
-				if ( aspect_ratio !== real_ratio )
-				{
-					return rj(WrongAspect())
-				}
-
-				return rs()
-			})
-		})
-	}
-
-	var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
-	function validate_mime (img)
-	{
-		if (! img || ! img.mimetype)
+		if (result === -1)
 		{
 			throw WrongExtension()
 		}
 
-		var exts = ['image/png', 'image/jpg', 'image/jpeg']
-		var result = exts.indexOf(img.mimetype)
-
-		return new Promise(rs =>
-		{
-			if (result === -1)
-			{
-				throw WrongExtension()
-			}
-
-			return rs()
-		})
-	}
-
-	return pic
+		return rs()
+	})
 }

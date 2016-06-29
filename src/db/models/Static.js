@@ -124,9 +124,9 @@ module.exports = function (rootpath)
 		]
 	}
 
-	function get_filename (id, mime)
+	function get_filename (id, type)
 	{
-		var ext = mime.extension(mime)
+		var ext = mime.extension(type)
 
 		return `${id}.${ext}`
 	}
