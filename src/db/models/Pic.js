@@ -3,6 +3,8 @@ var noop = require('lodash/noop')
 
 var Err = require('../../Err')
 
+var mime = require('mime')
+
 var lwip = require('lwip')
 var round = require('lodash/round')
 
@@ -174,7 +176,7 @@ module.exports = function (db)
 		return new Promise((rs, rj) =>
 		{
 			lwip.open(img.buffer,
-				static_model.getExt(img.mimetype),
+				mime.extension(img.mimetype),
 				(err, image) =>
 			{
 				if (err)

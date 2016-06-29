@@ -102,11 +102,6 @@ module.exports = function (rootpath)
 		})
 	}
 
-	static.getExt = function (mime)
-	{
-		return get_ext(mime)
-	}
-
 	function path_by_hash (hash)
 	{
 		var t = tuple(hash)
