@@ -83,6 +83,12 @@ paths:
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
+  '/static/upload/pic':
+    $ref: ../api/statics/swag/UploadUserPic.yaml
+
+  '/static/upload/profile_pic':
+    $ref: ../api/statics/swag/UploadProfilePic.yaml
+
   '/users/current':
     $ref: ../api/users/swag/UserCurrent.yaml
 
