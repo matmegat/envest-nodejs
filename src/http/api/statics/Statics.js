@@ -70,7 +70,9 @@ module.exports = function Statics (rootpath, db, http)
 
 	var profile_pic = multer().single('profile_pic')
 
-	statics.express.post('/upload/profile_pic', http.investorRequired, (rq, rs) =>
+	statics.express.post('/upload/profile_pic',
+		http.investorRequired,
+		(rq, rs) =>
 	{
 		profile_pic(rq, rs, (err) =>
 		{

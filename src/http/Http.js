@@ -45,7 +45,8 @@ module.exports = function Http (app)
 	ReqLog(app.log, http.express)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
-	http.investorRequired = compose(authRequired, investorRequired(app.db.investor))
+	http.investorRequired =
+		compose(authRequired, investorRequired(app.db.investor))
 	http.passport = Passport(http.express, app.db)
 
 	CheckToken(http.express, http.passport)

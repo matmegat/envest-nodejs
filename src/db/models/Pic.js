@@ -173,14 +173,17 @@ module.exports = function (db)
 	{
 		return new Promise((rs, rj) =>
 		{
-			lwip.open(img.buffer, static_model.getExt(img.mimetype), (err, image) =>
+			lwip.open(img.buffer,
+				static_model.getExt(img.mimetype),
+				(err, image) =>
 			{
 				if (err)
 				{
 					return rj(GMError(err))
 				}
 
-				var aspect_ratio = round(ratio.aspect_width / ratio.aspect_height, 1)
+				var aspect_ratio =
+					round(ratio.aspect_width / ratio.aspect_height, 1)
 				var real_ratio = round(image.width() / image.height(), 1)
 
 				if ( aspect_ratio !== real_ratio )
