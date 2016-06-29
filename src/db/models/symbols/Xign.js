@@ -32,7 +32,7 @@ module.exports = function Xign (cfg)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: '6/27/2016',
+				AsOfDate: apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
