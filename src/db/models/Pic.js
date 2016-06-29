@@ -110,6 +110,7 @@ function validate_img (img, settings)
 	})
 }
 
+
 var ReadErr = Err('wrong_file', 'Wrong File')
 
 function expect_file (file)
@@ -125,6 +126,7 @@ function expect_file (file)
 	})
 }
 
+
 var SizeErr = Err('file_maximum_size_exceeded', 'File Maximum Size Exseeded')
 
 function validate_size (img, max_size)
@@ -139,6 +141,31 @@ function validate_size (img, max_size)
 		return rs()
 	})
 }
+
+
+var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
+
+function validate_mime (img)
+{
+	if (! img || ! img.mimetype)
+	{
+		throw WrongExtension()
+	}
+
+	var exts = ['image/png', 'image/jpg', 'image/jpeg']
+	var result = exts.indexOf(img.mimetype)
+
+	return new Promise(rs =>
+	{
+		if (result === -1)
+		{
+			throw WrongExtension()
+		}
+
+		return rs()
+	})
+}
+
 
 var LwipError = Err('reading_file_error', 'Reading File Error')
 var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
@@ -167,27 +194,5 @@ function validate_aspect (img, ratio)
 
 			return rs()
 		})
-	})
-}
-
-var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
-function validate_mime (img)
-{
-	if (! img || ! img.mimetype)
-	{
-		throw WrongExtension()
-	}
-
-	var exts = ['image/png', 'image/jpg', 'image/jpeg']
-	var result = exts.indexOf(img.mimetype)
-
-	return new Promise(rs =>
-	{
-		if (result === -1)
-		{
-			throw WrongExtension()
-		}
-
-		return rs()
 	})
 }
