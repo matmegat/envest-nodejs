@@ -4,13 +4,13 @@ get:
   parameters:
   - name: max_id
     in: query
-    type: number
+    type: integer
     description: |
       Get feed items that are added before *max_id* (inclusive) with applied sorting
       [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
   - name: since_id
     in: query
-    type: number
+    type: integer
     description: |
       Get feed items greater than *since_id* (non inclusive) with applied sorting
       [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)

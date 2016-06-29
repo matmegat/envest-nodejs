@@ -3,7 +3,7 @@ items:
   type: object
   properties:
     year:
-      type: number
+      type: integer
       description: year
     percentage:
       type: number

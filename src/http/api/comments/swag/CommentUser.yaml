@@ -1,7 +1,7 @@
 type: object
 properties:
   id:
-    type: number
+    type: integer
     description: User Id
   first_name:
     type: string

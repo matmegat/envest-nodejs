@@ -1,7 +1,7 @@
 type: object
 properties:
   id:
-    type: number
+    type: integer
     description: Notification Id
   timestamp:
     type: string
@@ -14,7 +14,7 @@ properties:
     type: string
     description: JSON object events
   recipient_id:
-    type: number
+    type: integer
     description: Recipient id
   is_viewed:
     type: boolean
