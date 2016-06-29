@@ -65,7 +65,6 @@ module.exports = function (rootpath)
 	static.get = function (hash)
 	{
 		var path = path_by_hash(hash)
-		var mimetype = mime.lookup(path)
 
 		return exists(path)
 		.then(exists =>
@@ -77,7 +76,7 @@ module.exports = function (rootpath)
 			else
 			{
 				return {
-					type: mimetype,
+					type: mime.lookup(path),
 					stream: fs.createReadStream(path)
 				}
 			}
