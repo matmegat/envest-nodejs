@@ -1,7 +1,7 @@
 
 var Xign = require('./Xign')
 
-var Symbol = module.exports = function Symbol (cfg)
+var Symbols = module.exports = function Symbols (cfg)
 {
 	var xign = Xign(cfg.xignite)
 
@@ -14,13 +14,13 @@ var Symbol = module.exports = function Symbol (cfg)
 	.then(rs => console.log(rs), console.error)
 }
 
-Symbol.schema = {}
+Symbols.schema = {}
 
 /*
  * columns('', table)        = { exchange, ticker }
  * columns('symbol_', table) = { symbol_exchange, symbol_ticker } // REF
  */
-Symbol.schema.columns = (prefix, table) =>
+Symbols.schema.columns = (prefix, table) =>
 {
 	prefix || (prefix = '')
 
@@ -35,7 +35,7 @@ var Err = require('../../../Err')
 
 var WrongFormat = Err('wrong_symbol_format')
 
-Symbol.schema.validate = (symbol) =>
+Symbols.schema.validate = (symbol) =>
 {
 	if (! Array.isArray(symbol))
 	{
