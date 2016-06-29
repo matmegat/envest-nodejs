@@ -11,16 +11,14 @@ var round = require('lodash/round')
 module.exports = function (db)
 {
 	var pic = {}
-	var user_model = db.user
-	var investor_model = db.investor
-	var static_model = db.static
 
-	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
+	var user     = db.user
+	var investor = db.investor
 
 	/* update User `pic` */
 	pic.update = update_on_model(
-		user_model.picById,
-		user_model.updatePic,
+		user.picById,
+		user.updatePic,
 	{
 		max_size: 10 * 1024 * 1024,
 		ratio: {
@@ -31,8 +29,8 @@ module.exports = function (db)
 
 	/* update Investor `profile_pic` */
 	pic.updateProfile = update_on_model(
-		investor_model.profilePicById,
-		investor_model.updateProfilePic,
+		investor.profilePicById,
+		investor.updateProfilePic,
 	{
 		max_size: 10 * 1024 * 1024,
 		ratio: {
@@ -41,7 +39,9 @@ module.exports = function (db)
 		}
 	})
 
-	return pic
+
+	var static = db.static
+	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
 
 	function update_on_model (getter, setter, validations)
 	{
@@ -53,7 +53,7 @@ module.exports = function (db)
 			return validate_img(file, validations)
 			.then(() =>
 			{
-				return static_model.store(file)
+				return static.store(file)
 			})
 			.then(hash =>
 			{
@@ -74,7 +74,7 @@ module.exports = function (db)
 				})
 				.catch(() =>
 				{
-					return static_model.remove(new_pic)
+					return static.remove(new_pic)
 					.then(() =>
 					{
 						throw UpdateErr()
@@ -83,11 +83,13 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				return static_model.remove(old_pic)
+				return static.remove(old_pic)
 			})
 			.then(noop)
 		}
 	}
+
+	return pic
 }
 
 function validate_img (img, settings)
