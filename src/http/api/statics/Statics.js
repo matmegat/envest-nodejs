@@ -51,39 +51,48 @@ module.exports = function Statics (rootpath, db, http)
 		})
 	})
 
+
+	statics.express.post('/upload/pic', authRequired,
+		uploader(
+			multer().single('pic'),
+			statics.pic_model.update
+		)
+	)
+
+
+	statics.express.post('/upload/pic', authRequired,
+		uploader(
+			multer().single('pic'),
+			statics.pic_model.update
+		)
+	)
+
+
+	statics.express.post('/upload/profile_pic', http.investorRequired,
+		uploader(
+			multer().single('profile_pic'),
+			statics.pic_model.updateProfile
+		)
+	)
+
+
 	var UploadError = Err('upload_error', 'Upload error')
 
-	var pic = multer().single('pic')
-
-	statics.express.post('/upload/pic', authRequired, (rq, rs) =>
+	function uploader (multipart_reader, setter)
 	{
-		pic(rq, rs, (err) =>
+		return (rq, rs) =>
 		{
-			if (err)
+			multipart_reader(rq, rs, (err) =>
 			{
-				return toss.err(rs, UploadError(err))
-			}
+				if (err)
+				{
+					return toss.err(rs, UploadError(err))
+				}
 
-			toss(rs, statics.pic_model.update(rq.file, rq.user.id))
-		})
-	})
-
-	var profile_pic = multer().single('profile_pic')
-
-	statics.express.post('/upload/profile_pic',
-		http.investorRequired,
-		(rq, rs) =>
-	{
-		profile_pic(rq, rs, (err) =>
-		{
-			if (err)
-			{
-				return toss.err(rs, UploadError(err))
-			}
-
-			toss(rs, statics.pic_model.updateProfile(rq.file, rq.user.id))
-		})
-	})
+				toss(rs, setter(rq.file, rq.user.id))
+			})
+		}
+	}
 
 	return statics
 }
