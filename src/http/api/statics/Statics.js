@@ -37,9 +37,16 @@ module.exports = function Statics (rootpath, db, http)
 				rs.setHeader('content-type', file_data.type)
 				file_data.stream.pipe(rs)
 			})
-			.catch(() =>
+			.catch(err =>
 			{
-				rs.sendStatus(404)
+				if (err.code === 'file_not_found')
+				{
+					rs.sendStatus(404)
+				}
+				else
+				{
+					toss.err(err)
+				}
 			})
 		})
 	})
