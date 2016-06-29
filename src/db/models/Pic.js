@@ -93,31 +93,20 @@ module.exports = function (db)
 function validate_img (img, settings)
 {
 	var max_size = settings.max_size
-	var ratio = settings.ratio
+	var ratio    = settings.ratio
 
-	return new Promise((rs, rj) =>
+	return expect_file(img)
+	.then(() =>
 	{
-		expect_file(img)
-		.then(() =>
-		{
-			return validate_size(img, max_size)
-		})
-		.then(() =>
-		{
-			return validate_mime(img)
-		})
-		.then(() =>
-		{
-			return validate_aspect(img, ratio)
-		})
-		.then(() =>
-		{
-			return rs()
-		})
-		.catch(err =>
-		{
-			return rj(err)
-		})
+		return validate_size(img, max_size)
+	})
+	.then(() =>
+	{
+		return validate_mime(img)
+	})
+	.then(() =>
+	{
+		return validate_aspect(img, ratio)
 	})
 }
 
