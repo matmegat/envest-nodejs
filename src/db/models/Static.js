@@ -86,10 +86,7 @@ module.exports = function (rootpath)
 	{
 		if (! hash)
 		{
-			return new Promise(rs =>
-			{
-				return rs()
-			})
+			return Promise.resolve()
 		}
 
 		var t = tuple(hash)
