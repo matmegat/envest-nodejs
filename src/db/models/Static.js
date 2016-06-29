@@ -92,8 +92,7 @@ module.exports = function (rootpath)
 			return Promise.resolve()
 		}
 
-		var t = tuple(hash)
-		var path = tuple_to_filename(t)
+		var path = path_by_hash(hash)
 
 		return exists(path)
 		.then(exists =>
