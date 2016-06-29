@@ -9,14 +9,21 @@ var Symbols = module.exports = function Symbols (cfg)
 
 	symbols.resolve = (symbol) =>
 	{
-		// Symbols.schema.validate
+		return vlp(symbol)
+		.then(symbol =>
+		{
+			var xsymbol = symbol[0] + '.' + symbol[1]
+			console.log(symbol)
+
+			return xign.resolve(xsymbol)
+		})
 	}
 
 	xign.fundamentals('TSLA.BATS')
 	.then(rs => console.log(rs), console.error)
 	.then(() =>
 	{
-		return xign.resolve('TSLA.BATS')
+		return symbols.resolve([ 'TSLA', 'BATS' ])
 	})
 	.then(rs => console.log(rs), console.error)
 
