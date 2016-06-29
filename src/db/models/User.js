@@ -174,7 +174,6 @@ module.exports = function User (db)
 	}
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
-	// eslint-disable-next-line id-length
 	function ensureEmailNotExists (email, trx)
 	{
 		return user.byEmail(email, trx)

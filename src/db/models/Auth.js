@@ -110,7 +110,6 @@ module.exports = function Auth (db)
 		})
 	}
 
-	// eslint-disable-next-line id-length
 	function validate_change_email (email)
 	{
 		return new Promise(rs =>

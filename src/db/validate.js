@@ -82,6 +82,7 @@ validate.integer = function validate__integer (field, name)
 	}
 }
 
+// eslint-disable-next-line id-length
 validate.integer.positive = function validate__integer__positive (field, name)
 {
 	validate.integer(field, name)
