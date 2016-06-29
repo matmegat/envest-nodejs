@@ -12,10 +12,25 @@ var Symbols = module.exports = function Symbols (cfg)
 		return vlp(symbol)
 		.then(symbol =>
 		{
-			var xsymbol = symbol[0] + '.' + symbol[1]
-			console.log(symbol)
+			var xsymbol = symbol__xign(symbol)
 
 			return xign.resolve(xsymbol)
+		})
+		.then(resl =>
+		{
+			var symbol = xign__symbol(resl.xsymbol)
+			var data =
+			{
+				symbol:   symbol,
+				ticker:   symbol[0],
+				exchange: resl.exchange,
+				company:  resl.company
+			}
+
+			/* TODO temp assert */
+			expect(data.exchange).equal(symbol[1])
+
+			return data
 		})
 	}
 
@@ -76,4 +91,24 @@ var vl = Symbols.schema.validate = (symbol) =>
 var vlp = Symbols.schema.validate.promise = (symbol) =>
 {
 	return new Promise(rs => rs(vl(symbol)))
+}
+
+var symbol__xign = Symbols.schema.symbol__xign = (symbol) =>
+{
+	vl(symbol)
+
+	return symbol[0] + '.' + symbol[1]
+}
+
+
+/* TODO temp assert*/
+var expect = require('chai').expect
+
+var xign__symbol = Symbols.schema.xign__symbol = (xsymbol) =>
+{
+	var symbol = String(xsymbol).split('.')
+
+	expect(symbol).length(2)
+
+	return symbol
 }
