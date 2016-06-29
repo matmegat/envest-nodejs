@@ -36,6 +36,16 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
+		return knex.schema.createTable('pass_reset', (table) =>
+		{
+			table.integer('user_id').primary()
+
+			table.timestamp('timestamp').defaultTo(knex.fn.now())
+			table.string('code', 32).notNullable()
+		})
+	})
+	.then(() =>
+	{
 		return knex.schema.createTable('auth_facebook', (table) =>
 		{
 			table.integer('user_id').primary()
@@ -55,6 +65,7 @@ exports.down = function (knex, Promise)
 	[
 		knex.schema.dropTableIfExists('users'),
 		knex.schema.dropTableIfExists('email_confirms'),
+		knex.schema.dropTableIfExists('pass_reset'),
 		knex.schema.dropTableIfExists('auth_local'),
 		knex.schema.dropTableIfExists('auth_facebook')
 	])
