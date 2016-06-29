@@ -62,7 +62,8 @@ module.exports = function User (db)
 				'auth_facebook.facebook_id AS facebook_id',
 				'users.first_name AS first_name',
 				'users.last_name AS last_name',
-				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email'),
 				'users.pic AS pic',
 				'investors.user_id AS investor_user_id',
 				'investors.profile_pic AS profile_pic',
@@ -200,7 +201,8 @@ module.exports = function User (db)
 					'first_name',
 					'last_name',
 					'pic',
-					knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
+					knex.raw(
+						'COALESCE(users.email, email_confirms.new_email) AS email')
 				)
 				.from('users')
 				.leftJoin(
