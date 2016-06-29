@@ -5,7 +5,12 @@ var Symbol = module.exports = function Symbol (cfg)
 {
 	var xign = Xign(cfg.xignite)
 
-	xign.fundamentals('GOOG')
+	xign.fundamentals('TSLA.BATS')
+	.then(rs => console.log(rs), console.error)
+	.then(() =>
+	{
+		return xign.resolve('TSLA.BATS')
+	})
 	.then(rs => console.log(rs), console.error)
 }
 

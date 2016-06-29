@@ -18,7 +18,20 @@ module.exports = function Xign (cfg)
 
 	var X = {}
 
-	X.fundamentals = (symbol) =>
+	X.resolve = (symbol) =>
+	{
+		return fundamentals(symbol)
+		.then(data =>
+		{
+			return {
+				symbol: data.Company.Symbol,
+				exchange: data.Company.MarketIdentificationCode,
+				company: data.Company.Name
+			}
+		})
+	}
+
+	var fundamentals = X.fundamentals = (symbol) =>
 	{
 		var uri = format(
 		{
