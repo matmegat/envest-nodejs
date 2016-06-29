@@ -3,7 +3,14 @@ var Xign = require('./Xign')
 
 var Symbols = module.exports = function Symbols (cfg)
 {
+	var symbols = {}
+
 	var xign = Xign(cfg.xignite)
+
+	symbols.resolve = (symbol) =>
+	{
+		// Symbols.schema.validate
+	}
 
 	xign.fundamentals('TSLA.BATS')
 	.then(rs => console.log(rs), console.error)
@@ -12,6 +19,8 @@ var Symbols = module.exports = function Symbols (cfg)
 		return xign.resolve('TSLA.BATS')
 	})
 	.then(rs => console.log(rs), console.error)
+
+	return symbols
 }
 
 Symbols.schema = {}
