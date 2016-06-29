@@ -29,3 +29,28 @@ Symbol.schema.columns = (prefix, table) =>
 
 	return table
 }
+
+
+var Err = require('../../../Err')
+
+var WrongFormat = Err('wrong_symbol_format')
+
+Symbol.schema.validate = (symbol) =>
+{
+	if (! Array.isArray(symbol))
+	{
+		throw WrongFormat({ reason: 'must_be_array' })
+	}
+	if (symbol.length !== 2)
+	{
+		throw WrongFormat({ reason: 'must_be_pair' })
+	}
+
+	symbol.forEach(it =>
+	{
+		if (typeof it !== 'string')
+		{
+			throw WrongFormat({ reason: 'element_must_be_string' })
+		}
+	})
+}
