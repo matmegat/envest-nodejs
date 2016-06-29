@@ -104,12 +104,7 @@ module.exports = function Feed (db)
 			order_column: 'feed_items.id'
 		})
 
-		var queryset = feed.feed_table().select(
-		'feed_items.id',
-		'feed_items.timestamp',
-		'feed_items.investor_id',
-		'feed_items.type',
-		'feed_items.data')
+		var queryset = feed.feed_table()
 
 		var paginator
 
@@ -125,6 +120,13 @@ module.exports = function Feed (db)
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
+
+		queryset.select(
+		'feed_items.id',
+		'feed_items.timestamp',
+		'feed_items.investor_id',
+		'feed_items.type',
+		'feed_items.data')
 
 		return paginator.paginate(queryset, options.paginator)
 		.then((feed_items) =>
