@@ -24,14 +24,13 @@ module.exports = function Portfolio (db, investor)
 			return portfolio.table(trx)
 			.select(
 			[
+				'symbol_exchange',
+				'symbol_ticker',
+				'buy_price',
 				'amount',
-				'symbols.id',
-				'symbols.ticker',
-				'symbols.company',
 				'brokerage.multiplier'
 			])
 			.where('portfolio_symbols.investor_id', options.investor_id)
-			.innerJoin('symbols', 'portfolio_symbols.symbol_id', 'symbols.id')
 			.innerJoin(
 				'brokerage',
 				'portfolio_symbols.investor_id',
@@ -42,19 +41,19 @@ module.exports = function Portfolio (db, investor)
 		{
 			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
 			{
-				var random_price = _.random(50.0, 150.0, true)
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
-					random_price *
+					portfolio_holding.buy_price *
 					portfolio_holding.multiplier
 
 				portfolio_holding.gain = _.random(-10.0, 10.0, true)
-				portfolio_holding.symbol = _.pick(portfolio_holding,
-				[
-					'id',
-					'ticker',
-					'company'
-				])
+				// TODO: request to XIgnite
+				portfolio_holding.symbol =
+				{
+					exchange: portfolio_holding.symbol_exchange,
+					ticker: portfolio_holding.symbol_ticker,
+					company: 'TODO: request XIgnite'
+				}
 
 				return _.pick(portfolio_holding,
 				[
