@@ -44,7 +44,7 @@ var Err = require('../../../Err')
 
 var WrongFormat = Err('wrong_symbol_format')
 
-Symbols.schema.validate = (symbol) =>
+var vl = Symbols.schema.validate = (symbol) =>
 {
 	if (! Array.isArray(symbol))
 	{
@@ -62,4 +62,11 @@ Symbols.schema.validate = (symbol) =>
 			throw WrongFormat({ reason: 'element_must_be_string' })
 		}
 	})
+
+	return symbol
+}
+
+var vlp = Symbols.schema.validate.promise = (symbol) =>
+{
+	return new Promise(rs => rs(vl(symbol)))
 }
