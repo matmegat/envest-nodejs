@@ -17,6 +17,46 @@ module.exports = function (rootpath)
 	var static = {}
 	var root_img = rootpath.partial('static/images')
 
+	function path_by_hash (hash)
+	{
+		var t = tuple(hash)
+
+		return tuple_to_filename(t)
+	}
+
+	function exists (path)
+	{
+		return stat(path)
+		.then(() => true, () => false)
+	}
+
+	function tuple (filename)
+	{
+		return [
+			filename.charAt(0),
+			filename.charAt(1),
+			filename.slice(2)
+		]
+	}
+
+	function get_filename (id, type)
+	{
+		var ext = mime.extension(type)
+
+		return `${id}.${ext}`
+	}
+
+	function tuple_to_dir (tuple)
+	{
+		return root_img(tuple.slice(0, -1))
+	}
+
+	function tuple_to_filename (tuple)
+	{
+		return root_img(tuple)
+	}
+	
+
 	var AlreadyExists = Err('file_already_exists', 'File already exists')
 	var FileSavingErr = Err('file_saving_error', 'File Saving Error')
 
@@ -100,45 +140,6 @@ module.exports = function (rootpath)
 				return unlink(path)
 			}
 		})
-	}
-
-	function path_by_hash (hash)
-	{
-		var t = tuple(hash)
-
-		return tuple_to_filename(t)
-	}
-
-	function exists (path)
-	{
-		return stat(path)
-		.then(() => true, () => false)
-	}
-
-	function tuple (filename)
-	{
-		return [
-			filename.charAt(0),
-			filename.charAt(1),
-			filename.slice(2)
-		]
-	}
-
-	function get_filename (id, type)
-	{
-		var ext = mime.extension(type)
-
-		return `${id}.${ext}`
-	}
-
-	function tuple_to_dir (tuple)
-	{
-		return root_img(tuple.slice(0, -1))
-	}
-
-	function tuple_to_filename (tuple)
-	{
-		return root_img(tuple)
 	}
 
 	return static
