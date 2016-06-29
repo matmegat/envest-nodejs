@@ -56,7 +56,7 @@ module.exports = function name (app)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
-	db.investor = Investor(db)
+	db.investor = Investor(db, app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
