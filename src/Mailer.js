@@ -6,12 +6,11 @@ var SendGrid = require('sendgrid')
 var Err = require('./Err')
 var SendgridError = Err('sendgrid_error', 'Sendgrid error.')
 
-module.exports = function Mailer ()
+module.exports = function Mailer (cfg)
 {
 	var mailer = {}
-	// eslint-disable-next-line max-len
-	var API_key = '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'
-	var sendgrid = SendGrid(API_key)
+
+	var sendgrid = SendGrid(cfg.key)
 
 	var defaults =
 	{

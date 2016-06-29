@@ -11,5 +11,10 @@
 
     "database": "netvest",
     "user": "netvest"
+  },
+
+  "sendgrid":
+  {
+    "key": "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"
   }
 }

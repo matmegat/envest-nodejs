@@ -16,7 +16,7 @@ module.exports = function App ()
 
 	app.cfg  = Config(app)
 	app.log  = Log()
-	app.mail = Mailer(app)
+	app.mail = Mailer(app.cfg.sendgrid)
 	app.db   = Db(app)
 	app.http = Http(app)
 
