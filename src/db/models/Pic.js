@@ -27,8 +27,8 @@ module.exports = function (db)
 			}
 		}
 
-		var new_pic,
-			old_pic
+		var new_pic
+		var old_pic
 
 		return validate_img(file, validation_data)
 		.then(() =>
@@ -43,7 +43,7 @@ module.exports = function (db)
 		})
 		.then(result =>
 		{
-			return old_pic = result.pic
+			old_pic = result.pic
 		})
 		.then(() =>
 		{
@@ -77,8 +77,8 @@ module.exports = function (db)
 				aspect_height: 11
 			}
 		}
-		var new_pic,
-			old_pic
+		var new_pic
+		var old_pic
 
 		return validate_img(file, validation_data)
 		.then(() =>
@@ -93,13 +93,10 @@ module.exports = function (db)
 		})
 		.then(result =>
 		{
-			return old_pic = result.profile_pic
+			old_pic = result.profile_pic
 		})
 		.then(() =>
 		{
-			console.log(old_pic)
-			console.log(new_pic)
-
 			return investor_model.updateProfilePic(
 			{
 				user_id: id,
@@ -119,15 +116,6 @@ module.exports = function (db)
 			return static_model.remove(old_pic)
 		})
 		.then(noop)
-	}
-
-	function update_pic (hash, file)
-	{
-		return static_model.remove(hash)
-		.then(() =>
-		{
-			return static_model.store(file)
-		})
 	}
 
 
@@ -192,7 +180,7 @@ module.exports = function (db)
 		})
 	}
 
-	var GMError = Err('reading_file_error', 'Reading File Error')
+	var LwipError = Err('reading_file_error', 'Reading File Error')
 	var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
 
 	function validate_aspect (img, ratio)
@@ -205,7 +193,7 @@ module.exports = function (db)
 			{
 				if (err)
 				{
-					return rj(GMError(err))
+					return rj(LwipError(err))
 				}
 
 				var aspect_ratio =

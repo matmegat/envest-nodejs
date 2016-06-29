@@ -112,14 +112,7 @@ module.exports = function (rootpath)
 	function exists (path)
 	{
 		return stat(path)
-		.then(() =>
-		{
-			return true
-		})
-		.catch(() =>
-		{
-			return false
-		})
+		.then(() => true, () => false)
 	}
 
 	function tuple (filename)
