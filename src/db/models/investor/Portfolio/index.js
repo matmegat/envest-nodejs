@@ -3,17 +3,18 @@ var knexed = require('../../../knexed')
 var _ = require('lodash')
 
 var Brokerage = require('./Brokerage')
+var Holdings  = require('./Holdings')
 
 module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
-	// var holdings  = {}
 
 	var knex    = db.knex
 	// var helpers = db.helpers
 
 	portfolio.table = knexed(knex, 'portfolio_symbols')
 	portfolio.brokerage = Brokerage(db, investor)
+	portfolio.holdings  = Holdings(db, investor)
 
 	portfolio.list = function (options, trx)
 	{
