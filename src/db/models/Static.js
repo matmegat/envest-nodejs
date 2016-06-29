@@ -150,15 +150,9 @@ module.exports = function (rootpath)
 		]
 	}
 
-	function get_ext (mime)
+	function get_ext (type)
 	{
-		switch (mime)
-		{
-			case 'image/png' : return  'png'
-			case 'image/jpeg': return 'jpeg'
-			case 'image/jpg': return 'jpg'
-			default: return 'jpeg'
-		}
+		return mime.extension(type)
 	}
 
 	function get_filename (id, mime)
