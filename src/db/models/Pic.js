@@ -27,32 +27,43 @@ module.exports = function (db)
 			}
 		}
 
+		var new_pic,
+			old_pic
+
 		return validate_img(file, validation_data)
 		.then(() =>
 		{
+			return static_model.store(file)
+		})
+		.then(hash =>
+		{
+			new_pic = hash
+
 			return user_model.picById(id)
 		})
 		.then(result =>
 		{
-			var hash = result.pic
-
-			return update_pic(hash, file)
+			return old_pic = result.pic
 		})
-		.then(hash =>
+		.then(() =>
 		{
 			return user_model.updatePic(
 			{
 				user_id: id,
-				hash: hash
+				hash: new_pic
 			})
 			.catch(() =>
 			{
-				return static_model.remove(hash)
+				return static_model.remove(new_pic)
 				.then(() =>
 				{
 					throw UpdateErr()
 				})
 			})
+		})
+		.then(() =>
+		{
+			return static_model.remove(old_pic)
 		})
 		.then(noop)
 	}
@@ -66,33 +77,46 @@ module.exports = function (db)
 				aspect_height: 11
 			}
 		}
+		var new_pic,
+			old_pic
 
 		return validate_img(file, validation_data)
 		.then(() =>
 		{
+			return static_model.store(file)
+		})
+		.then(hash =>
+		{
+			new_pic = hash
+
 			return investor_model.profilePicById(id)
 		})
 		.then(result =>
 		{
-			var hash = result.profile_pic
-
-			return update_pic(hash, file)
+			return old_pic = result.profile_pic
 		})
-		.then(hash =>
+		.then(() =>
 		{
+			console.log(old_pic)
+			console.log(new_pic)
+
 			return investor_model.updateProfilePic(
 			{
 				user_id: id,
-				hash: hash
+				hash: new_pic
 			})
 			.catch(() =>
 			{
-				return static_model.remove(hash)
+				return static_model.remove(new_pic)
 				.then(() =>
 				{
 					throw UpdateErr()
 				})
 			})
+		})
+		.then(() =>
+		{
+			return static_model.remove(old_pic)
 		})
 		.then(noop)
 	}
