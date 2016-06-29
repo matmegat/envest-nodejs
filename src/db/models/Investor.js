@@ -13,6 +13,8 @@ module.exports = function Investor (db)
 	var investor = {}
 
 	var knex = db.knex
+
+	var one = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
 	investor.table = knexed(
@@ -152,11 +154,14 @@ module.exports = function Investor (db)
 	/*TODO: deal with second table*/
 	var investor_table = knexed(knex, 'investors')
 
+	var get_pic = require('lodash/fp/get')('profile_pic')
+
 	investor.profilePicById = function (user_id)
 	{
 		return investor_table()
 		.where('user_id', user_id)
-		.then(oneMaybe)
+		.then(one)
+		.then(get_pic)
 	}
 
 	investor.updateProfilePic = function (data)

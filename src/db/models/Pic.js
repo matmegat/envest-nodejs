@@ -57,13 +57,15 @@ module.exports = function (db)
 			})
 			.then(hash =>
 			{
+				/* side effect */
 				new_pic = hash
 
 				return getter(id)
 			})
-			.then(result =>
+			.then(result_pic =>
 			{
-				old_pic = result.profile_pic
+				/* side effect */
+				old_pic = result_pic
 			})
 			.then(() =>
 			{

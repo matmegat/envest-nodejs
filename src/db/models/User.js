@@ -280,11 +280,15 @@ module.exports = function User (db)
 		})
 	})
 
+
+	var get_pic = require('lodash/fp/get')('pic')
+
 	user.picById = function (id)
 	{
 		return user.users_table()
 		.where('id', id)
-		.then(oneMaybe)
+		.then(one)
+		.then(get_pic)
 	}
 
 	user.updatePic = function (data)
