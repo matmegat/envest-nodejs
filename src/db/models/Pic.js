@@ -17,110 +17,78 @@ module.exports = function (db)
 
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
 
-	pic.update = function (file, id)
+	/* update User `pic` */
+	pic.update = update_on_model(
+		user_model.picById,
+		user_model.updatePic,
 	{
-		var validation_data = {
-			max_size: 10 * 1024 * 1024,
-			ratio: {
-				aspect_width: 1,
-				aspect_height: 1
-			}
+		max_size: 10 * 1024 * 1024,
+		ratio: {
+			aspect_width:  1,
+			aspect_height: 1
 		}
+	})
 
-		var new_pic
-		var old_pic
-
-		return validate_img(file, validation_data)
-		.then(() =>
-		{
-			return static_model.store(file)
-		})
-		.then(hash =>
-		{
-			new_pic = hash
-
-			return user_model.picById(id)
-		})
-		.then(result =>
-		{
-			old_pic = result.pic
-		})
-		.then(() =>
-		{
-			return user_model.updatePic(
-			{
-				user_id: id,
-				hash: new_pic
-			})
-			.catch(() =>
-			{
-				return static_model.remove(new_pic)
-				.then(() =>
-				{
-					throw UpdateErr()
-				})
-			})
-		})
-		.then(() =>
-		{
-			return static_model.remove(old_pic)
-		})
-		.then(noop)
-	}
-
-	pic.updateProfile = function (file, id)
+	/* update Investor `profile_pic` */
+	pic.updateProfile = update_on_model(
+		investor_model.profilePicById,
+		investor_model.updateProfilePic,
 	{
-		var validation_data = {
-			max_size: 10 * 1024 * 1024,
-			ratio: {
-				aspect_width: 15,
-				aspect_height: 11
-			}
+		max_size: 10 * 1024 * 1024,
+		ratio: {
+			aspect_width:  15,
+			aspect_height: 11
 		}
-		var new_pic
-		var old_pic
-
-		return validate_img(file, validation_data)
-		.then(() =>
-		{
-			return static_model.store(file)
-		})
-		.then(hash =>
-		{
-			new_pic = hash
-
-			return investor_model.profilePicById(id)
-		})
-		.then(result =>
-		{
-			old_pic = result.profile_pic
-		})
-		.then(() =>
-		{
-			return investor_model.updateProfilePic(
-			{
-				user_id: id,
-				hash: new_pic
-			})
-			.catch(() =>
-			{
-				return static_model.remove(new_pic)
-				.then(() =>
-				{
-					throw UpdateErr()
-				})
-			})
-		})
-		.then(() =>
-		{
-			return static_model.remove(old_pic)
-		})
-		.then(noop)
-	}
+	})
 
 	return pic
-}
 
+	function update_on_model (getter, setter, validations)
+	{
+		return (file, id) =>
+		{
+			var new_pic
+			var old_pic
+
+			return validate_img(file, validations)
+			.then(() =>
+			{
+				return static_model.store(file)
+			})
+			.then(hash =>
+			{
+				new_pic = hash
+
+				return getter(id)
+			})
+			.then(result =>
+			{
+				old_pic = result.profile_pic
+			})
+			.then(() =>
+			{
+				return setter(
+				{
+					user_id: id,
+					hash: new_pic
+				})
+				.catch(() =>
+				{
+					return static_model.remove(new_pic)
+					.then(() =>
+					{
+						throw UpdateErr()
+					})
+				})
+			})
+			.then(() =>
+			{
+				return static_model.remove(old_pic)
+			})
+			.then(noop)
+		}
+	}
+}
 
 function validate_img (img, settings)
 {
