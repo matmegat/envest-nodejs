@@ -17,72 +17,10 @@ module.exports = function (rootpath)
 	var static = {}
 	var root_img = rootpath.partial('static/images')
 
-	static.store = function (file)
-	{
-		return save_file(file)
-	}
-
-	var NotExists = Err('file_not_found', 'File not found')
-
-	static.get = function (hash)
-	{
-		var path = path_by_hash(hash)
-		var mimetype = mime.lookup(path)
-
-		return exists(path)
-		.then(exists =>
-		{
-			if (! exists)
-			{
-				throw NotExists()
-			}
-			else
-			{
-				return {
-					type: mimetype,
-					stream: fs.createReadStream(path)
-				}
-			}
-		})
-	}
-
-	static.remove = function (hash)
-	{
-		return remove_file(hash)
-	}
-
-	static.getExt = function (mime)
-	{
-		return get_ext(mime)
-	}
-
-	function remove_file (hash)
-	{
-		if (! hash)
-		{
-			return new Promise(rs =>
-			{
-				return rs()
-			})
-		}
-
-		var t = tuple(hash)
-		var path = tuple_to_filename(t)
-
-		return exists(path)
-		.then(exists =>
-		{
-			if (exists)
-			{
-				return unlink(path)
-			}
-		})
-	}
-
 	var AlreadyExists = Err('file_already_exists', 'File already exists')
 	var FileSavingErr = Err('file_saving_error', 'File Saving Error')
 
-	function save_file (file)
+	static.store = function (file)
 	{
 		var hash = uid()
 		var filename = get_filename(hash, file.mimetype)
@@ -118,6 +56,58 @@ module.exports = function (rootpath)
 				})
 			})
 		})
+	}
+
+	var NotExists = Err('file_not_found', 'File not found')
+
+	static.get = function (hash)
+	{
+		var path = path_by_hash(hash)
+		var mimetype = mime.lookup(path)
+
+		return exists(path)
+		.then(exists =>
+		{
+			if (! exists)
+			{
+				throw NotExists()
+			}
+			else
+			{
+				return {
+					type: mimetype,
+					stream: fs.createReadStream(path)
+				}
+			}
+		})
+	}
+
+	static.remove = function (hash)
+	{
+		if (! hash)
+		{
+			return new Promise(rs =>
+			{
+				return rs()
+			})
+		}
+
+		var t = tuple(hash)
+		var path = tuple_to_filename(t)
+
+		return exists(path)
+		.then(exists =>
+		{
+			if (exists)
+			{
+				return unlink(path)
+			}
+		})
+	}
+
+	static.getExt = function (mime)
+	{
+		return get_ext(mime)
 	}
 
 	function path_by_hash (hash)
