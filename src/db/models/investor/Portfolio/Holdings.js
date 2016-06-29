@@ -3,6 +3,10 @@ var upsert = require('../../../upsert')
 
 var _ = require('lodash')
 
+var validate = require('../../../validate')
+
+var Err = require('../../../../Err')
+
 module.exports = function Holdings (db, investor)
 {
 	var holdings = {}
@@ -47,12 +51,77 @@ module.exports = function Holdings (db, investor)
 
 			return holdings_upsert(_.extend({}, where_clause, where), holding)
 		}))
-		.then((upserts) =>
-		{
-			return upserts.length
-		})
-
 	}
+
+	holdings.set = knexed.transact(knex, (trx, data) =>
+	{
+		/* operation with validation procedure
+		* Expect data to be:
+		* {
+		*   investor_id: integer,
+		*   holdings:
+		*   [
+		*     {
+		*       symbol_exchange: string,
+		*       symbol_ticker: string,
+		*       buy_price: float,
+		*       amount: integer
+		*     },
+		*     {}
+		*   ]
+		* }
+		* */
+
+		return investor.all.ensure(data.investor_id, trx)
+		.then(() =>
+		{
+			validate.array(data.holdings, 'holdings')
+
+			data.holdings.forEach((holding, i) =>
+			{
+				validate.required(
+					holding.symbol_exchange,
+					`holdings[${i}].symbol_exchange`
+				)
+				validate.empty(
+					holding.symbol_exchange,
+					`holdings[${i}].symbol_exchange`
+				)
+
+				validate.required(
+					holding.symbol_ticker,
+					`holdings[${i}].symbol_ticker`
+				)
+				validate.empty(
+					holding.symbol_ticker,
+					`holdings[${i}].symbol_ticker`
+				)
+
+				validate.number(
+					holding.amount,
+					`holdings[${i}].amount`
+				)
+				if (holding.amount <= 0)
+				{
+					throw InvalidAmount({ field: `holdings[${i}].amount` })
+				}
+
+				validate.number(
+					holding.buy_price,
+					`holdings[${i}].buy_price`
+				)
+				if (holding.buy_price <= 0)
+				{
+					throw InvalidAmount({ field: `holdings[${i}].buy_price` })
+				}
+			})
+
+			return set_holdings(trx, data)
+		})
+	})
+
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
 
 	return  holdings
 }
