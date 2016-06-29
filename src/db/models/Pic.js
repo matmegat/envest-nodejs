@@ -119,7 +119,7 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				return validate_extension(img)
+				return validate_mime(img)
 			})
 			.then(() =>
 			{
@@ -194,7 +194,7 @@ module.exports = function (db)
 	}
 
 	var WrongExtension = Err('wrong_file_ext', 'Wrong File Extension')
-	function validate_extension (img)
+	function validate_mime (img)
 	{
 		if (! img || ! img.mimetype)
 		{
