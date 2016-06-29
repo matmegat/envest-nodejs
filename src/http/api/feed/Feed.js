@@ -15,14 +15,76 @@ module.exports = function Feed (db)
 
 	feed.express.get('/', (rq, rs) =>
 	{
-		var options = _.pick(rq.query,
+		var options = {}
+
+		options.filter = _.pick(rq.query,
+		[
+			'type',
+			'investors',
+			'investor',
+			'last_days',
+			'last_weeks',
+			'last_months',
+			'last_years',
+			'name',
+			'mindate',
+			'maxdate'
+		])
+
+		options.paginator = _.pick(rq.query,
 		[
 			'max_id',
-			'since_id'
+			'since_id',
+			'page'
 		])
 
 		toss(rs, feed.model.list(options))
 	})
+
+	feed.express.get('/counts', (rq, rs) =>
+	{
+		var options = _.pick(rq.query,
+		[
+			'investors',
+			'investor',
+			'last_days',
+			'last_weeks',
+			'last_months',
+			'last_years',
+			'name',
+			'mindate',
+			'maxdate'
+		])
+
+		toss(rs, feed.model.counts(options))
+	})
+
+	feed.express.get('/trades',  by_type('trade'))
+	feed.express.get('/updates', by_type('update'))
+
+	function by_type (type)
+	{
+		return function (rq, rs)
+		{
+			var options = {}
+
+			options.paginator = _.pick(rq.query,
+			[
+				'max_id',
+				'since_id',
+				'page'
+			])
+
+			options.filter = _.pick(rq.query,
+			[
+				'investor'
+			])
+
+			options.filter.type = type
+
+			toss(rs, feed.model.list(options))
+		}
+	}
 
 	feed.express.get('/:id', (rq, rs) =>
 	{
@@ -53,4 +115,6 @@ module.exports = function Feed (db)
 
 	return feed
 }
+
+
 

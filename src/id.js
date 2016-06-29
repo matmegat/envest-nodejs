@@ -34,6 +34,11 @@ var validate = id.validate = curry((fn, id) =>
 	return id
 })
 
+id.validateMany = curry((fn, ids) =>
+{
+	ids.forEach(validate(fn))
+})
+
 id.validate.promise = curry((fn, id) =>
 {
 	return new Promise(rs => rs(validate(fn, id)))

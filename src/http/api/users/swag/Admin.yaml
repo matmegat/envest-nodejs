@@ -1,0 +1,10 @@
+type: object
+description: |
+  Investor's info if User is admin
+properties:
+  parent:
+    type: integer
+    description: Parent admin
+  can_intro:
+    type: boolean
+    description: Opportunity to invite new admins

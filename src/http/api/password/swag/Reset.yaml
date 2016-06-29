@@ -1,0 +1,29 @@
+post:
+  description: Reset the password
+  parameters:
+  - name: payload
+    in: body
+    description: |
+      JSON payload to log in.
+      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+    schema:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code change password
+        new_pass:
+          type: string
+          description: New password
+      required:
+      - code
+      - new_pass
+  responses:
+    200:
+      description: Password changed
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - password

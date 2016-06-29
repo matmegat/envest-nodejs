@@ -23,6 +23,7 @@ toss.err = curry((rs, err) =>
 	{
 		console.warn('using wrong error object')
 		console.error(err)
+		console.error(err.stack)
 
 		return rs.status(500).end()
 	}

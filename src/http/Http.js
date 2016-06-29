@@ -10,10 +10,13 @@ var investorRequired = require('./investor-required')
 
 var Auth = require('./api/auth/Auth')
 var Admin = require('./api/admin/Admin')
+var Password = require('./api/password/Password')
+var Users = require('./api/users/Users')
 
 var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
 var Investors = require('./api/investors/Investors')
+var Watchlist = require('./api/watchlist/Watchlist')
 
 var Statics = require('./api/statics/Statics')
 
@@ -26,7 +29,7 @@ var ReqLog = require('./ReqLog')
 var CheckToken = require('./CheckToken')
 var OptionsStub = require('./OptionsStub')
 
-var errorMiddleware = require('./error-middleware')
+var internalError = require('./internal-error')
 var setErrorMode = require('./error-mode')
 
 module.exports = function Http (app)
@@ -73,9 +76,12 @@ module.exports = function Http (app)
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root, app.db, http), 'static', 'static')
 	mount(Notifications(app.db), 'notifications', 'notifications')
+	mount(Password(app.db.user), 'password', 'password')
+	mount(Users(app.db.user), 'users', 'users')
+	mount(Watchlist(), 'watchlist', 'watchlist')
 
 
-	http.express.use(errorMiddleware)
+	http.express.use(internalError)
 
 	app.swagger = Swagger(app, http.express)
 

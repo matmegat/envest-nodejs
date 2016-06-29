@@ -28,6 +28,8 @@ module.exports = function Investor (db)
 		)
 	)
 
+	investor.WrongInvestorId = WrongInvestorId
+
 	var paging_table = function (trx)
 	{
 		return investor.table(trx)
@@ -60,7 +62,7 @@ module.exports = function Investor (db)
 
 	investor.byId = function (id, trx)
 	{
-		return investor.validate_id(id)
+		return validate_id(id)
 		.then(() =>
 		{
 			return investor
@@ -93,7 +95,7 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../id').validate.promise(WrongInvestorId)
+	var validate_id = require('../../id').validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)
 	{

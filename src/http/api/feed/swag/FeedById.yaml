@@ -3,7 +3,7 @@ get:
   parameters:
   - name: feed_id
     in: path
-    type: number
+    type: integer
     description: Feed Item ID
     required: true
   responses:

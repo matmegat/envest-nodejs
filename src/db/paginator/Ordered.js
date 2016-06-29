@@ -3,11 +3,12 @@ var extend = require('lodash/extend')
 
 var toId = require('../../id').toId
 
-var defaults =
+var defaults = require('./options')
+
+defaults = extend({}, defaults,
 {
-	order_column: 'id',
-	limit: 20
-}
+	order_column: 'id'
+})
 
 module.exports = function Paginator__Ordered (paginator_options)
 {
