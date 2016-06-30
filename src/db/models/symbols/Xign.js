@@ -24,9 +24,9 @@ module.exports = function Xign (cfg)
 		.then(data =>
 		{
 			return {
-				xsymbol: data.Company.Symbol,
+				symbol:   data.Company.Symbol, /* may be not full */
 				exchange: data.Company.MarketIdentificationCode,
-				company: data.Company.Name
+				company:  data.Company.Name
 			}
 		})
 	}
