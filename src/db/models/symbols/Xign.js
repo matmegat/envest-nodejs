@@ -18,7 +18,20 @@ module.exports = function Xign (cfg)
 
 	var X = {}
 
-	X.fundamentals = (symbol) =>
+	X.resolve = (symbol) =>
+	{
+		return fundamentals(symbol)
+		.then(data =>
+		{
+			return {
+				xsymbol: data.Company.Symbol,
+				exchange: data.Company.MarketIdentificationCode,
+				company: data.Company.Name
+			}
+		})
+	}
+
+	var fundamentals = X.fundamentals = (symbol) =>
 	{
 		var uri = format(
 		{
@@ -32,7 +45,7 @@ module.exports = function Xign (cfg)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: '6/27/2016',
+				AsOfDate: apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
@@ -69,4 +82,6 @@ unwrap.success = (rs) =>
 	{
 		throw rs
 	}
+
+	return rs
 }
