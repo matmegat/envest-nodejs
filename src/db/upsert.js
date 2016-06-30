@@ -4,16 +4,18 @@ var one = require('./helpers').one
 
 module.exports = function upsert (table, constraint, returning)
 {
+	var cloned_table = () => table.clone()
+
 	return (key_pair, data) =>
 	{
 		var full_data = extend({}, data, key_pair)
 
-		return table.insert(full_data, returning)
+		return cloned_table().insert(full_data, returning)
 		.catch(error =>
 		{
 			if (error.constraint === constraint)
 			{
-				return table.update(data, returning)
+				return cloned_table().update(data, returning)
 				.where(key_pair)
 			}
 			else
