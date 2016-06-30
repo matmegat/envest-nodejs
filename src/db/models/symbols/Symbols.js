@@ -33,22 +33,6 @@ var Symbols = module.exports = function Symbols (cfg)
 		})
 	}
 
-	/*xign.fundamentals('TSLA.BATS')
-	.then(rs => console.log(rs), console.error)
-	.then(() =>
-	{
-		return symbols.resolve([ 'TSLA', 'BATS' ])
-	})
-	.then(rs => console.log(rs), console.error)*/
-
-	return symbols.resolve('TSLA')
-	.then(rs => console.log(rs), console.error)
-	.then(() =>
-	{
-		return symbols.resolve('TSLA.BATS')
-	})
-	.then(rs => console.log(rs), console.error)
-
 	return symbols
 }
 
