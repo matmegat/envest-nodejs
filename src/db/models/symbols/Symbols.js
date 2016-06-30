@@ -1,5 +1,6 @@
 
 var Xign = require('./Xign')
+var Symbl = require('./Symbl')
 
 var Symbols = module.exports = function Symbols (cfg)
 {
@@ -64,7 +65,7 @@ Symbols.schema.columns = (prefix, table) =>
 
 var Err = require('../../../Err')
 
-var WrongFormat = Err('wrong_symbol_format')
+
 
 var vl = Symbols.schema.validate = (symbol) =>
 {
