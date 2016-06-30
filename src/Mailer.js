@@ -15,8 +15,8 @@ module.exports = function Mailer (cfg)
 	var defaults =
 	{
 		subject: 'NetVest Mailer',
-		text: 'NetVest Mailer',
-		html: 'NetVest Mailer',
+		// text: 'NetVest Mailer',
+		// html: 'NetVest Mailer',
 		from: 'netvest.mailer@gmail.com',
 		fromname: 'NetVest'
 	}
@@ -26,37 +26,42 @@ module.exports = function Mailer (cfg)
 		welcome: '5ef32fb6-9c55-416b-ae81-0d2df70aa56e'
 	}
 
-	mailer.send = function (data, template_type)
+	mailer.send = function (template, substs, data)
 	{
-		var email_data = _.pick(data, ['to', 'subject', 'text', 'html'])
-		var email = new sendgrid.Email(_.extend({}, defaults, email_data))
+		data = _.extend({}, defaults, data)
 
-		var substitutions = {}
-		var template_id = templates[template_type]
-
-		if (template_id)
+		if (template in templates)
 		{
-			email.setFilters(
-			{
-				templates:
-				{
-					settings:
-					{
-						enable: 1,
-						template_id: templates[template_type],
-					}
-				}
-			})
-
-			_.forEach(_.omit(data, 'text', 'html'), (value, key) =>
-			{
-				_.set(substitutions, '%' + key + '%', [ value ])
-			})
-
-			email.setSubstitutions(substitutions)
+			template = templates[template]
+		}
+		else if (typeof template === 'string')
+		{
+			/* fallback as text */
+			data.text = template
+			template  = null
+		}
+		else
+		{
+			template = null
 		}
 
+		var substs = wrapsub(data.substs || {})
+
+		var email = new sendgrid.Email(data)
+
+		if (template)
+		{
+			email.setFilters(_.set({}, 'templates.settings', { enable: 1, template_id: template }))
+		}
+
+		email.setSubstitutions(substs)
+
 		return send(email)
+	}
+
+	function wrapsub (substs)
+	{
+		return _.mapKeys(substs, (v, k) => '%' + k + '%')
 	}
 
 	function send (email)
