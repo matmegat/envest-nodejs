@@ -2,7 +2,7 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-// var parse  = require('url').parse
+var parse  = require('url').parse
 
 var request = require('axios')
 
@@ -17,6 +17,30 @@ module.exports = function Xign (cfg)
 	expect(token).a('string')
 
 	var X = {}
+
+	X.quotes = (symbols) =>
+	{
+		var uri = format(
+		{
+			protocol: 'http:',
+			host: 'globalquotes.xignite.com',
+
+			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: 'GLD',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(unwrap.data)
+		.then(unwrap.first)
+		.then(unwrap.success)
+	}
 
 	X.resolve = (symbol) =>
 	{

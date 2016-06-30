@@ -33,6 +33,14 @@ var Symbols = module.exports = function Symbols (cfg)
 		})
 	}
 
+	symbols.quotes = (symbols) =>
+	{
+		return xign.quotes(symbols)
+	}
+
+	symbols.quotes('GLD')
+	.then(console.log, console.error)
+
 	return symbols
 }
 
