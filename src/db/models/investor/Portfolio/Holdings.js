@@ -42,7 +42,7 @@ module.exports = function Holdings (db, investor)
 		{
 			var holdings_upsert = upsert(
 				holdings.holdings_table(trx),
-				'portfolio_symbols_investor_id_symbol_exchange_symbol_ticker_uni',
+				'portfolio_symbol_unique',
 				'id'
 			)
 

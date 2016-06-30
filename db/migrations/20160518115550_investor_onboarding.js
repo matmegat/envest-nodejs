@@ -52,7 +52,8 @@ exports.up = function (knex, Promise)
 				.notNullable()
 				.defaultTo(7.62)
 
-			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ])
+			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ],
+				'portfolio_symbol_unique')
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
