@@ -61,7 +61,12 @@ module.exports = function (db, http)
 		var field = rq.body.field
 		var value = rq.body.value
 
-		toss(rs, investors.model.onboarding.update(whom_id, investor_id, field, value))
+		toss(rs, investors.model.onboarding.update(
+			whom_id,
+			investor_id,
+			field,
+			value
+		))
 	})
 
 	return investors

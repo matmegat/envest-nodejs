@@ -97,7 +97,8 @@ module.exports = function Onboarding (db, investor)
 var Err = require('../../../Err')
 var WrongField = Err('wrong_field', 'Wrong Onboarding field')
 
-var CantEdit = Err('cant_edit', 'This user must be an admin or onboarded investor')
+var CantEdit = Err('cant_edit',
+	'This user must be an admin or onboarded investor')
 
 var Field = require('./Field')
 var validate = require('../../validate')

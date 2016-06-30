@@ -12,7 +12,6 @@ module.exports = function Holdings (db, investor)
 	var holdings = {}
 
 	var knex    = db.knex
-	var helpers = db.helpers
 
 	holdings.brokerage_table = knexed(knex, 'brokerage')
 	holdings.holdings_table = knexed(knex, 'portfolio_symbols')
@@ -39,7 +38,7 @@ module.exports = function Holdings (db, investor)
 
 		var where_clause = _.pick(data, ['investor_id'])
 
-		return Promise.all(_.map(data.holdings, (holding, i) =>
+		return Promise.all(_.map(data.holdings, (holding) =>
 		{
 			var holdings_upsert = upsert(
 				holdings.holdings_table(trx),
