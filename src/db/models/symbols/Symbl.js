@@ -26,7 +26,7 @@ var Symbl = module.exports = function Symbl (it)
 		s.ticker   = it[0]
 		s.exchange = it[1] || null
 
-		s.toX = () =>
+		s.toXign = () =>
 		{
 			var r = [ s.ticker ]
 			if (s.exchange)
