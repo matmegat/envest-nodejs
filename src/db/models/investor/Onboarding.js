@@ -12,6 +12,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
+	onb.fields.holdings = Holdings(investor, db)
 
 	expect(db, 'Onboarding depends on Admin').property('admin')
 	var admin = db.admin
@@ -266,6 +267,78 @@ function Brokerage (investor_model, db)
 				{
 					investor_id: investor.user_id,
 					cash_value: value
+				})
+			})
+		}
+	})
+}
+
+var WrongHoldingsFormat = Err('wrong_holdings_format',
+	'Wrong Portfolio Holdings Format')
+
+function Holdings (investor_model, db)
+{
+	function vrow (row, i)
+	{
+		expect(row).an('object')
+
+		validate.required(row.symbol_exchange, `holdings[${i}].symbol_exchange`)
+		validate.empty(row.symbol_exchange, `holdings[${i}].symbol_exchange`)
+
+		validate.required(row.symbol_ticker, `holdings[${i}].symbol_ticker`)
+		validate.empty(row.symbol_ticker, `holdings[${i}].symbol_ticker`)
+
+		validate.number(row.amount, `holdings[${i}].amount`)
+		if (row.amount <= 0)
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].amount` })
+		}
+
+		validate.number(row.buy_price, `holdings[${i}].buy_price`)
+		if (row.buy_price <= 0)
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].buy_price` })
+		}
+	}
+
+
+	return Field(investor_model,
+	{
+		validate: (value) =>
+		{
+			try
+			{
+				validate.array(value, 'holdings')
+
+				value.forEach(vrow)
+			}
+			catch (e)
+			{
+				if (Err.is(e))
+				{
+					throw e
+				}
+				else
+				{
+					throw WrongHoldingsFormat({ field: 'holdings' })
+				}
+			}
+
+			return value
+		},
+		set: (value, investor_queryset) =>
+		{
+			var portfolio = db.investor.portfolio
+
+			return investor_queryset
+			.select('user_id')
+			.then(db.helpers.one)
+			.then((investor) =>
+			{
+				return portfolio.set_holdings(
+				{
+					investor_id: investor.user_id,
+					holdings: value
 				})
 			})
 		}

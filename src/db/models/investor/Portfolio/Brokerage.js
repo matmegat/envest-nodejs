@@ -45,6 +45,10 @@ module.exports = function Brokerage (db, investor)
 
 			return set_brokerage(trx, data)
 		})
+		.then(() =>
+		{
+			return brokerage.calc_multiplier(trx, data.investor_id)
+		})
 	})
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
@@ -119,8 +123,8 @@ module.exports = function Brokerage (db, investor)
 
 	var multiplier_update =
 	{
-		deposit: calc_multiplier,
-		withdraw: calc_multiplier
+		deposit: brokerage.calc_multiplier,
+		withdraw: brokerage.calc_multiplier
 	}
 
 	function validate_deal (amount, brokerage)
@@ -179,19 +183,19 @@ module.exports = function Brokerage (db, investor)
 		'Invalid Portfolio Operation')
 
 
-	function calc_multiplier (trx, investor_id)
+	brokerage.calc_multiplier = function (trx, investor_id)
 	{
 		return brokerage.brokerage_table(trx)
 		.where('investor_id', investor_id)
 		.then(helpers.one)
-		.then((brokerage) =>
+		.then((brokerage_entry) =>
 		{
 			return brokerage.holdings_table(trx)
 			.where('investor_id', investor_id)
 			.then((holdings) =>
 			{
 				return {
-					brokerage: brokerage,
+					brokerage: brokerage_entry,
 					holdings: holdings
 				}
 			})
@@ -199,7 +203,7 @@ module.exports = function Brokerage (db, investor)
 		.then((full_portfolio) =>
 		{
 			var indexed_amount = 100000
-			var real_allocation = full_portfolio.brokerage.cash_value
+			var real_allocation = +full_portfolio.brokerage.cash_value
 
 			full_portfolio.holdings.forEach((holding) =>
 			{

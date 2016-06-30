@@ -70,5 +70,14 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.set_holdings = knexed.transact(knex, (trx, options) =>
+	{
+		return portfolio.holdings.set(options)
+		.then(() =>
+		{
+			return portfolio.brokerage.calc_multiplier(trx, options.investor_id)
+		})
+	})
+
 	return portfolio
 }
