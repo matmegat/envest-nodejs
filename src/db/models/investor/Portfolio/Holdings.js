@@ -35,17 +35,16 @@ module.exports = function Holdings (db, investor)
 		*   ]
 		* }
 		* */
+		var holdings_upsert = upsert(
+			holdings.holdings_table(trx),
+			'portfolio_symbol_unique',
+			'id'
+		)
 
 		var where_clause = _.pick(data, ['investor_id'])
 
 		return Promise.all(_.map(data.holdings, (holding) =>
 		{
-			var holdings_upsert = upsert(
-				holdings.holdings_table(trx),
-				'portfolio_symbol_unique',
-				'id'
-			)
-
 			var where = _.pick(holding, ['symbol_exchange', 'symbol_ticker'])
 
 			return holdings_upsert(_.extend({}, where_clause, where), holding)
