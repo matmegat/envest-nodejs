@@ -41,6 +41,23 @@ module.exports = function Xign (cfg)
 
 		return request(uri)
 		.then(unwrap.data)
+		.then(resl =>
+		{
+			return resl
+			.map(r =>
+			{
+				if (! unwrap.isSuccess(r))
+				{
+					return null
+				}
+
+				return r
+			})
+			.map(r =>
+			{
+				return r
+			})
+		})
 	}
 
 	X.resolve = (symbol) =>
@@ -103,10 +120,15 @@ unwrap.first = (rs) => rs[0]
 
 unwrap.success = (rs) =>
 {
-	if (rs.Outcome !== 'Success')
+	if (! unwrap.isSuccess(rs))
 	{
 		throw rs
 	}
 
 	return rs
+}
+
+unwrap.isSuccess = (rs) =>
+{
+	return rs.Outcome === 'Success'
 }
