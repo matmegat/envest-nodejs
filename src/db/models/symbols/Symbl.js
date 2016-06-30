@@ -53,3 +53,8 @@ var inst = () => Object.create(Symbl.prototype)
 var Err = require('../../../Err')
 
 var WrongFormat = Err('wrong_symbol_format')
+
+Symbl.validate = (it) =>
+{
+	return new Promise(rs => rs(Symbl(it)))
+}

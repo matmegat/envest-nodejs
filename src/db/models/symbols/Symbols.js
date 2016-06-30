@@ -10,7 +10,7 @@ var Symbols = module.exports = function Symbols (cfg)
 
 	symbols.resolve = (symbol) =>
 	{
-		return vlp(symbol)
+		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
 			return xign.resolve(symbol.toXign())
@@ -52,6 +52,7 @@ var Symbols = module.exports = function Symbols (cfg)
 	return symbols
 }
 
+
 Symbols.schema = {}
 
 /*
@@ -66,14 +67,4 @@ Symbols.schema.columns = (prefix, table) =>
 	table.string(prefix + 'ticker').notNullable()
 
 	return table
-}
-
-var vl = Symbols.schema.validate = (symbol) =>
-{
-	return Symbl(symbol)
-}
-
-var vlp = Symbols.schema.validate.promise = (symbol) =>
-{
-	return new Promise(rs => rs(vl(symbol)))
 }
