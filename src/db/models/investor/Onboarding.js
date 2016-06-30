@@ -13,6 +13,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.hist_return = HistReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
 	onb.fields.holdings = Holdings(investor, db)
+	onb.fields.start_date = StartDate(investor)
 
 	expect(db, 'Onboarding depends on Admin').property('admin')
 	var admin = db.admin
@@ -341,6 +342,34 @@ function Holdings (investor_model, db)
 					holdings: value
 				})
 			})
+		}
+	})
+}
+
+var moment = require('moment')
+var WrongStartDateFormat = Err('wrong_start_date_format',
+	'Wrong start_date format. Not ISO-8601')
+
+function StartDate (investor)
+{
+	return Field(investor,
+	{
+		validate: (value) =>
+		{
+			validate.string(value, 'start_date')
+			validate.empty(value, 'start_date')
+
+			var moment_date = moment(value)
+			if (! moment_date.isValid())
+			{
+				throw WrongStartDateFormat()
+			}
+
+			return moment_date.format()
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ start_date: value })
 		}
 	})
 }
