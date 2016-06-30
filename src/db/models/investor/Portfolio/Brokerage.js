@@ -12,7 +12,7 @@ module.exports = function Brokerage (db, investor)
 	var knex    = db.knex
 	var helpers = db.helpers
 
-	brokerage.brokerage_table = knexed(knex, 'brokerage')
+	brokerage.table = knexed(knex, 'brokerage')
 	brokerage.holdings_table = knexed(knex, 'portfolio_symbols')
 
 	function set_brokerage (trx, data)
@@ -20,7 +20,7 @@ module.exports = function Brokerage (db, investor)
 		var where_clause = _.pick(data, ['investor_id'])
 		var update_clause = _.pick(data, ['cash_value', 'multiplier'])
 
-		return brokerage.brokerage_table(trx)
+		return brokerage.table(trx)
 		.where(where_clause)
 		.update(update_clause)
 	}
@@ -81,7 +81,7 @@ module.exports = function Brokerage (db, investor)
 		return investor.all.ensure(data.investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.brokerage_table(trx)
+			return brokerage.table(trx)
 			.where('investor_id', data.investor_id)
 			.then(helpers.one)
 		})
@@ -185,7 +185,7 @@ module.exports = function Brokerage (db, investor)
 
 	brokerage.calc_multiplier = function (trx, investor_id)
 	{
-		return brokerage.brokerage_table(trx)
+		return brokerage.table(trx)
 		.where('investor_id', investor_id)
 		.then(helpers.one)
 		.then((brokerage_entry) =>

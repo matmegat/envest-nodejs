@@ -122,7 +122,7 @@ module.exports = function Investor (db)
 			emits.NewAdmins({ investor_id: investor_id })
 			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
 
-			return investor.portfolio.brokerage_table(trx)
+			return investor.portfolio.brokerage.table(trx)
 			.insert(
 			{
 				investor_id: investor_id,
