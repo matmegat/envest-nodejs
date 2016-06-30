@@ -3,6 +3,7 @@ var knexed = require('../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
+var extend = require('lodash/extend')
 
 var validate   = require('../validate')
 var validateId = require('../../id').validate
@@ -27,6 +28,8 @@ module.exports = function Notifications (db)
 
 	notifications.Emitter = function Emitter (type, options)
 	{
+		options = extend({}, options)
+
 		return function NotificationEmit (target_or_event, event)
 		{
 			var emit =
