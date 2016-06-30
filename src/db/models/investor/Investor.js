@@ -52,6 +52,8 @@ module.exports = function Investor (db)
 	investor.all    = Meta(investor.table, {})
 	investor.public = Meta(investor.table, { is_public: true })
 
+	investor.portfolio = Portfolio(db, investor)
+
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
 		return generate_code()
@@ -134,6 +136,5 @@ module.exports = function Investor (db)
 		})
 	})
 
-	investor.portfolio = Portfolio(db, investor)
 	return investor
 }
