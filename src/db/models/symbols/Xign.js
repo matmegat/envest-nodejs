@@ -2,7 +2,7 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-var parse  = require('url').parse
+// var parse  = require('url').parse
 
 var request = require('axios')
 
