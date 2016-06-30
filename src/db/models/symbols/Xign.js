@@ -20,6 +20,9 @@ module.exports = function Xign (cfg)
 
 	X.quotes = (symbols) =>
 	{
+		expect(symbols).a('array')
+		symbols.forEach(s => expect(s).a('string'))
+
 		var uri = format(
 		{
 			protocol: 'http:',
@@ -30,7 +33,7 @@ module.exports = function Xign (cfg)
 			query:
 			{
 				IdentifierType: 'Symbol',
-				Identifiers: 'GLD',
+				Identifiers: symbols.join(','),
 
 				_Token: token
 			}
