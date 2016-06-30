@@ -56,17 +56,22 @@ module.exports = function Mailer (cfg)
 			email.setSubstitutions(substitutions)
 		}
 
-		return new Promise((resolve, reject) =>
+		return send(email)
+	}
+
+	function send (email)
+	{
+		return new Promise((rs, rj) =>
 		{
 			sendgrid.send(email, (err, response) =>
 			{
 				if (err)
 				{
-					reject(SendgridError(err))
+					rj(SendgridError(err))
 				}
 				else
 				{
-					resolve(response)
+					rs(response)
 				}
 			})
 		})
