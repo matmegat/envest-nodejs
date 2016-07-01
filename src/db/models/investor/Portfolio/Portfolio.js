@@ -12,16 +12,18 @@ module.exports = function Portfolio (db, investor)
 	var knex    = db.knex
 	// var helpers = db.helpers
 
-	portfolio.table = knexed(knex, 'portfolio_symbols')
-	portfolio.brokerage = Brokerage(db, investor)
-	portfolio.holdings  = Holdings(db, investor)
+	portfolio.holdings_table = knexed(knex, 'portfolio_symbols')
+	portfolio.brokerage_table = knexed(knex, 'brokerage')
+
+	var brokerage = Brokerage(db, investor)
+	var holdings  = Holdings(db, investor)
 
 	portfolio.list = function (options, trx)
 	{
 		return investor.public.ensure(options.investor_id, trx)
 		.then(() =>
 		{
-			return portfolio.table(trx)
+			return portfolio.holdings_table(trx)
 			.select(
 			[
 				'symbol_exchange',
@@ -73,8 +75,8 @@ module.exports = function Portfolio (db, investor)
 	portfolio.recalculate = function (investor_id)
 	{
 		return Promise.all([
-			portfolio.brokerage.byInvestorId(investor_id),
-			portfolio.holdings.byInvestorId(investor_id)
+			brokerage.byInvestorId(investor_id),
+			holdings.byInvestorId(investor_id)
 		])
 		.then((brokerage_entry, holding_entries) =>
 		{
@@ -88,7 +90,7 @@ module.exports = function Portfolio (db, investor)
 
 			var multiplier = indexed_amount / real_allocation
 
-			return portfolio.brokerage.set(
+			return brokerage.set(
 			{
 				investor_id: investor_id,
 				cash_value: Number(brokerage_entry.cash_value),
@@ -99,7 +101,7 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.set_holdings = function (options)
 	{
-		return portfolio.holdings.set(options)
+		return holdings.set(options)
 		.then(() =>
 		{
 			return portfolio.recalculate(options.investor_id)
@@ -108,7 +110,7 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.set_brokerage = function (options)
 	{
-		return portfolio.brokerage.set(options)
+		return brokerage.set(options)
 		.then(() =>
 		{
 			return portfolio.recalculate(options.investor_id)
