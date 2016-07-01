@@ -5,6 +5,7 @@ var Config = require('./Config')
 var Log = require('./Log')
 var Db = require('./db/Db')
 var Http = require('./http/Http')
+var Mailer = require('./Mailer')
 
 module.exports = function App ()
 {
@@ -15,6 +16,7 @@ module.exports = function App ()
 
 	app.cfg  = Config(app)
 	app.log  = Log()
+	app.mail = Mailer(app.cfg.sendgrid)
 	app.db   = Db(app)
 	app.http = Http(app)
 
