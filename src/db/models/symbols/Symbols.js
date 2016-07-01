@@ -2,6 +2,8 @@
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
 
+var extend = require('lodash/extend')
+
 var Symbols = module.exports = function Symbols (cfg)
 {
 	var symbols = {}
@@ -38,6 +40,13 @@ var Symbols = module.exports = function Symbols (cfg)
 		symbols = [].concat(symbols)
 
 		return xign.quotes(symbols)
+		.then(resl =>
+		{
+			return resl.map((r, i) =>
+			{
+				return extend({ symbol: symbols[i] }, r)
+			})
+		})
 	}
 
 	symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])
