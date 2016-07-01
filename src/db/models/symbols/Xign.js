@@ -53,9 +53,10 @@ module.exports = function Xign (cfg)
 
 				return r
 			})
-			.map(unwrap.maybe(r =>
+			.map(unwrap.maybe((r, i) =>
 			{
 				return {
+					symbol: symbols[i],
 					currency: r.Currency,
 					price:    r.Last
 				}
@@ -138,11 +139,11 @@ unwrap.isSuccess = (rs) =>
 
 unwrap.maybe = (fn) =>
 {
-	return (it) =>
+	return function (it)
 	{
 		if (it)
 		{
-			return fn(it)
+			return fn.apply(this, arguments)
 		}
 		else
 		{

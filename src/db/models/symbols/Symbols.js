@@ -40,13 +40,6 @@ var Symbols = module.exports = function Symbols (cfg)
 		symbols = [].concat(symbols)
 
 		return xign.quotes(symbols)
-		.then(resl =>
-		{
-			return resl.map((r, i) =>
-			{
-				return extend({ symbol: symbols[i] }, r)
-			})
-		})
 	}
 
 	symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])
