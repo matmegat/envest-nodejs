@@ -114,7 +114,8 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.set_brokerage = function (options) {
+	portfolio.set_brokerage = function (options)
+	{
 		return portfolio.brokerage.set(options)
 		.then(() =>
 		{
