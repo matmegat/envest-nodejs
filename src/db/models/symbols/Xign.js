@@ -18,15 +18,61 @@ module.exports = function Xign (cfg)
 
 	var X = {}
 
+	X.quotes = (symbols) =>
+	{
+		expect(symbols).a('array')
+		symbols.forEach(s => expect(s).a('string'))
+
+		var uri = format(
+		{
+			protocol: 'http:',
+			host: 'globalquotes.xignite.com',
+
+			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbols.join(','),
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(unwrap.data)
+		.then(resl =>
+		{
+			return resl
+			.map(r =>
+			{
+				if (! unwrap.isSuccess(r))
+				{
+					return null
+				}
+
+				return r
+			})
+			.map(unwrap.maybe((r, i) =>
+			{
+				return {
+					symbol: symbols[i],
+					currency: r.Currency,
+					price:    r.Last
+				}
+			}))
+		})
+	}
+
 	X.resolve = (symbol) =>
 	{
 		return fundamentals(symbol)
 		.then(data =>
 		{
 			return {
-				xsymbol: data.Company.Symbol,
+				symbol:   data.Company.Symbol, /* may be not full */
 				exchange: data.Company.MarketIdentificationCode,
-				company: data.Company.Name
+				company:  data.Company.Name
 			}
 		})
 	}
@@ -78,10 +124,30 @@ unwrap.first = (rs) => rs[0]
 
 unwrap.success = (rs) =>
 {
-	if (rs.Outcome !== 'Success')
+	if (! unwrap.isSuccess(rs))
 	{
 		throw rs
 	}
 
 	return rs
+}
+
+unwrap.isSuccess = (rs) =>
+{
+	return rs.Outcome === 'Success'
+}
+
+unwrap.maybe = (fn) =>
+{
+	return function (it)
+	{
+		if (it)
+		{
+			return fn.apply(this, arguments)
+		}
+		else
+		{
+			return it
+		}
+	}
 }
