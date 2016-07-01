@@ -78,8 +78,11 @@ module.exports = function Portfolio (db, investor)
 			brokerage.byInvestorId(investor_id),
 			holdings.byInvestorId(investor_id)
 		])
-		.then((brokerage_entry, holding_entries) =>
+		.then((values) =>
 		{
+			var brokerage_entry = values[0]
+			var holding_entries = values[1]
+
 			var indexed_amount = 100000
 			var real_allocation = Number(brokerage_entry.cash_value)
 
@@ -90,18 +93,17 @@ module.exports = function Portfolio (db, investor)
 
 			var multiplier = indexed_amount / real_allocation
 
-			return brokerage.set(
+			return brokerage.set(investor_id,
 			{
-				investor_id: investor_id,
 				cash_value: Number(brokerage_entry.cash_value),
 				multiplier: multiplier
 			})
 		})
 	}
 
-	portfolio.setHoldings = function (investor_id, holdings)
+	portfolio.setHoldings = function (investor_id, holding_entries)
 	{
-		return holdings.set(investor_id, holdings)
+		return holdings.set(investor_id, holding_entries)
 		.then(() =>
 		{
 			return portfolio.recalculate(investor_id)

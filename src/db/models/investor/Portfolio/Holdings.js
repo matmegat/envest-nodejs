@@ -15,7 +15,7 @@ module.exports = function Holdings (db, investor)
 
 	holdings.table = knexed(knex, 'portfolio_symbols')
 
-	function set_holdings (trx, investor_id, holdings)
+	function set_holdings (trx, investor_id, holding_entries)
 	{
 		/* Expect data to be =
 		* investor_id: integer
@@ -38,7 +38,7 @@ module.exports = function Holdings (db, investor)
 
 		var where_clause = { investor_id: investor_id }
 
-		return Promise.all(_.map(holdings, (holding) =>
+		return Promise.all(_.map(holding_entries, (holding) =>
 		{
 			var where = _.pick(holding, ['symbol_exchange', 'symbol_ticker'])
 
@@ -46,7 +46,7 @@ module.exports = function Holdings (db, investor)
 		}))
 	}
 
-	holdings.set = knexed.transact(knex, (trx, investor_id, holdings) =>
+	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
 		/* operation with validation procedure
 		* Expect data to be:
@@ -68,9 +68,9 @@ module.exports = function Holdings (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			validate.array(holdings, 'holdings')
+			validate.array(holding_entries, 'holdings')
 
-			holdings.forEach((holding, i) =>
+			holding_entries.forEach((holding, i) =>
 			{
 				validate.required(
 					holding.symbol_exchange,
@@ -109,17 +109,32 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			return set_holdings(trx, investor_id, holdings)
+			// return set_holdings(trx, investor_id, holdings)
+			return Promise.all(_.map(holding_entries, (holding) =>
+			{
+				return db.xign.resolve(`${holding.symbol_ticker}.${holding.symbol_exchange}`)
+			}))
+		})
+		.catch((error) =>
+		{
+			throw UnresolvedSymbol({ data: error.Message })
+		})
+		.then((processed_symbols) =>
+		{
+			return set_holdings(trx, investor_id, holding_entries)
 		})
 	})
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
+	var UnresolvedSymbol = Err('invalid_portfolio_symbol',
+		`Symbol can't be resolved`)
 
 	holdings.byInvestorId = function (investor_id)
 	{
 		return holdings.table()
 		.where('investor_id', investor_id)
+		.debug(true)
 	}
 
 	return holdings
