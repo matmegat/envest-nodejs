@@ -99,7 +99,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.set_holdings = function (options)
+	portfolio.setHoldings = function (options)
 	{
 		return holdings.set(options)
 		.then(() =>
@@ -108,7 +108,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.set_brokerage = function (options)
+	portfolio.setBrokerage = function (options)
 	{
 		return brokerage.set(options)
 		.then(() =>

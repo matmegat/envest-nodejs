@@ -265,7 +265,7 @@ function Brokerage (investor_model, db)
 			.then(db.helpers.one)
 			.then((investor) =>
 			{
-				return portfolio.set_brokerage(
+				return portfolio.setBrokerage(
 				{
 					investor_id: investor.user_id,
 					cash_value: value
@@ -337,7 +337,7 @@ function Holdings (investor_model, db)
 			.then(db.helpers.one)
 			.then((investor) =>
 			{
-				return portfolio.set_holdings(
+				return portfolio.setHoldings(
 				{
 					investor_id: investor.user_id,
 					holdings: value
