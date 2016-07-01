@@ -258,14 +258,14 @@ function Brokerage (investor_model, db)
 		},
 		set: (value, investor_queryset) =>
 		{
-			var brokerage = db.investor.portfolio.brokerage
+			var portfolio = db.investor.portfolio
 
 			return investor_queryset
 			.select('user_id')
 			.then(db.helpers.one)
 			.then((investor) =>
 			{
-				return brokerage.set(
+				return portfolio.set_brokerage(
 				{
 					investor_id: investor.user_id,
 					cash_value: value

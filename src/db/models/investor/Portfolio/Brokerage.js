@@ -13,7 +13,6 @@ module.exports = function Brokerage (db, investor)
 	var helpers = db.helpers
 
 	brokerage.table = knexed(knex, 'brokerage')
-	brokerage.holdings_table = knexed(knex, 'portfolio_symbols')
 
 	function set_brokerage (trx, data)
 	{
@@ -23,6 +22,13 @@ module.exports = function Brokerage (db, investor)
 		return brokerage.table(trx)
 		.where(where_clause)
 		.update(update_clause)
+	}
+
+	brokerage.byInvestorId = function (investor_id)
+	{
+		return brokerage.table()
+		.where('investor_id', investor_id)
+		.then(db.helpers.one)
 	}
 
 	brokerage.set = knexed.transact(knex, (trx, data) =>
@@ -44,10 +50,6 @@ module.exports = function Brokerage (db, investor)
 			}
 
 			return set_brokerage(trx, data)
-		})
-		.then(() =>
-		{
-			return brokerage.calc_multiplier(trx, data.investor_id)
 		})
 	})
 
@@ -99,17 +101,6 @@ module.exports = function Brokerage (db, investor)
 			data.cash_value = amount + brokerage.cash_value
 			return set_brokerage(trx, data)
 		})
-		.then(() =>
-		{
-			if (operation in multiplier_update)
-			{
-				return multiplier_update[operation](trx, data.investor_id)
-			}
-			else
-			{
-				return false
-			}
-		})
 	})
 
 	var valid_operations =
@@ -119,12 +110,6 @@ module.exports = function Brokerage (db, investor)
 		interest: validate_positive,
 		fee: validate_negative,
 		trade: validate_deal
-	}
-
-	var multiplier_update =
-	{
-		deposit: brokerage.calc_multiplier,
-		withdraw: brokerage.calc_multiplier
 	}
 
 	function validate_deal (amount, brokerage)
@@ -181,46 +166,6 @@ module.exports = function Brokerage (db, investor)
 
 	var InvalidOperation = Err('invalid_portfolio_operation',
 		'Invalid Portfolio Operation')
-
-
-	brokerage.calc_multiplier = function (trx, investor_id)
-	{
-		return brokerage.table(trx)
-		.where('investor_id', investor_id)
-		.then(helpers.one)
-		.then((brokerage_entry) =>
-		{
-			return brokerage.holdings_table(trx)
-			.where('investor_id', investor_id)
-			.then((holdings) =>
-			{
-				return {
-					brokerage: brokerage_entry,
-					holdings: holdings
-				}
-			})
-		})
-		.then((full_portfolio) =>
-		{
-			var indexed_amount = 100000
-			var real_allocation = +full_portfolio.brokerage.cash_value
-
-			full_portfolio.holdings.forEach((holding) =>
-			{
-
-				real_allocation += holding.amount * holding.buy_price
-			})
-
-			var multiplier = indexed_amount / real_allocation
-
-			return set_brokerage(
-			trx,
-			{
-				investor_id: investor_id,
-				multiplier: multiplier
-			})
-		})
-	}
 
 	return brokerage
 }

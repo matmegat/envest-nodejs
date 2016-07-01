@@ -13,10 +13,7 @@ module.exports = function Holdings (db, investor)
 
 	var knex    = db.knex
 
-	holdings.brokerage_table = knexed(knex, 'brokerage')
-	holdings.holdings_table = knexed(knex, 'portfolio_symbols')
-
-
+	holdings.table = knexed(knex, 'portfolio_symbols')
 
 	function set_holdings (trx, data)
 	{
@@ -36,7 +33,7 @@ module.exports = function Holdings (db, investor)
 		* }
 		* */
 		var holdings_upsert = upsert(
-			holdings.holdings_table(trx),
+			holdings.table(trx),
 			'portfolio_symbol_unique',
 			'id'
 		)
@@ -121,5 +118,11 @@ module.exports = function Holdings (db, investor)
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	return  holdings
+	holdings.byInvestorId = function (investor_id)
+	{
+		return holdings.table()
+		.where('investor_id', investor_id)
+	}
+
+	return holdings
 }

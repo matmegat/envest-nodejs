@@ -70,14 +70,57 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.set_holdings = knexed.transact(knex, (trx, options) =>
+	portfolio.recalculate = function (investor_id)
+	{
+		return portfolio.brokerage.byInvestorId(investor_id)
+		.then((brokerage) =>
+		{
+			return portfolio.holdings.byInvestorId(investor_id)
+			.then((holdings) =>
+			{
+				return {
+					brokerage: brokerage,
+					holdings: holdings
+				}
+			})
+		})
+		.then((full_portfolio) =>
+		{
+			var indexed_amount = 100000
+			var real_allocation = +full_portfolio.brokerage.cash_value
+
+			full_portfolio.holdings.forEach((holding) =>
+			{
+				real_allocation += holding.amount * holding.buy_price
+			})
+
+			var multiplier = indexed_amount / real_allocation
+
+			return portfolio.brokerage.set(
+			{
+				investor_id: investor_id,
+				cash_value: +full_portfolio.brokerage.cash_value,
+				multiplier: multiplier
+			})
+		})
+	}
+
+	portfolio.set_holdings = function (options)
 	{
 		return portfolio.holdings.set(options)
 		.then(() =>
 		{
-			return portfolio.brokerage.calc_multiplier(trx, options.investor_id)
+			return portfolio.recalculate(options.investor_id)
 		})
-	})
+	}
+
+	portfolio.set_brokerage = function (options) {
+		return portfolio.brokerage.set(options)
+		.then(() =>
+		{
+			return portfolio.recalculate(options.investor_id)
+		})
+	}
 
 	return portfolio
 }
