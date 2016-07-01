@@ -18,9 +18,9 @@ module.exports = function Portfolio (db, investor)
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
 
-	portfolio.list = function (options, trx)
+	portfolio.list = function (investor_id, trx)
 	{
-		return investor.public.ensure(options.investor_id, trx)
+		return investor.public.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return portfolio.holdings_table(trx)
@@ -32,7 +32,7 @@ module.exports = function Portfolio (db, investor)
 				'amount',
 				'brokerage.multiplier'
 			])
-			.where('portfolio_symbols.investor_id', options.investor_id)
+			.where('portfolio_symbols.investor_id', investor_id)
 			.innerJoin(
 				'brokerage',
 				'portfolio_symbols.investor_id',
@@ -99,21 +99,21 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.setHoldings = function (options)
+	portfolio.setHoldings = function (investor_id, holdings)
 	{
-		return holdings.set(options)
+		return holdings.set(investor_id, holdings)
 		.then(() =>
 		{
-			return portfolio.recalculate(options.investor_id)
+			return portfolio.recalculate(investor_id)
 		})
 	}
 
-	portfolio.setBrokerage = function (options)
+	portfolio.setBrokerage = function (investor_id, amount)
 	{
-		return brokerage.set(options)
+		return brokerage.set(investor_id, { cash_value: amount })
 		.then(() =>
 		{
-			return portfolio.recalculate(options.investor_id)
+			return portfolio.recalculate(investor_id)
 		})
 	}
 

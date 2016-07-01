@@ -14,9 +14,9 @@ module.exports = function Brokerage (db, investor)
 
 	brokerage.table = knexed(knex, 'brokerage')
 
-	function set_brokerage (trx, data)
+	function set_brokerage (trx, investor_id, data)
 	{
-		var where_clause = _.pick(data, ['investor_id'])
+		var where_clause = { investor_id: investor_id }
 		var update_clause = _.pick(data, ['cash_value', 'multiplier'])
 
 		return brokerage.table(trx)
@@ -31,9 +31,9 @@ module.exports = function Brokerage (db, investor)
 		.then(db.helpers.one)
 	}
 
-	brokerage.set = knexed.transact(knex, (trx, data) =>
+	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
 	{
-		return investor.all.ensure(data.investor_id, trx)
+		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			/* validate update keys */
@@ -49,7 +49,7 @@ module.exports = function Brokerage (db, investor)
 				validate_multiplier(data.multiplier)
 			}
 
-			return set_brokerage(trx, data)
+			return set_brokerage(trx, investor_id, data)
 		})
 	})
 
@@ -67,24 +67,23 @@ module.exports = function Brokerage (db, investor)
 	}
 
 
-	brokerage.update = knexed.transact(knex, (trx, data) =>
+	brokerage.update = knexed.transact(knex, (trx, investor_id, data) =>
 	{
 		/* operation with validation procedure:
 		 * data =
 		 * {
 		 *   operation: 'deposit' | 'withdraw' | 'fee' | 'interest' | 'trade'
-		 *   investor_id: integer,
 		 *   amount: number
 		 * }
 		 * */
 		var operation = data.operation
 		var amount = data.amount
 
-		return investor.all.ensure(data.investor_id, trx)
+		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return brokerage.table(trx)
-			.where('investor_id', data.investor_id)
+			.where('investor_id', investor_id)
 			.then(helpers.one)
 		})
 		.then((brokerage) =>
@@ -99,7 +98,7 @@ module.exports = function Brokerage (db, investor)
 			}
 
 			data.cash_value = amount + brokerage.cash_value
-			return set_brokerage(trx, data)
+			return set_brokerage(trx, investor_id, data)
 		})
 	})
 

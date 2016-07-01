@@ -15,22 +15,20 @@ module.exports = function Holdings (db, investor)
 
 	holdings.table = knexed(knex, 'portfolio_symbols')
 
-	function set_holdings (trx, data)
+	function set_holdings (trx, investor_id, holdings)
 	{
 		/* Expect data to be =
-		* {
-		*   investor_id: integer
-		*   holdings:
-		*   [
-		*     {
-		*       symbol_exchange: string,
-		*       symbol_ticker:   string,
-		*       amount:          integer,
-		*       buy_price:       float
-		*     },
-		*     {},
-		*   ]
-		* }
+		* investor_id: integer
+		* holdings:
+		* [
+		*   {
+		*     symbol_exchange: string,
+		*     symbol_ticker:   string,
+		*     amount:          integer,
+		*     buy_price:       float
+		*   },
+		*   {},
+		* ]
 		* */
 		var holdings_upsert = upsert(
 			holdings.table(trx),
@@ -38,9 +36,9 @@ module.exports = function Holdings (db, investor)
 			'id'
 		)
 
-		var where_clause = _.pick(data, ['investor_id'])
+		var where_clause = { investor_id: investor_id }
 
-		return Promise.all(_.map(data.holdings, (holding) =>
+		return Promise.all(_.map(holdings, (holding) =>
 		{
 			var where = _.pick(holding, ['symbol_exchange', 'symbol_ticker'])
 
@@ -48,7 +46,7 @@ module.exports = function Holdings (db, investor)
 		}))
 	}
 
-	holdings.set = knexed.transact(knex, (trx, data) =>
+	holdings.set = knexed.transact(knex, (trx, investor_id, holdings) =>
 	{
 		/* operation with validation procedure
 		* Expect data to be:
@@ -67,12 +65,12 @@ module.exports = function Holdings (db, investor)
 		* }
 		* */
 
-		return investor.all.ensure(data.investor_id, trx)
+		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			validate.array(data.holdings, 'holdings')
+			validate.array(holdings, 'holdings')
 
-			data.holdings.forEach((holding, i) =>
+			holdings.forEach((holding, i) =>
 			{
 				validate.required(
 					holding.symbol_exchange,
@@ -111,7 +109,7 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			return set_holdings(trx, data)
+			return set_holdings(trx, investor_id, holdings)
 		})
 	})
 
