@@ -1,8 +1,6 @@
 
 var knexed = require('../knexed')
 
-var _ = require('lodash')
-
 var Err = require('../../Err')
 var AdminRequired =
     Err('admin_required', 'Admin privileges is required for this operation')
@@ -14,8 +12,6 @@ var AlreadyAdmin = Err('already_admin', 'This user is admin already')
 
 var expect = require('chai').expect
 var validate = require('../validate')
-
-var PaginatorBooked  = require('../paginator/Booked')
 
 var noop = require('lodash/noop')
 
@@ -30,7 +26,6 @@ module.exports = function Admin (db)
 	expect(db, 'Admin depends on User').property('user')
 
 	var oneMaybe = db.helpers.oneMaybe
-	var count = db.helpers.count
 
 	admin.ensure = function (user_id, trx)
 	{
@@ -121,98 +116,6 @@ module.exports = function Admin (db)
 		})
 		.then(noop)
 	})
-
-	var paginator = PaginatorBooked()
-
-	admin.usersList = function (user_group, options)
-	{
-		var queryset = users_by_group(user_group)
-		.leftJoin(
-			'email_confirms',
-			'users.id',
-			'email_confirms.user_id'
-		)
-
-		if (options.filter.query)
-		{
-			queryset = filter_by_query(queryset, options.filter.query)
-		}
-
-		var count_queryset = queryset.clone()
-
-		queryset
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
-		)
-
-		options.paginator = _.extend({}, options.paginator,
-		{
-			real_order_column: 'users.id'
-		})
-
-		return paginator.paginate(queryset, options.paginator)
-		.then((users) =>
-		{
-			var response =
-			{
-				users: users
-			}
-
-			return count(count_queryset)
-			.then(count =>
-			{
-				return paginator.total(response, count)
-			})
-		})
-	}
-
-	function users_by_group (group)
-	{
-		if (user.groups.isUser(group))
-		{
-			return user.users_table()
-			.leftJoin(
-				'admins',
-				'users.id',
-				'admins.user_id'
-			 )
-			.leftJoin(
-				'investors',
-				'users.id',
-				'investors.user_id'
-			)
-			.whereNull('admins.user_id')
-			.whereNull('investors.user_id')
-		}
-		else if (user.groups.isAdmin(group))
-		{
-			return user.users_table()
-			.leftJoin(
-				'admins',
-				'users.id',
-				'admins.user_id'
-			 )
-			.whereNotNull('admins.user_id')
-		}
-	}
-
-	function filter_by_query (queryset, query)
-	{
-		var pattern = '%' + query.toLowerCase() + '%'
-
-		return queryset
-		.where(function ()
-		{
-			this.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
-			pattern)
-			this.orWhere('users.email', 'like', pattern)
-			this.orWhere('email_confirms.new_email', 'like', pattern)
-		})
-	}
 
 	return admin
 }
