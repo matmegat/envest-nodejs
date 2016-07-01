@@ -72,24 +72,16 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.recalculate = function (investor_id)
 	{
-		return portfolio.brokerage.byInvestorId(investor_id)
-		.then((brokerage) =>
-		{
-			return portfolio.holdings.byInvestorId(investor_id)
-			.then((holdings) =>
-			{
-				return {
-					brokerage: brokerage,
-					holdings: holdings
-				}
-			})
-		})
-		.then((full_portfolio) =>
+		return Promise.all([
+			portfolio.brokerage.byInvestorId(investor_id),
+			portfolio.holdings.byInvestorId(investor_id)
+		])
+		.then((brokerage_entry, holding_entries) =>
 		{
 			var indexed_amount = 100000
-			var real_allocation = +full_portfolio.brokerage.cash_value
+			var real_allocation = Number(brokerage_entry.cash_value)
 
-			full_portfolio.holdings.forEach((holding) =>
+			holding_entries.forEach((holding) =>
 			{
 				real_allocation += holding.amount * holding.buy_price
 			})
@@ -99,7 +91,7 @@ module.exports = function Portfolio (db, investor)
 			return portfolio.brokerage.set(
 			{
 				investor_id: investor_id,
-				cash_value: +full_portfolio.brokerage.cash_value,
+				cash_value: Number(brokerage_entry.cash_value),
 				multiplier: multiplier
 			})
 		})
