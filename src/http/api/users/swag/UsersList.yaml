@@ -1,0 +1,24 @@
+get:
+  description: Get a list of users
+  parameters:
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  - name: query
+    in: query
+    type: string
+    description: Search query
+
+  responses:
+    200:
+      description: user's list
+      schema:
+        $ref: ./Users.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - users

@@ -92,6 +92,12 @@ paths:
   '/users/current':
     $ref: ../api/users/swag/UserCurrent.yaml
 
+  '/users/':
+    $ref: ../api/users/swag/UsersList.yaml
+
+  '/users/admins':
+    $ref: ../api/users/swag/AdminsList.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 
@@ -126,6 +132,12 @@ definitions:
 
   User:
     $ref: ./User.yaml
+
+  Users:
+    $ref: ../api/users/swag/Users.yaml
+
+  UsersItem:
+    $ref: ../api/users/swag/UsersItem.yaml
 
   Comments:
     $ref: ../api/comments/swag/Comments.yaml
