@@ -39,6 +39,8 @@ var Symbols = module.exports = function Symbols (cfg)
 	{
 		symbols = [].concat(symbols)
 
+		// symbols.forEach(Symbl)
+
 		return xign.quotes(symbols)
 	}
 
