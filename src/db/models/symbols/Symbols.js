@@ -2,6 +2,9 @@
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
 
+var Err = require('../../../Err')
+var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
+
 var extend = require('lodash/extend')
 
 var Symbols = module.exports = function Symbols (cfg)
@@ -16,22 +19,26 @@ var Symbols = module.exports = function Symbols (cfg)
 		.then(symbol =>
 		{
 			return xign.resolve(symbol.toXign())
-		})
-		.then(resl =>
-		{
-			var symbol = Symbl(resl.symbol)
-
-			symbol.exchange || (symbol.exchange = resl.exchange)
-
-			var data =
+			.then(resl =>
 			{
-				symbol:   symbol.toXign(),
-				ticker:   symbol.ticker,
-				exchange: symbol.exchange,
-				company:  resl.company
-			}
+				var symbol = Symbl(resl.symbol)
 
-			return data
+				symbol.exchange || (symbol.exchange = resl.exchange)
+
+				var data =
+				{
+					symbol:   symbol.toXign(),
+					ticker:   symbol.ticker,
+					exchange: symbol.exchange,
+					company:  resl.company
+				}
+
+				return data
+			},
+			error =>
+			{
+				throw UnknownSymbol({ symbol: symbol })
+			})
 		})
 	}
 
