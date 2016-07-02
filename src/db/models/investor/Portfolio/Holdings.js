@@ -112,7 +112,7 @@ module.exports = function Holdings (db, investor)
 			// return set_holdings(trx, investor_id, holdings)
 			return Promise.all(_.map(holding_entries, (holding) =>
 			{
-				return db.xign.resolve(`${holding.symbol_ticker}.${holding.symbol_exchange}`)
+				return db.symbols.resolve(`${holding.symbol_ticker}.${holding.symbol_exchange}`)
 			}))
 		})
 		.catch((error) =>
