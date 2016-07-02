@@ -44,8 +44,8 @@ var Symbols = module.exports = function Symbols (cfg)
 		return xign.quotes(symbols)
 	}
 
-	symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])
-	.then(console.log, console.error)
+	// symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])
+	// .then(console.log, console.error)
 
 	// symbols.resolve('GE.XNYS')
 	// .then(console.log, console.error)
