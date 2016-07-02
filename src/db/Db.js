@@ -58,7 +58,7 @@ module.exports = function name (app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
-	db.xign = Symbols(app.cfg)
+	db.symbols = Symbols(app.cfg)
 
 	return db
 }
