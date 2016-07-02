@@ -115,10 +115,6 @@ module.exports = function Holdings (db, investor)
 				return db.symbols.resolve(`${holding.symbol_ticker}.${holding.symbol_exchange}`)
 			}))
 		})
-		.catch((error) =>
-		{
-			throw UnresolvedSymbol({ data: error.Message })
-		})
 		.then((processed_symbols) =>
 		{
 			return set_holdings(trx, investor_id, holding_entries)
@@ -127,8 +123,6 @@ module.exports = function Holdings (db, investor)
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
-	var UnresolvedSymbol = Err('invalid_portfolio_symbol',
-		`Symbol can't be resolved`)
 
 	holdings.byInvestorId = function (investor_id)
 	{
