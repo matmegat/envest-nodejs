@@ -11,7 +11,7 @@ var defaults = require('./options')
 
 defaults = extend({}, defaults,
 {
-	order_column: 'timestamp',
+	real_order_column: 'timestamp',
 	default_direction: 'desc'
 })
 
@@ -27,6 +27,12 @@ module.exports = function Paginator__Booked (paginator_options)
 
 		//toId и validateId ипользуются т.к их логика подходит для проверки page
 		var page = toId(options.page)
+
+		if (! page)
+		{
+			return queryset
+		}
+
 		validateId(WrongPageNumber, page)
 
 		var limit  = Math.min(options.limit, defaults.limit)
@@ -39,7 +45,7 @@ module.exports = function Paginator__Booked (paginator_options)
 			queryset.offset(offset)
 		}
 
-		var order_column = options.order_column
+		var order_column = options.real_order_column
 		var default_dir = options.default_direction
 
 		queryset.orderBy(order_column, default_dir)

@@ -1,0 +1,27 @@
+get:
+  description: Get a list of admins
+  parameters:
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  - name: query
+    in: query
+    type: string
+    description: Search query
+
+  responses:
+    200:
+      description: user's list
+      schema:
+        $ref: ./Users.yaml
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - users
