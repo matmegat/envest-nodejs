@@ -22,7 +22,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 	model.add = (owner_id, symbol) =>
 	{
-		return symbols.resolve(symbol)
+		return model.validateId(owner_id)
+		.then(() =>
+		{
+			return symbols.resolve(symbol)
+		})
 		.then(symbol =>
 		{
 			// add
@@ -31,7 +35,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 	model.remove = (owner_id, symbol) =>
 	{
-		return symbols.resolve(symbol)
+		return model.validateId(owner_id)
+		.then(() =>
+		{
+			return symbols.resolve(symbol)
+		})
 		.then(symbol =>
 		{
 			// remove
