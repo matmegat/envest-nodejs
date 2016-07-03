@@ -1,6 +1,9 @@
 
 // var Symbl = require('../symbols/Symbols/Symbl')
 
+var noop = require('lodash/noop')
+var extend = Object.assign
+
 var SymbolList = module.exports = function SymbolList (table, symbols)
 {
 	var model = {}
@@ -20,7 +23,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 	}
 
-	model.add = (owner_id, symbol) =>
+	model.add = (owner_id, symbol, additional) =>
 	{
 		return model.validateId(owner_id)
 		.then(() =>
@@ -29,8 +32,20 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 		.then(symbol =>
 		{
-			// add
+			var entry =
+			{
+				owner_id: owner_id,
+
+				symbol_exchange: symbol.exchange,
+				symbol_ticker:   symbol.ticker,
+			}
+
+			extend(entry, additional)
+
+			return table().insert(entry)
 		})
+		// catch duplicate
+		.then(noop)
 	}
 
 	model.remove = (owner_id, symbol) =>
