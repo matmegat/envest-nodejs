@@ -51,7 +51,9 @@ module.exports = function Mailer (cfg)
 
 		if (template)
 		{
-			email.setFilters(_.set({}, 'templates.settings', { enable: 1, template_id: template }))
+			email.setFilters(_.set({}, 'templates.settings',
+				{ enable: 1, template_id: template }
+			))
 		}
 
 		email.setSubstitutions(substs)
