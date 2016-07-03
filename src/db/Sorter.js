@@ -22,7 +22,7 @@ module.exports = function Sorter (sorter_options)
 
 		var column, direction
 
-		if(options.sort)
+		if(options && options.sort)
 		{
 			var sort = options.sort.split(',')
 
