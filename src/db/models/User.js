@@ -6,12 +6,13 @@ var extend = require('lodash/extend')
 
 var Password = require('./Password')
 
-var Err = require('../../Err')
 var Groups = require('./Groups')
-var NotFound = Err('user_not_found', 'User not found')
+
+var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
-var WrongUserId = Err('wrong_user_id', 'Wrong user id')
-var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
+
+var validate_email = require('../validate').email
+
 
 module.exports = function User (db)
 {
@@ -28,14 +29,14 @@ module.exports = function User (db)
 
 	user.password = Password(db, user)
 
-	user.NotFound = NotFound
-
 	user.groups = Groups(db, user)
+
+	user.NotFound = Err('user_not_found', 'User not found')
 
 	user.ensure = function (id, trx)
 	{
 		return user.byId(id, trx)
-		.then(Err.nullish(UserDoesNotExist))
+		.then(Err.nullish(user.NotFound))
 	}
 
 	user.byId = function (id, trx)
@@ -49,7 +50,97 @@ module.exports = function User (db)
 		})
 	}
 
+	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 	user.validateId = require('../../id').validate.promise(WrongUserId)
+
+	user.infoById = function (id)
+	{
+		return knex.select('*')
+		.from(function ()
+		{
+			this.select(
+				'users.id AS id',
+				'auth_facebook.facebook_id AS facebook_id',
+				'users.first_name AS first_name',
+				'users.last_name AS last_name',
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email'),
+				'users.pic AS pic',
+				'investors.user_id AS investor_user_id',
+				'investors.profile_pic AS profile_pic',
+				'investors.profession AS profession',
+				'investors.background AS background',
+				'investors.historical_returns AS historical_returns',
+				'investors.is_public AS is_public',
+				'investors.start_date AS start_date',
+				'admins.user_id AS admin_user_id',
+				'admins.parent AS parent',
+				'admins.can_intro AS can_intro'
+			)
+			.from('users')
+			.leftJoin(
+				'auth_facebook',
+				'users.id',
+				'auth_facebook.user_id'
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
+			.leftJoin(
+				'investors',
+				'users.id',
+				'investors.user_id'
+			)
+			.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+			)
+			.as('ignored_alias')
+			.where('id', id)
+		})
+		.then(oneMaybe)
+		.then(Err.nullish(user.NotFound))
+		.then(result =>
+		{
+			var user_data = {}
+
+			user_data = pick(result,
+			[
+				'id',
+				'first_name',
+				'last_name',
+				'email',
+				'pic'
+			])
+
+			if (result.investor_user_id)
+			{
+				user_data.investor = pick(result,
+				[
+					'profile_pic',
+					'profession',
+					'background',
+					'historical_returns',
+					'is_public',
+					'start_date',
+				])
+			}
+
+			if (result.admin_user_id)
+			{
+				user_data.admin = pick(result,
+				[
+					'parent',
+					'can_intro'
+				])
+			}
+
+			return user_data
+		})
+	}
 
 	user.create = function (data)
 	{
