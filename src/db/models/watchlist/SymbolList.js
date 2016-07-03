@@ -63,8 +63,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 		.then(symbol =>
 		{
-			// remove
+			return table()
+			.where('owner_id', owner_id)
+			.delete()
 		})
+		.then(noop)
 	}
 
 	return model
