@@ -50,7 +50,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		{
 			if (error.constraint && ends(error.constraint, 'owner_symbol_unique'))
 			{
-				throw AlreadyThere({ symbol: symbol })
+				throw AlreadyThere()
 			}
 			else
 			{
