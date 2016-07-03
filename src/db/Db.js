@@ -6,10 +6,11 @@ var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
+var Symbols = require('./models/symbols/Symbols')
 var Investor = require('./models/Investor')
 var Portfolio = require('./models/Portfolio')
 var Notifications = require('./models/Notifications')
-var Symbols = require('./models/symbols/Symbols')
+var Watchlist = require('./models/watchlist/Watchlist')
 
 module.exports = function name (app)
 {
@@ -54,11 +55,13 @@ module.exports = function name (app)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
+
+	db.symbols = Symbols(app.cfg)
+
 	db.investor = Investor(db)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
-
-	db.symbols = Symbols(app.cfg)
+	db.watchlist = Watchlist(db)
 
 	return db
 }
