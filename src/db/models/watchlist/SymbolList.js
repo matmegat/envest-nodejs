@@ -78,7 +78,7 @@ SymbolList.schema = {}
 var Symbols = require('../symbols/Symbols')
 var expect  = require('chai').expect
 
-SymbolList.schema.columns = (owner) =>
+SymbolList.schema.columns = (table, name, owner) =>
 {
 	expect(owner).a('string')
 	expect(owner).contain('.')
@@ -94,6 +94,6 @@ SymbolList.schema.columns = (owner) =>
 
 	table.unique(
 		[ 'owner_id', 'symbol_exchange', 'symbol_ticker' ]
-		, 'owner_symbol_unique'
+		, name + '_owner_symbol_unique'
 	)
 }
