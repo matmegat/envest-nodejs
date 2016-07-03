@@ -4,6 +4,9 @@
 var noop = require('lodash/noop')
 var extend = Object.assign
 
+var Err = require('../../../Err')
+var AlreadyThere = Err('symbol_already_there', 'Symbol already in this list')
+
 var SymbolList = module.exports = function SymbolList (table, symbols)
 {
 	var model = {}
@@ -44,7 +47,10 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 			return table().insert(entry)
 		})
-		// catch duplicate
+		.catch(Err.fromDb('owner_symbol_unique', () =>
+		{
+			return AlreadyThere({ symbol: symbol })
+		}))
 		.then(noop)
 	}
 
@@ -84,4 +90,9 @@ SymbolList.schema.columns = (owner) =>
 		.onDelete('cascade')
 
 	Symbols.schema.columns('symbol_', table)
+
+	table.unique(
+		[ 'owner_id', 'symbol_exchange', 'symbol_ticker' ]
+		, 'owner_symbol_unique'
+	)
 }
