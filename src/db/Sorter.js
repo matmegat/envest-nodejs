@@ -19,12 +19,21 @@ module.exports = function Sorter (sorter_options)
 
 	sorter.sort = function (queryset, options)
 	{
-		var sort = options.sort.split(',')
 
-		var order_column = sort[0] ||
+		var column, direction
+
+		if(options.sort)
+		{
+			var sort = options.sort.split(',')
+
+			column = sort[0]
+			direction = sort[1]
+		}
+
+		var order_column = column ||
 		sorter_options.order_column
 
-		var default_dir  = sort[1] ||
+		var default_dir  = direction ||
 		sorter_options.default_direction
 
 		validate_dir(default_dir)
@@ -51,7 +60,7 @@ module.exports = function Sorter (sorter_options)
 
 	function validate_order (order_column, allowed_columns)
 	{
-		if (_.indexOf(allowed_columns, order_column) === -1)
+		if (! _.includes(allowed_columns, order_column))
 		{
 			throw WrongOrderColumn()
 		}
