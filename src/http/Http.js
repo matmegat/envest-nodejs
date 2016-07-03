@@ -73,7 +73,7 @@ module.exports = function Http (app)
 	mount(Statics(app.root), 'static', 'static')
 	mount(Notifications(app.db), 'notifications', 'notifications')
 	mount(Password(app.db.user), 'password', 'password')
-	mount(Watchlist(), 'watchlist', 'watchlist')
+	mount(Watchlist(app.db.watchlist), 'watchlist', 'watchlist')
 
 
 	http.express.use(errorMiddleware)

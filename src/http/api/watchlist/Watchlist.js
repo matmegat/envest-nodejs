@@ -1,9 +1,9 @@
 
 var Router = require('express').Router
-// var toss = require('../../toss')
 var authRequired = require('../../auth-required')
+var toss = require('../../toss')
 
-module.exports = () =>
+module.exports = (watchlist) =>
 {
 	var wl = {}
 
@@ -13,7 +13,19 @@ module.exports = () =>
 
 	wl.express.get('/', (rq, rs) =>
 	{
+		var owner_id = rq.user.id
+
+		// toss(rs, watchlist.user.byId(owner_id))
+
 		rs.status(200).send(RandomWatchlist('user'))
+	})
+
+	wl.express.put('/:symbol', (rq, rs) =>
+	{
+		var owner_id = rq.user.id
+		var symbol   = rq.params.symbol
+
+		toss(rs, watchlist.user.add(owner_id, symbol))
 	})
 
 	wl.express.get('/investor/:id', (rq, rs) =>
