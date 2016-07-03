@@ -379,7 +379,7 @@ module.exports = function User (db)
 
 	var sorter = Sorter(
 	{
-		order_column: 'users.id',
+		order_column: 'last_name',
 		allowed_columns: ['last_name', 'first_name', 'email']
 	})
 
