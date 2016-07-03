@@ -40,7 +40,7 @@ module.exports = function User (db)
 
 	user.byId = function (id, trx)
 	{
-		return validate_id(id)
+		return user.validateId(id)
 		.then(() =>
 		{
 			return user.users_table(trx)
@@ -49,7 +49,7 @@ module.exports = function User (db)
 		})
 	}
 
-	var validate_id = require('../../id').validate.promise(WrongUserId)
+	user.validateId = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
 	{

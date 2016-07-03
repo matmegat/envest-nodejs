@@ -58,7 +58,7 @@ module.exports = function Investor (db)
 
 	investor.byId = function (id, trx)
 	{
-		return investor.validate_id(id)
+		return investor.validateId(id)
 		.then(() =>
 		{
 			return investor
@@ -91,7 +91,7 @@ module.exports = function Investor (db)
 		})
 	}
 
-	investor.validate_id = require('../../id').validate.promise(WrongInvestorId)
+	investor.validateId = require('../../id').validate.promise(WrongInvestorId)
 
 	investor.list = function (options, trx)
 	{

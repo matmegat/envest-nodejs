@@ -1,6 +1,4 @@
 
-// var Symbl = require('../symbols/Symbols/Symbl')
-
 var noop = require('lodash/noop')
 var extend = Object.assign
 
@@ -11,7 +9,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 {
 	var model = {}
 
-	model.validateId = () =>
+	model.validateId = (owner_id) =>
 	{
 		throw new Error('not_implemented')
 	}
