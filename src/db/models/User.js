@@ -18,6 +18,7 @@ var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
 var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
+var Sorter = require('../Sorter')
 
 module.exports = function User (db)
 {
@@ -376,6 +377,21 @@ module.exports = function User (db)
 
 	var paginator = PaginatorBooked()
 
+	var column_alias =
+	{
+		lname: 'last_name',
+		fname: 'first_name',
+		email: 'email'
+	}
+
+	var sorter_options =
+	{
+		order_column: 'users.id',
+		column_alias: column_alias
+	}
+
+	var sorter = Sorter(sorter_options)
+
 	user.byGroup = function (user_group, options)
 	{
 		var queryset = users_by_group(user_group)
@@ -391,6 +407,8 @@ module.exports = function User (db)
 		}
 
 		var count_queryset = queryset.clone()
+
+		queryset = sorter.sort(queryset, options.sorter)
 
 		queryset
 		.select(

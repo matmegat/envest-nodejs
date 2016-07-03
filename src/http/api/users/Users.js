@@ -39,6 +39,12 @@ module.exports = function Users (http, user_model)
 				'query'
 			])
 
+			options.sorter = _.pick(rq.query,
+			[
+				'sort',
+				'dir'
+			])
+
 			toss(rs, users.model.byGroup(group, options))
 		}
 	}
