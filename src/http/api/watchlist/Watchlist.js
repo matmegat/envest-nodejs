@@ -15,9 +15,9 @@ module.exports = (watchlist) =>
 	{
 		var owner_id = rq.user.id
 
-		// toss(rs, watchlist.user.byId(owner_id))
+		toss(rs, watchlist.user.byId(owner_id))
 
-		rs.status(200).send(RandomWatchlist('user'))
+		//rs.status(200).send(RandomWatchlist('user'))
 	})
 
 	wl.express.put('/:symbol', (rq, rs) =>
@@ -26,6 +26,14 @@ module.exports = (watchlist) =>
 		var symbol   = rq.params.symbol
 
 		toss(rs, watchlist.user.add(owner_id, symbol))
+	})
+
+	wl.express.delete('/:symbol', (rq, rs) =>
+	{
+		var owner_id = rq.user.id
+		var symbol   = rq.params.symbol
+
+		toss(rs, watchlist.user.remove(owner_id, symbol))
 	})
 
 	wl.express.get('/investor/:id', (rq, rs) =>
