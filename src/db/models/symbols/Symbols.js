@@ -27,7 +27,7 @@ var Symbols = module.exports = function Symbols (cfg)
 
 				var data =
 				{
-					symbol:   symbol.toXign(),
+					full:     symbol.toXign(),
 					ticker:   symbol.ticker,
 					exchange: symbol.exchange,
 					company:  resl.company
