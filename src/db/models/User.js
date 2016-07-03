@@ -8,12 +8,10 @@ var pick = require('lodash/pick')
 
 var Password = require('./Password')
 
-var Err = require('../../Err')
 var Groups = require('./Groups')
-var NotFound = Err('user_not_found', 'User not found')
+
+var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
-var WrongUserId = Err('wrong_user_id', 'Wrong user id')
-var UserDoesNotExist = Err('user_not_exist', 'User does not exist')
 var validate_email = require('../validate').email
 
 module.exports = function User (db)
@@ -31,14 +29,14 @@ module.exports = function User (db)
 
 	user.password = Password(db, user)
 
-	user.NotFound = NotFound
-
 	user.groups = Groups(db, user)
+
+	user.NotFound = Err('user_not_found', 'User not found')
 
 	user.ensure = function (id, trx)
 	{
 		return user.byId(id, trx)
-		.then(Err.nullish(UserDoesNotExist))
+		.then(Err.nullish(user.NotFound))
 	}
 
 	user.byId = function (id, trx)
@@ -101,7 +99,7 @@ module.exports = function User (db)
 			.where('id', id)
 		})
 		.then(oneMaybe)
-		.then(Err.nullish(NotFound))
+		.then(Err.nullish(user.NotFound))
 		.then(result =>
 		{
 			var user_data = {}
@@ -141,6 +139,7 @@ module.exports = function User (db)
 		})
 	}
 
+	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 	var validate_id = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
