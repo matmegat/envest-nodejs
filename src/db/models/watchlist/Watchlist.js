@@ -5,6 +5,9 @@ var knexed = require('../../knexed')
 
 var SymbolList = require('./SymbolList')
 
+var wrap = require('lodash/wrap')
+var pick = require('lodash/pick')
+
 module.exports = function Watchlist (db, symbols)
 {
 	expect(db, 'Watchlists depends on User').property('user')
@@ -24,6 +27,16 @@ module.exports = function Watchlist (db, symbols)
 		w.investor = SymbolList(knexed(knex, 'watchlist_investor'))
 
 		w.investor.validateId = db.investor.validateId
+
+		w.investor.add = wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
+		{
+			expect(additional).an('object')
+			expect(additional).property('target_price')
+
+			additional = pick(additional, 'target_price')
+
+			return sup(owner_id, symbol, additional)
+		})
 	}
 
 	return w
