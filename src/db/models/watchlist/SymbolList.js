@@ -1,6 +1,7 @@
 
 var noop = require('lodash/noop')
 var extend = Object.assign
+var ends = require('lodash/endsWith')
 
 var Err = require('../../../Err')
 var AlreadyThere = Err('symbol_already_there', 'Symbol already in this list')
@@ -45,10 +46,17 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 			return table().insert(entry)
 		})
-		.catch(Err.fromDb('owner_symbol_unique', () =>
+		.catch(error =>
 		{
-			return AlreadyThere({ symbol: symbol })
-		}))
+			if (error.constraint && ends(error.constraint, 'owner_symbol_unique'))
+			{
+				throw AlreadyThere({ symbol: symbol })
+			}
+			else
+			{
+				throw error
+			}
+		})
 		.then(noop)
 	}
 
