@@ -20,13 +20,13 @@ var Watchlist = module.exports = function Watchlist (db, symbols)
 	{
 		w.user = SymbolList(knexed(knex, schema.user.table_name))
 
-		w.user.validateId = db.user.validateId
+		w.user.validateId = db.user.ensure
 	}
 
 	{
 		w.investor = SymbolList(knexed(knex, schema.investor.table_name))
 
-		w.investor.validateId = db.investor.validateId
+		w.investor.validateId = db.investor.ensure
 
 		w.investor.add = wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
 		{
