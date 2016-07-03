@@ -85,7 +85,7 @@ SymbolList.schema.columns = (owner) =>
 
 	table.increments('id').primary()
 
-	table.integer('owner_id')
+	table.integer('owner_id').notNullable()
 		.references(owner)
 		.onUpdate('cascade')
 		.onDelete('cascade')
