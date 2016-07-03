@@ -1,9 +1,9 @@
 
 var extend = require('lodash/extend')
 
+var _ = require('lodash')
+
 var Err = require('../Err')
-var WrongDirection =
-    Err('wrong_direction', 'Direction could be desc or asc')
 
 var defaults =
 {
@@ -19,26 +19,42 @@ module.exports = function Sorter (sorter_options)
 
 	sorter.sort = function (queryset, options)
 	{
-		var order_column = sorter_options.column_alias[options.sort] ||
+		var sort = options.sort.split(',')
+
+		var order_column = sort[0] ||
 		sorter_options.order_column
 
-		var default_dir  = options.dir ||
+		var default_dir  = sort[1] ||
 		sorter_options.default_direction
 
-		if (validate_dir(default_dir))
-		{
-			throw WrongDirection()
-		}
+		validate_dir(default_dir)
+		validate_order(order_column,
+		sorter_options.allowed_columns)
 
 		queryset.orderBy(order_column, default_dir)
 
 		return queryset
 	}
 
-	function validate_dir (dir)
+	var WrongDirection = Err('wrong_direction', 'Direction could be desc or asc')
+
+	function validate_dir (direction)
 	{
-		return dir !== 'desc' &&
-		dir !== 'asc'
+		if (direction !== 'desc' &&
+		direction !== 'asc')
+		{
+			throw WrongDirection()
+		}
+	}
+
+	var WrongOrderColumn = Err('wrong_order_column', 'Wrong order column')
+
+	function validate_order (order_column, allowed_columns)
+	{
+		if (_.indexOf(allowed_columns, order_column) === -1)
+		{
+			throw WrongOrderColumn()
+		}
 	}
 
 	return sorter

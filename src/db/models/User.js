@@ -377,20 +377,11 @@ module.exports = function User (db)
 
 	var paginator = PaginatorBooked()
 
-	var column_alias =
-	{
-		lname: 'last_name',
-		fname: 'first_name',
-		email: 'email'
-	}
-
-	var sorter_options =
+	var sorter = Sorter(
 	{
 		order_column: 'users.id',
-		column_alias: column_alias
-	}
-
-	var sorter = Sorter(sorter_options)
+		allowed_columns: ['last_name', 'first_name', 'email']
+	})
 
 	user.byGroup = function (user_group, options)
 	{

@@ -41,8 +41,7 @@ module.exports = function Users (http, user_model)
 
 			options.sorter = _.pick(rq.query,
 			[
-				'sort',
-				'dir'
+				'sort'
 			])
 
 			toss(rs, users.model.byGroup(group, options))
