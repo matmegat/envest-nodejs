@@ -6,6 +6,7 @@ var cookie_parser = require('cookie-parser')
 var compose = require('composable-middleware')
 var authRequired = require('./auth-required')
 var AdminRequired = require('./admin-required')
+var investorRequired = require('./investor-required')
 
 var Auth = require('./api/auth/Auth')
 var Admin = require('./api/admin/Admin')
@@ -46,6 +47,7 @@ module.exports = function Http (app)
 	ReqLog(app.log, http.express)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
+	http.investorRequired = compose(authRequired, investorRequired(app.db.investor))
 	http.passport = Passport(http.express, app.db)
 
 	CheckToken(http.express, http.passport)
