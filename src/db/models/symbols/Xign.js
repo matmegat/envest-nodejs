@@ -56,9 +56,10 @@ module.exports = function Xign (cfg)
 			.map(unwrap.maybe((r, i) =>
 			{
 				return {
-					symbol: symbols[i],
+					symbol:   symbols[i],
 					currency: r.Currency,
-					price:    r.Last
+					price:    r.Last,
+					company:  r.Security.Name
 				}
 			}))
 		})

@@ -51,11 +51,6 @@ var Symbols = module.exports = function Symbols (cfg)
 		return xign.quotes(invoke(symbols, 'toXign'))
 		.then(resl =>
 		{
-			console.log(resl)
-			return resl
-		})
-		.then(resl =>
-		{
 			return resl.map((r, i) =>
 			{
 				if (! r)
@@ -65,10 +60,17 @@ var Symbols = module.exports = function Symbols (cfg)
 				else
 				{
 					r.symbol = symbols[i]
+					r.symbol.full = r.symbol.toXign()
+					r.symbol.company = r.company
 
 					return r
 				}
 			})
+		})
+		.then(resl =>
+		{
+			console.log(resl)
+			return resl
 		})
 	}
 
