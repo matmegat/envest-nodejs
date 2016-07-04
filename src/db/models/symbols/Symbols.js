@@ -5,6 +5,7 @@ var Symbl = require('./Symbl')
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 
+var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 
 var Symbols = module.exports = function Symbols (cfg)
@@ -55,10 +56,12 @@ var Symbols = module.exports = function Symbols (cfg)
 				}
 				else
 				{
-					r.symbol = symbols[i].toFull()
-					r.symbol.company = r.company
+					var symbol = symbols[i].toFull()
+					symbol.company = r.company
 
-					delete r.company
+					r = omit(r, 'symbol', 'company')
+
+					r.symbol = symbol
 
 					return r
 				}
