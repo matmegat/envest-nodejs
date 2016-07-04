@@ -464,8 +464,9 @@ module.exports = function User (db)
 		return queryset
 		.where(function ()
 		{
-			this.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
-			pattern)
+			this.whereRaw(
+				"lower(users.first_name || ' ' || users.last_name) LIKE ?",
+				pattern)
 			this.orWhere('users.email', 'like', pattern)
 			this.orWhere('email_confirms.new_email', 'like', pattern)
 		})

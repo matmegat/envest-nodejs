@@ -39,8 +39,9 @@ var Watchlist = module.exports = function Watchlist (db)
 		{
 			return new Promise(rs =>
 			{
-				validate.required(get(additional, 'target_price'), 'target_price')
-				// TODO validate.number
+				var target_price = get(additional, 'target_price')
+				validate.required(target_price, 'target_price')
+				validate.integer.positive(target_price, 'target_price')
 
 				additional = pick(additional, 'target_price')
 
