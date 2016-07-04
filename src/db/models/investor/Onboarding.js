@@ -235,7 +235,7 @@ function HistReturn (investor)
 		},
 		set: (value, queryset) =>
 		{
-			return queryset.update({ historical_returns: value })
+			return queryset.update({ historical_returns: JSON.stringify(value) })
 		}
 	})
 }
