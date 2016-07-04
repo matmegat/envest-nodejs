@@ -122,13 +122,7 @@ module.exports = function Investor (db)
 			emits.NewAdmins({ investor_id: investor_id })
 			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
 
-			return investor.portfolio.brokerage_table(trx)
-			.insert(
-			{
-				investor_id: investor_id,
-				cash_value: 0.0,
-				multiplier: 1.0
-			})
+			return investor.portfolio.createBrokerage(trx, investor_id, 100000)
 			.then(() =>
 			{
 				return investor.all.byId(investor_id, trx)

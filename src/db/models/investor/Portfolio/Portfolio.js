@@ -13,7 +13,6 @@ module.exports = function Portfolio (db, investor)
 	// var helpers = db.helpers
 
 	portfolio.holdings_table = knexed(knex, 'portfolio_symbols')
-	portfolio.brokerage_table = knexed(knex, 'brokerage')
 
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
@@ -108,6 +107,17 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return portfolio.recalculate(investor_id)
+		})
+	}
+
+	portfolio.createBrokerage = function (trx, investor_id, amount)
+	{
+		return brokerage.table(trx)
+		.insert(
+		{
+			investor_id: investor_id,
+			cash_value: amount,
+			multiplier: 1.0
 		})
 	}
 
