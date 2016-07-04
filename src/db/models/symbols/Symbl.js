@@ -37,6 +37,8 @@ var Symbl = module.exports = function Symbl (it)
 			return r.join('.')
 		}
 
+		s.toString = s.toXign
+
 		return s
 	}
 
