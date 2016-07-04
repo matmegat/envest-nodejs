@@ -19,10 +19,10 @@ module.exports = function Sorter (sorter_options)
 
 	sorter.sort = function (queryset, options)
 	{
+		var column
+		var direction
 
-		var column, direction
-
-		if(options && options.sort)
+		if (options && options.sort)
 		{
 			var sort = options.sort.split(',')
 
