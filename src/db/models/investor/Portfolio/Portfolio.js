@@ -23,30 +23,22 @@ module.exports = function Portfolio (db, investor)
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return portfolio.holdings_table(trx)
-			.select(
-			[
-				'symbol_exchange',
-				'symbol_ticker',
-				'buy_price',
-				'amount',
-				'brokerage.multiplier'
+			return Promise.all([
+				holdings.byInvestorId(investor_id),
+				brokerage.byInvestorId(investor_id)
 			])
-			.where('portfolio_symbols.investor_id', investor_id)
-			.innerJoin(
-				'brokerage',
-				'portfolio_symbols.investor_id',
-				'brokerage.investor_id'
-			)
 		})
-		.then((portfolio_holdings) =>
+		.then((values) =>
 		{
+			var portfolio_holdings = values[0]
+			var brokerage = values[1]
+
 			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
 			{
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
 					portfolio_holding.buy_price *
-					portfolio_holding.multiplier
+					brokerage.multiplier
 
 				portfolio_holding.gain = _.random(-10.0, 10.0, true)
 				// TODO: request to XIgnite
