@@ -18,7 +18,7 @@ var Symbl = module.exports = function Symbl (it)
 		var L = it.length
 		if ((L < 1) || (L > 2))
 		{
-			throw WrongFormat({ reason: 'must_be_a_pair'})
+			throw WrongFormat({ reason: 'must_be_a_pair' })
 		}
 
 		var s = inst()

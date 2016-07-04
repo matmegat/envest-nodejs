@@ -31,7 +31,7 @@ var Symbols = module.exports = function Symbols (cfg)
 
 				return symbol
 			},
-			error =>
+			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
 			})

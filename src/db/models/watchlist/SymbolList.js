@@ -13,7 +13,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 {
 	var model = {}
 
-	model.validateId = (owner_id) =>
+	model.validateId = (/* owner_id */) =>
 	{
 		throw new Error('not_implemented')
 	}
@@ -89,7 +89,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		{
 			return symbols.resolve(symbol)
 		})
-		.then(symbol =>
+		.then(() =>
 		{
 			return table()
 			.where('owner_id', owner_id)
