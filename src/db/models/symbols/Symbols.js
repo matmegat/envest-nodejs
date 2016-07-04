@@ -64,18 +64,7 @@ var Symbols = module.exports = function Symbols (cfg)
 				}
 			})
 		})
-		.then(resl =>
-		{
-			console.log(resl)
-			return resl
-		})
 	}
-
-	// symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])
-	// .then(console.log, console.error)
-
-	// symbols.resolve('GE.XNYS')
-	// .then(console.log, console.error)
 
 	return symbols
 }
