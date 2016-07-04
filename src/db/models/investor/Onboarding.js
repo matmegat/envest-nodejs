@@ -1,6 +1,5 @@
 
 var expect = require('chai').expect
-var Symbl = require('../symbols/Symbl')
 
 module.exports = function Onboarding (db, investor)
 {
