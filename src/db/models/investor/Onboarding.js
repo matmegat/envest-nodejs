@@ -1,5 +1,6 @@
 
 var expect = require('chai').expect
+var Symbl = require('../symbols/Symbl')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -280,11 +281,8 @@ function Holdings (investor_model, db)
 	{
 		expect(row).an('object')
 
-		validate.required(row.symbol_exchange, `holdings[${i}].symbol_exchange`)
-		validate.empty(row.symbol_exchange, `holdings[${i}].symbol_exchange`)
-
-		validate.required(row.symbol_ticker, `holdings[${i}].symbol_ticker`)
-		validate.empty(row.symbol_ticker, `holdings[${i}].symbol_ticker`)
+		validate.required(row.symbol, `holdings[${i}].symbol`)
+		validate.empty(row.symbol, `holdings[${i}].symbol`)
 
 		validate.number(row.amount, `holdings[${i}].amount`)
 		if (row.amount <= 0)

@@ -72,37 +72,16 @@ module.exports = function Holdings (db, investor)
 
 			holding_entries.forEach((holding, i) =>
 			{
-				validate.required(
-					holding.symbol_exchange,
-					`holdings[${i}].symbol_exchange`
-				)
-				validate.empty(
-					holding.symbol_exchange,
-					`holdings[${i}].symbol_exchange`
-				)
+				validate.required(holding.symbol, `holdings[${i}].symbol`)
+				validate.empty(holding.symbol, `holdings[${i}].symbol`)
 
-				validate.required(
-					holding.symbol_ticker,
-					`holdings[${i}].symbol_ticker`
-				)
-				validate.empty(
-					holding.symbol_ticker,
-					`holdings[${i}].symbol_ticker`
-				)
-
-				validate.number(
-					holding.amount,
-					`holdings[${i}].amount`
-				)
+				validate.number(holding.amount, `holdings[${i}].amount`)
 				if (holding.amount <= 0)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].amount` })
 				}
 
-				validate.number(
-					holding.buy_price,
-					`holdings[${i}].buy_price`
-				)
+				validate.number(holding.buy_price, `holdings[${i}].buy_price`)
 				if (holding.buy_price <= 0)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].buy_price` })
@@ -112,11 +91,18 @@ module.exports = function Holdings (db, investor)
 			// return set_holdings(trx, investor_id, holdings)
 			return Promise.all(_.map(holding_entries, (holding) =>
 			{
-				return db.symbols.resolve(`${holding.symbol_ticker}.${holding.symbol_exchange}`)
+				return db.symbols.resolve(holding.symbol)
 			}))
 		})
 		.then((processed_symbols) =>
 		{
+			processed_symbols.forEach((symbol, i) =>
+			{
+				holding_entries[i].symbol_exchange = symbol.exchange
+				holding_entries[i].symbol_ticker = symbol.ticker
+				delete holding_entries[i].symbol
+			})
+
 			return set_holdings(trx, investor_id, holding_entries)
 		})
 	})
@@ -128,7 +114,6 @@ module.exports = function Holdings (db, investor)
 	{
 		return holdings.table()
 		.where('investor_id', investor_id)
-		.debug(true)
 	}
 
 	return holdings
