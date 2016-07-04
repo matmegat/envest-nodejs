@@ -23,6 +23,7 @@ module.exports = function Investor (db, app)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
+	var one = db.helpers.one
 
 	investor.table = knexed(knex, 'investors')
 
@@ -128,6 +129,25 @@ module.exports = function Investor (db, app)
 			})
 		})
 	})
+
+	var get_pic = require('lodash/fp/get')('profile_pic')
+
+	investor.profilePicById = function (user_id)
+	{
+		return investor.table()
+		.where('user_id', user_id)
+		.then(one)
+		.then(get_pic)
+	}
+
+	investor.updateProfilePic = function (data)
+	{
+		return investor.table()
+		.update({
+			profile_pic: data.hash
+		})
+		.where('user_id', data.user_id)
+	}
 
 	return investor
 }
