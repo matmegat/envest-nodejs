@@ -39,6 +39,16 @@ var Symbl = module.exports = function Symbl (it)
 
 		s.toString = s.toXign
 
+		s.toFull = () =>
+		{
+			return {
+				full: s.toXign(),
+				ticker: s.ticker,
+				exchange: s.exchange,
+				company: null
+			}
+		}
+
 		return s
 	}
 

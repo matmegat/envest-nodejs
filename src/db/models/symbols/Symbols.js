@@ -25,15 +25,11 @@ var Symbols = module.exports = function Symbols (cfg)
 
 				symbol.exchange || (symbol.exchange = resl.exchange)
 
-				var data =
-				{
-					full:     symbol.toXign(),
-					ticker:   symbol.ticker,
-					exchange: symbol.exchange,
-					company:  resl.company
-				}
+				symbol = symbol.toFull()
 
-				return data
+				symbol.company = resl.company
+
+				return symbol
 			},
 			error =>
 			{
@@ -59,9 +55,10 @@ var Symbols = module.exports = function Symbols (cfg)
 				}
 				else
 				{
-					r.symbol = symbols[i]
-					r.symbol.full = r.symbol.toXign()
+					r.symbol = symbols[i].toFull()
 					r.symbol.company = r.company
+
+					delete r.company
 
 					return r
 				}
