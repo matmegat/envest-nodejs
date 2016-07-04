@@ -57,13 +57,12 @@ module.exports = function name (app)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
+
 	db.investor = Investor(db, app)
 	db.feed = Feed(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
-
-	db.symbols = Symbols(app.cfg)
 
 	db.symbols = Symbols(app.cfg)
 	db.watchlist = Watchlist(db)

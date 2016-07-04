@@ -59,7 +59,8 @@ module.exports = function Xign (cfg)
 					symbol:   symbols[i],
 					currency: r.Currency,
 					price:    r.Last,
-					company:  r.Security.Name
+					company:  r.Security.Name,
+					gain:     r.PercentChangeFromPreviousClose
 				}
 			}))
 		})

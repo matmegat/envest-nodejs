@@ -36,7 +36,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 				return map(quotes, (r, i) =>
 				{
 					var t = entries[i].target_price
-					if (t)
+					if (r && t) /* fix for unresolved symbols */
 					{
 						r.target_price = t
 					}

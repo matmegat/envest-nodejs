@@ -19,19 +19,19 @@ put:
   tags:
   - watchlist
 
-# delete:
-#   description: |
-#     Delete Symbol from Investors's Watchlist
-#   parameters:
-#   - name: symbol_x
-#     in: path
-#     type: string
-#     description: Symbol Full (GE.XNYS)
-#     required: true
+delete:
+  description: |
+    Delete Symbol from Investors's Watchlist
+  parameters:
+  - name: symbol_x
+    in: path
+    type: string
+    description: Symbol Full (GE.XNYS)
+    required: true
 
-#   responses:
-#     200:
-#       description: Symbol removed
+  responses:
+    200:
+      description: Symbol removed
 
-#   tags:
-#   - watchlist
+  tags:
+  - watchlist

@@ -1,0 +1,19 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: User id
+  first_name:
+    type: string
+    description: User First name
+  last_name:
+    type: string
+    description: User Last name
+  email:
+    type: string
+    description: User email
+required:
+- id
+- first_name
+- last_name
+- email

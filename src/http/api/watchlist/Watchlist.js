@@ -38,9 +38,17 @@ module.exports = (watchlist, http) =>
 
 
 	/* Investor */
-	wl.express.get('/investor/:id', (rq, rs) =>
+	wl.express.get('/investor/by-id/:id', (rq, rs) =>
 	{
 		var owner_id = rq.params.id
+
+		toss(rs, watchlist.investor.byId(owner_id))
+	})
+
+	wl.express.get('/investor/', http.investorRequired,
+	(rq, rs) =>
+	{
+		var owner_id = rq.user.id
 
 		toss(rs, watchlist.investor.byId(owner_id))
 	})
