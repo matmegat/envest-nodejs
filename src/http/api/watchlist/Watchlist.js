@@ -50,8 +50,9 @@ module.exports = (watchlist, http) =>
 	{
 		var owner_id = rq.user.id
 		var symbol   = rq.params.symbol
+		var additional = rq.body
 
-		toss(rs, watchlist.investor.add(owner_id, symbol))
+		toss(rs, watchlist.investor.add(owner_id, symbol, additional))
 	})
 
 	wl.express.delete('/investor/:symbol', http.investorRequired,
