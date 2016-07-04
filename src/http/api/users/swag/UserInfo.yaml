@@ -1,0 +1,30 @@
+type: object
+title: Authenticated User's data
+properties:
+  id:
+    type: integer
+    description: User's Id
+  first_name:
+    type: string
+    description: User's First Name
+  last_name:
+    type: string
+    description: User's Last Name
+  email:
+    type: string
+    description: User's Email
+  pic:
+    type: string
+    description: URL to User's image
+  investor:
+    schema:
+    $ref: './Investor.yaml'
+  admin:
+    schema:
+    $ref: './Admin.yaml'
+required:
+- id
+- first_name
+- last_name
+- pic
+- email

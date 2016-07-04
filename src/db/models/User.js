@@ -1,9 +1,13 @@
 
 var knexed = require('../knexed')
 
+var _ = require('lodash')
+
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 var pick   = require('lodash/pick')
+
+var pick = require('lodash/pick')
 
 var Password = require('./Password')
 
@@ -11,6 +15,10 @@ var Groups = require('./Groups')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
+
+var validate_email = require('../validate').email
+var PaginatorBooked = require('../paginator/Booked')
+var Sorter = require('../Sorter')
 
 module.exports = function User (db)
 {
@@ -20,6 +28,7 @@ module.exports = function User (db)
 
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
+	var count = db.helpers.count
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
@@ -171,7 +180,6 @@ module.exports = function User (db)
 	}
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
-	// eslint-disable-next-line id-length
 	function ensureEmailNotExists (email, trx)
 	{
 		return user.byEmail(email, trx)
@@ -180,34 +188,43 @@ module.exports = function User (db)
 
 	user.byEmail = function (email, trx)
 	{
-		return knex.select('*')
-		.transacting(trx)
-		.from(function ()
+		return new Promise(rs =>
 		{
-			this.select(
-				'users.id AS id',
-				'password',
-				'salt',
-				'first_name',
-				'last_name',
-				'pic',
-				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
-			)
-			.from('users')
-			.leftJoin(
-				'email_confirms',
-				'users.id',
-				'email_confirms.user_id'
-			)
-			.leftJoin(
-				'auth_local',
-				'users.id',
-				'auth_local.user_id'
-			)
-			.as('ignored_alias')
+			validate_email(email)
+			return rs()
 		})
-		.where('email', email)
-		.then(oneMaybe)
+		.then(() =>
+		{
+			return knex.select('*')
+			.transacting(trx)
+			.from(function ()
+			{
+				this.select(
+					'users.id AS id',
+					'password',
+					'salt',
+					'first_name',
+					'last_name',
+					'pic',
+					knex.raw(
+						'COALESCE(users.email, email_confirms.new_email) AS email')
+				)
+				.from('users')
+				.leftJoin(
+					'email_confirms',
+					'users.id',
+					'email_confirms.user_id'
+				)
+				.leftJoin(
+					'auth_local',
+					'users.id',
+					'auth_local.user_id'
+				)
+				.as('ignored_alias')
+			})
+			.where('email', email.toLowerCase())
+			.then(oneMaybe)
+		})
 	}
 
 	user.list = function (ids)
@@ -219,21 +236,13 @@ module.exports = function User (db)
 
 	user.byFacebookId = function (facebook_id)
 	{
-		return knex.select('id', 'facebook_id')
-		.from(function ()
-		{
-			this.select(
-				'users.id AS id',
-				'auth_facebook.facebook_id AS facebook_id'
-			)
-			.from('users')
-			.leftJoin(
-				'auth_facebook',
-				'users.id',
-				'auth_facebook.user_id'
-			)
-			.as('ignored_alias')
-		})
+		return knex.select('*')
+		.from('users')
+		.leftJoin(
+			'auth_facebook',
+			'users.id',
+			'auth_facebook.user_id'
+		)
 		.where('facebook_id', facebook_id)
 		.then(oneMaybe)
 	}
@@ -250,14 +259,14 @@ module.exports = function User (db)
 			}
 			, 'id')
 			.then(one)
-			.then(function (id)
+			.then(id =>
 			{
 				return user.newEmailUpdate({
 					user_id: id,
 					new_email: data.email
 				}, trx)
 			})
-			.then(function (id)
+			.then(id =>
 			{
 				return createFacebookUser({
 					user_id: id,
@@ -267,6 +276,10 @@ module.exports = function User (db)
 			.then(() =>
 			{
 				return user.byFacebookId(data.facebook_id)
+			})
+			.then(result =>
+			{
+				return result.id
 			})
 		})
 	}
@@ -280,10 +293,12 @@ module.exports = function User (db)
 			{
 				return user.createFacebook(data)
 			}
-			else
-			{
-				return result
-			}
+
+			return result.id
+		})
+		.then(id =>
+		{
+			return user.infoById(id)
 		})
 	}
 
@@ -360,6 +375,125 @@ module.exports = function User (db)
 			})
 		})
 	})
+
+	var paginator = PaginatorBooked()
+
+	var sorter = Sorter(
+	{
+		order_column: 'last_name',
+		allowed_columns: [ 'last_name', 'first_name', 'email' ]
+	})
+
+	user.byGroup = function (user_group, options)
+	{
+		var queryset = users_by_group(user_group)
+		.leftJoin(
+			'email_confirms',
+			'users.id',
+			'email_confirms.user_id'
+		)
+
+		if (options.filter.query)
+		{
+			queryset = filter_by_query(queryset, options.filter.query)
+		}
+
+		var count_queryset = queryset.clone()
+
+		queryset = sorter.sort(queryset, options.sorter)
+
+		queryset
+		.select(
+			'users.id',
+			'users.first_name',
+			'users.last_name',
+			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
+		)
+
+		options.paginator = _.extend({}, options.paginator,
+		{
+			real_order_column: 'users.id'
+		})
+
+		return paginator.paginate(queryset, options.paginator)
+		.then((users) =>
+		{
+			var response =
+			{
+				users: users
+			}
+
+			return count(count_queryset)
+			.then(count =>
+			{
+				return paginator.total(response, count)
+			})
+		})
+	}
+
+	function users_by_group (group)
+	{
+		if (user.groups.isUser(group))
+		{
+			return user.users_table()
+			.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+			 )
+			.leftJoin(
+				'investors',
+				'users.id',
+				'investors.user_id'
+			)
+			.whereNull('admins.user_id')
+			.whereNull('investors.user_id')
+		}
+		else if (user.groups.isAdmin(group))
+		{
+			return user.users_table()
+			.leftJoin(
+				'admins',
+				'users.id',
+				'admins.user_id'
+			 )
+			.whereNotNull('admins.user_id')
+		}
+	}
+
+	function filter_by_query (queryset, query)
+	{
+		var pattern = '%' + query.toLowerCase() + '%'
+
+		return queryset
+		.where(function ()
+		{
+			this.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
+			pattern)
+			this.orWhere('users.email', 'like', pattern)
+			this.orWhere('email_confirms.new_email', 'like', pattern)
+		})
+	}
+
+	var get_pic = require('lodash/fp/get')('pic')
+
+	user.picById = function (id)
+	{
+		return user.users_table()
+		.where('id', id)
+		.then(one)
+		.then(get_pic)
+	}
+
+	user.updatePic = function (data)
+	{
+		return user.users_table()
+		.update(
+		{
+			pic: data.hash
+		})
+		.where('id', data.user_id)
+	}
 
 	return user
 }

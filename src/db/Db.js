@@ -11,6 +11,8 @@ var Investor = require('./models/Investor')
 var Portfolio = require('./models/Portfolio')
 var Notifications = require('./models/Notifications')
 var Watchlist = require('./models/watchlist/Watchlist')
+var Static = require('./models/Static')
+var Pic = require('./models/Pic')
 
 module.exports = function name (app)
 {
@@ -18,6 +20,7 @@ module.exports = function name (app)
 
 	var cfg  = app.cfg
 	var conn = cfg.pg
+	var rootpath = app.root
 
 	db.helpers = require('./helpers')
 
@@ -62,6 +65,9 @@ module.exports = function name (app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 	db.watchlist = Watchlist(db)
+
+	db.static = Static(rootpath)
+	db.pic = Pic(db)
 
 	return db
 }

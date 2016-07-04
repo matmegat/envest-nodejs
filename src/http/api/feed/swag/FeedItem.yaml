@@ -1,14 +1,14 @@
 type: object
 properties:
   id:
-    type: number
+    type: integer
     description: Feed event id
   timestamp:
     type: string
     format: date-time
     description: when event occurs
   investor_id:
-    type: number
+    type: integer
     description: |
       **optional**
       present at `/feed` requests
@@ -27,7 +27,7 @@ properties:
     - $ref: ./WatchlistEvent.yaml
     - $ref: ./UpdateEvent.yaml
   comments:
-    type: number
+    type: integer
     description: Amount of comments for Feed Item
 required:
 - id

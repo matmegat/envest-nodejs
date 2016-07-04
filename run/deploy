@@ -7,7 +7,7 @@ var home = require('home').resolve
 var tmp = require('os').tmpdir
 
 var fs = require('fs-sync')
-var load  = fs.readJSON
+var read  = fs.read
 var write = fs.write
 
 var slack = require('./lib/slack')
@@ -33,7 +33,8 @@ if (! env)
 var cmd = require('command-promise')
 var partial = require('lodash/partial')
 
-// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/ ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
+// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/
+// ... ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
 
 var ssh = partial(cmd, 'ssh')
 var scp = partial(cmd, 'scp')
@@ -56,15 +57,19 @@ if (key)
 var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
 ssh = partial(ssh, remote)
-rsync = partial(rsync, '--recursive', '--delete')
+rsync = partial(rsync, '--recursive')
+rsync_clean = partial(rsync, '--delete')
 
 function outputify (name, fn)
 {
-	return () =>
+	return function ()
 	{
 		console.info('START', name)
 
-		var r = fn.apply(this, arguments)
+		var r = new Promise(rs =>
+		{
+			rs(fn.apply(this, arguments))
+		})
 
 		return r.then(() =>
 		{
@@ -90,12 +95,16 @@ function target (path)
 	return remote + ':' + remote_rootpath(path)
 }
 
+
+var load  = fs.readJSON
+
 function dump (path, config)
 {
 	config = JSON.stringify(config, null, '  ')
 
 	write(path, config)
 }
+
 
 function rev ()
 {
@@ -130,7 +139,7 @@ rev()
 }))
 .then(outputify('copy db/', () =>
 {
-	return rsync(rootpath('db') + '/', target('db'))
+	return rsync_clean(rootpath('db') + '/', target('db'))
 }))
 .then(outputify('copy static/', () =>
 {
@@ -138,7 +147,7 @@ rev()
 }))
 .then(outputify('copy src/', () =>
 {
-	return rsync(rootpath('src') + '/', target('src'))
+	return rsync_clean(rootpath('src') + '/', target('src'))
 }))
 .then(() =>
 {
@@ -155,10 +164,33 @@ rev()
 	dump(tmp, config)
 
 	return scp(tmp, target('cfg/config.json'))
+	.then(() => config)
 }))
-.then(() =>
+.then(config =>
 {
-	return scp(rootpath('cfg/nginx.conf'), target('cfg/'))
+	if (! config.nginx)
+	{
+		return
+	}
+
+	return outputify('compile nginx config, copy cfg/', () =>
+	{
+		var render = require('mustache').render
+
+		var template = read(rootpath('cfg/env/_nginx.conf'))
+		var port = config.port
+
+		var rendered = render(template,
+		{
+			port: port,
+			port_nginx: port - 1
+		})
+
+		var tmp = rootpath('var/deploy-nginx.conf')
+		write(tmp, rendered)
+
+		return scp(tmp, target('cfg/nginx.conf'))
+	})()
 })
 .then(() =>
 {
@@ -169,7 +201,8 @@ rev()
 	return ssh(
 		f( '"cd %s;'
 		 + ' npm install --production --no-optional;'
-		 + 'sudo npm run restart"', remote_rootpath()
+		 + 'sudo npm run restart;'
+		 + 'sudo nginx -s reload || true;"', remote_rootpath()
 	))
 }))
 .then(() =>
@@ -185,6 +218,7 @@ rev()
 .catch(error =>
 {
 	console.error(error)
+	console.error(error.stack)
 
 	slack.failure(env)
 	.then(() =>

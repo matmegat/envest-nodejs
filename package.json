@@ -44,11 +44,26 @@
     "cookie-parser":
       "^1.4.1",
 
+    "multer":
+      "^1.1.0",
+
+    "shortid":
+      "^2.2.6",
+
+    "lwip":
+      "^0.0.9",
+
+    "mkdirp":
+      "^0.5.1",
+
     "express-session":
       "^1.13.0",
 
     "composable-middleware":
       "^0.3",
+
+    "sendgrid":
+      "^2",
 
     "passport":
       "^0.3.2",
@@ -105,13 +120,16 @@
       "^2.8",
 
     "js-outlander":
-      "StrangeTransistor/js-outlander#2.0.7",
+      "StrangeTransistor/js-outlander#2.0.8",
 
     "nodemon":
       "^1.9.1",
 
     "minimist":
       "^1.2",
+
+    "mustache":
+      "^2.2",
 
     "home":
       "^1",
