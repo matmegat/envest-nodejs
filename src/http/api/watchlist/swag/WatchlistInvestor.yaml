@@ -19,12 +19,16 @@ get:
           price:
             type: number
             description: current price of asset
+          currency:
+            type: string
+            description: currency of price (mostly common "USD")
           target_price:
             type: number
             description: Investor's target price of asset
         required:
           - symbol
           - price
+          - currency
           - target_price
 
     400:
