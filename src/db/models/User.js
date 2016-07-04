@@ -3,6 +3,7 @@ var knexed = require('../knexed')
 
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
+var pick   = require('lodash/pick')
 
 var Password = require('./Password')
 
@@ -10,9 +11,6 @@ var Groups = require('./Groups')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
-
-var validate_email = require('../validate').email
-
 
 module.exports = function User (db)
 {
