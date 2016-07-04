@@ -5,8 +5,6 @@ var promisify = require('promisify-node')
 var randomBytes = promisify(crypto.randomBytes)
 var genHash = promisify(crypto.pbkdf2)
 
-var shortid = require('shortid')
-
 var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
@@ -40,22 +38,21 @@ helpers.generate_code = function generate_code ()
 {
 	var chars = '0123456789abcdefghijklmnopqrstuvwxyz'
 
-	return new Promise(function(rs, rj)
+	return new Promise(function (rs)
 	{
 		var charsLength = chars.length
-
 		var randomBytes = crypto.randomBytes(code_size)
 
 		var result = new Array(code_size)
 
 		var cursor = 0
-		for (var i = 0; i < code_size; i++)
+		for (var i = 0; i < code_size; i ++)
 		{
 			cursor += randomBytes[i]
 			result[i] = chars[cursor % charsLength]
 		}
 
-		rs(result.join(''));
+		rs(result.join(''))
 	})
 }
 

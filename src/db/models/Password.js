@@ -136,7 +136,7 @@ module.exports = function Password (db, app, user)
 					'user_id'
 				)
 
-				var where = {user_id: user.id}
+				var where = { user_id: user.id }
 
 				return password_upsert(where, data)
 				.then(() =>
