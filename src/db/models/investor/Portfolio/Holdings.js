@@ -22,10 +22,9 @@ module.exports = function Holdings (db, investor)
 		* holdings:
 		* [
 		*   {
-		*     symbol_exchange: string,
-		*     symbol_ticker:   string,
-		*     amount:          integer,
-		*     buy_price:       float
+		*     symbol:    string,
+		*     amount:    integer,
+		*     buy_price: float
 		*   },
 		*   {},
 		* ]

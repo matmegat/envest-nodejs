@@ -32,34 +32,53 @@ module.exports = function Portfolio (db, investor)
 			var portfolio_holdings = values[0]
 			var brokerage = values[1]
 
-			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
+			portfolio_holdings.forEach((portfolio_holding) =>
 			{
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
 					portfolio_holding.buy_price *
 					brokerage.multiplier
-
-				portfolio_holding.gain = _.random(-10.0, 10.0, true)
-				// TODO: request to XIgnite
-				portfolio_holding.symbol =
-				{
-					exchange: portfolio_holding.symbol_exchange,
-					ticker: portfolio_holding.symbol_ticker,
-					company: 'TODO: request XIgnite'
-				}
-
-				return _.pick(portfolio_holding,
-				[
-					'symbol',
-					'allocation',
-					'gain'
-				])
 			})
 
-			return {
-				total: portfolio_holdings.length,
-				holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc')
-			}
+			return db.symbols.quotes(portfolio_holdings.map((holding) =>
+			{
+				return [ holding.symbol_ticker, holding.symbol_exchange ]
+			}))
+			.then((quoted_symbols) =>
+			{
+				portfolio_holdings = quoted_symbols.map((quoted_symbol, i) =>
+				{
+					if (quoted_symbol === null)
+					{
+						portfolio_holdings[i].symbol =
+						{
+							ticker: portfolio_holdings[i].symbol_ticker,
+							exchange: portfolio_holdings[i].symbol_exchange,
+							company: null
+						}
+						portfolio_holdings[i].gain = null
+					}
+					else
+					{
+						portfolio_holdings[i].symbol = quoted_symbol.symbol
+						portfolio_holdings[i].gain =
+							quoted_symbol.price /
+							portfolio_holdings[i].buy_price - 1
+					}
+
+					return _.pick(portfolio_holdings[i],
+					[
+						'symbol',
+						'allocation',
+						'gain'
+					])
+				})
+
+				return {
+					total: portfolio_holdings.length,
+					holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc')
+				}
+			})
 		})
 	}
 
