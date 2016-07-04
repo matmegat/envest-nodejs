@@ -1,9 +1,11 @@
 # note:
 # the more accurate term for this Type is "Security" (as a tradeable financial asset),
-# but for not to be mixed up with Informational Security
-# this is called Symbol
+# but for not to be mixed up with "Informational Security" this is called Symbol
 type: object
 properties:
+  full:
+    type: string
+    description: Symbol exchange and ticker in xIgnite format (GE.XNYS)
   exchange:
     type: string
     description: Symbol exchange
@@ -14,6 +16,7 @@ properties:
     type: string
     description: company name corresponding to that symbol
 required:
+- full
 - exchange
 - ticker
 - company

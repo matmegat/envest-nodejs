@@ -6,9 +6,11 @@ var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
 var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
+var Symbols = require('./models/symbols/Symbols')
 var Investor = require('./models/Investor')
 var Portfolio = require('./models/Portfolio')
 var Notifications = require('./models/Notifications')
+var Watchlist = require('./models/watchlist/Watchlist')
 var Static = require('./models/Static')
 var Pic = require('./models/Pic')
 
@@ -56,9 +58,13 @@ module.exports = function name (app)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
-	db.investor = Investor(db, app)
+
+	db.symbols = Symbols(app.cfg)
+
+	db.investor = Investor(db)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
+	db.watchlist = Watchlist(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
