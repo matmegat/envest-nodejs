@@ -68,6 +68,9 @@ paths:
   '/watchlist':
     $ref: ../api/watchlist/swag/WatchlistUser.yaml
 
+  '/watchlist/{symbol_x}':
+    $ref: ../api/watchlist/swag/PutDelete-WatchlistUser.yaml
+
   '/watchlist/investor/{investor_id}':
     $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
 

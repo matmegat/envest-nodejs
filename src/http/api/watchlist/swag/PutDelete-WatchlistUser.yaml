@@ -1,0 +1,37 @@
+put:
+  description: |
+    Put Symbol in User's Watchlist
+  parameters:
+  - name: symbol_x
+    in: path
+    type: string
+    description: Symbol Full (GE.XNYS)
+    required: true
+
+  responses:
+    200:
+      description: Symbol added
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+  tags:
+  - watchlist
+
+delete:
+  description: |
+    Delete Symbol from User's Watchlist
+  parameters:
+  - name: symbol_x
+    in: path
+    type: string
+    description: Symbol Full (GE.XNYS)
+    required: true
+  responses:
+    200:
+      description: Symbol removed
+
+  tags:
+  - watchlist
