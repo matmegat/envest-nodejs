@@ -34,7 +34,8 @@ var Watchlist = module.exports = function Watchlist (db)
 
 		w.investor.validateId = db.investor.ensure
 
-		w.investor.add = wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
+		w.investor.add =
+		wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
 		{
 			return new Promise(rs =>
 			{
