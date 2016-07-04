@@ -13,10 +13,9 @@ var Onboarding = require('./Onboarding')
 
 var Meta = require('./Meta')
 
-module.exports = function Investor (db, app)
 var Portfolio = require('./Portfolio')
 
-module.exports = function Investor (db)
+module.exports = function Investor (db, app)
 {
 	var investor = {}
 

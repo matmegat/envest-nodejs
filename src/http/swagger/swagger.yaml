@@ -20,6 +20,15 @@ paths:
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
+  '/feed/counts':
+    $ref: ../api/feed/swag/FeedByCounts.yaml
+
+  '/feed/trades':
+    $ref: ../api/feed/swag/FeedByTrade.yaml
+
+  '/feed/updates':
+    $ref: ../api/feed/swag/FeedByUpdate.yaml
+
   '/feed/{feed_id}/comments':
     $ref: ../api/feed/swag/GetPostFeedComments.yaml
 
@@ -80,6 +89,15 @@ paths:
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
+  '/static/upload/pic':
+    $ref: ../api/statics/swag/UploadUserPic.yaml
+
+  '/static/upload/profile_pic':
+    $ref: ../api/statics/swag/UploadProfilePic.yaml
+
+  '/users/current':
+    $ref: ../api/users/swag/UserCurrent.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 
@@ -96,6 +114,9 @@ definitions:
 
   FeedItem:
     $ref: ../api/feed/swag/FeedItem.yaml
+
+  FeedCounts:
+    $ref: ../api/feed/swag/FeedCounts.yaml
 
   Investor:
     $ref: ../api/investors/swag/Investor.yaml

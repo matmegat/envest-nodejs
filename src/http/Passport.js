@@ -32,7 +32,7 @@ module.exports = function (express, db)
 
 	passport.deserializeUser((id, done) =>
 	{
-		user.byId(id)
+		user.infoById(id)
 		.then(user =>
 		{
 			if (! user)
@@ -73,7 +73,7 @@ function useBearerToken (user)
 
 		if (decoded && decoded.id)
 		{
-			user.byId(decoded.id)
+			user.infoById(decoded.id)
 			.then(user => done(null, user), done)
 		}
 		else
@@ -92,9 +92,8 @@ function useFacebookToken (auth, user)
 	{
 		clientID: clientID,
 		clientSecret: clientSecret
-	}
-	// eslint-disable-next-line max-params
-	, (accessToken, refreshToken, profile, done) =>
+	},
+	(accessToken, refreshToken, profile, done) =>
 	{
 		var user_data =
 		{

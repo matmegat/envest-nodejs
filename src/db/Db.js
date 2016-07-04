@@ -8,6 +8,8 @@ var Feed = require('./models/Feed')
 var Comments = require('./models/Comments')
 var Investor = require('./models/investor/Investor')
 var Notifications = require('./models/Notifications')
+var Static = require('./models/Static')
+var Pic = require('./models/Pic')
 var Symbols = require('./models/symbols/Symbols')
 
 module.exports = function name (app)
@@ -16,6 +18,7 @@ module.exports = function name (app)
 
 	var cfg  = app.cfg
 	var conn = cfg.pg
+	var rootpath = app.root
 
 	db.helpers = require('./helpers')
 
@@ -55,6 +58,9 @@ module.exports = function name (app)
 	db.comments = Comments(db)
 	db.investor = Investor(db, app)
 	db.feed = Feed(db)
+
+	db.static = Static(rootpath)
+	db.pic = Pic(db)
 
 	db.symbols = Symbols(app.cfg)
 

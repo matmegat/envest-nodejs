@@ -1,26 +1,6 @@
 get:
-  description: latest 20 Feed posts for current user
+  description: Get count of each type of Feed.
   parameters:
-  - name: max_id
-    in: query
-    type: integer
-    description: |
-      Get feed items that are added before *max_id* (inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
-  - name: since_id
-    in: query
-    type: integer
-    description: |
-      Get feed items greater than *since_id* (non inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
-  - name: page
-    in: query
-    type: integer
-    description: Page number
-  - name: type
-    in: query
-    type: string
-    description: Type feed
   - name: investor
     in: query
     type: integer
@@ -59,8 +39,12 @@ get:
     description: Feed after a date (ISO 8601 strings)
   responses:
     200:
-      description: user's Feed
+      description: Сount of each type of Feed
       schema:
-        $ref: ./Feed.yaml
+        $ref: ./FeedCounts.yaml
+    400:
+      description: Handled Error
+      schema:
+        $ref: ../../../swagger/Error.yaml
   tags:
   - feed

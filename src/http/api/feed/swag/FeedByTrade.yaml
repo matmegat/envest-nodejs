@@ -1,7 +1,5 @@
 get:
-  description: |
-    Get list of investors sorted by `last_name`. Response exrended with
-    investor fields: `is_public`, ~~`is_featured`~~, ~~`category`~~
+  description: Get selected Feed Item by type 'trade'
   parameters:
   - name: max_id
     in: query
@@ -19,16 +17,18 @@ get:
     in: query
     type: integer
     description: Page number
+  - name: investor
+    in: query
+    type: integer
+    description: Investor Id
   responses:
     200:
-      description: Investors list
+      description: Selected Feed
       schema:
-        $ref: ./Investors.yaml
+        $ref: ./FeedItem.yaml
     400:
-      description: |
-        **Error object** which follows
-        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      description: Handled Error
       schema:
         $ref: ../../../swagger/Error.yaml
   tags:
-  - admin
+  - feed

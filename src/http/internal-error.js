@@ -2,9 +2,9 @@
 var toss = require('./toss')
 var Err = require('../Err')
 
-var MiddlewareError = Err('middleware_error', 'Middleware error')
+var InternalError = Err('internal_error', 'Internal error')
 
-// eslint-disable-next-line no-unused-vars, max-params
+// eslint-disable-next-line no-unused-vars
 module.exports = (err, rq, rs, next) =>
 {
 	if (Err.is(err))
@@ -14,7 +14,8 @@ module.exports = (err, rq, rs, next) =>
 	else
 	{
 		console.error(err)
+		console.error(err.stack)
 
-		return toss.err(rs, MiddlewareError())
+		return toss.err(rs, InternalError())
 	}
 }

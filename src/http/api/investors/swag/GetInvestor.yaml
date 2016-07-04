@@ -3,7 +3,7 @@ get:
   parameters:
   - name: investor_id
     in: path
-    type: number
+    type: integer
     description: Investor ID
     required: true
   responses:

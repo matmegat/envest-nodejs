@@ -50,7 +50,7 @@ module.exports = function Paginator__Booked (paginator_options)
 	paginator.total = function (response, count)
 	{
 		response.total = count
-		response.pages = Math.floor(count / paginator_options.limit)
+		response.pages = Math.ceil(count / paginator_options.limit)
 
 		return response
 	}
