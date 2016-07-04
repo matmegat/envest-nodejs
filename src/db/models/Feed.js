@@ -15,6 +15,8 @@ var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var noop = require('lodash/noop')
 
+var validate = require('../validate')
+
 module.exports = function Feed (db)
 {
 	var feed = {}
@@ -208,18 +210,92 @@ module.exports = function Feed (db)
 
 	feed.add = function (feed_item)
 	{
-		return feed.feed_table()
-		.insert(
+		return validateFeedItem(data)
+		.then(() =>
 		{
-			investor_id: feed_item.investor_id,
-			type: feed_item.type,
-			data: feed_item.data
+			return feed.feed_table()
+			.insert(
+			{
+				investor_id: feed_item.investor_id,
+				type: feed_item.type,
+				data: feed_item.data
+			})
 		})
 		.then(noop)
 	}
 
 	return feed
 }
+
+var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
+
+function validateFeedItem (data)
+{
+	return new Promise(rs =>
+	{
+		validate.required(data.title, 'title')
+		validate.required(data.text, 'text')
+
+		rs(data)
+	})
+	.then(data =>
+	{
+		switch (data.type)
+		{
+			case 'trade':
+				return validate_trade (data)
+				break
+			case 'watchlist':
+				return validate_watchlist (data)
+				break
+			case 'update':
+				return validate_update (data)
+				break
+			default:
+				throw WrongFeedType()
+		}
+	})
+}
+
+function validate_trade (data)
+{
+	return new Promise(rs =>
+	{
+		validate.required(data.symbol, 'symbol')
+		validate.empty(data.symbol, 'symbol')
+
+		validate.required(data.price, 'price')
+		validate.empty(data.price, 'price')
+
+		validate.required(data.amount, 'amount')
+		validate.empty(data.amount, 'amount')
+
+		validate.required(data.risk, 'risk')
+		validate.empty(data.risk, 'risk')
+	})
+}
+
+function validate_watchlist (data)
+{
+	return new Promise(rs =>
+	{
+		validate.required(data.symbol, 'symbol')
+		validate.empty(data.symbol, 'symbol')
+
+		validate.requied(data.motivations, 'motivations')
+		validate.empty(data.motivations, 'motivations')
+	})
+}
+
+function validate_update (data)
+{
+	return new Promise(rs =>
+	{
+		validate.required(data.symbols, 'symbols')
+		validate.empty(data.symbols, 'symbols')
+	})
+}
+
 
 function transform_event (item)
 {

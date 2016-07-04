@@ -27,10 +27,12 @@ module.exports = function (db, http, admin)
 		var feed_item = {}
 
 		var target_user_id = rq.body.target_user_id
+		var timestamp = rq.body.timestamp
 
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
+			feed_item.timestamp = timestamp
 			feed_item.investor_id = target_user_id
 			feed_item.type = rq.body.type
 			feed_item.data = pick(rq.body,
