@@ -28,6 +28,7 @@ module.exports = function App ()
 	.then(() =>
 	{
 		console.info('READY')
+		app.log('READY')
 	})
 	.catch(error =>
 	{

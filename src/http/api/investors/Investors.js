@@ -42,9 +42,7 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/portfolio', (rq, rs) =>
 	{
-		var options = { investor_id: rq.params.id }
-
-		toss(rs, db.portfolio.list(options))
+		toss(rs, db.investor.portfolio.list(rq.params.id))
 	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
@@ -61,7 +59,12 @@ module.exports = function (db, http)
 		var field = rq.body.field
 		var value = rq.body.value
 
-		toss(rs, investors.model.onboarding.update(whom_id, investor_id, field, value))
+		toss(rs, investors.model.onboarding.update(
+			whom_id,
+			investor_id,
+			field,
+			value
+		))
 	})
 
 	return investors

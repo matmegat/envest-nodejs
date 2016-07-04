@@ -1,5 +1,6 @@
 
 var expect = require('chai').expect
+var Symbl = require('../symbols/Symbl')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -11,6 +12,9 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.focus = Focus(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
+	onb.fields.brokerage = Brokerage(investor, db)
+	onb.fields.holdings = Holdings(investor, db)
+	onb.fields.start_date = StartDate(investor)
 
 	expect(db, 'Onboarding depends on Admin').property('admin')
 	var admin = db.admin
@@ -94,7 +98,8 @@ module.exports = function Onboarding (db, investor)
 var Err = require('../../../Err')
 var WrongField = Err('wrong_field', 'Wrong Onboarding field')
 
-var CantEdit = Err('cant_edit', 'This user must be an admin or onboarded investor')
+var CantEdit = Err('cant_edit',
+	'This user must be an admin or onboarded investor')
 
 var Field = require('./Field')
 var validate = require('../../validate')
@@ -122,6 +127,7 @@ function Profession (investor)
 
 
 var validateFocLength = validate.length(3)
+// eslint-disable-next-line id-length
 var validateFocItemLength = validate.length(250)
 
 function Focus (investor)
@@ -230,6 +236,131 @@ function HistReturn (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ historical_returns: value })
+		}
+	})
+}
+
+// eslint-disable-next-line id-length
+var WrongBrokerageFormat = Err('wrong_brokerage_format',
+	'Wrong brokerage format')
+
+function Brokerage (investor_model, db)
+{
+	return Field(investor_model,
+	{
+		validate: (value) =>
+		{
+			if (! isFinite(value) || value < 0)
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage' })
+			}
+
+			return value
+		},
+		set: (value, investor_queryset) =>
+		{
+			var portfolio = db.investor.portfolio
+
+			return investor_queryset
+			.select('user_id')
+			.then(db.helpers.one)
+			.then((investor) =>
+			{
+				return portfolio.setBrokerage(investor.user_id, value)
+			})
+		}
+	})
+}
+
+var WrongHoldingsFormat = Err('wrong_holdings_format',
+	'Wrong Portfolio Holdings Format')
+
+function Holdings (investor_model, db)
+{
+	function vrow (row, i)
+	{
+		expect(row).an('object')
+
+		validate.required(row.symbol, `holdings[${i}].symbol`)
+		validate.empty(row.symbol, `holdings[${i}].symbol`)
+
+		validate.number(row.amount, `holdings[${i}].amount`)
+		if (row.amount <= 0)
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].amount` })
+		}
+
+		validate.number(row.buy_price, `holdings[${i}].buy_price`)
+		if (row.buy_price <= 0)
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].buy_price` })
+		}
+	}
+
+
+	return Field(investor_model,
+	{
+		validate: (value) =>
+		{
+			try
+			{
+				validate.array(value, 'holdings')
+
+				value.forEach(vrow)
+			}
+			catch (e)
+			{
+				if (Err.is(e))
+				{
+					throw e
+				}
+				else
+				{
+					throw WrongHoldingsFormat({ field: 'holdings' })
+				}
+			}
+
+			return value
+		},
+		set: (value, investor_queryset) =>
+		{
+			var portfolio = db.investor.portfolio
+
+			return investor_queryset
+			.select('user_id')
+			.then(db.helpers.one)
+			.then((investor) =>
+			{
+				return portfolio.setHoldings(investor.user_id, value)
+			})
+		}
+	})
+}
+
+var moment = require('moment')
+var WrongStartDateFormat = Err('wrong_start_date_format',
+	'Wrong start_date format. Not ISO-8601')
+
+function StartDate (investor)
+{
+	return Field(investor,
+	{
+		validate: (value) =>
+		{
+			validate.string(value, 'start_date')
+			validate.empty(value, 'start_date')
+
+			var moment_date = moment(value)
+			if (! moment_date.isValid())
+			{
+				throw WrongStartDateFormat()
+			}
+
+			return moment_date.format()
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ start_date: value })
 		}
 	})
 }

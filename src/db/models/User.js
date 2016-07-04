@@ -4,6 +4,8 @@ var knexed = require('../knexed')
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 
+var Password = require('./Password')
+
 var Err = require('../../Err')
 var Groups = require('./Groups')
 var NotFound = Err('user_not_found', 'User not found')
@@ -23,7 +25,8 @@ module.exports = function User (db)
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
-	user.auth_local     = knexed(knex, 'auth_local')
+
+	user.password = Password(db, user)
 
 	user.NotFound = NotFound
 
@@ -65,11 +68,7 @@ module.exports = function User (db)
 				.then(one)
 				.then(function (id)
 				{
-					return createLocalCreds({
-						user_id: id,
-						password: data.password,
-						salt: data.salt
-					}, trx)
+					return user.password.create(id, data.password, trx)
 				})
 				.then(function (id)
 				{
@@ -202,13 +201,6 @@ module.exports = function User (db)
 	function createFacebookUser (data, trx)
 	{
 		return user.auth_facebook(trx)
-		.insert(data, 'user_id')
-		.then(one)
-	}
-
-	function createLocalCreds (data, trx)
-	{
-		return user.auth_local(trx)
 		.insert(data, 'user_id')
 		.then(one)
 	}

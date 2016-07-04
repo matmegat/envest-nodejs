@@ -14,6 +14,9 @@ var Onboarding = require('./Onboarding')
 var Meta = require('./Meta')
 
 module.exports = function Investor (db, app)
+var Portfolio = require('./Portfolio')
+
+module.exports = function Investor (db)
 {
 	var investor = {}
 
@@ -49,6 +52,8 @@ module.exports = function Investor (db, app)
 
 	investor.all    = Meta(investor.table, {})
 	investor.public = Meta(investor.table, { is_public: true })
+
+	investor.portfolio = Portfolio(db, investor)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
@@ -117,7 +122,11 @@ module.exports = function Investor (db, app)
 			emits.NewAdmins({ investor_id: investor_id })
 			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
 
-			return investor.all.byId(investor_id, trx)
+			return investor.portfolio.createBrokerage(trx, investor_id, 100000)
+			.then(() =>
+			{
+				return investor.all.byId(investor_id, trx)
+			})
 		})
 	})
 

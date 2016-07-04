@@ -71,8 +71,23 @@ paths:
   '/investors/{investor_id}/field':
     $ref: ../api/investors/swag/Field.yaml
 
+  '/watchlist':
+      $ref: ../api/watchlist/swag/WatchlistUser.yaml
+
+  '/watchlist/investor/{investor_id}':
+    $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
+
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
+
+  '/password/req-reset':
+    $ref: ../api/password/swag/ReqReset.yaml
+
+  '/password/reset':
+    $ref: ../api/password/swag/Reset.yaml
+
+  '/password/change':
+    $ref: ../api/password/swag/Change.yaml
 
 definitions:
 
