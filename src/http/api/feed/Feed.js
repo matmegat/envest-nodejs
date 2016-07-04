@@ -131,6 +131,14 @@ module.exports = function Feed (db, http)
 			])
 
 		toss(rs, feed.model.add(feed_item))
+
+		// {
+		//  "type": "update",
+		// 	"symbols": null,
+		// 	"title": "Title of the Update Event",
+		// 	"text": "Just an update.",
+		// 	"motivations": null
+		// }
 	})
 
 	return feed
