@@ -10,6 +10,7 @@ module.exports = function (db, http, admin)
 	var express = ctrl.express = Router()
 
 	var feed_model = db.feed
+	var investor_model = db.investor
 
 	express.use(http.adminRequired)
 
@@ -25,19 +26,24 @@ module.exports = function (db, http, admin)
 	{
 		var feed_item = {}
 
-		/* Ensure that target_user_id is investor */
+		var target_user_id = rq.body.target_user_id
 
-		feed_item.investor_id = rq.body.target_user_id
-		feed_item.type = rq.body.type
-		feed_item.data = pick(rq.body,
-			[
-				'symbols',
-				'title',
-				'text',
-				'motivations'
-			])
+		return investor_model.ensure(target_user_id)
+		.then(() => 
+		{
+			feed_item.investor_id = target_user_id
+			feed_item.type = rq.body.type
+			feed_item.data = pick(rq.body,
+				[
+					'symbols',
+					'title',
+					'text',
+					'motivations'
+				])
 
-		toss(rs, feed_model.add(feed_item))
+			toss(rs, feed_model.add(feed_item))
+		})
+		.catch(toss.err(rs))
 	})
 
 	return ctrl
