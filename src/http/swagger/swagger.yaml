@@ -74,6 +74,9 @@ paths:
   '/watchlist/investor/{investor_id}':
     $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
 
+  #'/watchlist/investor/{symbol_x}':
+  #  $ref: ../api/watchlist/swag/PutDelete-WatchlistInvestor.yaml
+
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
 
