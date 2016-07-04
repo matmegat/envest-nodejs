@@ -13,6 +13,8 @@ var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
+var noop = require('lodash/noop')
+
 module.exports = function Feed (db)
 {
 	var feed = {}
@@ -202,6 +204,18 @@ module.exports = function Feed (db)
 		options.type = type
 
 		return count(filter(feed.feed_table(), options))
+	}
+
+	feed.add = function (feed_item)
+	{
+		return feed.feed_table()
+		.insert(
+		{
+			investor_id: feed_item.investor_id,
+			type: feed_item.type,
+			data: feed_item.data
+		})
+		.then(noop)
 	}
 
 	return feed

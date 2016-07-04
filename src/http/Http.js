@@ -71,7 +71,7 @@ module.exports = function Http (app)
 
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
 	mount(Admin(http, app.db.admin), 'admin', 'admin')
-	mount(Feed(app.db), 'feed', 'feed')
+	mount(Feed(app.db, http), 'feed', 'feed')
 	mount(Comments(app.db.comments), 'comments', 'comments')
 	mount(Investors(app.db), 'investors', 'investors')
 	mount(Statics(app.root, app.db, http), 'static', 'static')

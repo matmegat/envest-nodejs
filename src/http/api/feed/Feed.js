@@ -4,8 +4,11 @@ var _ = require('lodash')
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
+var investorRequired = require('../../investor-required')
 
-module.exports = function Feed (db)
+var pick = require('lodash/pick')
+
+module.exports = function Feed (db, http)
 {
 	var feed = {}
 
@@ -111,6 +114,23 @@ module.exports = function Feed (db)
 		comment_data.user_id = rq.user.id
 
 		toss(rs, db.comments.create(comment_data))
+	})
+
+	feed.express.post('/post', http.investorRequired, (rq, rs) =>
+	{
+		var feed_item = {}
+
+		feed_item.investor_id = rq.user.id
+		feed_item.type = rq.body.type
+		feed_item.data = pick(rq.body,
+			[
+				'symbols',
+				'title',
+				'text',
+				'motivations'
+			])
+
+		toss(rs, feed.model.add(feed_item))
 	})
 
 	return feed
