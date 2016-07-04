@@ -5,12 +5,14 @@ var promisify = require('promisify-node')
 var randomBytes = promisify(crypto.randomBytes)
 var genHash = promisify(crypto.pbkdf2)
 
+var shortid = require('shortid')
+
 var method = require('lodash/method')
 var hex = method('toString', 'hex')
 
 // DB salt size = 8 chars (16 bytes), DB password size = 18 chars (36 bytes)
 var salt_size     = 16
-var code_size     = 16
+var code_size     = 8
 var password_size = 36
 var iterations    = 48329
 
@@ -36,7 +38,25 @@ helpers.generate_salt = function generate_salt ()
 
 helpers.generate_code = function generate_code ()
 {
-	return gen_rand_str(code_size)
+	var chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+
+	return new Promise(function(rs, rj)
+	{
+		var charsLength = chars.length
+
+		var randomBytes = crypto.randomBytes(code_size)
+
+		var result = new Array(code_size)
+
+		var cursor = 0
+		for (var i = 0; i < code_size; i++)
+		{
+			cursor += randomBytes[i]
+			result[i] = chars[cursor % charsLength]
+		}
+
+		rs(result.join(''));
+	})
 }
 
 var encrypt_pass = helpers.encrypt_pass = function encrypt_pass (password, salt)
