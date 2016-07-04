@@ -5,7 +5,7 @@ var Symbl = require('./Symbl')
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 
-var extend = require('lodash/extend')
+var invoke = require('lodash/invokeMap')
 
 var Symbols = module.exports = function Symbols (cfg)
 {
@@ -46,9 +46,30 @@ var Symbols = module.exports = function Symbols (cfg)
 	{
 		symbols = [].concat(symbols)
 
-		// symbols.forEach(Symbl)
+		symbols = symbols.map(Symbl)
 
-		return xign.quotes(symbols)
+		return xign.quotes(invoke(symbols, 'toXign'))
+		.then(resl =>
+		{
+			console.log(resl)
+			return resl
+		})
+		.then(resl =>
+		{
+			return resl.map((r, i) =>
+			{
+				if (! r)
+				{
+					return r
+				}
+				else
+				{
+					r.symbol = symbols[i]
+
+					return r
+				}
+			})
+		})
 	}
 
 	// symbols.quotes([ 'WRONG', 'GE.XNYS', 'GLD' ])

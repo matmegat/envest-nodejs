@@ -1,7 +1,10 @@
 
-var noop = require('lodash/noop')
 var extend = Object.assign
-var ends = require('lodash/endsWith')
+var noop   = require('lodash/noop')
+var ends   = require('lodash/endsWith')
+var map    = require('lodash/map')
+
+var at = require('lodash/fp/at')
 
 var Err = require('../../../Err')
 var AlreadyThere = Err('symbol_already_there', 'Symbol already in this list')
@@ -22,6 +25,12 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		{
 			return table()
 			.where('owner_id', owner_id)
+		})
+		.then(entries =>
+		{
+			entries = map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
+
+			return symbols.quotes(entries)
 		})
 	}
 
