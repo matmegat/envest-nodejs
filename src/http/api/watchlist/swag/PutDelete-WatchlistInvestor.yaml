@@ -7,6 +7,22 @@ put:
     type: string
     description: Symbol Full (GE.XNYS)
     required: true
+
+  - name: payload
+    description: additional data (target_price)
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Additional
+      properties:
+        target_price:
+          type: integer
+          description: target_price for Investor action (buy/sell)
+          default: 1
+      required:
+      - target_price
+
   responses:
     200:
       description: Symbol added
