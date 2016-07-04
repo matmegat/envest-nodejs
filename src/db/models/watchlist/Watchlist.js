@@ -7,6 +7,9 @@ var SymbolList = require('./SymbolList')
 
 var wrap = require('lodash/wrap')
 var pick = require('lodash/pick')
+var get  = require('lodash/get')
+
+var validate = require('../../validate')
 
 var Watchlist = module.exports = function Watchlist (db)
 {
@@ -33,12 +36,15 @@ var Watchlist = module.exports = function Watchlist (db)
 
 		w.investor.add = wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
 		{
-			expect(additional).an('object')
-			expect(additional).property('target_price')
+			return new Promise(rs =>
+			{
+				validate.required(get(additional, 'target_price'), 'target_price')
+				// TODO validate.number
 
-			additional = pick(additional, 'target_price')
+				additional = pick(additional, 'target_price')
 
-			return sup(owner_id, symbol, additional)
+				rs(sup(owner_id, symbol, additional))
+			})
 		})
 	}
 
