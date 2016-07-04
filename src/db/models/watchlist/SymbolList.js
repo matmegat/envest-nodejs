@@ -28,9 +28,22 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 		.then(entries =>
 		{
-			entries = map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
+			return symbols.quotes(
+				map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
+			)
+			.then(quotes =>
+			{
+				return map(quotes, (r, i) =>
+				{
+					var t = entries[i].target_price
+					if (t)
+					{
+						r.target_price = t
+					}
 
-			return symbols.quotes(entries)
+					return r
+				})
+			})
 		})
 	}
 
