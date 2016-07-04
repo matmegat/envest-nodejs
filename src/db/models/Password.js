@@ -1,14 +1,17 @@
 
 var knexed = require('../knexed')
+var upsert = require('../upsert')
 
 var Err = require('../../Err')
 var noop = require('lodash/noop')
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
-module.exports = function Password (db, user)
+module.exports = function Password (db, app, user)
 {
 	var password = {}
+
+	var mailer = app.mail
 
 	var knex = db.knex
 
@@ -118,8 +121,8 @@ module.exports = function Password (db, user)
 			{
 				var data =
 				{
-					user_id: user.id,
-					code: code
+					code: code,
+					timestamp: knex.fn.now()
 				}
 
 				if (timestamp === null)
@@ -127,26 +130,22 @@ module.exports = function Password (db, user)
 					data.timestamp = null
 				}
 
-				return password.reset_table(trx)
-				.insert(data)
-				.then(noop)
-				.catch(err =>
+				var password_upsert = upsert(
+					password.reset_table(trx),
+					'pass_reset_pkey',
+					'user_id'
+				)
+
+				var where = {user_id: user.id}
+
+				return password_upsert(where, data)
+				.then(() =>
 				{
-					if (err.constraint === 'pass_reset_pkey')
+					return mailer.send(
 					{
-						return password.reset_table(trx)
-						.update(
-						{
-							code: code,
-							timestamp: knex.fn.now()
-						})
-						.where('user_id', user.id)
-						.then(noop)
-					}
-					else
-					{
-						throw err
-					}
+						to: email,
+						text: code.toUpperCase()
+					}, 'default')
 				})
 			})
 		})
@@ -159,8 +158,10 @@ module.exports = function Password (db, user)
 
 	password.reset = knexed.transact(knex, (trx, reset_code, new_pass) =>
 	{
+		var code = reset_code.toLowerCase()
+
 		return password.reset_table(trx)
-		.where('code', reset_code)
+		.where('code', code)
 		.then(Err.emptish(ResetCodeNotFound))
 		.then(one)
 		.then(data =>
@@ -171,7 +172,7 @@ module.exports = function Password (db, user)
 				.then(() =>
 				{
 					return password.reset_table(trx)
-					.where('code', reset_code)
+					.where('code', code)
 					.del()
 					.then(noop)
 				})

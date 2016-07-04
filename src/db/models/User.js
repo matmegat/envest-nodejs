@@ -20,7 +20,7 @@ var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
 
-module.exports = function User (db)
+module.exports = function User (db, app)
 {
 	var user = {}
 
@@ -34,7 +34,7 @@ module.exports = function User (db)
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 
-	user.password = Password(db, user)
+	user.password = Password(db, app, user)
 
 	user.groups = Groups(db, user)
 
