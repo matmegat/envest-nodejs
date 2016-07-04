@@ -9,6 +9,10 @@ get:
     in: query
     type: string
     description: Search query
+  - name: sort
+    in: query
+    type: string
+    description: Sorting options [column, desc||asc]
 
   responses:
     200:
