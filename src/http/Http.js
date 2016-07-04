@@ -78,7 +78,7 @@ module.exports = function Http (app)
 	mount(Notifications(app.db), 'notifications', 'notifications')
 	mount(Password(app.db.user), 'password', 'password')
 	mount(Users(app.db.user), 'users', 'users')
-	mount(Watchlist(), 'watchlist', 'watchlist')
+	mount(Watchlist(app.db.watchlist, http), 'watchlist', 'watchlist')
 
 
 	http.express.use(internalError)

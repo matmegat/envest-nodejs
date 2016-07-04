@@ -3,7 +3,6 @@ var knexed = require('../knexed')
 
 var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
-
 var pick = require('lodash/pick')
 
 var Password = require('./Password')
@@ -41,7 +40,7 @@ module.exports = function User (db)
 
 	user.byId = function (id, trx)
 	{
-		return validate_id(id)
+		return user.validateId(id)
 		.then(() =>
 		{
 			return user.users_table(trx)
@@ -49,6 +48,9 @@ module.exports = function User (db)
 			.then(oneMaybe)
 		})
 	}
+
+	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
+	user.validateId = require('../../id').validate.promise(WrongUserId)
 
 	user.infoById = function (id)
 	{
@@ -138,9 +140,6 @@ module.exports = function User (db)
 			return user_data
 		})
 	}
-
-	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
-	var validate_id = require('../../id').validate.promise(WrongUserId)
 
 	user.create = function (data)
 	{

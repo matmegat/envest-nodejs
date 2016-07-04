@@ -11,6 +11,7 @@ var Notifications = require('./models/Notifications')
 var Static = require('./models/Static')
 var Pic = require('./models/Pic')
 var Symbols = require('./models/symbols/Symbols')
+var Watchlist = require('./models/watchlist/Watchlist')
 
 module.exports = function name (app)
 {
@@ -63,6 +64,9 @@ module.exports = function name (app)
 	db.pic = Pic(db)
 
 	db.symbols = Symbols(app.cfg)
+
+	db.symbols = Symbols(app.cfg)
+	db.watchlist = Watchlist(db)
 
 	return db
 }
