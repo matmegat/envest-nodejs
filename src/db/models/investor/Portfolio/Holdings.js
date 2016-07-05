@@ -1,3 +1,4 @@
+
 var knexed = require('../../../knexed')
 var upsert = require('../../../upsert')
 
@@ -11,21 +12,20 @@ module.exports = function Holdings (db, investor)
 {
 	var holdings = {}
 
-	var knex    = db.knex
+	var knex = db.knex
 
 	holdings.table = knexed(knex, 'portfolio_symbols')
 
 	function set_holdings (trx, investor_id, holding_entries)
 	{
-		/* Expect data to be =
-		* investor_id: integer
-		* holdings:
+		/* Expect holding_entries to be =
 		* [
 		*   {
 		*     symbol:    string,
 		*     amount:    integer,
 		*     buy_price: float
 		*   },
+		*
 		*   {},
 		* ]
 		* */
@@ -39,31 +39,27 @@ module.exports = function Holdings (db, investor)
 
 		return Promise.all(_.map(holding_entries, (holding) =>
 		{
-			var where = _.pick(holding, ['symbol_exchange', 'symbol_ticker'])
+			var data = _.pick(holding, 'symbol_exchange', 'symbol_ticker')
 
-			return holdings_upsert(_.extend({}, where_clause, where), holding)
+			return holdings_upsert(_.extend({}, where_clause, data), holding)
 		}))
 	}
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
 		/* operation with validation procedure
-		* Expect data to be:
-		* {
-		*   investor_id: integer,
-		*   holdings:
-		*   [
-		*     {
-		*       symbol_exchange: string,
-		*       symbol_ticker: string,
-		*       buy_price: float,
-		*       amount: integer
-		*     },
-		*     {}
-		*   ]
-		* }
+		* Expect holding_entries to be:
+		* [
+		*   {
+		*     symbol_exchange: string,
+		*     symbol_ticker: string,
+		*     buy_price: float,
+		*     amount: integer
+		*   },
+		*
+		*   {}
+		* ]
 		* */
-
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -87,7 +83,6 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			// return set_holdings(trx, investor_id, holdings)
 			return Promise.all(_.map(holding_entries, (holding) =>
 			{
 				return db.symbols.resolve(holding.symbol)
@@ -98,7 +93,7 @@ module.exports = function Holdings (db, investor)
 			processed_symbols.forEach((symbol, i) =>
 			{
 				holding_entries[i].symbol_exchange = symbol.exchange
-				holding_entries[i].symbol_ticker = symbol.ticker
+				holding_entries[i].symbol_ticker   = symbol.ticker
 				delete holding_entries[i].symbol
 			})
 
