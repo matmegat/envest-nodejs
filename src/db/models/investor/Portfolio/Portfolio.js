@@ -61,9 +61,9 @@ module.exports = function Portfolio (db, investor)
 					else
 					{
 						portfolio_holdings[i].symbol = quoted_symbol.symbol
-						portfolio_holdings[i].gain =
-							quoted_symbol.price /
-							portfolio_holdings[i].buy_price - 1
+						portfolio_holdings[i].gain = /* calculated percentage */
+							( quoted_symbol.price /
+							portfolio_holdings[i].buy_price - 1 ) * 100
 					}
 
 					return _.pick(portfolio_holdings[i],
