@@ -28,6 +28,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 		.then(entries =>
 		{
+			if (! entries.length)
+			{	// TODO: need refactor
+				return []
+			}
+
 			return symbols.quotes(
 				map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
 			)
@@ -89,10 +94,15 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		{
 			return symbols.resolve(symbol)
 		})
-		.then(() =>
+		.then((symbol) =>
 		{
 			return table()
-			.where('owner_id', owner_id)
+			.where(
+			{
+				owner_id: owner_id,
+				symbol_exchange: symbol.exchange,
+				symbol_ticker: symbol.ticker
+			})
 			.delete()
 		})
 		.then(noop)
