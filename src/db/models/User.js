@@ -398,7 +398,8 @@ module.exports = function User (db, app)
 				return mailer.send('default', null,
 				{
 					to: user.email,
-					text: data.code.toUpperCase()
+					text: 'Email confirm code: '
+					+ data.code.toUpperCase()
 				})
 			})
 		})

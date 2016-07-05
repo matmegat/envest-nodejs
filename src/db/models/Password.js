@@ -144,7 +144,8 @@ module.exports = function Password (db, user, app)
 					return mailer.send('default', null,
 					{
 						to: email,
-						text: code.toUpperCase()
+						text: 'Password reset code: '
+						+ code.toUpperCase()
 					})
 				})
 			})
