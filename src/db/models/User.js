@@ -1,11 +1,12 @@
 
 var knexed = require('../knexed')
-
-var _ = require('lodash')
+var upsert = require('../upsert')
 
 var generate_code = require('../../crypto-helpers').generate_code
+
 var extend = require('lodash/extend')
 var pick   = require('lodash/pick')
+var ends   = require('lodash/endsWith')
 
 var pick = require('lodash/pick')
 
@@ -23,6 +24,8 @@ var Sorter = require('../Sorter')
 module.exports = function User (db, app)
 {
 	var user = {}
+
+	var mailer = app.mail
 
 	var knex = db.knex
 
@@ -52,7 +55,20 @@ module.exports = function User (db, app)
 		.then(() =>
 		{
 			return user.users_table(trx)
-			.where('id', id)
+			.select(
+				'users.id AS id',
+				'first_name',
+				'last_name',
+				'pic',
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email')
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
+			.where('users.id', id)
 			.then(oneMaybe)
 		})
 	}
@@ -353,25 +369,37 @@ module.exports = function User (db, app)
 		{
 			data.code = code
 
-			return user.email_confirms(trx)
-			.insert(data, 'user_id')
-			.then(one)
-			.catch(err =>
+			var email_confirms_upsert = upsert(
+				user.email_confirms(trx),
+				'email_confirms_pkey',
+				'user_id'
+			)
+
+			var where = { user_id: data.user_id }
+
+			return email_confirms_upsert(where, data)
+			.catch(error =>
 			{
-				if (err.constraint === 'email_confirms_pkey')
+				if (error.constraint && ends(error.constraint, 'email_confirms_new_email_unique'))
 				{
-					return user.email_confirms()
-					.update(
-					{
-						new_email: data.new_email,
-						code: data.code
-					})
-					.where('user_id', data.user_id)
+					throw EmailAlreadyExists()
 				}
 				else
 				{
-					throw err
+					throw error
 				}
+			})
+			.then(() =>
+			{
+				return user.byId(data.user_id)
+			})
+			.then((user) =>
+			{
+				return mailer.send('default',
+				{
+					to: user.email,
+					text: data.code.toUpperCase()
+				})
 			})
 		})
 	})
@@ -410,7 +438,7 @@ module.exports = function User (db, app)
 			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 		)
 
-		options.paginator = _.extend({}, options.paginator,
+		options.paginator = extend({}, options.paginator,
 		{
 			real_order_column: 'users.id'
 		})
