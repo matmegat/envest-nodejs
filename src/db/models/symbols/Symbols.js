@@ -1,4 +1,6 @@
 
+var expect = require('chai').expect
+
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
 
@@ -41,6 +43,8 @@ var Symbols = module.exports = function Symbols (cfg)
 
 	symbols.quotes = (symbols) =>
 	{
+		expect(symbols).ok
+
 		symbols = [].concat(symbols)
 
 		symbols = symbols.map(Symbl)

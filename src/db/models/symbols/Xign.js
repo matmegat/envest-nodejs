@@ -20,7 +20,13 @@ module.exports = function Xign (cfg)
 
 	X.quotes = (symbols) =>
 	{
-		expect(symbols).a('array')
+		expect(symbols).an('array')
+
+		if (! symbols.length)
+		{
+			return Promise.resolve([])
+		}
+
 		symbols.forEach(s => expect(s).a('string'))
 
 		var uri = format(
@@ -68,6 +74,8 @@ module.exports = function Xign (cfg)
 
 	X.resolve = (symbol) =>
 	{
+		expect(symbol).ok
+
 		return fundamentals(symbol)
 		.then(data =>
 		{
