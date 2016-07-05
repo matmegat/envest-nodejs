@@ -233,17 +233,17 @@ var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
 
 function validateFeedItem (feed_item)
 {
+	var type = feed_item.type
 	var data = feed_item.data
 
 	return new Promise(rs =>
 	{
-		validate.required(data.title, 'title')
 		validate.required(data.text, 'text')
 
 		validate.empty(data.timestamp)
 		validate_date(data.date)
 
-		validate_dirs(data)
+		validate_dirs(data, type)
 
 		rs(data)
 	})
@@ -280,12 +280,12 @@ function validate_date (data)
 
 var WrongDir = Err('wrong_dir', 'Wrong Dir')
 
-function validate_dirs (data)
+function validate_dirs (data, type)
 {
 	var tradeDirs = ['bought', 'sold']
 	var watchlistDirs = ['added', 'removed']
 
-	if (data.type === 'trade')
+	if (type === 'trade')
 	{
 		if (tradeDirs.indexOf(data.dir) === -1)
 		{
@@ -293,7 +293,7 @@ function validate_dirs (data)
 		}
 	}
 
-	if (data.type === 'watchlist')
+	if (type === 'watchlist')
 	{
 		if (watchDirs.indexOf(data.dir) === -1)
 		{
@@ -301,7 +301,7 @@ function validate_dirs (data)
 		}
 	}
 
-	if (data.type === 'update')
+	if (type === 'update')
 	{
 		if (data.dir)
 		{
@@ -314,7 +314,7 @@ function validate_trade (data)
 {
 	return new Promise(rs =>
 	{
-		validate.required(data.symbol, 'symbol')
+		// validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
 		validate.required(data.price, 'price')
@@ -348,6 +348,7 @@ function validate_update (data)
 {
 	return new Promise(rs =>
 	{
+		validate.required(data.title, 'title')
 		validate.empty(data.symbols, 'symbols')
 
 		rs()
