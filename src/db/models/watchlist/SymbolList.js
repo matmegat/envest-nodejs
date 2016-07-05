@@ -28,6 +28,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 		.then(entries =>
 		{
+			if (! entries.length)
+			{	// TODO: need refactor
+				return []
+			}
+
 			return symbols.quotes(
 				map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
 			)
