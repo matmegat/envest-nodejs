@@ -395,7 +395,7 @@ module.exports = function User (db, app)
 			})
 			.then((user) =>
 			{
-				return mailer.send('default',
+				return mailer.send('default', null,
 				{
 					to: user.email,
 					text: data.code.toUpperCase()

@@ -27,7 +27,7 @@ module.exports = function Mailer (cfg)
 		default: 'ba81d1e0-858b-4b28-a48c-53ed78e3c209'
 	}
 
-	mailer.send = function (template, data)
+	mailer.send = function (template, substs, data)
 	{
 		data = _.extend({}, defaults, data)
 
@@ -46,7 +46,7 @@ module.exports = function Mailer (cfg)
 			template = null
 		}
 
-		var substs = wrapsub(data.substs || {})
+		substs = wrapsub(substs || {})
 
 		var email = new sendgrid.Email(data)
 

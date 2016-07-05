@@ -141,7 +141,7 @@ module.exports = function Password (db, user, app)
 				return password_upsert(where, data)
 				.then(() =>
 				{
-					return mailer.send('default',
+					return mailer.send('default', null,
 					{
 						to: email,
 						text: code.toUpperCase()
