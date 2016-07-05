@@ -27,7 +27,7 @@ module.exports = function Mailer (cfg)
 		default: 'ba81d1e0-858b-4b28-a48c-53ed78e3c209'
 	}
 
-	mailer.send = function (data, template, substs)
+	mailer.send = function (template, data)
 	{
 		data = _.extend({}, defaults, data)
 

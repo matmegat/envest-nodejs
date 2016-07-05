@@ -34,7 +34,7 @@ module.exports = function User (db, app)
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 
-	user.password = Password(db, app, user)
+	user.password = Password(db, user, app)
 
 	user.groups = Groups(db, user)
 

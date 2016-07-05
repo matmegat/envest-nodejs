@@ -7,7 +7,7 @@ var noop = require('lodash/noop')
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
-module.exports = function Password (db, app, user)
+module.exports = function Password (db, user, app)
 {
 	var password = {}
 
@@ -141,11 +141,11 @@ module.exports = function Password (db, app, user)
 				return password_upsert(where, data)
 				.then(() =>
 				{
-					return mailer.send(
+					return mailer.send('default',
 					{
 						to: email,
 						text: code.toUpperCase()
-					}, 'default')
+					})
 				})
 			})
 		})
