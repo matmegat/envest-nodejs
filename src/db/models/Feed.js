@@ -15,6 +15,8 @@ var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var noop = require('lodash/noop')
 
+var moment = require('moment')
+
 var validate = require('../validate')
 
 module.exports = function Feed (db)
@@ -210,7 +212,7 @@ module.exports = function Feed (db)
 
 	feed.add = function (feed_item)
 	{
-		return validateFeedItem(data)
+		return validateFeedItem(feed_item)
 		.then(() =>
 		{
 			return feed.feed_table()
@@ -229,18 +231,25 @@ module.exports = function Feed (db)
 
 var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
 
-function validateFeedItem (data)
+function validateFeedItem (feed_item)
 {
+	var data = feed_item.data
+
 	return new Promise(rs =>
 	{
 		validate.required(data.title, 'title')
 		validate.required(data.text, 'text')
 
+		validate.empty(data.timestamp)
+		validate_date(data.date)
+
+		validate_dirs(data)
+
 		rs(data)
 	})
-	.then(data =>
+	.then(() =>
 	{
-		switch (data.type)
+		switch (feed_item.type)
 		{
 			case 'trade':
 				return validate_trade (data)
@@ -255,6 +264,50 @@ function validateFeedItem (data)
 				throw WrongFeedType()
 		}
 	})
+}
+
+var WrongFeedDate = Err('wrong_feed_date', 'Wrong Feed Date')
+
+function validate_date (data)
+{
+	var date = moment(data)
+
+	if (! date.isValid())
+ 	{
+  		throw WrongFeedDate()
+  	}
+}
+
+var WrongDir = Err('wrong_dir', 'Wrong Dir')
+
+function validate_dirs (data)
+{
+	var tradeDirs = ['bought', 'sold']
+	var watchlistDirs = ['added', 'removed']
+
+	if (data.type === 'trade')
+	{
+		if (tradeDirs.indexOf(data.dir) === -1)
+		{
+			throw WrongDir()
+		}
+	}
+
+	if (data.type === 'watchlist')
+	{
+		if (watchDirs.indexOf(data.dir) === -1)
+		{
+			throw WrongDir()
+		}
+	}
+
+	if (data.type === 'update')
+	{
+		if (data.dir)
+		{
+			throw WrongDir()
+		}
+	}
 }
 
 function validate_trade (data)
@@ -272,6 +325,8 @@ function validate_trade (data)
 
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
+
+		rs()
 	})
 }
 
@@ -284,6 +339,8 @@ function validate_watchlist (data)
 
 		validate.requied(data.motivations, 'motivations')
 		validate.empty(data.motivations, 'motivations')
+
+		rs()
 	})
 }
 
@@ -291,8 +348,9 @@ function validate_update (data)
 {
 	return new Promise(rs =>
 	{
-		validate.required(data.symbols, 'symbols')
 		validate.empty(data.symbols, 'symbols')
+
+		rs()
 	})
 }
 
