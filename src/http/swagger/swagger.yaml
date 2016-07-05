@@ -80,6 +80,9 @@ paths:
   '/investors/{investor_id}/field':
     $ref: ../api/investors/swag/Field.yaml
 
+  '/investors/{investor_id}/push_public':
+    $ref: ../api/investors/swag/Post-PushPublic.yaml
+
   '/watchlist':
       $ref: ../api/watchlist/swag/WatchlistUser.yaml
 

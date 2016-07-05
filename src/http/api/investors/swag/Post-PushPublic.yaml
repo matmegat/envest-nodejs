@@ -1,0 +1,24 @@
+post:
+  description: Makes investor public [Onboarding Flow](https://weezlabs.atlassian.net/wiki/display/NET/Investor+On-Boarding)
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor ID
+    required: true
+
+  responses:
+    200:
+      description: Investor updated and become available
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors
+  - admin
