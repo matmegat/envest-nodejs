@@ -352,7 +352,6 @@ function validate_watchlist (feed_item)
 
 		validate.required(data.text, 'text')
 
-		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
 		validate.requied(data.motivations, 'motivations')
