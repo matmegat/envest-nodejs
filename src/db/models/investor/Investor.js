@@ -149,5 +149,34 @@ module.exports = function Investor (db, app)
 		.where('user_id', data.user_id)
 	}
 
+	investor.fullProfile = function (investor_id)
+	{
+		return investor.all.ensure(investor_id)
+		.then(() =>
+		{
+			return investor.table()
+			.select(
+				'users.id',
+				'users.first_name',
+				'users.last_name',
+				'users.pic',
+				knex.raw('COALESCE(users.email, email_confirms.new_email) AS email'),
+				'investors.profession',
+				'investors.focus',
+				'investors.background',
+				'investors.historical_returns',
+				'investors.profile_pic'
+			)
+			.innerJoin('users', 'investors.user_id', 'users.id')
+			.leftJoin(
+				'email_confirms',
+				'investors.user_id',
+				'email_confirms.user_id'
+			)
+			.where('investors.user_id', investor_id)
+			.then(one)
+		})
+	}
+
 	return investor
 }

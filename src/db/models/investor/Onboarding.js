@@ -1,6 +1,12 @@
 
 var expect = require('chai').expect
 
+var Err = require('../../../Err')
+
+var validate = require('../../validate')
+
+var _ = require('lodash')
+
 module.exports = function Onboarding (db, investor)
 {
 	var onb = {}
@@ -90,18 +96,125 @@ module.exports = function Onboarding (db, investor)
 		})
 	}
 
+	onb.pushLive = function pushLive (whom_id, investor_id)
+	{
+
+
+		return Promise.all(
+		[
+			investor.all.is(investor_id),
+			investor.public.is(investor_id)
+		])
+		.then((so) =>
+		{
+			var is_investor = so[0]
+			var is_public = so[1]
+
+			if (! is_investor)
+			{
+				throw CannotGoPublic({ reason: 'Not an investor' })
+			}
+
+			if (is_public)
+			{
+				throw CannotGoPublic({ reason: 'Already public' })
+			}
+
+			return investor.fullProfile(investor_id)
+		})
+		.then((investor_entry) =>
+		{
+			console.log('\n', JSON.stringify(investor_entry, null, 2))
+			var current_year = new Date().getFullYear()
+
+			validate.name(investor_entry.first_name, 'first_name')
+			validate.name(investor_entry.last_name, 'last_name')
+
+			validate.email(investor_entry.email)
+
+			validate.string(investor_entry.pic, 'pic')
+			validate.empty(investor_entry.pic, 'pic')
+
+			// validate.string(investor.profile_pic, 'profile_pic')
+			// validate.empty(investor.profile_pic, 'profile_pic')
+
+			{ /* validate historical_returns */
+				onb.fields.hist_return.validate(investor_entry.historical_returns)
+
+				/* validate that previous year included into historical_returns */
+				var last_year = _.find(
+					investor_entry.historical_returns,
+					{ year: current_year - 1 }
+				)
+				if (! last_year)
+				{
+					throw WrongHistFormat(
+					{
+						field: 'hist_return',
+						subfield: 'year',
+						reason: `${current_year - 1} not included`
+					})
+				}
+
+				/* validate duplicates */
+				var is_duplicates = ! _.chain(investor_entry.historical_returns)
+				.countBy('year')
+				.every(value => value === 1)
+				.value()
+
+				if (is_duplicates)
+				{
+					throw WrongHistFormat(
+					{
+						field: 'hist_return',
+						subfield: 'year',
+						reason: `Duplicates exists`
+					})
+				}
+
+				/* validate gaps */
+				var sorted_returns = _.orderBy(
+					investor_entry.historical_returns,
+					[ 'year', 'asc' ]
+				)
+				for (var i = 1; i < sorted_returns.length; i ++)
+				{
+					if (sorted_returns[i].year - sorted_returns[i-1] !== 1)
+					{
+						throw WrongHistFormat(
+						{
+							field: 'hist_return',
+							subfield: 'year',
+							reason: `Gaps in filled years`
+						})
+					}
+				}
+			}
+		})
+		.catch((err) =>
+		{
+			if (Err.is(err))
+			{
+				throw CannotGoPublic({ reason: err.message, data: err.data })
+			}
+
+			throw err
+		})
+	}
+
+	var CannotGoPublic = Err('cannot_go_public',
+		'Investor cannot be pushed to public')
+
 	return onb
 }
 
 
-var Err = require('../../../Err')
 var WrongField = Err('wrong_field', 'Wrong Onboarding field')
 
 var CantEdit = Err('cant_edit',
 	'This user must be an admin or onboarded investor')
 
 var Field = require('./Field')
-var validate = require('../../validate')
 
 
 var validateProfLength = validate.length(50)
