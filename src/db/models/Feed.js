@@ -14,6 +14,7 @@ var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var noop = require('lodash/noop')
+var pick = require('lodash/pick')
 
 var moment = require('moment')
 
@@ -213,14 +214,14 @@ module.exports = function Feed (db)
 	feed.add = function (feed_item)
 	{
 		return validateFeedItem(feed_item)
-		.then(() =>
+		.then(data =>
 		{
 			return feed.feed_table()
 			.insert(
 			{
 				investor_id: feed_item.investor_id,
 				type: feed_item.type,
-				data: feed_item.data
+				data: data
 			})
 		})
 		.then(noop)
@@ -233,23 +234,13 @@ var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
 
 function validateFeedItem (feed_item)
 {
-	var type = feed_item.type
 	var data = feed_item.data
-
+	var type = data.type = feed_item.type
+	var date = data.date
+	
 	return new Promise(rs =>
 	{
-		validate.required(data.text, 'text')
-
-		validate.empty(data.timestamp)
-		validate_date(data.date)
-
-		validate_dirs(data, type)
-
-		rs(data)
-	})
-	.then(() =>
-	{
-		switch (feed_item.type)
+		switch (type)
 		{
 			case 'trade':
 				return validate_trade (data)
@@ -264,6 +255,19 @@ function validateFeedItem (feed_item)
 				throw WrongFeedType()
 		}
 	})
+	.then(data =>
+	{
+		if (date)
+		{
+			validate.empty(date)
+			validate_date(date)
+
+			data.date = date
+		}
+
+		return data
+	})
+	
 }
 
 var WrongFeedDate = Err('wrong_feed_date', 'Wrong Feed Date')
@@ -280,30 +284,11 @@ function validate_date (data)
 
 var WrongDir = Err('wrong_dir', 'Wrong Dir')
 
-function validate_dirs (data, type)
+function validate_dir (type)
 {
-	var tradeDirs = ['bought', 'sold']
-	var watchlistDirs = ['added', 'removed']
-
-	if (type === 'trade')
+	return function (typeSet)
 	{
-		if (tradeDirs.indexOf(data.dir) === -1)
-		{
-			throw WrongDir()
-		}
-	}
-
-	if (type === 'watchlist')
-	{
-		if (watchDirs.indexOf(data.dir) === -1)
-		{
-			throw WrongDir()
-		}
-	}
-
-	if (type === 'update')
-	{
-		if (data.dir)
+		if (typeSet.indexOf(type) === -1)
 		{
 			throw WrongDir()
 		}
@@ -312,9 +297,24 @@ function validate_dirs (data, type)
 
 function validate_trade (data)
 {
+	var tradeDirs = ['bought', 'sold']
+	var data = pick(data,
+	[
+		'dir',
+		'symbol',
+		'price',
+		'amount',
+		'text',
+		'risk',
+		'motivations'	
+	])
+	var validate_trade_dir = validate_dir(data.type)
+
 	return new Promise(rs =>
 	{
-		// validate.required(data.symbol, 'symbol')
+		validate.required(data.text, 'text')
+
+		validate_trade_dir(tradeDirs)
 		validate.empty(data.symbol, 'symbol')
 
 		validate.required(data.price, 'price')
@@ -326,32 +326,55 @@ function validate_trade (data)
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
 
-		rs()
+		rs(data)
 	})
 }
 
 function validate_watchlist (data)
 {
+	var watchlistDirs = ['added', 'removed']
+	var data = pick(data,
+	[
+		'dir',
+		'symbol',
+		'text',
+		'motivations'
+	])
+	var validate_watchlist_dir = validate_dir(data.type)
+
 	return new Promise(rs =>
 	{
+		validate_watchlist_dir(watchlistDirs)
+
+		validate.required(data.text, 'text')
+
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
 		validate.requied(data.motivations, 'motivations')
 		validate.empty(data.motivations, 'motivations')
 
-		rs()
+		rs(data)
 	})
 }
 
 function validate_update (data)
 {
+	var data = pick(data,
+	[
+		'symbols',
+		'title',
+		'text',
+		'motivations'
+	])
+
 	return new Promise(rs =>
 	{
+		validate.required(data.text, 'text')
 		validate.required(data.title, 'title')
 		validate.empty(data.symbols, 'symbols')
 
-		rs()
+		rs(data)
 	})
 }
 
