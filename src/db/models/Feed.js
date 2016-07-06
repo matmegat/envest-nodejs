@@ -317,6 +317,8 @@ function validate_trade (feed_item)
 		validate.required(data.text, 'text')
 
 		validate_trade_dir(tradeDirs)
+
+		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
 		validate.required(data.price, 'price')
@@ -352,6 +354,7 @@ function validate_watchlist (feed_item)
 
 		validate.required(data.text, 'text')
 
+		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
 		validate.requied(data.motivations, 'motivations')
@@ -376,6 +379,8 @@ function validate_update (feed_item)
 	{
 		validate.required(data.text, 'text')
 		validate.required(data.title, 'title')
+
+		validate.required(data.symbols, 'symbols')
 		validate.empty(data.symbols, 'symbols')
 
 		rs(feed_item)
