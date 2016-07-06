@@ -309,7 +309,7 @@ function validate_trade (feed_item)
 		'risk',
 		'motivations'	
 	])
-	var validate_trade_dir = validate_dir(feed_item.type)
+	var validate_trade_dir = validate_dir(feed_item.data.dir)
 	var data = feed_item.data
 
 	return new Promise(rs =>
@@ -342,7 +342,8 @@ function validate_watchlist (feed_item)
 		'text',
 		'motivations'
 	])
-	var validate_watchlist_dir = validate_dir(feed_item.type)
+
+	var validate_watchlist_dir = validate_dir(feed_item.data.dir)
 	var data = feed_item.data
 
 	return new Promise(rs =>
