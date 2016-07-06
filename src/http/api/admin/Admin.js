@@ -1,7 +1,6 @@
 
 var Router = require('express').Router
 var toss = require('../../toss')
-var pick = require('lodash/pick')
 
 module.exports = function (db, http, admin)
 {
@@ -35,13 +34,7 @@ module.exports = function (db, http, admin)
 			feed_item.date = date
 			feed_item.investor_id = target_user_id
 			feed_item.type = rq.body.type
-			feed_item.data = pick(rq.body,
-				[
-					'symbols',
-					'title',
-					'text',
-					'motivations'
-				])
+			feed_item.data = rq.body.data
 
 			toss(rs, feed_model.add(feed_item))
 		})
