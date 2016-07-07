@@ -31,7 +31,7 @@ module.exports = function Xign (cfg)
 
 		var uri = format(
 		{
-			protocol: 'http:',
+			protocol: 'https:',
 			host: 'globalquotes.xignite.com',
 
 			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
