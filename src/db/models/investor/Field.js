@@ -60,7 +60,7 @@ function setter (field, set)
 			var queryset = field.investor.table()
 			.where('user_id', investor_id)
 
-			return set(value, queryset)
+			return set(value, queryset, investor_id)
 		})
 		.then(noop)
 	}

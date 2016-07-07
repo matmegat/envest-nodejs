@@ -396,17 +396,11 @@ function Brokerage (investor_model, db)
 
 			return value
 		},
-		set: (value, investor_queryset) =>
+		set: (value, investor_queryset, investor_id) =>
 		{
 			var portfolio = db.investor.portfolio
 
-			return investor_queryset
-			.select('user_id')
-			.then(db.helpers.one)
-			.then((investor) =>
-			{
-				return portfolio.setBrokerage(investor.user_id, value)
-			})
+			return portfolio.setBrokerage(investor_id, value)
 		}
 	})
 }
@@ -461,17 +455,11 @@ function Holdings (investor_model, db)
 
 			return value
 		},
-		set: (value, investor_queryset) =>
+		set: (value, investor_queryset, investor_id) =>
 		{
 			var portfolio = db.investor.portfolio
 
-			return investor_queryset
-			.select('user_id')
-			.then(db.helpers.one)
-			.then((investor) =>
-			{
-				return portfolio.setHoldings(investor.user_id, value)
-			})
+			return portfolio.setHoldings(investor_id, value)
 		}
 	})
 }
