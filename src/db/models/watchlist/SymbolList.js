@@ -73,6 +73,10 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			extend(entry, additional)
 
 			return table().insert(entry)
+			.then(() =>
+			{
+				return symbol
+			})
 		})
 		.catch(error =>
 		{
@@ -85,7 +89,6 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 				throw error
 			}
 		})
-		.then(noop)
 	}
 
 	model.remove = (owner_id, symbol) =>
