@@ -4,5 +4,5 @@
 
 module.exports = (tx) =>
 {
-	return tx && Boolean(tx.txid)
+	return tx && Boolean(tx.transaction && tx.savepoint)
 }
