@@ -98,8 +98,6 @@ module.exports = function Onboarding (db, investor)
 
 	onb.pushLive = function pushLive (whom_id, investor_id)
 	{
-
-
 		return Promise.all(
 		[
 			investor.all.is(investor_id),
@@ -124,8 +122,6 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_entry) =>
 		{
-			console.log('\n', JSON.stringify(investor_entry, null, 2))
-
 			validate.name(investor_entry.first_name, 'first_name')
 			validate.name(investor_entry.last_name, 'last_name')
 
@@ -148,15 +144,6 @@ module.exports = function Onboarding (db, investor)
 
 			return investor.portfolio.full(investor_id)
 		})
-		.catch((err) =>
-		{
-			if (Err.is(err))
-			{
-				throw CannotGoPublic({ reason: err.message, data: err.data })
-			}
-
-			throw err
-		})
 		.then((portfolio) =>
 		{
 			if (! portfolio.brokerage)
@@ -172,7 +159,16 @@ module.exports = function Onboarding (db, investor)
 				throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
 			}
 
-			return investor.setPublic(investor_id, true, 'id')
+			return investor.setPublic(investor_id, true, 'user_id')
+		})
+		.catch((err) =>
+		{
+			if (Err.is(err) && err.code !== CannotGoPublic().code)
+			{
+				throw CannotGoPublic({ reason: err.message, data: err.data })
+			}
+
+			throw err
 		})
 		.then((investor_id) =>
 		{
@@ -224,7 +220,7 @@ module.exports = function Onboarding (db, investor)
 		var sorted_returns = _.orderBy(hist_returns, [ 'year', 'asc' ])
 		for (var i = 1; i < sorted_returns.length; i ++)
 		{
-			if (sorted_returns[i].year - sorted_returns[i-1] !== 1)
+			if (sorted_returns[i].year - sorted_returns[i - 1].year !== 1)
 			{
 				throw WrongHistFormat(
 				{
