@@ -81,7 +81,8 @@ module.exports = function Auth (db)
 		return validate_change_email(new_email)
 		.then(() =>
 		{
-			return user.newEmailUpdate({
+			return user.newEmailUpdate(null,
+			{
 				user_id: user_id,
 				new_email: new_email
 			})

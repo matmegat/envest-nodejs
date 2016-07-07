@@ -184,10 +184,11 @@ module.exports = function User (db, app)
 			})
 			.then(function (id)
 			{
-				return user.newEmailUpdate({
+				return user.newEmailUpdate(trx,
+				{
 					user_id: id,
 					new_email: data.email
-				}, trx)
+				})
 			})
 		})
 	})
@@ -274,10 +275,11 @@ module.exports = function User (db, app)
 			.then(one)
 			.then(id =>
 			{
-				return user.newEmailUpdate({
+				return user.newEmailUpdate(trx,
+				{
 					user_id: id,
 					new_email: data.email
-				}, trx)
+				})
 			})
 			.then(id =>
 			{
@@ -353,7 +355,7 @@ module.exports = function User (db, app)
 		.del()
 	}
 
-	user.newEmailUpdate = knexed.transact(knex, (trx, data) =>
+	user.newEmailUpdate = function (trx, data)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
@@ -386,9 +388,9 @@ module.exports = function User (db, app)
 					throw error
 				}
 			})
-			.then(() =>
+			.then((user_id) =>
 			{
-				return user.byId(data.user_id)
+				return user.byId(user_id, trx)
 			})
 			.then((user) =>
 			{
@@ -400,7 +402,7 @@ module.exports = function User (db, app)
 				})
 			})
 		})
-	})
+	}
 
 	var paginator = PaginatorBooked()
 
