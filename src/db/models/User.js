@@ -165,35 +165,32 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.create = function (data)
+	user.create = knexed.transact(knex, (trx, data) =>
 	{
-		return knex.transaction(function (trx)
+		return ensureEmailNotExists(data.email, trx)
+		.then(() =>
 		{
-			return ensureEmailNotExists(data.email, trx)
-			.then(() =>
+			return user.users_table(trx)
+			.insert({
+				first_name: data.first_name,
+				last_name: data.last_name,
+				email: null
+			}
+			, 'id')
+			.then(one)
+			.then(function (id)
 			{
-				return user.users_table(trx)
-				.insert({
-					first_name: data.first_name,
-					last_name: data.last_name,
-					email: null
-				}
-				, 'id')
-				.then(one)
-				.then(function (id)
-				{
-					return user.password.create(id, data.password, trx)
-				})
-				.then(function (id)
-				{
-					return user.newEmailUpdate({
-						user_id: id,
-						new_email: data.email
-					}, trx)
-				})
+				return user.password.create(id, data.password, trx)
+			})
+			.then(function (id)
+			{
+				return user.newEmailUpdate({
+					user_id: id,
+					new_email: data.email
+				}, trx)
 			})
 		})
-	}
+	})
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
 	function ensureEmailNotExists (email, trx)
