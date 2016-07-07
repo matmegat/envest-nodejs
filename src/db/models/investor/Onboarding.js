@@ -134,8 +134,8 @@ module.exports = function Onboarding (db, investor)
 			validate.string(investor_entry.pic, 'pic')
 			validate.empty(investor_entry.pic, 'pic')
 
-			// validate.string(investor.profile_pic, 'profile_pic')
-			// validate.empty(investor.profile_pic, 'profile_pic')
+			validate.string(investor.profile_pic, 'profile_pic')
+			validate.empty(investor.profile_pic, 'profile_pic')
 
 			/* validate historical_returns */
 			validate__historical_returns(investor_entry.historical_returns)
@@ -145,6 +145,8 @@ module.exports = function Onboarding (db, investor)
 			onb.fields.focus.validate(investor_entry.focus)
 
 			onb.fields.profession.validate(investor_entry.profession)
+
+			return investor.portfolio.full(investor_id)
 		})
 		.catch((err) =>
 		{
@@ -154,6 +156,23 @@ module.exports = function Onboarding (db, investor)
 			}
 
 			throw err
+		})
+		.then((portfolio) =>
+		{
+			if (! portfolio.brokerage)
+			{
+				throw CannotGoPublic({ reason: 'Brokerage does not exist' })
+			}
+			if (! portfolio.brokerage.amount < 0)
+			{
+				throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
+			}
+			if (! portfolio.brokerage.multiplier < 0)
+			{
+				throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
+			}
+
+			return investor.setPublic(investor_id, true, 'id')
 		})
 	}
 

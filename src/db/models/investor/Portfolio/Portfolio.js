@@ -140,5 +140,47 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.full = function (investor_id)
+	{
+		return investor.all.ensure(investor_id)
+		.then(() =>
+		{
+			return Promise.all([
+				holdings.byInvestorId(investor_id),
+				brokerage.byInvestorId(investor_id)
+			])
+		})
+		.then((values) =>
+		{
+			var portfolio_holdings = values[0]
+			var brokerage = values[1]
+
+			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
+			{
+				portfolio_holding.allocation =
+					portfolio_holding.amount *
+					portfolio_holding.buy_price *
+					brokerage.multiplier
+
+				portfolio_holding.symbol =
+				{
+					ticker: portfolio_holding.symbol_ticker,
+					exchange: portfolio_holding.symbol_exchange,
+					company: null
+				}
+
+				return _.omit(
+					portfolio_holding,
+					[ 'symbol_ticker', 'symbol_exchange' ]
+				)
+			})
+
+			return {
+				brokerage: brokerage,
+				holdings:  portfolio_holdings
+			}
+		})
+	}
+
 	return portfolio
 }

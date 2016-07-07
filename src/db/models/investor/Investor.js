@@ -178,5 +178,16 @@ module.exports = function Investor (db, app)
 		})
 	}
 
+	investor.setPublic = knexed.transact(knex, (trx, id, value, returning) =>
+	{
+		return investor.all.ensure(id)
+		.then(() =>
+		{
+			return investor.table(trx)
+			.where('user_id', id)
+			.update('is_public', value, returning)
+		})
+	})
+
 	return investor
 }
