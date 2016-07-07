@@ -51,7 +51,7 @@ var Watchlist = module.exports = function Watchlist (db)
 
 		w.investor.decorate = (r, entry) =>
 		{
-			r.target_price = entry.target_price
+			r.target_price = Number(entry.target_price)
 
 			return r
 		}
