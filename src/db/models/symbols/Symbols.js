@@ -54,7 +54,7 @@ var Symbols = module.exports = function Symbols (cfg)
 		{
 			return resl.map((r, i) =>
 			{
-				if (! r)
+				if (! r) /* not_resolved */
 				{
 					return r
 				}
