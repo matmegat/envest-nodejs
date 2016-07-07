@@ -174,10 +174,16 @@ module.exports = function Onboarding (db, investor)
 
 			return investor.setPublic(investor_id, true, 'id')
 		})
+		.then((investor_id) =>
+		{
+			PublicChanged(investor_id, { by: 'admin', admin_id: whom_id })
+		})
 	}
 
 	var CannotGoPublic = Err('cannot_go_public',
 		'Investor cannot be pushed to public')
+
+	var PublicChanged = Emitter('pushed_to_public')
 
 	// eslint-disable-next-line id-length
 	function validate__historical_returns (hist_returns)

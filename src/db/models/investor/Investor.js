@@ -187,6 +187,7 @@ module.exports = function Investor (db, app)
 			.where('user_id', id)
 			.update('is_public', value, returning)
 		})
+		.then(one)
 	})
 
 	return investor
