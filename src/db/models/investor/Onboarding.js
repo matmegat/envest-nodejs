@@ -125,7 +125,6 @@ module.exports = function Onboarding (db, investor)
 		.then((investor_entry) =>
 		{
 			console.log('\n', JSON.stringify(investor_entry, null, 2))
-			var current_year = new Date().getFullYear()
 
 			validate.name(investor_entry.first_name, 'first_name')
 			validate.name(investor_entry.last_name, 'last_name')
@@ -138,58 +137,14 @@ module.exports = function Onboarding (db, investor)
 			// validate.string(investor.profile_pic, 'profile_pic')
 			// validate.empty(investor.profile_pic, 'profile_pic')
 
-			{ /* validate historical_returns */
-				onb.fields.hist_return.validate(investor_entry.historical_returns)
+			/* validate historical_returns */
+			validate__historical_returns(investor_entry.historical_returns)
 
-				/* validate that previous year included into historical_returns */
-				var last_year = _.find(
-					investor_entry.historical_returns,
-					{ year: current_year - 1 }
-				)
-				if (! last_year)
-				{
-					throw WrongHistFormat(
-					{
-						field: 'hist_return',
-						subfield: 'year',
-						reason: `${current_year - 1} not included`
-					})
-				}
+			onb.fields.background.validate(investor_entry.background)
 
-				/* validate duplicates */
-				var is_duplicates = ! _.chain(investor_entry.historical_returns)
-				.countBy('year')
-				.every(value => value === 1)
-				.value()
+			onb.fields.focus.validate(investor_entry.focus)
 
-				if (is_duplicates)
-				{
-					throw WrongHistFormat(
-					{
-						field: 'hist_return',
-						subfield: 'year',
-						reason: `Duplicates exists`
-					})
-				}
-
-				/* validate gaps */
-				var sorted_returns = _.orderBy(
-					investor_entry.historical_returns,
-					[ 'year', 'asc' ]
-				)
-				for (var i = 1; i < sorted_returns.length; i ++)
-				{
-					if (sorted_returns[i].year - sorted_returns[i-1] !== 1)
-					{
-						throw WrongHistFormat(
-						{
-							field: 'hist_return',
-							subfield: 'year',
-							reason: `Gaps in filled years`
-						})
-					}
-				}
-			}
+			onb.fields.profession.validate(investor_entry.profession)
 		})
 		.catch((err) =>
 		{
@@ -204,6 +159,57 @@ module.exports = function Onboarding (db, investor)
 
 	var CannotGoPublic = Err('cannot_go_public',
 		'Investor cannot be pushed to public')
+
+	// eslint-disable-next-line id-length
+	function validate__historical_returns (hist_returns)
+	{
+		var current_year = new Date().getFullYear()
+
+		onb.fields.hist_return.validate(hist_returns)
+
+		/* validate that previous year included into historical_returns */
+		var last_year = _.find(hist_returns, { year: current_year - 1 })
+		if (! last_year)
+		{
+			throw WrongHistFormat(
+			{
+				field: 'hist_return',
+				subfield: 'year',
+				reason: `${current_year - 1} not included`
+			})
+		}
+
+		/* validate duplicates */
+		var is_duplicates = ! _.chain(hist_returns)
+			.countBy('year')
+			.every(value => value === 1)
+			.value()
+
+		if (is_duplicates)
+		{
+			throw WrongHistFormat(
+			{
+				field: 'hist_return',
+				subfield: 'year',
+				reason: `Duplicates exists`
+			})
+		}
+
+		/* validate gaps */
+		var sorted_returns = _.orderBy(hist_returns, [ 'year', 'asc' ])
+		for (var i = 1; i < sorted_returns.length; i ++)
+		{
+			if (sorted_returns[i].year - sorted_returns[i-1] !== 1)
+			{
+				throw WrongHistFormat(
+				{
+					field: 'hist_return',
+					subfield: 'year',
+					reason: `Gaps in filled years`
+				})
+			}
+		}
+	}
 
 	return onb
 }
