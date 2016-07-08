@@ -131,7 +131,7 @@ module.exports = function Password (db, user, app)
 				}
 
 				var password_upsert = upsert(
-					password.reset_table(trx),
+					password.reset_table(),
 					'pass_reset_pkey',
 					'user_id'
 				)
