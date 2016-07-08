@@ -157,6 +157,8 @@ module.exports = function Portfolio (db, investor)
 
 			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
 			{
+				portfolio_holding.buy_price = Number(portfolio_holding.buy_price)
+
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
 					portfolio_holding.buy_price *
