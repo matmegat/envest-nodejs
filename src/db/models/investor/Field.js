@@ -10,6 +10,8 @@ module.exports = function Field (investor, options)
 
 	field.set = setter(field, options.set)
 
+	field.verify = verifier(field, options.verify)
+
 	return field
 }
 
@@ -63,5 +65,18 @@ function setter (field, set)
 			return set(value, queryset, investor_id)
 		})
 		.then(noop)
+	}
+}
+
+function verifier (field, verify)
+{
+	expect(verify).a('function')
+
+	return (investor_id) =>
+	{
+		var queryset = field.investor.table()
+		.where('user_id', investor_id)
+
+		return verify(queryset, investor_id)
 	}
 }
