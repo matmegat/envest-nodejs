@@ -1,9 +1,14 @@
 
 var knexed = require('../knexed')
-
-var _ = require('lodash')
+var upsert = require('../upsert')
 
 var generate_code = require('../../crypto-helpers').generate_code
+
+var extend = require('lodash/extend')
+var pick   = require('lodash/pick')
+var ends   = require('lodash/endsWith')
+
+var pick = require('lodash/pick')
 
 var Password = require('./Password')
 
@@ -11,14 +16,16 @@ var Groups = require('./Groups')
 
 var Err = require('../../Err')
 var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
-var validate_email = require('../validate').email
 
+var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
 
-module.exports = function User (db)
+module.exports = function User (db, app)
 {
 	var user = {}
+
+	var mailer = app.mail
 
 	var knex = db.knex
 
@@ -30,7 +37,7 @@ module.exports = function User (db)
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 
-	user.password = Password(db, user)
+	user.password = Password(db, user, app)
 
 	user.groups = Groups(db, user)
 
@@ -48,7 +55,20 @@ module.exports = function User (db)
 		.then(() =>
 		{
 			return user.users_table(trx)
-			.where('id', id)
+			.select(
+				'users.id AS id',
+				'first_name',
+				'last_name',
+				'pic',
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email')
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
+			.where('users.id', id)
 			.then(oneMaybe)
 		})
 	}
@@ -110,7 +130,7 @@ module.exports = function User (db)
 		{
 			var user_data = {}
 
-			user_data = _.pick(result,
+			user_data = pick(result,
 			[
 				'id',
 				'first_name',
@@ -121,7 +141,7 @@ module.exports = function User (db)
 
 			if (result.investor_user_id)
 			{
-				user_data.investor = _.pick(result,
+				user_data.investor = pick(result,
 				[
 					'profile_pic',
 					'profession',
@@ -134,7 +154,7 @@ module.exports = function User (db)
 
 			if (result.admin_user_id)
 			{
-				user_data.admin = _.pick(result,
+				user_data.admin = pick(result,
 				[
 					'parent',
 					'can_intro'
@@ -145,35 +165,33 @@ module.exports = function User (db)
 		})
 	}
 
-	user.create = function (data)
+	user.create = knexed.transact(knex, (trx, data) =>
 	{
-		return knex.transaction(function (trx)
+		return ensureEmailNotExists(data.email, trx)
+		.then(() =>
 		{
-			return ensureEmailNotExists(data.email, trx)
-			.then(() =>
+			return user.users_table(trx)
+			.insert({
+				first_name: data.first_name,
+				last_name: data.last_name,
+				email: null
+			}
+			, 'id')
+			.then(one)
+			.then(function (id)
 			{
-				return user.users_table(trx)
-				.insert({
-					first_name: data.first_name,
-					last_name: data.last_name,
-					email: null
-				}
-				, 'id')
-				.then(one)
-				.then(function (id)
+				return user.password.create(id, data.password, trx)
+			})
+			.then(function (id)
+			{
+				return user.newEmailUpdate(trx,
 				{
-					return user.password.create(id, data.password, trx)
-				})
-				.then(function (id)
-				{
-					return user.newEmailUpdate({
-						user_id: id,
-						new_email: data.email
-					}, trx)
+					user_id: id,
+					new_email: data.email
 				})
 			})
 		})
-	}
+	})
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
 	function ensureEmailNotExists (email, trx)
@@ -257,10 +275,11 @@ module.exports = function User (db)
 			.then(one)
 			.then(id =>
 			{
-				return user.newEmailUpdate({
+				return user.newEmailUpdate(trx,
+				{
 					user_id: id,
 					new_email: data.email
-				}, trx)
+				})
 			})
 			.then(id =>
 			{
@@ -336,9 +355,9 @@ module.exports = function User (db)
 		.del()
 	}
 
-	user.newEmailUpdate = knexed.transact(knex, (trx, data) =>
+	user.newEmailUpdate = function (trx, data)
 	{
-		data = _.extend({}, data, { new_email: data.new_email.toLowerCase() })
+		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
 		return ensureEmailNotExists(data.new_email, trx)
 		.then(() =>
@@ -349,28 +368,40 @@ module.exports = function User (db)
 		{
 			data.code = code
 
-			return user.email_confirms(trx)
-			.insert(data, 'user_id')
-			.then(one)
-			.catch(err =>
+			var email_confirms_upsert = upsert(
+				user.email_confirms(trx),
+				'user_id'
+			)
+
+			var where = { user_id: data.user_id }
+
+			return email_confirms_upsert(where, data)
+			.catch(error =>
 			{
-				if (err.constraint === 'email_confirms_pkey')
+				if (error.constraint && ends(error.constraint, 'email_confirms_new_email_unique'))
 				{
-					return user.email_confirms()
-					.update(
-					{
-						new_email: data.new_email,
-						code: data.code
-					})
-					.where('user_id', data.user_id)
+					throw EmailAlreadyExists()
 				}
 				else
 				{
-					throw err
+					throw error
 				}
 			})
+			.then((user_id) =>
+			{
+				return user.byId(user_id, trx)
+			})
+			.then((user) =>
+			{
+				return mailer.send('default', null,
+				{
+					to: user.email,
+					text: 'Email confirm code: '
+					+ data.code.toUpperCase()
+				})
+			})
 		})
-	})
+	}
 
 	var paginator = PaginatorBooked()
 
@@ -406,7 +437,7 @@ module.exports = function User (db)
 			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 		)
 
-		options.paginator = _.extend({}, options.paginator,
+		options.paginator = extend({}, options.paginator,
 		{
 			real_order_column: 'users.id'
 		})

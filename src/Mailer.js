@@ -23,7 +23,8 @@ module.exports = function Mailer (cfg)
 
 	var templates =
 	{
-		welcome: '5ef32fb6-9c55-416b-ae81-0d2df70aa56e'
+		welcome: '5ef32fb6-9c55-416b-ae81-0d2df70aa56e',
+		default: 'ba81d1e0-858b-4b28-a48c-53ed78e3c209'
 	}
 
 	mailer.send = function (template, substs, data)
@@ -45,7 +46,7 @@ module.exports = function Mailer (cfg)
 			template = null
 		}
 
-		var substs = wrapsub(data.substs || {})
+		substs = wrapsub(substs || {})
 
 		var email = new sendgrid.Email(data)
 

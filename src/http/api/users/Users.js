@@ -12,7 +12,6 @@ module.exports = function Users (http, user_model)
 
 	users.express = Router()
 	users.express.use(authRequired)
-	users.express.use(['/', '/admins'], http.adminRequired)
 	users.model = user_model
 
 	users.express.get('/current', (rq, rs) =>
@@ -20,8 +19,9 @@ module.exports = function Users (http, user_model)
 		rs.send(rq.user)
 	})
 
-	users.express.get('/',  by_group('users'))
-	users.express.get('/admins', by_group('admins'))
+	users.express.get('/', http.adminRequired, by_group('users'))
+	users.express.get('/admins', http.adminRequired, by_group('admins'))
+
 
 	function by_group (group)
 	{

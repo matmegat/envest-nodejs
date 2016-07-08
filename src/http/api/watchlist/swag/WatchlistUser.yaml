@@ -6,24 +6,27 @@ get:
       description: User Watchlist
       schema:
         title: Watchlist
-        type: object
-        properties:
-          symbol:
-            $ref: ../../../swagger/Symbol.yaml
-          price:
-            type: number
-            description: current price of asset
-          currency:
-            type: string
-            description: currency of price (mostly common "USD")
-          gain:
-            type: number
-            description: asset's gain in current day
-        required:
-          - symbol
-          - price
-          - currency
-          - gain
+        type: array
+        items:
+        - type: object
+          title: Watchlist Item
+          properties:
+            symbol:
+              $ref: ../../../swagger/Symbol.yaml
+            price:
+              type: number
+              description: current price of asset
+            currency:
+              type: string
+              description: currency of price (mostly common "USD")
+            gain:
+              type: number
+              description: asset's gain in current day
+          required:
+            - symbol
+            - price
+            - currency
+            - gain
 
     400:
       description: |

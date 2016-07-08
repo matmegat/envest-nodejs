@@ -1,8 +1,9 @@
 
 var extend = Object.assign
+var oneMaybe = require('./helpers').oneMaybe
 var one = require('./helpers').one
 
-module.exports = function upsert (table, constraint, returning)
+module.exports = function upsert (table, returning)
 {
 	var cloned_table = () => table.clone()
 
@@ -10,17 +11,22 @@ module.exports = function upsert (table, constraint, returning)
 	{
 		var full_data = extend({}, data, key_pair)
 
-		return cloned_table().insert(full_data, returning)
-		.catch(error =>
+		return cloned_table().select()
+		.where(key_pair)
+		.then(oneMaybe)
+		.then(Boolean)
+		.then(so =>
 		{
-			if (error.constraint === constraint)
+			if (! so)
 			{
-				return cloned_table().update(data, returning)
-				.where(key_pair)
+				return cloned_table()
+				.insert(full_data, returning)
 			}
 			else
 			{
-				throw error
+				return cloned_table()
+				.update(data, returning)
+				.where(key_pair)
 			}
 		})
 		.then(one)

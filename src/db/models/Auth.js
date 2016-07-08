@@ -63,7 +63,7 @@ module.exports = function Auth (db)
 
 	auth.emailConfirm = function (code)
 	{
-		return user.newEmailByCode(code)
+		return user.newEmailByCode(code.toLowerCase())
 		.then(Err.nullish(WrongConfirmCode))
 		.then(email_confirms =>
 		{
@@ -81,7 +81,8 @@ module.exports = function Auth (db)
 		return validate_change_email(new_email)
 		.then(() =>
 		{
-			return user.newEmailUpdate({
+			return user.newEmailUpdate(null,
+			{
 				user_id: user_id,
 				new_email: new_email
 			})
