@@ -48,6 +48,13 @@ var Watchlist = module.exports = function Watchlist (db)
 				rs(sup(owner_id, symbol, additional))
 			})
 		})
+
+		w.investor.decorate = (r, entry) =>
+		{
+			r.target_price = Number(entry.target_price)
+
+			return r
+		}
 	}
 
 	return w

@@ -3,6 +3,7 @@ var extend = Object.assign
 var noop   = require('lodash/noop')
 var ends   = require('lodash/endsWith')
 var map    = require('lodash/map')
+var first  = require('lodash/head')
 
 var at = require('lodash/fp/at')
 
@@ -18,6 +19,8 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		throw new Error('not_implemented')
 	}
 
+	model.decorate = null
+
 	model.byId = (owner_id) =>
 	{
 		return model.validateId(owner_id)
@@ -26,25 +29,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			return table()
 			.where('owner_id', owner_id)
 		})
-		.then(entries =>
-		{
-			return symbols.quotes(
-				map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
-			)
-			.then(quotes =>
-			{
-				return map(quotes, (r, i) =>
-				{
-					var t = entries[i].target_price
-					if (r && t) /* fix for unresolved symbols */
-					{
-						r.target_price = t
-					}
-
-					return r
-				})
-			})
-		})
+		.then(transform)
 	}
 
 	model.add = (owner_id, symbol, additional) =>
@@ -67,6 +52,11 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			extend(entry, additional)
 
 			return table().insert(entry)
+			.then(() =>
+			{
+				return transform([ entry ])
+			})
+			.then(first)
 		})
 		.catch(error =>
 		{
@@ -79,7 +69,30 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 				throw error
 			}
 		})
-		.then(noop)
+	}
+
+	function transform (entries)
+	{
+		return symbols.quotes(
+			map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
+		)
+		.then(quotes =>
+		{
+			return map(quotes, (r, i) =>
+			{
+				if (! r) /* not_resolved */
+				{
+					return r
+				}
+
+				if (model.decorate)
+				{
+					r = model.decorate(r, entries[i])
+				}
+
+				return r
+			})
+		})
 	}
 
 	model.remove = (owner_id, symbol) =>
@@ -89,10 +102,15 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		{
 			return symbols.resolve(symbol)
 		})
-		.then(() =>
+		.then((symbol) =>
 		{
 			return table()
-			.where('owner_id', owner_id)
+			.where(
+			{
+				owner_id: owner_id,
+				symbol_exchange: symbol.exchange,
+				symbol_ticker: symbol.ticker
+			})
 			.delete()
 		})
 		.then(noop)
