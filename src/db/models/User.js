@@ -370,7 +370,6 @@ module.exports = function User (db, app)
 
 			var email_confirms_upsert = upsert(
 				user.email_confirms(trx),
-				'email_confirms_pkey',
 				'user_id'
 			)
 
