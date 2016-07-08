@@ -1,3 +1,4 @@
+
 var knexed = require('../../../knexed')
 
 var _ = require('lodash')
@@ -16,8 +17,8 @@ module.exports = function Brokerage (db, investor)
 
 	function set_brokerage (trx, investor_id, data)
 	{
-		var where_clause = { investor_id: investor_id }
-		var update_clause = _.pick(data, ['cash_value', 'multiplier'])
+		var where_clause  = { investor_id: investor_id }
+		var update_clause = _.pick(data, 'cash_value', 'multiplier')
 
 		return brokerage.table(trx)
 		.where(where_clause)
