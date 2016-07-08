@@ -35,27 +35,21 @@ module.exports = function Password (db, user, app)
 		})
 		.then(data =>
 		{
-			return auth_local(trx)
-			.insert(
+			var data =
 			{
-				user_id: user_id,
 				password: data.password,
 				salt: data.salt
-			}, 'user_id')
-			.catch(err =>
-			{
-				if (err.constraint === 'auth_local_pkey')
-				{
-					return auth_local(trx)
-					.update(data, 'user_id')
-					.where('user_id', user_id)
-				}
-				else
-				{
-					throw err
-				}
-			})
-			.then(one)
+			}
+
+			var auth_local_upsert = upsert(
+				auth_local(trx),
+				'user_id'
+			)
+
+			var where = { user_id: user_id }
+
+			return auth_local_upsert(where, data)
+
 		})
 	}
 
