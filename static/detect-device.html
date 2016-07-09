@@ -1,0 +1,56 @@
+<script>
+var is = {}
+
+is.iOS     = navigator.userAgent.match(/iPhone|iPad/i)
+is.Android = navigator.userAgent.match(/android/i)
+
+if (is.iOS)
+{
+	alert('iOS')
+	location = 'netvest://do-something'
+
+	fallback('http://www.apple.com/ru/itunes/')
+}
+else if (is.Android)
+{
+	alert('Android')
+	location = 'intent://do-something'
+
+	fallback('https://play.google.com/store')
+}
+else
+{
+	alert('other')
+	location = 'http://do-something'
+}
+
+function fallback (store)
+{
+	alert('fallback')
+	setTimeout(function still ()
+	{
+		if (! isHidden())
+		{
+			alert('go store')
+			location = store
+		}
+	}
+	, 250)
+}
+
+function isHidden ()
+{
+	if (typeof document.hidden !== 'undefined')
+	{
+		return Boolean(document.hidden)
+	}
+	else if (typeof document.webkitHidden !== 'undefined')
+	{
+		return Boolean(document.webkitHidden)
+	}
+	else
+	{
+		return false
+	}
+}
+</script>

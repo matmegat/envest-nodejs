@@ -60,6 +60,12 @@ module.exports = function Http (app)
 
 	OptionsStub(http.express)
 
+	http.express.get('/detect-device', (rq, rs) =>
+	{
+		var file = require('fs').createReadStream
+
+		file(app.root('static/detect-device.html')).pipe(rs)
+	})
 
 	http.api = {}
 
