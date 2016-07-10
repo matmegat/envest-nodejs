@@ -13,6 +13,7 @@ var Notifications = require('./models/Notifications')
 var Watchlist = require('./models/watchlist/Watchlist')
 var Static = require('./models/Static')
 var Pic = require('./models/Pic')
+var Subscription = require('./models/subscription/Netvest')
 
 module.exports = function name (app)
 {
@@ -53,6 +54,7 @@ module.exports = function name (app)
 	})
 
 	db.user  = User(db, app)
+	db.subsc = Subscription(db)
 	db.notifications = Notifications(db)
 	db.auth  = Auth(db)
 	db.admin = Admin(db)
