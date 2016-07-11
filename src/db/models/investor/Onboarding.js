@@ -507,7 +507,7 @@ function StartDate (investor)
 		},
 		verify: (value, investor_id) =>
 		{	// because DB returns Date() for start_date
-			return investor
+			return investor.table()
 			.where('user_id', investor_id)
 			.select('start_date')
 			.then(one)
