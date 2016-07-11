@@ -248,10 +248,9 @@ module.exports = function User (db, app)
 		.whereIn('id', ids)
 	}
 
-	user.byFacebookId = function (facebook_id)
+	user.byFacebookId = function (facebook_id, trx)
 	{
-		return knex.select('*')
-		.from('users')
+		return user.users_table(trx)
 		.leftJoin(
 			'auth_facebook',
 			'users.id',
@@ -290,7 +289,7 @@ module.exports = function User (db, app)
 			})
 			.then(() =>
 			{
-				return user.byFacebookId(data.facebook_id)
+				return user.byFacebookId(data.facebook_id, trx)
 			})
 			.then(result =>
 			{
@@ -391,14 +390,16 @@ module.exports = function User (db, app)
 			{
 				return user.byId(user_id, trx)
 			})
-			.then((user) =>
+			.then((user_item) =>
 			{
-				return mailer.send('default', null,
+				mailer.send('default', null,
 				{
-					to: user.email,
+					to: user_item.email,
 					text: 'Email confirm code: '
 					+ data.code.toUpperCase()
 				})
+
+				return user_item.id
 			})
 		})
 	}
