@@ -24,6 +24,13 @@ module.exports = function Feed (db)
 
 	feed.feed_table = knexed(knex, 'feed_items')
 
+	expect(db, 'Feed depends on Comments').property('comments')
+	var comments = db.comments
+
+	expect(db, 'Feed depends on Investor').property('investor')
+	var investor = db.investor
+
+
 	var paginators = {}
 
 	paginators.chunked = PaginatorChunked(
@@ -52,12 +59,6 @@ module.exports = function Feed (db)
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
 	})
-
-	expect(db, 'Feed depends on Comments').property('comments')
-	var comments = db.comments
-
-	expect(db, 'Feed depends on Investor').property('investor')
-	var investor = db.investor
 
 	feed.NotFound = NotFound
 
