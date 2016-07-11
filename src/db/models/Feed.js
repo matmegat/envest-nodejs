@@ -216,9 +216,21 @@ module.exports = function Feed (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date investor_post_date_exeeded')
 
-	feed.add = function (mode, date, investor_id, type, data)
+	feed.create = function (investor_id, type, date, data)
 	{
-		date = moment(date) || moment.now()
+		return feed.feed_table()
+		.insert({
+			investor_id: investor_id,
+			type: type,
+			timestamp: date,
+			data: data
+		})
+		.then(noop)
+	}
+
+	feed.add = function (mode, investor_id, type, date, data)
+	{
+		date = date || new Date()
 
 		return Promise.resolve()
 		.then(() =>
@@ -228,6 +240,7 @@ module.exports = function Feed (db)
 			if (mode === "mode:post")
 			{
 				var min_date = moment().day(-3)
+				date = moment(date)
 
 				if (! date.isSameOrAfter(min_date))
 				{
@@ -241,191 +254,187 @@ module.exports = function Feed (db)
 		})
 		.then(type =>
 		{
-			return validate_feed_data(type, data)
+			return validate_feed_data(investor_id, type, date, data)
 		})
 		.then(noop)
 	}
 
 	return feed
-}
 
-function validate_feed_type (feed_type)
-{
-	var types = ['trade', 'watchlist', 'update']
-	var validate_type = validate.collection(types)
-
-	return new Promise(rs =>
+	function validate_feed_type (type)
 	{
-		validate_type(feed_type)
+		var types = ['trade', 'watchlist', 'update']
+		var validate_type = validate.collection(types)
 
-		rs(feed_type)
-	})
-}
-
-function validate_feed_data (type, data)
-{
-	if (type === 'trade')
-	{
-		return Watchlist().set(data)
-		.then(() =>
+		return new Promise(rs =>
 		{
-			console.log('Trade set')
+			validate_type(type)
 
-			return
+			rs(type)
 		})
 	}
 
-	if (type === 'watchlist')
+	function validate_feed_data (investor_id, type, date, data)
 	{
-		return Watchlist().set(data)
-		.then(() =>
+		if (type === 'trade')
 		{
-			console.log('Watchlist set')
+			return Watchlist().set(data)
+			.then(() =>
+			{
+				console.log('Trade set')
 
-			return
+				return
+			})
+		}
+
+		if (type === 'watchlist')
+		{
+			return Watchlist().set(data)
+			.then(() =>
+			{
+				console.log('Watchlist set')
+
+				return
+			})
+		}
+
+		if (type === 'update')
+		{
+			return Update().set(investor_id, type, date, data)
+			.then(noop)
+		}
+	}
+
+
+	function Trade ()
+	{
+		return Type(
+		{
+			validate: validate_trade,
+			set: (data) =>
+			{
+				return data
+			}
 		})
 	}
 
-	if (type === 'update')
+	function validate_trade (data)
 	{
-		return Update().set(data)
-		.then(() =>
-		{
-			console.log('Update set')
+		var data = pick(data,
+		[
+			'dir',
+			'symbol',
+			'price',
+			'amount',
+			'text',
+			'risk',
+			'motivations'	
+		])
 
-			return
+		var trade_dirs = ['bought', 'sold']
+		var validate_trade_dir = validate.collection(trade_dirs)
+
+		return new Promise(rs =>
+		{
+			validate.required(data.text, 'text')
+
+			validate_trade_dir(data.dir)
+
+			validate.required(data.symbol, 'symbol')
+			validate.empty(data.symbol, 'symbol')
+
+			validate.required(data.price, 'price')
+			validate.empty(data.price, 'price')
+
+			validate.required(data.amount, 'amount')
+			validate.empty(data.amount, 'amount')
+
+			validate.required(data.risk, 'risk')
+			validate.empty(data.risk, 'risk')
+
+			rs(data)
+		})
+	}
+
+
+	function Watchlist ()
+	{
+		return Type(
+		{
+			validate: validate_watchlist,
+			set: (data) =>
+			{
+				return data
+			}
+		})
+	}
+
+	function validate_watchlist (data)
+	{
+		var data = pick(data,
+		[
+			'dir',
+			'symbol',
+			'text',
+			'motivations'
+		])
+
+		var watchlist_dirs = ['added', 'removed']
+		var validate_watchlist_dir = validate.collection(watchlist_dirs)
+
+		return new Promise(rs =>
+		{
+			validate_watchlist_dir(data.dir)
+
+			validate.required(data.text, 'text')
+
+			validate.required(data.symbol, 'symbol')
+			validate.empty(data.symbol, 'symbol')
+
+			validate.requied(data.motivations, 'motivations')
+			validate.empty(data.motivations, 'motivations')
+
+			rs(data)
+		})
+	}
+
+
+	function Update ()
+	{
+		return Type(
+		{
+			validate: validate_update,
+			set: (investor_id, type, date, data) =>
+			{
+				return feed.create(investor_id, type, date, data)
+			}
+		})
+	}
+
+	function validate_update (data)
+	{
+		console.log(data)
+
+		var data = pick(data,
+		[
+			'symbols',
+			'title',
+			'text',
+			'motivations'
+		])
+
+		return new Promise(rs =>
+		{
+			validate.required(data.text, 'text')
+			validate.required(data.title, 'title')
+
+			validate.required(data.symbols, 'symbols')
+			validate.empty(data.symbols, 'symbols')
+
+			rs(data)
 		})
 	}
 }
-
-
-function Trade ()
-{
-	return Type(
-	{
-		validate: validate_trade,
-		set: (data) =>
-		{
-			return data
-		}
-	})
-}
-
-function validate_trade (data)
-{
-	var data = pick(data,
-	[
-		'dir',
-		'symbol',
-		'price',
-		'amount',
-		'text',
-		'risk',
-		'motivations'	
-	])
-
-	var trade_dirs = ['bought', 'sold']
-	var validate_trade_dir = validate.collection(trade_dirs)
-
-	return new Promise(rs =>
-	{
-		validate.required(data.text, 'text')
-
-		validate_trade_dir(data.dir)
-
-		validate.required(data.symbol, 'symbol')
-		validate.empty(data.symbol, 'symbol')
-
-		validate.required(data.price, 'price')
-		validate.empty(data.price, 'price')
-
-		validate.required(data.amount, 'amount')
-		validate.empty(data.amount, 'amount')
-
-		validate.required(data.risk, 'risk')
-		validate.empty(data.risk, 'risk')
-
-		rs(data)
-	})
-}
-
-
-function Watchlist ()
-{
-	return Type(
-	{
-		validate: validate_watchlist,
-		set: (data) =>
-		{
-			return data
-		}
-	})
-}
-
-function validate_watchlist (data)
-{
-	var data = pick(data,
-	[
-		'dir',
-		'symbol',
-		'text',
-		'motivations'
-	])
-
-	var watchlist_dirs = ['added', 'removed']
-	var validate_watchlist_dir = validate.collection(watchlist_dirs)
-
-	return new Promise(rs =>
-	{
-		validate_watchlist_dir(data.dir)
-
-		validate.required(data.text, 'text')
-
-		validate.required(data.symbol, 'symbol')
-		validate.empty(data.symbol, 'symbol')
-
-		validate.requied(data.motivations, 'motivations')
-		validate.empty(data.motivations, 'motivations')
-
-		rs(data)
-	})
-}
-
-
-function Update ()
-{
-	return Type(
-	{
-		validate: validate_update,
-		set: (data) =>
-		{
-			return data
-		}
-	})
-}
-
-function validate_update (data)
-{
-	var data = pick(data,
-	[
-		'symbols',
-		'title',
-		'text',
-		'motivations'
-	])
-
-	return new Promise(rs =>
-	{
-		validate.required(data.text, 'text')
-		validate.required(data.title, 'title')
-
-		validate.required(data.symbols, 'symbols')
-		validate.empty(data.symbols, 'symbols')
-
-		rs(data)
-	})
-}
-
 
 function transform_event (item)
 {

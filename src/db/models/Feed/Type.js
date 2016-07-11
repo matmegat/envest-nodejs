@@ -25,12 +25,12 @@ function validator (func)
 
 function setter (type, set)
 {
-	return (data) =>
+	return (investor_id, feed_type, date, data) =>
 	{
 		return type.validate(data)
 		.then(data =>
 		{
-			return set(data)
+			return set(investor_id, feed_type, date, data)
 		})
 		.then(noop)
 	}

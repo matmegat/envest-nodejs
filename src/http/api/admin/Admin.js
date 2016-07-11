@@ -32,7 +32,7 @@ module.exports = function (db, http, admin)
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
-			toss(rs, feed_model.add(mode, date, target_user_id, type, data))
+			toss(rs, feed_model.add(mode, target_user_id, type, date, data))
 		})
 		.catch(toss.err(rs))
 	})
