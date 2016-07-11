@@ -118,13 +118,11 @@ module.exports = function Feed (db, http)
 
 	feed.express.post('/post', http.investorRequired, (rq, rs) =>
 	{
-		var feed_item = {}
+		var investor_id = rq.user.id
+		var type = rq.body.type
+		var data = rq.body.data
 
-		feed_item.investor_id = rq.user.id
-		feed_item.type = rq.body.type
-		feed_item.data = rq.body.data
-
-		toss(rs, feed.model.add(feed_item))
+		toss(rs, feed.model.add(investor_id, type, data))
 	})
 
 	return feed
