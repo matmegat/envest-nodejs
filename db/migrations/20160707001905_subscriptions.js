@@ -8,8 +8,6 @@ exports.up = function (knex)
 		table.timestamp('start_time').defaultTo(knex.fn.now())
 		table.timestamp('end_time')
 
-		table.integer('lifetime')
-
 		table.string('type').notNullable()
 
 		table.integer('user_id')

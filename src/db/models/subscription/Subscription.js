@@ -4,8 +4,10 @@ var knexed = require('../../knexed')
 var _ = require('lodash')
 
 var moment = require('moment')
-var validate   = require('../../validate')
-var isPositive   = validate.integer.positive
+
+var validate    = require('../../validate')
+var validate_time = validate.time
+
 var validateId = require('../../../id').validate.promise
 
 var Err = require('../../../Err')
@@ -27,7 +29,7 @@ module.exports = function Subscription (db, subsc_desc)
 		{
 			items.forEach((item) =>
 			{
-				if (includes(subsc_desc[item.type], feature))
+				if (includes(subsc_desc[item.type].feature, feature))
 				{
 					return true
 				}
@@ -35,22 +37,29 @@ module.exports = function Subscription (db, subsc_desc)
 		})
 	}
 
-	var curry = _.curry
-	var noop  = _.noop
-
-	var activate = subscription.activate = curry((type, days, user_id) =>
+	subscription.activate = function (user_id, type, days)
 	{
-		var end_time = moment.add(days, 'days')
-
 		return validate_type(type)
 		.then(() =>
 		{
-			return validate_days(days)
+			days = days || subsc_desc[type].days
+
+			if (subsc_desc[type].once)
+			{
+				return once_activate(user_id, type, days)
+			}
+			else
+			{
+				return activate(user_id, type, days)
+			}
 		})
-		.then(() =>
-		{
-			return counting_time(user_id, end_time)
-		})
+	}
+
+	var noop  = _.noop
+
+	function activate (user_id, type, days)
+	{
+		return counting_time(user_id, days)
 		.then((time) =>
 		{
 			subscription.table()
@@ -63,62 +72,18 @@ module.exports = function Subscription (db, subsc_desc)
 			.then(noop)
 			.catch(Err.fromDb('subscription_user_id_foreign', db.user.NotFound))
 		})
-	})
-
-	var OnlyOnceActivate = Err('only_once_activate', 'Subscription can be activated only once')
-
-	subscription.onceActivate = curry((type, days, user_id) =>
-	{
-		return validate_type(type)
-		.then(() =>
-		{
-			return validate_days(days)
-		})
-		.then(() =>
-		{
-			return by_user_id_type(user_id, type)
-		})
-		.then((items) =>
-		{
-			if (items.length === 0)
-			{
-				return activate(user_id, type, days)
-			}
-			else
-			{
-				throw OnlyOnceActivate({ type: type })
-			}
-		})
-	})
-
-	var WrongType = Err('wrong_subscription_type', 'Wrong subscription type')
-
-	function validate_type (type)
-	{
-		return new Promise(rs =>
-		{
-			if (! (type in subsc_desc))
-			{
-				throw WrongType()
-			}
-
-			return rs(type)
-		})
 	}
 
-	function validate_days (days)
+	function counting_time (user_id, days)
 	{
+		var time = moment().add(days, 'days')
+
 		return new Promise(rs =>
 		{
-			isPositive('subscription_days', days)
+			validate_time(time, 'subscription')
 
-			return rs(days)
+			return rs()
 		})
-	}
-
-	function counting_time (user_id, time)
-	{
-		return validate_time(time)
 		.then(() =>
 		{
 			return by_user_id(user_id)
@@ -138,18 +103,36 @@ module.exports = function Subscription (db, subsc_desc)
 		})
 	}
 
-	var WrongTime = Err('wrong_subscription_time', 'Wrong subscription time')
+	var OnlyOnceActivate = Err('only_once_activate', 'Subscription can be activated only once')
 
-	function validate_time (time)
+	function once_activate (user_id, type, days)
+	{
+		return by_user_id_type(user_id, type)
+		.then((items) =>
+		{
+			if (items.length === 0)
+			{
+				return activate(user_id, type, days)
+			}
+			else
+			{
+				throw OnlyOnceActivate({ type: type })
+			}
+		})
+	}
+
+	var WrongType = Err('wrong_subscription_type', 'Wrong subscription type')
+
+	function validate_type (type)
 	{
 		return new Promise(rs =>
 		{
-			if (! time.isValid())
+			if (! (type in subsc_desc))
 			{
-				throw WrongTime()
+				throw WrongType()
 			}
 
-			return rs(time)
+			return rs()
 		})
 	}
 
@@ -157,7 +140,7 @@ module.exports = function Subscription (db, subsc_desc)
 
 	function by_user_id (user_id)
 	{
-		return validateId(WrongUserId)
+		return validateId(WrongUserId, user_id)
 		.then(() =>
 		{
 			return subscription.table()
@@ -169,7 +152,7 @@ module.exports = function Subscription (db, subsc_desc)
 
 	function by_user_id_type (user_id, type)
 	{
-		return validateId(WrongUserId)
+		return validateId(WrongUserId, user_id)
 		.then(() =>
 		{
 			return subscription.table()

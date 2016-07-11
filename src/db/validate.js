@@ -1,5 +1,6 @@
 
 var Err = require('../Err')
+var moment = require('moment')
 
 var validate = module.exports = {}
 
@@ -158,5 +159,17 @@ validate.email = function validate__email (email)
 	if (! emailRe.test(email))
 	{
 		throw WrongEmail()
+	}
+}
+
+var WrongTime = Err('wrong_time', 'Wrong time')
+
+validate.time = function validate__time (time, name)
+{
+	var time = moment(time)
+
+	if (! time.isValid())
+	{
+		throw WrongTime({ name: name })
 	}
 }
