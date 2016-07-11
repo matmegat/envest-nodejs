@@ -86,6 +86,7 @@ module.exports = function Feed (db)
 				delete feed_item.investor_id
 
 				transform_event(feed_item)
+				transform_symbols([ feed_item ])
 
 				return feed_item
 			})
@@ -150,6 +151,8 @@ module.exports = function Feed (db)
 					item.comments = counts[item.id]
 					transform_event(item)
 				})
+
+				transform_symbols(feed_items)
 
 				return feed_items
 			})
@@ -224,4 +227,37 @@ function transform_event (item)
 
 	delete item.type
 	delete item.data
+}
+
+
+var compact = _.compact
+var flatten = _.flatten
+
+var Symbl = require('./symbols/Symbl')
+
+function transform_symbols (items)
+{
+	var symbols = items.map(item =>
+	{
+		var data = item.event.data
+
+		if (data.symbol)
+		{
+			return data.symbol
+		}
+		if (data.symbols)
+		{
+			return data.symbols
+		}
+	})
+
+	symbols = flatten(symbols)
+	symbols = compact(symbols)
+
+	symbols = symbols.map(symbol =>
+	{
+		return Symbl([ symbol.ticker, symbol.exchange ])
+	})
+
+	console.log(symbols)
 }
