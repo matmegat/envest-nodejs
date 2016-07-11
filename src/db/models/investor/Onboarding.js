@@ -122,7 +122,7 @@ module.exports = function Onboarding (db, investor)
 
 			return Promise.all(_.map(onb.fields, (field) =>
 			{
-				return field.verify(investor_id, field.key)
+				return field.verify(investor_id)
 			}))
 		})
 		.then(() => db.user.infoById(investor_id))
@@ -171,6 +171,8 @@ var Field = require('./Field')
 
 
 var validateProfLength = validate.length(50)
+
+var one = require('../../helpers').one
 
 function Profession (investor)
 {
@@ -370,7 +372,6 @@ function Brokerage (investor_model, db)
 {
 	return Field(investor_model,
 	{
-		key: null,
 		validate: (value) =>
 		{
 			if (! isFinite(value) || value < 0)
@@ -439,7 +440,6 @@ function Holdings (investor_model, db)
 
 	return Field(investor_model,
 	{
-		key: null,
 		validate: (value) =>
 		{
 			try
@@ -491,7 +491,6 @@ function StartDate (investor)
 {
 	return Field(investor,
 	{
-		key: 'start_date',
 		validate: (value) =>
 		{
 			validate.string(value, 'start_date')
@@ -509,6 +508,22 @@ function StartDate (investor)
 		{
 			return queryset.update({ start_date: value })
 		},
-		verify: (value) => value !== null
+		verify: (value, investor_id) =>
+		{	// because DB returns Date() for start_date
+			return investor
+			.where('user_id', investor_id)
+			.select('start_date')
+			.then(one)
+			.then((rs) =>
+			{
+				var moment_date = moment(rs.start_date)
+				if (! moment_date.isValid())
+				{
+					throw WrongStartDateFormat()
+				}
+
+				return true
+			})
+		}
 	})
 }

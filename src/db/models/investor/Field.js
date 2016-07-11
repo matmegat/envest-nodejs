@@ -76,9 +76,9 @@ function verifier (field, verify)
 {
 	expect(verify).a('function')
 
-	return (investor_id, select_field) =>
+	return (investor_id) =>
 	{
-		if (select_field === null)
+		if (! field.key)
 		{
 			return verify(null, investor_id)
 		}
@@ -88,7 +88,7 @@ function verifier (field, verify)
 		.then(one)
 		.then((entry) =>
 		{
-			return field.validate(entry[select_field])
+			return field.validate(entry[field.key])
 			.then((value) =>
 			{
 				return verify(value, investor_id)
