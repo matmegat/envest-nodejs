@@ -56,7 +56,7 @@ module.exports = function name (app)
 	db.user  = User(db, app)
 	db.subsc = Subscription(db)
 	db.notifications = Notifications(db)
-	db.auth  = Auth(db)
+	db.auth  = Auth(db, db.subsc)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
