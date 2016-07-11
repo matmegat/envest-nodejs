@@ -213,6 +213,8 @@ module.exports = function Feed (db)
 
 	feed.add = function (investor_id, type, data, date)
 	{
+		date = date || moment.now()
+
 		return Promise.resolve()
 		.then(() =>
 		{
