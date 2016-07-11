@@ -211,19 +211,16 @@ module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.add = function (feed_item)
+	feed.add = function (investor_id, type, data)
 	{
-		var investor_id = feed_item.investor_id
-
-		return validateFeedItem(feed_item)
-		.then(item =>
+		return validate_feed_data(data)
+		.then(data =>
 		{
 			return feed.feed_table()
-			.insert(
-			{
+			.insert({
 				investor_id: investor_id,
-				type: item.type,
-				data: item.data
+				type: type,
+				data: data
 			})
 		})
 		.then(noop)
@@ -234,7 +231,7 @@ module.exports = function Feed (db)
 
 var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
 
-function validateFeedItem (feed_item)
+function validate_feed_data (feed_item)
 {
 	var date = feed_item.date
 
@@ -267,39 +264,25 @@ function validateFeedItem (feed_item)
 		}
 
 		return feed_item
-	})
-	
+	})	
 }
 
-var WrongFeedDate = Err('wrong_feed_date', 'Wrong Feed Date')
 
-function validate_date (data)
+function Trade ()
 {
-	var date = moment(data)
-
-	if (! date.isValid())
- 	{
-  		throw WrongFeedDate()
-  	}
-}
-
-var WrongDir = Err('wrong_dir', 'Wrong Dir')
-
-function validate_dir (type)
-{
-	return function (typeSet)
+	return Type(investor,
 	{
-		if (typeSet.indexOf(type) === -1)
+		validate: validate_trade,
+		set: (data) =>
 		{
-			throw WrongDir()
+			return data
 		}
-	}
+	})
 }
 
-function validate_trade (feed_item)
+function validate_trade (data)
 {
-	var tradeDirs = ['bought', 'sold']
-	feed_item.data = pick(feed_item.data,
+	var data = pick(data,
 	[
 		'dir',
 		'symbol',
@@ -309,8 +292,6 @@ function validate_trade (feed_item)
 		'risk',
 		'motivations'	
 	])
-	var validate_trade_dir = validate_dir(feed_item.data.dir)
-	var data = feed_item.data
 
 	return new Promise(rs =>
 	{
@@ -330,23 +311,32 @@ function validate_trade (feed_item)
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
 
-		rs(feed_item)
+		rs(data)
 	})
 }
 
-function validate_watchlist (feed_item)
+
+function Watchlist ()
 {
-	var watchlistDirs = ['added', 'removed']
-	feed_item.data = pick(feed_item.data,
+	return Type(investor,
+	{
+		validate: validate_watchlist,
+		set: (data) =>
+		{
+			return data
+		}
+	})
+}
+
+function validate_watchlist (data)
+{
+	var data = pick(data,
 	[
 		'dir',
 		'symbol',
 		'text',
 		'motivations'
 	])
-
-	var validate_watchlist_dir = validate_dir(feed_item.data.dir)
-	var data = feed_item.data
 
 	return new Promise(rs =>
 	{
@@ -360,20 +350,32 @@ function validate_watchlist (feed_item)
 		validate.requied(data.motivations, 'motivations')
 		validate.empty(data.motivations, 'motivations')
 
-		rs(feed_item)
+		rs(data)
 	})
 }
 
-function validate_update (feed_item)
+
+function Update ()
 {
-	feed_item.data = pick(feed_item.data,
+	return Type(investor,
+	{
+		validate: validate_update,
+		set: (data) =>
+		{
+			return data
+		}
+	})
+}
+
+function validate_update (data)
+{
+	var data = pick(data,
 	[
 		'symbols',
 		'title',
 		'text',
 		'motivations'
 	])
-	var data = feed_item.data
 
 	return new Promise(rs =>
 	{
@@ -383,7 +385,7 @@ function validate_update (feed_item)
 		validate.required(data.symbols, 'symbols')
 		validate.empty(data.symbols, 'symbols')
 
-		rs(feed_item)
+		rs(data)
 	})
 }
 
