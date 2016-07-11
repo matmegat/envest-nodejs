@@ -19,9 +19,6 @@ function validator (func)
 {
 	return (data) =>
 	{
-		console.log('Data in validator: ')
-		console.log(data)
-
 		return new Promise(rs => rs(func(data)))
 	}
 }
