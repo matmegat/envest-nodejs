@@ -65,15 +65,23 @@ module.exports = function Promo (db)
 		.where(function ()
 		{
 			this.where('end_time', '>', moment())
-			this.orWhere('end_time', null)
+			this.whereNotNull('end_time')
 		})
 		.where(function ()
 		{
 			this.where('activations', '>', 0)
-			this.orWhere('activations', null)
+			this.whereNotNull('activations')
 		})
 		.where('code', code)
 		.then(Err.emptish(WrongPromoCode))
+	}
+
+	promo.decrement = function (code)
+	{
+		return promo.table()
+		.where('code', code)
+		.whereNotNull('activations')
+		.decrement('activations', 1)
 	}
 
 	return promo
