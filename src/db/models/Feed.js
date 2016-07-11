@@ -214,9 +214,9 @@ module.exports = function Feed (db)
 	feed.add = function (investor_id, type, data)
 	{
 		return validate_feed_type(type)
-		.then(() =>
+		.then(type =>
 		{
-			return validate_feed_data(data)
+			return validate_feed_data(type, data)
 		})
 		.then(data =>
 		{
@@ -241,43 +241,27 @@ function validate_feed_type (feed_type)
 	return new Promise(rs =>
 	{
 		validate_type(feed_type)
+
+		rs(feed_type)
 	})
 }
 
-function validate_feed_data (feed_item)
+function validate_feed_data (type, data)
 {
-	var date = feed_item.date
-
-	return Promise.resolve()
-	.then(() =>
+	if (type === 'trade')
 	{
-		switch (feed_item.type)
-		{
-			case 'trade':
-				return validate_trade (feed_item)
-				break
-			case 'watchlist':
-				return validate_watchlist (feed_item)
-				break
-			case 'update':
-				return validate_update (feed_item)
-				break
-			default:
-				throw WrongFeedType()
-		}
-	})
-	.then(feed_item =>
-	{	
-		if (date)
-		{
-			validate.empty(date)
-			validate_date(date)
+		return validate_trade(data)
+	}
 
-			feed_item.date = date
-		}
+	if (type === 'watchlist')
+	{
+		return validate_watchlist(data)
+	}
 
-		return feed_item
-	})	
+	if (type === 'update')
+	{
+		return validate_update(data)
+	}
 }
 
 
