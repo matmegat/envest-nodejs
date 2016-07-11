@@ -23,20 +23,15 @@ module.exports = function (db, http, admin)
 
 	express.post('/post-as', (rq, rs) =>
 	{
-		var feed_item = {}
-
 		var target_user_id = rq.body.target_user_id
+		var type = rq.body.type
 		var date = rq.body.date
+		var data = rq.body.data
 
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
-			feed_item.date = date
-			feed_item.investor_id = target_user_id
-			feed_item.type = rq.body.type
-			feed_item.data = rq.body.data
-
-			toss(rs, feed_model.add(feed_item))
+			toss(rs, feed_model.add(target_user_id, type, data))
 		})
 		.catch(toss.err(rs))
 	})
