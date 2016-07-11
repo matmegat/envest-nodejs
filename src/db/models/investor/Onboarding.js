@@ -189,8 +189,7 @@ function Profession (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ profession: value })
-		},
-		verify: (value) => value !== null
+		}
 	})
 }
 
@@ -220,8 +219,7 @@ function Focus (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ focus: JSON.stringify(value) })
-		},
-		verify: (value) => value !== null
+		}
 	})
 }
 
@@ -243,8 +241,7 @@ function Background (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ background: value })
-		},
-		verify: (value) => value !== null
+		}
 	})
 }
 

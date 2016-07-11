@@ -74,7 +74,10 @@ var one = require('../../helpers').one
 
 function verifier (field, verify)
 {
-	expect(verify).a('function')
+	if (typeof verify !== 'function')
+	{
+		verify = (value) => value !== null
+	}
 
 	return (investor_id) =>
 	{
