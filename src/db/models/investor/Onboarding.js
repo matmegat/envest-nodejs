@@ -122,7 +122,7 @@ module.exports = function Onboarding (db, investor)
 
 			return Promise.all(_.map(onb.fields, (field) =>
 			{
-				return field.verify(investor_id)
+				return field.verify(investor_id, field.key)
 			}))
 		})
 		.then(() => db.user.infoById(investor_id))
@@ -172,12 +172,11 @@ var Field = require('./Field')
 
 var validateProfLength = validate.length(50)
 
-var one = require('../../helpers').one
-
 function Profession (investor)
 {
 	return Field(investor,
 	{
+		key: 'profession',
 		validate: (value) =>
 		{
 			validate.string(value, 'profession')
@@ -189,19 +188,7 @@ function Profession (investor)
 		{
 			return queryset.update({ profession: value })
 		},
-		verify: (queryset) =>
-		{
-			return queryset
-			.select('profession')
-			.then(one)
-			.then((rs) =>
-			{
-				validate.string(rs.profession, 'profession')
-				validate.empty(rs.profession, 'profession')
-				validateProfLength(rs.profession, 'profession')
-				return true
-			})
-		}
+		verify: (value) => value !== null
 	})
 }
 
@@ -214,6 +201,7 @@ function Focus (investor)
 {
 	return Field(investor,
 	{
+		key: 'focus',
 		validate: (value) =>
 		{
 			validate.array(value, 'focus')
@@ -231,25 +219,7 @@ function Focus (investor)
 		{
 			return queryset.update({ focus: JSON.stringify(value) })
 		},
-		verify: (queryset) =>
-		{
-			return queryset
-			.select('focus')
-			.then(one)
-			.then((rs) =>
-			{
-				validate.array(rs.focus, 'focus')
-				validateFocLength(rs.focus, 'focus')
-				/* validate each element of array */
-				rs.focus.forEach((focus_item, i) =>
-				{
-					validate.string(focus_item, `focus[${i}]`)
-					validate.empty(focus_item, `focus[${i}]`)
-					validateFocItemLength(focus_item, `focus[${i}]`)
-				})
-				return true
-			})
-		}
+		verify: (value) => value !== null
 	})
 }
 
@@ -260,6 +230,7 @@ function Background (investor)
 {
 	return Field(investor,
 	{
+		key: 'background',
 		validate: (value) =>
 		{
 			validate.string(value, 'background')
@@ -271,20 +242,7 @@ function Background (investor)
 		{
 			return queryset.update({ background: value })
 		},
-		verify: (queryset) =>
-		{
-			return queryset
-			.select('background')
-			.then(one)
-			.then((rs) =>
-			{
-				validate.string(rs.background, 'background')
-				validate.empty(rs.background, 'background')
-				validateBackLength(rs.background, 'background')
-
-				return true
-			})
-		}
+		verify: (value) => value !== null
 	})
 }
 
@@ -324,6 +282,7 @@ function HistReturn (investor)
 
 	return Field(investor,
 	{
+		key: 'historical_returns',
 		validate: (value) =>
 		{
 			try
@@ -350,64 +309,54 @@ function HistReturn (investor)
 		{
 			return queryset.update({ historical_returns: JSON.stringify(value) })
 		},
-		verify: (queryset) =>
+		verify: (hist_returns) =>
 		{
-			return queryset
-			.select('historical_returns')
-			.then(one)
-			.then((rs) =>
+			var current_year = new Date().getFullYear()
+
+			/* validate that previous year included into historical_returns */
+			var last_year = _.find(hist_returns, { year: current_year - 1 })
+			if (! last_year)
 			{
-				var current_year = new Date().getFullYear()
-				var hist_returns = rs.historical_returns
-
-				validate.array(hist_returns, 'hist_return')
-				hist_returns.forEach(vrow)
-
-				/* validate that previous year included into historical_returns */
-				var last_year = _.find(hist_returns, { year: current_year - 1 })
-				if (! last_year)
+				throw WrongHistFormat(
 				{
-					throw WrongHistFormat(
-						{
-							field: 'hist_return',
-							subfield: 'year',
-							reason: `${current_year - 1} not included`
-						})
-				}
+					field: 'hist_return',
+					subfield: 'year',
+					reason: `${current_year - 1} not included`
+				})
+			}
 
-				/* validate duplicates */
-				var is_duplicates = ! _.chain(hist_returns)
-				.countBy('year')
-				.every(value => value === 1)
-				.value()
+			/* validate duplicates */
+			var is_duplicates = ! _.chain(hist_returns)
+			.countBy('year')
+			.every(value => value === 1)
+			.value()
 
-				if (is_duplicates)
+			if (is_duplicates)
+			{
+				throw WrongHistFormat(
+				{
+					field: 'hist_return',
+					subfield: 'year',
+					reason: `Duplicates exists`
+				})
+			}
+
+			/* validate gaps */
+			var sorted_returns = _.orderBy(hist_returns, [ 'year', 'asc' ])
+			for (var i = 1; i < sorted_returns.length; i ++)
+			{
+				if (sorted_returns[i].year - sorted_returns[i - 1].year !== 1)
 				{
 					throw WrongHistFormat(
 					{
 						field: 'hist_return',
 						subfield: 'year',
-						reason: `Duplicates exists`
+						reason: `Gaps in filled years`
 					})
 				}
+			}
 
-				/* validate gaps */
-				var sorted_returns = _.orderBy(hist_returns, [ 'year', 'asc' ])
-				for (var i = 1; i < sorted_returns.length; i ++)
-				{
-					if (sorted_returns[i].year - sorted_returns[i - 1].year !== 1)
-					{
-						throw WrongHistFormat(
-						{
-							field: 'hist_return',
-							subfield: 'year',
-							reason: `Gaps in filled years`
-						})
-					}
-				}
-
-				return true
-			})
+			return true
 		}
 	})
 }
@@ -421,6 +370,7 @@ function Brokerage (investor_model, db)
 {
 	return Field(investor_model,
 	{
+		key: null,
 		validate: (value) =>
 		{
 			if (! isFinite(value) || value < 0)
@@ -436,7 +386,7 @@ function Brokerage (investor_model, db)
 
 			return portfolio.setBrokerage(investor_id, value)
 		},
-		verify: (queryset, investor_id) =>
+		verify: (value, investor_id) =>
 		{
 			return db.investor.portfolio.full(investor_id)
 			.then((portfolio) =>
@@ -489,6 +439,7 @@ function Holdings (investor_model, db)
 
 	return Field(investor_model,
 	{
+		key: null,
 		validate: (value) =>
 		{
 			try
@@ -517,7 +468,7 @@ function Holdings (investor_model, db)
 
 			return portfolio.setHoldings(investor_id, value)
 		},
-		verify: (queryset, investor_id) =>
+		verify: (value, investor_id) =>
 		{
 			return db.investor.portfolio.full(investor_id)
 			.then((portfolio) =>
@@ -540,6 +491,7 @@ function StartDate (investor)
 {
 	return Field(investor,
 	{
+		key: 'start_date',
 		validate: (value) =>
 		{
 			validate.string(value, 'start_date')
@@ -557,21 +509,6 @@ function StartDate (investor)
 		{
 			return queryset.update({ start_date: value })
 		},
-		verify: (queryset) =>
-		{
-			return queryset
-			.select('start_date')
-			.then(one)
-			.then((rs) =>
-			{
-				var moment_date = moment(rs.start_date)
-				if (! moment_date.isValid())
-				{
-					throw WrongStartDateFormat()
-				}
-
-				return true
-			})
-		}
+		verify: (value) => value !== null
 	})
 }

@@ -12,6 +12,8 @@ module.exports = function Field (investor, options)
 
 	field.verify = verifier(field, options.verify)
 
+	field.key = options.key
+
 	return field
 }
 
@@ -68,15 +70,29 @@ function setter (field, set)
 	}
 }
 
+var one = require('../../helpers').one
+
 function verifier (field, verify)
 {
 	expect(verify).a('function')
 
-	return (investor_id) =>
+	return (investor_id, select_field) =>
 	{
-		var queryset = field.investor.table()
-		.where('user_id', investor_id)
+		if (select_field === null)
+		{
+			return verify(null, investor_id)
+		}
 
-		return verify(queryset, investor_id)
+		return field.investor.table()
+		.where('user_id', investor_id)
+		.then(one)
+		.then((entry) =>
+		{
+			return field.validate(entry[select_field])
+			.then((value) =>
+			{
+				return verify(value, investor_id)
+			})
+		})
 	}
 }
