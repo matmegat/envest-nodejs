@@ -213,7 +213,11 @@ module.exports = function Feed (db)
 
 	feed.add = function (investor_id, type, data)
 	{
-		return validate_feed_data(data)
+		return validate_feed_type(type)
+		.then(() =>
+		{
+			return validate_feed_data(data)
+		})
 		.then(data =>
 		{
 			return feed.feed_table()
@@ -229,7 +233,16 @@ module.exports = function Feed (db)
 	return feed
 }
 
-var WrongFeedType = Err('wrong_feed_type', 'Wrong Feed Type')
+function validate_feed_type (feed_type)
+{
+	var types = ['trade', 'watchlist', 'update']
+	var validate_type = validate.collection(types)
+
+	return new Promise(rs =>
+	{
+		validate_type(feed_type)
+	})
+}
 
 function validate_feed_data (feed_item)
 {
