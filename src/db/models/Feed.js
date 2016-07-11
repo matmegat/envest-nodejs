@@ -20,6 +20,8 @@ var moment = require('moment')
 
 var validate = require('../validate')
 
+var Type = require('./Feed/Type')
+
 module.exports = function Feed (db)
 {
 	var feed = {}
@@ -216,7 +218,7 @@ module.exports = function Feed (db)
 
 	feed.add = function (mode, date, investor_id, type, data)
 	{
-		date = date || moment.now()
+		date = moment(date) || moment.now()
 
 		return Promise.resolve()
 		.then(() =>
@@ -241,16 +243,6 @@ module.exports = function Feed (db)
 		{
 			return validate_feed_data(type, data)
 		})
-		.then(data =>
-		{
-			return feed.feed_table()
-			.insert({
-				investor_id: investor_id,
-				type: type,
-				data: data,
-				timestamp: date
-			})
-		})
 		.then(noop)
 	}
 
@@ -274,17 +266,35 @@ function validate_feed_data (type, data)
 {
 	if (type === 'trade')
 	{
-		return validate_trade(data)
+		return Watchlist().set(data)
+		.then(() =>
+		{
+			console.log('Trade set')
+
+			return
+		})
 	}
 
 	if (type === 'watchlist')
 	{
-		return validate_watchlist(data)
+		return Watchlist().set(data)
+		.then(() =>
+		{
+			console.log('Watchlist set')
+
+			return
+		})
 	}
 
 	if (type === 'update')
 	{
-		return validate_update(data)
+		return Update().set(data)
+		.then(() =>
+		{
+			console.log('Update set')
+
+			return
+		})
 	}
 }
 
