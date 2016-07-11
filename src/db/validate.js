@@ -132,7 +132,7 @@ validate.collection = function validate__collection (collection)
 	{
 		if (! includes(collection, item))
 		{
-			throw WrongDir({possible_values: collection, item: item})
+			throw NotIncluded({possible_values: collection, item: item})
 		}
 	}
 }
