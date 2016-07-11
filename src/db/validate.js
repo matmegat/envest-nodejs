@@ -110,6 +110,17 @@ validate.length = function validate__length (max)
 	}
 }
 
+var WrongDate = Err('wrong_date_format', 'Wrong Date Format')
+
+validate.date = function validate__date (date)
+{
+	var date = moment(date)
+
+	if (! date.isValid())
+	{
+		throw WrongDate()
+	}
+}
 
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
@@ -159,17 +170,5 @@ validate.email = function validate__email (email)
 	if (! emailRe.test(email))
 	{
 		throw WrongEmail()
-	}
-}
-
-var WrongTime = Err('wrong_time', 'Wrong time')
-
-validate.time = function validate__time (time, name)
-{
-	var time = moment(time)
-
-	if (! time.isValid())
-	{
-		throw WrongTime({ name: name })
 	}
 }
