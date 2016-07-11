@@ -1,6 +1,8 @@
 
 var Err = require('../Err')
 
+var includes = require('lodash/includes')
+
 var validate = module.exports = {}
 
 
@@ -110,7 +112,8 @@ validate.length = function validate__length (max)
 }
 
 var WrongDate = Err('wrong_date_format', 'Wrong Date Format')
-validate.date = function validate_date (date)
+
+validate.date = function validate__date (date)
 {
 	var date = moment(date)
 
@@ -120,6 +123,18 @@ validate.date = function validate_date (date)
   	}
 }
 
+var NotIncluded = Err('item_not_included', 'Item Not Included')
+
+validate.collection = function validate__collection (collection)
+{
+	return function (item)
+	{
+		if (! includes(collection, item))
+		{
+			throw WrongDir()
+		}
+	}
+}
 
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
