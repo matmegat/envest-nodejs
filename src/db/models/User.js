@@ -377,7 +377,8 @@ module.exports = function User (db, app)
 			return email_confirms_upsert(where, data)
 			.catch(error =>
 			{
-				if (error.constraint && ends(error.constraint, 'email_confirms_new_email_unique'))
+				if (error.constraint
+				 && ends(error.constraint, 'email_confirms_new_email_unique'))
 				{
 					throw EmailAlreadyExists()
 				}
