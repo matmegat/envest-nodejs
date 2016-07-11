@@ -6,7 +6,7 @@ var _ = require('lodash')
 var moment = require('moment')
 
 var validate    = require('../../validate')
-var validate_time = validate.time
+var validate_date = validate.date
 
 var validateId = require('../../../id').validate.promise
 
@@ -59,14 +59,14 @@ module.exports = function SubscrManager (db, subsc_desc)
 			{
 				return counting_time(user_id, days)
 			})
-			.then((time) =>
+			.then((date) =>
 			{
 				subscr_manager.table()
 				.insert(
 				{
 					user_id: user_id,
 					type: type,
-					end_time: time
+					end_time: date
 				})
 				.then(noop)
 				.catch(Err.fromDb('subscription_user_id_foreign', db.user.NotFound))
@@ -76,11 +76,11 @@ module.exports = function SubscrManager (db, subsc_desc)
 
 	function counting_time (user_id, days)
 	{
-		var time = moment().add(days, 'days')
+		var date = moment().add(days, 'days')
 
 		return new Promise(rs =>
 		{
-			validate_time(time, 'subscription')
+			validate_date(date)
 
 			return rs()
 		})
@@ -91,14 +91,14 @@ module.exports = function SubscrManager (db, subsc_desc)
 			{
 				if (items.length === 0)
 				{
-					return time
+					return date
 				}
 
 				var end_time = moment(items[0].end_time)
 
 				var remaining_time = end_time.subtract(moment())
 
-				return time.add(remaining_time)
+				return date.add(remaining_time)
 			})
 		})
 	}
