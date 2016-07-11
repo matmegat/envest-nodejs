@@ -30,6 +30,9 @@ module.exports = function Feed (db)
 	expect(db, 'Feed depends on Investor').property('investor')
 	var investor = db.investor
 
+	expect(db, 'Feed depends on Symbols').property('symbols')
+	var symbols = db.symbols
+
 
 	var paginators = {}
 
@@ -87,7 +90,7 @@ module.exports = function Feed (db)
 				delete feed_item.investor_id
 
 				transform_event(feed_item)
-				transform_symbols([ feed_item ])
+				transform_symbols([ feed_item ], symbols)
 
 				return feed_item
 			})
@@ -153,7 +156,7 @@ module.exports = function Feed (db)
 					transform_event(item)
 				})
 
-				transform_symbols(feed_items)
+				transform_symbols(feed_items, symbols)
 
 				return feed_items
 			})
@@ -237,7 +240,7 @@ var uniqBy  = _.uniqBy
 
 var Symbl = require('./symbols/Symbl')
 
-function transform_symbols (items)
+function transform_symbols (items, api)
 {
 	var symbols = items.map(item =>
 	{
@@ -263,5 +266,20 @@ function transform_symbols (items)
 
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
-	console.log(symbols)
+	api.quotes(symbols)
+	.then(quotes =>
+	{
+		return quotes.map(quote =>
+		{
+			if (quote)
+			{
+				return quote.symbol
+			}
+			else
+			{
+				return quote
+			}
+		})
+	})
+	.then(console.log, console.error)
 }
