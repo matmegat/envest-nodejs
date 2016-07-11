@@ -27,11 +27,12 @@ module.exports = function (db, http, admin)
 		var type = rq.body.type
 		var date = rq.body.date
 		var data = rq.body.data
+		var mode = 'mode:post-as'
 
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
-			toss(rs, feed_model.add(target_user_id, type, data, date))
+			toss(rs, feed_model.add(mode, date, target_user_id, type, data))
 		})
 		.catch(toss.err(rs))
 	})

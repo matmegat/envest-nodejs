@@ -211,14 +211,26 @@ module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.add = function (investor_id, type, data, date)
+	var InvestorPostDateErr =
+		Err('investor_post_date_exeeded', 'Investor post date investor_post_date_exeeded')
+
+	feed.add = function (mode, date, investor_id, type, data)
 	{
 		date = date || moment.now()
 
 		return Promise.resolve()
 		.then(() =>
 		{
-			return validate.date(date)
+			validate.date(date)
+
+			if (mode === "mode:post")
+			{
+				var min_date = moment().day(-3)
+				if (! date.isSameOrAfter(min_date))
+				{
+					throw InvestorPostDateErr({date: date, minDate: min_date })
+				}
+			}
 		})
 		.then(() =>
 		{
@@ -234,7 +246,8 @@ module.exports = function Feed (db)
 			.insert({
 				investor_id: investor_id,
 				type: type,
-				data: data
+				data: data,
+				timestamp: date
 			})
 		})
 		.then(noop)
@@ -277,7 +290,7 @@ function validate_feed_data (type, data)
 
 function Trade ()
 {
-	return Type(investor,
+	return Type(
 	{
 		validate: validate_trade,
 		set: (data) =>
@@ -325,7 +338,7 @@ function validate_trade (data)
 
 function Watchlist ()
 {
-	return Type(investor,
+	return Type(
 	{
 		validate: validate_watchlist,
 		set: (data) =>
@@ -364,7 +377,7 @@ function validate_watchlist (data)
 
 function Update ()
 {
-	return Type(investor,
+	return Type(
 	{
 		validate: validate_update,
 		set: (data) =>
