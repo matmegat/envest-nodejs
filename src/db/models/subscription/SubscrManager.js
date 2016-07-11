@@ -30,7 +30,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 		return validateId(WrongUserId, user_id)
 		.then(() =>
 		{
-			return by_user_id(user_id)
+			return get_active_subscr(user_id)
 		})
 		.then((items) =>
 		{
@@ -54,10 +54,10 @@ module.exports = function SubscrManager (db, subsc_desc)
 		{
 			days = days || subsc_desc[type].days
 
-			return subsc_desc[type].fn(user_id, type, subscr_manager.table)
+			return subsc_desc[type].fn(user_id, subscr_manager.table)
 			.then(() =>
 			{
-				return counting_time(user_id, days)
+				return calculate_whole_range(user_id, days)
 			})
 			.then((date) =>
 			{
@@ -74,7 +74,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 		})
 	}
 
-	function counting_time (user_id, days)
+	function calculate_whole_range (user_id, days)
 	{
 		var date = moment().add(days, 'days')
 
@@ -86,7 +86,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 		})
 		.then(() =>
 		{
-			return by_user_id(user_id)
+			return get_active_subscr(user_id)
 			.then((items) =>
 			{
 				if (items.length === 0)
@@ -118,7 +118,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 		})
 	}
 
-	function by_user_id (user_id)
+	function get_active_subscr (user_id)
 	{
 		return subscr_manager.table()
 		.where('user_id', user_id)
