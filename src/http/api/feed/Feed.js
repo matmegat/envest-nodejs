@@ -121,8 +121,9 @@ module.exports = function Feed (db, http)
 		var investor_id = rq.user.id
 		var type = rq.body.type
 		var data = rq.body.data
+		var date = rq.body.date
 
-		toss(rs, feed.model.add(investor_id, type, data))
+		toss(rs, feed.model.add(investor_id, type, data, date))
 	})
 
 	return feed

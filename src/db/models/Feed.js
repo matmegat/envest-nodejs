@@ -211,9 +211,17 @@ module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.add = function (investor_id, type, data)
+	feed.add = function (investor_id, type, data, date)
 	{
-		return validate_feed_type(type)
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.date(date)
+		})
+		.then(() =>
+		{
+			return validate_feed_type(type)
+		})
 		.then(type =>
 		{
 			return validate_feed_data(type, data)
