@@ -226,6 +226,7 @@ module.exports = function Feed (db)
 			if (mode === "mode:post")
 			{
 				var min_date = moment().day(-3)
+
 				if (! date.isSameOrAfter(min_date))
 				{
 					throw InvestorPostDateErr({date: date, minDate: min_date })
@@ -313,11 +314,14 @@ function validate_trade (data)
 		'motivations'	
 	])
 
+	var trade_dirs = ['bought', 'sold']
+	var validate_trade_dir = validate.collection(trade_dirs)
+
 	return new Promise(rs =>
 	{
 		validate.required(data.text, 'text')
 
-		validate_trade_dir(tradeDirs)
+		validate_trade_dir(data.dir)
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
@@ -358,9 +362,12 @@ function validate_watchlist (data)
 		'motivations'
 	])
 
+	var watchlist_dirs = ['added', 'removed']
+	var validate_watchlist_dir = validate.collection(watchlist_dirs)
+
 	return new Promise(rs =>
 	{
-		validate_watchlist_dir(watchlistDirs)
+		validate_watchlist_dir(data.dir)
 
 		validate.required(data.text, 'text')
 
