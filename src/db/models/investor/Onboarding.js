@@ -125,19 +125,19 @@ module.exports = function Onboarding (db, investor)
 				return field.verify(investor_id)
 			}))
 		})
-		.then(() => investor.fullProfile(investor_id))
-		.then((investor_entry) =>
+		.then(() => db.user.infoById(investor_id))
+		.then((user) =>
 		{
-			validate.name(investor_entry.first_name, 'first_name')
-			validate.name(investor_entry.last_name, 'last_name')
+			validate.name(user.first_name, 'first_name')
+			validate.name(user.last_name, 'last_name')
 
-			validate.email(investor_entry.email)
+			validate.email(user.email)
 
-			validate.string(investor_entry.pic, 'pic')
-			validate.empty(investor_entry.pic, 'pic')
+			validate.string(user.pic, 'pic')
+			validate.empty(user.pic, 'pic')
 
-			validate.string(investor_entry.profile_pic, 'profile_pic')
-			validate.empty(investor_entry.profile_pic, 'profile_pic')
+			validate.string(user.investor.profile_pic, 'profile_pic')
+			validate.empty(user.investor.profile_pic, 'profile_pic')
 
 			return investor.setPublic(investor_id, true, 'user_id')
 		})
