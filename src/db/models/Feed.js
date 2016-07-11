@@ -232,6 +232,7 @@ function transform_event (item)
 
 var compact = _.compact
 var flatten = _.flatten
+var uniqBy  = _.uniqBy
 
 var Symbl = require('./symbols/Symbl')
 
@@ -258,6 +259,8 @@ function transform_symbols (items)
 	{
 		return Symbl([ symbol.ticker, symbol.exchange ])
 	})
+
+	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
 	console.log(symbols)
 }
