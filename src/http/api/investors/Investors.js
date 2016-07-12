@@ -67,12 +67,12 @@ module.exports = function (db, http)
 		))
 	})
 
-	investors.express.post('/:id/push_public', http.adminRequired, (rq, rs) =>
+	investors.express.post('/:id/go-public', http.adminRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.params.id
 
-		toss(rs, investors.model.onboarding.pushLive(whom_id, investor_id))
+		toss(rs, investors.model.onboarding.goPublic(whom_id, investor_id))
 	})
 
 	return investors

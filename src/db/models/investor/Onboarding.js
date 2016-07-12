@@ -98,7 +98,7 @@ module.exports = function Onboarding (db, investor)
 		})
 	}
 
-	onb.pushLive = function pushLive (whom_id, investor_id)
+	onb.goPublic = function pushLive (whom_id, investor_id)
 	{
 		return Promise.all(
 		[
