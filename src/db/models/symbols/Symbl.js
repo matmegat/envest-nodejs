@@ -52,6 +52,14 @@ var Symbl = module.exports = function Symbl (it)
 		return s
 	}
 
+	if (Object(it) === it)
+	{
+		if (it.ticker && it.exchange)
+		{
+			return Symbl([ it.ticker, it.exchange ])
+		}
+	}
+
 	throw WrongFormat({ reason: 'unknown_format' })
 }
 
