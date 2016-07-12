@@ -183,6 +183,7 @@ rev()
 
 		var rendered = render(template,
 		{
+			env:  env,
 			port: port,
 			port_nginx: port - 1
 		})
