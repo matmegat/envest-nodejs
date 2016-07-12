@@ -16,11 +16,12 @@ var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 var noop = require('lodash/noop')
 var pick = require('lodash/pick')
 
-var moment = require('moment')
-
 var validate = require('../../validate')
 
-var Type = require('./Type')
+var Trade = require('./Trade')
+var Watchlist = require('./Watchlist')
+var Update = require('./Update')
+
 
 module.exports = function Feed (db)
 {
@@ -213,9 +214,6 @@ module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	var InvestorPostDateErr =
-		Err('investor_post_date_exeeded', 'Investor post date investor_post_date_exeeded')
-
 	feed.create = function (investor_id, type, date, data)
 	{
 		return feed.feed_table()
@@ -228,82 +226,7 @@ module.exports = function Feed (db)
 		.then(noop)
 	}
 
-	feed.add = function (mode, investor_id, type, date, data)
-	{
-		date = date || new Date()
-
-		return Promise.resolve()
-		.then(() =>
-		{
-			validate.date(date)
-
-			if (mode === "mode:post")
-			{
-				var min_date = moment().day(-3)
-				date = moment(date)
-
-				if (! date.isSameOrAfter(min_date))
-				{
-					throw InvestorPostDateErr({date: date, minDate: min_date })
-				}
-			}
-		})
-		.then(() =>
-		{
-			return validate_feed_type(type)
-		})
-		.then(type =>
-		{
-			return validate_feed_data(investor_id, type, date, data)
-		})
-		.then(noop)
-	}
-
 	return feed
-
-	function validate_feed_type (type)
-	{
-		var types = ['trade', 'watchlist', 'update']
-		var validate_type = validate.collection(types)
-
-		return new Promise(rs =>
-		{
-			validate_type(type)
-
-			rs(type)
-		})
-	}
-
-	function validate_feed_data (investor_id, type, date, data)
-	{
-		if (type === 'trade')
-		{
-			return Watchlist().set(data)
-			.then(() =>
-			{
-				console.log('Trade set')
-
-				return
-			})
-		}
-
-		if (type === 'watchlist')
-		{
-			return Watchlist().set(data)
-			.then(() =>
-			{
-				console.log('Watchlist set')
-
-				return
-			})
-		}
-
-		if (type === 'update')
-		{
-			return Update().set(investor_id, type, date, data)
-			.then(noop)
-		}
-	}
 }
 
 function transform_event (item)
