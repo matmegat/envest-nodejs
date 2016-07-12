@@ -8,7 +8,7 @@ module.exports = function (db, http, admin)
 
 	var express = ctrl.express = Router()
 
-	var feed_model = db.feed
+	var post_model = db.post
 	var investor_model = db.investor
 
 	express.use(http.adminRequired)
@@ -32,7 +32,7 @@ module.exports = function (db, http, admin)
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
-			toss(rs, feed_model.add(mode, target_user_id, type, date, data))
+			toss(rs, post_model.add(target_user_id, type, date, data))
 		})
 		.catch(toss.err(rs))
 	})

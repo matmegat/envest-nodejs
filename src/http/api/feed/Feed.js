@@ -13,6 +13,7 @@ module.exports = function Feed (db, http)
 	var feed = {}
 
 	feed.model = db.feed
+	feed.post = db.post
 	feed.express = Router()
 	feed.express.use(authRequired)
 
@@ -124,7 +125,7 @@ module.exports = function Feed (db, http)
 		var date = rq.body.date
 		var mode = 'mode:post'
 
-		toss(rs, feed.model.add(mode, investor_id, type, date, data))
+		toss(rs, feed.post.add(mode, investor_id, type, date, data))
 	})
 
 	return feed
