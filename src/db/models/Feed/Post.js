@@ -26,14 +26,9 @@ module.exports = function Post (feed)
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
-	post.add = function (mode, investor_id, type, date, data)
-	{
-		date = date || new Date()
+	validate.date(date)
 
-		return Promise.resolve()
-		.then(() =>
-		{
-			validate.date(date)
+			date = date || new Date()
 
 			if (mode === "mode:post")
 			{
@@ -45,19 +40,46 @@ module.exports = function Post (feed)
 					throw InvestorPostDateErr({date: date, minDate: min_date })
 				}
 			}
-		})
-		.then(() =>
-		{
-			if (! type in post.types)
-			{
-				throw WrongPostType()
-			}
-		})
-		.then(() =>
-		{
-			post = post.types[type]
 
-			post.set(investor_id, type, date, data)
+	post.add = function (investor_id, type, date, data)
+	{
+		if (! type in post.types)
+		{
+			throw WrongPostType()
+		}
+		post = post.types[type]
+
+		post.set(investor_id, type, date, data)
+	}
+
+	post.create = function (investor_id, type, date, data)
+	{
+		return Promise.resolve()
+		.then(() =>
+		{
+			//Send notification
+
+			//Validate date
+		})
+		.then(() =>
+		{
+			return post.add(investor_id, type, date, data)
+		})
+		.then(noop)
+	}
+
+	post.createAs = function (admin_id, investor_id, type, date, data)
+	{
+		return Promise.resolve()
+		.then(() =>
+		{
+			//Send notification
+
+			//Validate date
+		})
+		.then(() =>
+		{
+			return post.add(investor_id, type, date, data)
 		})
 		.then(noop)
 	}
