@@ -178,7 +178,13 @@ function Profession (investor)
 {
 	return Field(investor,
 	{
-		key: 'profession',
+		get: (queryset) =>
+		{
+			return queryset
+			.select('profession')
+			.then(one)
+			.then(rs => rs.profession)
+		},
 		validate: (value) =>
 		{
 			validate.string(value, 'profession')
@@ -202,7 +208,13 @@ function Focus (investor)
 {
 	return Field(investor,
 	{
-		key: 'focus',
+		get: (queryset) =>
+		{
+			return queryset
+			.select('focus')
+			.then(one)
+			.then(rs => rs.focus)
+		},
 		validate: (value) =>
 		{
 			validate.array(value, 'focus')
@@ -230,7 +242,13 @@ function Background (investor)
 {
 	return Field(investor,
 	{
-		key: 'background',
+		get: (queryset) =>
+		{
+			return queryset
+			.select('background')
+			.then(one)
+			.then(rs => rs.background)
+		},
 		validate: (value) =>
 		{
 			validate.string(value, 'background')
@@ -281,7 +299,13 @@ function HistReturn (investor)
 
 	return Field(investor,
 	{
-		key: 'historical_returns',
+		get: (queryset) =>
+		{
+			return queryset
+			.select('historical_returns')
+			.then(one)
+			.then(rs => rs.historical_returns)
+		},
 		validate: (value) =>
 		{
 			try
@@ -369,6 +393,11 @@ function Brokerage (investor_model, db)
 {
 	return Field(investor_model,
 	{
+		get: (queryset, investor_id) =>
+		{
+			return db.investor.portfolio.full(investor_id)
+			.then(full_portfolio => full_portfolio.brokerage)
+		},
 		validate: (value) =>
 		{
 			if (! isFinite(value) || value < 0)
@@ -437,6 +466,11 @@ function Holdings (investor_model, db)
 
 	return Field(investor_model,
 	{
+		get: (queryset, investor_id) =>
+		{
+			return db.investor.portfolio.full(investor_id)
+			.then(full_portfolio => full_portfolio.holdings)
+		},
 		validate: (value) =>
 		{
 			try
@@ -488,6 +522,13 @@ function StartDate (investor)
 {
 	return Field(investor,
 	{
+		get: (queryset) =>
+		{
+			return queryset
+			.select('start_date')
+			.then(one)
+			.then(rs => rs.start_date)
+		},
 		validate: (value) =>
 		{
 			validate.string(value, 'start_date')
