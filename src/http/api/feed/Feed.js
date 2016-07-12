@@ -123,9 +123,8 @@ module.exports = function Feed (db, http)
 		var type = rq.body.type
 		var data = rq.body.data
 		var date = rq.body.date
-		var mode = 'mode:post'
 
-		toss(rs, feed.post.add(mode, investor_id, type, date, data))
+		toss(rs, feed.post.create(investor_id, type, date, data))
 	})
 
 	return feed
