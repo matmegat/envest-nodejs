@@ -3,13 +3,13 @@ var expect = require('chai').expect
 
 var _ = require('lodash')
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 
-var PaginatorChunked = require('../paginator/Chunked')
-var PaginatorBooked  = require('../paginator/Booked')
-var Filter = require('../Filter')
+var PaginatorChunked = require('../../paginator/Chunked')
+var PaginatorBooked  = require('../../paginator/Booked')
+var Filter = require('../../Filter')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
@@ -18,9 +18,9 @@ var pick = require('lodash/pick')
 
 var moment = require('moment')
 
-var validate = require('../validate')
+var validate = require('../../validate')
 
-var Type = require('./Feed/Type')
+var Type = require('./Type')
 
 module.exports = function Feed (db)
 {
@@ -104,7 +104,7 @@ module.exports = function Feed (db)
 		})
 	}
 
-	feed.validateFeedId = require('../../id').validate.promise(WrongFeedId)
+	feed.validateFeedId = require('../../../id').validate.promise(WrongFeedId)
 
 	feed.list = function (options)
 	{
