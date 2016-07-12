@@ -72,7 +72,7 @@ var inst = () => Object.create(Symbl.prototype)
 
 var Err = require('../../../Err')
 
-var WrongFormat = Err('wrong_symbol_format')
+var WrongFormat = Err('wrong_symbol_format', 'Cannot parse input as Symbol')
 
 Symbl.validate = (it) =>
 {
