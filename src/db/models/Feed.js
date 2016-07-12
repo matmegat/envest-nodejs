@@ -266,7 +266,7 @@ function transform_symbols (items, api)
 
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
-	api.quotes(symbols)
+	return api.quotes(symbols)
 	.then(quotes =>
 	{
 		return quotes.map(quote =>
@@ -281,5 +281,56 @@ function transform_symbols (items, api)
 			}
 		})
 	})
-	.then(console.log, console.error)
+	.then(symbols =>
+	{
+		symbols = compact(symbols)
+		console.log(symbols)
+
+		var replace = replace_symbol(symbols)
+
+		items = items.map(replace)
+
+		console.info(items)
+
+		return items
+	})
+	.catch(console.error)
 }
+
+
+var find = _.find
+var curry = _.curry
+
+var replace_symbol = curry((symbols, item) =>
+{
+	var pick = pick_symbol(symbols)
+
+	var data = item.event.data
+
+	if (data.symbol)
+	{
+		data.symbol = pick(data.symbol)
+	}
+	if (data.symbols)
+	{
+		data.symbols = data.symbols.map(pick)
+	}
+
+	return item
+})
+
+var pick_symbol = curry((symbols, item_s) =>
+{
+	var symbol = find(symbols, s =>
+	{
+		return Symbl.equals(s, item_s)
+	})
+
+	if (! symbol)
+	{
+		console.warn('symbol_should_be_found')
+		return item_s
+	}
+
+	return symbol
+})
