@@ -90,9 +90,9 @@ module.exports = function Feed (db)
 				delete feed_item.investor_id
 
 				transform_event(feed_item)
-				transform_symbols([ feed_item ], symbols)
 
-				return feed_item
+				return transform_symbols([ feed_item ], symbols)
+				.then(it => it[0])
 			})
 		})
 		.then((feed_item) =>
@@ -156,9 +156,7 @@ module.exports = function Feed (db)
 					transform_event(item)
 				})
 
-				transform_symbols(feed_items, symbols)
-
-				return feed_items
+				return transform_symbols(feed_items, symbols)
 			})
 		})
 		.then((feed_items) =>
@@ -272,19 +270,13 @@ function transform_symbols (items, api)
 	{
 		quotes = compact(quotes)
 		quotes = map(quotes, 'symbol')
+
 		return quotes
 	})
 	.then(symbols =>
 	{
-		var replace = replace_symbol(symbols)
-
-		items = items.map(replace)
-
-		console.log(map(items, 'event.data'))
-
-		return items
+		return items.map(replace_symbol(symbols))
 	})
-	.catch(console.error)
 }
 
 
