@@ -76,7 +76,7 @@ function verifier (field, verify)
 {
 	if (typeof verify !== 'function')
 	{
-		verify = (value) => value !== null
+		verify = (value) => value != null /* || undefined */
 	}
 
 	return (investor_id) =>
