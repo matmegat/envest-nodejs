@@ -78,3 +78,12 @@ Symbl.validate = (it) =>
 {
 	return new Promise(rs => rs(Symbl(it)))
 }
+
+Symbl.equals = (L, R) =>
+{
+	L = Symbl(L)
+	R = Symbl(R)
+
+	return (L.ticker   === R.ticker)
+	    && (L.exchange === R.exchange)
+}
