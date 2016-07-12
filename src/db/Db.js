@@ -54,9 +54,9 @@ module.exports = function name (app)
 	})
 
 	db.user  = User(db, app)
-	db.subsc = NetvestSubsc(db)
+	db.subscr = NetvestSubsc(db, cfg.subscr)
 	db.notifications = Notifications(db)
-	db.auth  = Auth(db, db.subsc)
+	db.auth  = Auth(db, db.subscr)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)

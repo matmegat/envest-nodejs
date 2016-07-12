@@ -5,10 +5,11 @@ var _ = require('lodash')
 
 var moment = require('moment')
 
-var validate    = require('../../validate')
+var validate      = require('../../validate')
 var validate_date = validate.date
+var isPositive    = validate.integer.positive
 
-var validateId = require('../../../id').validate.promise
+var validateId = require('../../../id').validate
 
 var Err = require('../../../Err')
 
@@ -27,33 +28,40 @@ module.exports = function SubscrManager (db, subsc_desc)
 
 	subscr_manager.isAble = function (user_id, feature)
 	{
-		return validateId(WrongUserId, user_id)
+		return new Promise(rs =>
+		{
+			validateId(WrongUserId, user_id)
+			return rs()
+		})
 		.then(() =>
 		{
-			return get_active_subscr(user_id)
+			return get_active_subscrs(user_id)
 		})
-		.then((items) =>
+		.then((subscrs) =>
 		{
-			return find(items, (item) =>
+			return find(subscrs, (subscr) =>
 			{
-				return includes(subsc_desc[item.type].feature, feature)
+				return includes(subsc_desc[subscr.type].features, feature)
 			})
 		})
 	}
 
 	var noop  = _.noop
 
-	subscr_manager.activate = function (user_id, type, days)
+	subscr_manager.activate = function (user_id, type, days, trx)
 	{
-		return validateId(WrongUserId, user_id)
-		.then(() =>
+		days = days || subsc_desc[type].days
+
+		return new Promise(rs =>
 		{
-			return validate_type(type)
+			validateId(WrongUserId, user_id)
+			validate_type(type)
+			isPositive(days, 'days')
+
+			return rs()
 		})
 		.then(() =>
 		{
-			days = days || subsc_desc[type].days
-
 			return subsc_desc[type].fn(user_id, subscr_manager.table)
 			.then(() =>
 			{
@@ -61,7 +69,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 			})
 			.then((date) =>
 			{
-				subscr_manager.table()
+				subscr_manager.table(trx)
 				.insert(
 				{
 					user_id: user_id,
@@ -86,15 +94,15 @@ module.exports = function SubscrManager (db, subsc_desc)
 		})
 		.then(() =>
 		{
-			return get_active_subscr(user_id)
-			.then((items) =>
+			return get_active_subscrs(user_id)
+			.then((subscrs) =>
 			{
-				if (items.length === 0)
+				if (subscrs.length === 0)
 				{
 					return date
 				}
 
-				var end_time = moment(items[0].end_time)
+				var end_time = moment(subscrs[0].end_time)
 
 				var remaining_time = end_time.subtract(moment())
 
@@ -107,18 +115,13 @@ module.exports = function SubscrManager (db, subsc_desc)
 
 	function validate_type (type)
 	{
-		return new Promise(rs =>
+		if (! (type in subsc_desc))
 		{
-			if (! (type in subsc_desc))
-			{
-				throw WrongType()
-			}
-
-			return rs()
-		})
+			throw WrongType()
+		}
 	}
 
-	function get_active_subscr (user_id)
+	function get_active_subscrs (user_id)
 	{
 		return subscr_manager.table()
 		.where('user_id', user_id)
