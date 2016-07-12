@@ -25,7 +25,7 @@ module.exports = function Post (feed)
 
 	post.add = function (investor_id, type, date, data)
 	{
-		if (! type in post.types)
+		if (! (type in post.types))
 		{
 			throw WrongPostType()
 		}
