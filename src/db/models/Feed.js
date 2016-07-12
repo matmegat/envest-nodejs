@@ -234,6 +234,7 @@ function transform_event (item)
 }
 
 
+var map = _.map
 var compact = _.compact
 var flatten = _.flatten
 var uniqBy  = _.uniqBy
@@ -269,28 +270,17 @@ function transform_symbols (items, api)
 	return api.quotes(symbols)
 	.then(quotes =>
 	{
-		return quotes.map(quote =>
-		{
-			if (quote)
-			{
-				return quote.symbol
-			}
-			else
-			{
-				return quote
-			}
-		})
+		quotes = compact(quotes)
+		quotes = map(quotes, 'symbol')
+		return quotes
 	})
 	.then(symbols =>
 	{
-		symbols = compact(symbols)
-		console.log(symbols)
-
 		var replace = replace_symbol(symbols)
 
 		items = items.map(replace)
 
-		console.info(items)
+		console.log(map(items, 'event.data'))
 
 		return items
 	})
