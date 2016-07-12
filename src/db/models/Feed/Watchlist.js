@@ -9,7 +9,7 @@ module.exports = function Watchlist ()
 {
 	return Type(
 	{
-		validate: validate_watchlist
+		validate: validate_watchlist,
 		set: (data) =>
 		{
 			return data

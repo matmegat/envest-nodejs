@@ -5,7 +5,7 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-module.exports = function Trade ()
+module.exports = function Update (feed)
 {
 	return Type(
 	{
