@@ -14,7 +14,9 @@ module.exports = function (db)
 
 	investors.express.get('/', (rq, rs) =>
 	{
-		var options = pick(rq.query,
+		var options = {}
+
+		options.paginator = pick(rq.query,
 		[
 			'max_id',
 			'since_id'

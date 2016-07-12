@@ -99,7 +99,7 @@ module.exports = function Investor (db)
 
 	investor.list = function (options, trx)
 	{
-		options = _.extend({}, options,
+		options.paginator = _.extend({}, options.paginator,
 		{
 			limit: 20,
 			column_name: 'investors.user_id'
@@ -128,7 +128,7 @@ module.exports = function Investor (db)
 			)
 		}
 
-		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
+		return paginator.paginate(queryset, options.paginator)
 		.then((investors) =>
 		{
 			return investors.map((investor) =>
