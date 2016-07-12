@@ -26,20 +26,20 @@ module.exports = function Post (feed)
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
-	validate.date(date)
+	// validate.date(date)
 
-			date = date || new Date()
+	// date = date || new Date()
 
-			if (mode === "mode:post")
-			{
-				var min_date = moment().day(-3)
-				date = moment(date)
+	// if (mode === "mode:post")
+	// {
+	// 	var min_date = moment().day(-3)
+	// 	date = moment(date)
 
-				if (! date.isSameOrAfter(min_date))
-				{
-					throw InvestorPostDateErr({date: date, minDate: min_date })
-				}
-			}
+	// 	if (! date.isSameOrAfter(min_date))
+	// 	{
+	// 		throw InvestorPostDateErr({date: date, minDate: min_date })
+	// 	}
+	// }
 
 	post.add = function (investor_id, type, date, data)
 	{
