@@ -7,6 +7,7 @@ var NotFound = Err('investor_not_found', 'Investor not found')
 var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 
 var Paginator = require('../paginator/Chunked')
+var Filter = require('../Filter')
 
 module.exports = function Investor (db)
 {
@@ -46,6 +47,10 @@ module.exports = function Investor (db)
 		order_column: 'user_id',
 		real_order_column: 'last_name',
 		default_direction: 'asc'
+	})
+
+	var filter = Filter({
+		symbol: Filter.by.symbol('investors.user_id')
 	})
 
 	investor.is = function (investor_id, trx)
@@ -106,6 +111,10 @@ module.exports = function Investor (db)
 		})
 
 		var queryset = investor.table(trx)
+
+		queryset = filter(queryset, options.filter)
+
+		queryset
 		.select(
 			'users.id',
 			'users.first_name',
@@ -127,6 +136,8 @@ module.exports = function Investor (db)
 				options.where.argument
 			)
 		}
+
+		console.log(queryset.toString())
 
 		return paginator.paginate(queryset, options.paginator)
 		.then((investors) =>

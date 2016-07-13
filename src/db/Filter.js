@@ -148,3 +148,24 @@ Filter.by.name = function by_name (when_column)
 		pattern)
 	}
 }
+
+var Symbl = require('./models/symbols/Symbl')
+
+Filter.by.symbol = function by_symbol (column)
+{
+	return function (queryset, symbol)
+	{
+		symbol = Symbl(symbol)
+
+		return queryset
+		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.where(function ()
+		{
+			this.where('portfolio_symbols.symbol_ticker', symbol.ticker)
+			if (symbol.exchange)
+			{
+				this.where('portfolio_symbols.symbol_exchange', symbol.exchange)
+			}
+		})
+	}
+}

@@ -21,6 +21,12 @@ module.exports = function (db)
 			'max_id',
 			'since_id'
 		])
+
+		options.filter = pick(rq.query,
+		[
+			'symbol'
+		])
+
 		toss(rs, investors.model.list(options))
 	})
 
