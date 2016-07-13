@@ -214,9 +214,9 @@ module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.create = function (investor_id, type, date, data)
+	feed.create = function (investor_id, type, date, data, trx)
 	{
-		return feed.feed_table()
+		return feed.feed_table(trx)
 		.insert({
 			investor_id: investor_id,
 			type: type,
