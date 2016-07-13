@@ -310,7 +310,6 @@ var pick_symbol = curry((symbols, item_s) =>
 
 	if (! symbol)
 	{
-		console.warn('symbol_should_be_found')
 		return item_s
 	}
 
