@@ -33,9 +33,10 @@ module.exports = function Post (db)
 		{
 			throw WrongPostType({ type: type })
 		}
-		post = post.types[type]
+		
+		var post_type = post.types[type]
 
-		post.set(investor_id, type, date, data)
+		post_type.set(investor_id, type, date, data)
 	}
 
 	var InvestorPostDateErr =
@@ -68,11 +69,6 @@ module.exports = function Post (db)
 			{
 				return post.add(investor_id, type, date, data)
 			})
-			.then(() =>
-			{
-				//Send notification
-			})
-			.then(noop)
 		})
 	}
 
@@ -95,11 +91,6 @@ module.exports = function Post (db)
 			{
 				return post.add(investor_id, type, date, data)
 			})
-			.then(() =>
-			{
-				//Send notification
-			})
-			.then(noop)
 		})
 	}
 
