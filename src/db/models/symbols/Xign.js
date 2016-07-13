@@ -8,7 +8,7 @@ var request = require('axios')
 
 var moment = require('moment')
 
-module.exports = function Xign (cfg)
+module.exports = function Xign (cfg, log)
 {
 	expect(cfg).property('token')
 
@@ -54,6 +54,7 @@ module.exports = function Xign (cfg)
 			{
 				if (! unwrap.isSuccess(r))
 				{
+					warn(r)
 					return null
 				}
 
@@ -116,12 +117,27 @@ module.exports = function Xign (cfg)
 		.then(unwrap.data)
 		.then(unwrap.first)
 		.then(unwrap.success)
+		.catch(warn_rethrow)
 	}
+
 
 	function apidate (it)
 	{
 		return moment(it).format('M/DD/YYYY')
 	}
+
+
+	function warn_rethrow (rs)
+	{
+		warn(rs)
+		throw rs
+	}
+
+	function warn (rs)
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
 
 	return X
 }
