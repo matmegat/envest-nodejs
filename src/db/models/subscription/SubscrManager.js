@@ -5,6 +5,8 @@ var _ = require('lodash')
 
 var moment = require('moment')
 
+var expect = require('chai').expect
+
 var validate      = require('../../validate')
 var validate_date = validate.date
 var isPositive    = validate.integer.positive
@@ -20,6 +22,12 @@ module.exports = function SubscrManager (db, subsc_desc)
 	var knex = db.knex
 
 	subscr_manager.table = knexed(knex, 'subscriptions')
+
+	expect(db, 'Onboarding depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+
+	var SubscrActivateA = Emitter('subscr_activate', { group: 'admins' })
+	var SubscrActivateU = Emitter('subscr_activate')
 
 	var includes = _.includes
 	var find = _.find
@@ -87,6 +95,14 @@ module.exports = function SubscrManager (db, subsc_desc)
 				.then(noop)
 				.catch(Err.fromDb('subscription_user_id_foreign', db.user.NotFound))
 			})
+		})
+		.then(() =>
+		{
+			return SubscrActivateA({ user_id: user_id, type: type, days: days })
+		})
+		.then(() =>
+		{
+			return SubscrActivateU(user_id, { type: type, days: days })
 		})
 	}
 

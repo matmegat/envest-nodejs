@@ -6,6 +6,8 @@ var validate    = require('../../validate')
 var isPositive  = validate.integer.positive
 var validate_time = validate.time
 
+var expect = require('chai').expect
+
 var Err = require('../../../Err')
 
 module.exports = function Promo (db)
@@ -16,6 +18,11 @@ module.exports = function Promo (db)
 	var one = db.helpers.one
 
 	promo.table = knexed(knex, 'promo_codes')
+
+	expect(db, 'Onboarding depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+
+	var PromoCreateA = Emitter('promo_create', { group: 'admins' })
 
 	promo.create = function (type, code, end_time, activations)
 	{
@@ -46,6 +53,16 @@ module.exports = function Promo (db)
 				code: code.toLowerCase()
 			}, 'id')
 			.then(one)
+		})
+		.then(() =>
+		{
+			PromoCreateA(
+			{
+				type: type,
+				code: code,
+				end_time: end_time,
+				activations: activations
+			})
 		})
 	}
 

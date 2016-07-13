@@ -6,11 +6,17 @@ var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
 
+var expect = require('chai').expect
+
 var curry = require('lodash/curry')
 
 module.exports = function NetvestSubsc (db, cfg)
 {
 	var knex = db.knex
+
+	expect(db, 'Onboarding depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+	var SubscrEnterPromoA = Emitter('enter_promo', { group: 'admins' })
 
 	var OnlyOnceActivate = Err('only_once_activate', 'Subscription can be activated only once')
 
@@ -55,11 +61,15 @@ module.exports = function NetvestSubsc (db, cfg)
 		return promo.isValid(code, trx)
 		.then((item) =>
 		{
-			return netvest_subscr.activate(user_id, item.type, trx)
+			return netvest_subscr.activate(user_id, item.type, null, trx)
 		})
 		.then(() =>
 		{
 			return promo.decrement(code, trx)
+		})
+		.then(() =>
+		{
+			return SubscrEnterPromoA({ user_id: user_id, code: code })
 		})
 	})
 
