@@ -32,7 +32,7 @@ var Watchlist = module.exports = function Watchlist (db)
 	{
 		w.investor = SymbolList(knexed(knex, schema.investor.table_name), symbols)
 
-		w.investor.validateId = db.investor.ensure
+		w.investor.validateId = db.investor.all.ensure
 
 		w.investor.add =
 		wrap(w.investor.add, (sup, owner_id, symbol, additional) =>

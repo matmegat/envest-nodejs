@@ -8,7 +8,9 @@ var request = require('axios')
 
 var moment = require('moment')
 
-module.exports = function Xign (cfg)
+var extend = require('lodash/extend')
+
+module.exports = function Xign (cfg, log)
 {
 	expect(cfg).property('token')
 
@@ -54,21 +56,34 @@ module.exports = function Xign (cfg)
 			{
 				if (! unwrap.isSuccess(r))
 				{
+					warn(r)
 					return null
 				}
 
 				return r
 			})
-			.map(unwrap.maybe((r, i) =>
+			.map((r, i) =>
 			{
-				return {
-					symbol:   symbols[i],
-					currency: r.Currency,
-					price:    r.Last,
-					company:  r.Security.Name,
-					gain:     r.PercentChangeFromPreviousClose
+				var struct =
+				{
+					symbol: symbols[i],
+					price:  null
 				}
-			}))
+
+				if (r)
+				{
+					extend(struct,
+					{
+						symbol:   symbols[i],
+						currency: r.Currency,
+						price:    r.Last,
+						company:  r.Security.Name,
+						gain:     r.PercentChangeFromPreviousClose
+					})
+				}
+
+				return struct
+			})
 		})
 	}
 
@@ -116,12 +131,27 @@ module.exports = function Xign (cfg)
 		.then(unwrap.data)
 		.then(unwrap.first)
 		.then(unwrap.success)
+		.catch(warn_rethrow)
 	}
+
 
 	function apidate (it)
 	{
 		return moment(it).format('M/DD/YYYY')
 	}
+
+
+	function warn_rethrow (rs)
+	{
+		warn(rs)
+		throw rs
+	}
+
+	function warn (rs)
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
 
 	return X
 }
@@ -145,19 +175,4 @@ unwrap.success = (rs) =>
 unwrap.isSuccess = (rs) =>
 {
 	return rs.Outcome === 'Success'
-}
-
-unwrap.maybe = (fn) =>
-{
-	return function (it)
-	{
-		if (it)
-		{
-			return fn.apply(this, arguments)
-		}
-		else
-		{
-			return it
-		}
-	}
 }

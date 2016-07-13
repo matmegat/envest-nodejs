@@ -73,7 +73,7 @@ module.exports = function Feed (db)
 		.then(Err.nullish(NotFound))
 		.then((feed_item) =>
 		{
-			return investor.byId(feed_item.investor_id)
+			return investor.public.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
 				feed_item.investor = _.pick(investor,
@@ -156,7 +156,7 @@ module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			return investor.list(
+			return investor.public.list(
 			{
 				where:
 				{
