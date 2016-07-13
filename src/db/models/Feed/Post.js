@@ -12,14 +12,18 @@ var Update = require('./Update')
 
 var Feed = require('./Feed')
 
-module.exports = function Post (feed)
+module.exports = function Post (db)
 {
 	var post = {}
+
+	post.feed_model = db.feed
 
 	post.types = {}
 	post.types.trade = Trade()
 	post.types.watchlist = Watchlist()
-	post.types.update = Update(feed)
+	post.types.update = Update()
+
+	var knex = db.knex
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
@@ -27,7 +31,7 @@ module.exports = function Post (feed)
 	{
 		if (! (type in post.types))
 		{
-			throw WrongPostType()
+			throw WrongPostType({ type: type })
 		}
 		post = post.types[type]
 
@@ -39,50 +43,64 @@ module.exports = function Post (feed)
 
 	post.create = function (investor_id, type, date, data)
 	{
-		date = date || new Date()
-
-		return Promise.resolve()
-		.then(() =>
+		return knex.transaction(function (trx)
 		{
-			validate.date(date)
+			date = date || new Date()
 
-			var min_date = moment().day(-3)
-			date = moment(date)
-
-			if (! date.isSameOrAfter(min_date))
+			return Promise.resolve()
+			.then(() =>
 			{
-				throw InvestorPostDateErr({date: date, minDate: min_date })
-			}
-		})
-		.then(() =>
-		{
-			return post.add(investor_id, type, date, data)
-		})
-		.then(() =>
-		{
-			//Send notification
-		})
-		.then(noop)
+				validate.date(date)
+
+				var min_date = moment().day(-3)
+				date = moment(date)
+
+				if (! date.isSameOrAfter(min_date))
+				{
+					throw InvestorPostDateErr({date: date, minDate: min_date })
+				}
+			})
+			.then(() =>
+			{
+				return post.feed_model.create(investor_id, type, date, data, trx)
+			})
+			.then(() =>
+			{
+				return post.add(investor_id, type, date, data)
+			})
+			.then(() =>
+			{
+				//Send notification
+			})
+			.then(noop)
+		}
 	}
 
-	post.createAs = function (admin_id, investor_id, type, date, data)
+	post.createAs = function (whom_id, investor_id, type, date, data)
 	{
-		date = date || new Date()
+		return knex.transaction(function (trx)
+		{
+			date = date || new Date()
 
-		return Promise.resolve()
-		.then(() =>
-		{
-			return validate.date(date)
-		})
-		.then(() =>
-		{
-			return post.add(investor_id, type, date, data)
-		})
-		.then(() =>
-		{
-			//Send notification
-		})
-		.then(noop)
+			return Promise.resolve()
+			.then(() =>
+			{
+				return validate.date(date)
+			})
+			.then(() =>
+			{
+				return post.feed_model.create(investor_id, type, date, data, trx)
+			})
+			.then(() =>
+			{
+				return post.add(investor_id, type, date, data)
+			})
+			.then(() =>
+			{
+				//Send notification
+			})
+			.then(noop)
+		}
 	}
 
 	return post

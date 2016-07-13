@@ -61,7 +61,7 @@ module.exports = function name (app)
 	db.portfolio = Portfolio(db)
 	db.feed = Feed(db)
 
-	db.post = Post(db.feed)
+	db.post = Post(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
