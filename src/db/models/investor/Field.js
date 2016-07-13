@@ -12,7 +12,7 @@ module.exports = function Field (investor, options)
 
 	field.verify = verifier(field, options.verify)
 
-	field.key = options.key
+	field.get = getter(field, options.get)
 
 	return field
 }
@@ -81,21 +81,31 @@ function verifier (field, verify)
 
 	return (investor_id) =>
 	{
-		if (! field.key)
+		return field.get(investor_id)
+		.then((value) =>
 		{
-			return verify(null, investor_id)
-		}
-
-		return field.investor.table()
-		.where('user_id', investor_id)
-		.then(one)
-		.then((entry) =>
-		{
-			return field.validate(entry[field.key])
-			.then((value) =>
+			return field.validate(value)
+			.then(() =>
 			{
 				return verify(value, investor_id)
 			})
+		})
+	}
+}
+
+function getter (field, get)
+{
+	expect(get).a('function')
+
+	return (investor_id) =>
+	{
+		return field.investor.all.ensure(investor_id)
+		.then(() =>
+		{
+			var queryset = field.investor.table()
+			.where('user_id', investor_id)
+
+			return get(queryset, investor_id)
 		})
 	}
 }

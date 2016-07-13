@@ -396,7 +396,8 @@ function Brokerage (investor_model, db)
 		get: (queryset, investor_id) =>
 		{
 			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.brokerage)
+			.then(full_portfolio => full_portfolio.brokerage.cash_value)
+			.then(Number)
 		},
 		validate: (value) =>
 		{
@@ -422,7 +423,7 @@ function Brokerage (investor_model, db)
 				{
 					throw CannotGoPublic({ reason: 'Brokerage does not exist' })
 				}
-				if (! portfolio.brokerage.amount < 0)
+				if (! Number(portfolio.brokerage.cash_value) < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
 				}
@@ -498,17 +499,6 @@ function Holdings (investor_model, db)
 			var portfolio = db.investor.portfolio
 
 			return portfolio.setHoldings(investor_id, value)
-		},
-		verify: (value, investor_id) =>
-		{
-			return db.investor.portfolio.full(investor_id)
-			.then((portfolio) =>
-			{
-				validate.array(portfolio.holdings, 'holdings')
-				portfolio.holdings.forEach(vrow)
-
-				return true
-			})
 		}
 	})
 }
@@ -531,8 +521,11 @@ function StartDate (investor)
 		},
 		validate: (value) =>
 		{
-			validate.string(value, 'start_date')
-			validate.empty(value, 'start_date')
+			if (! (value instanceof Date))
+			{
+				validate.string(value, 'start_date')
+				validate.empty(value, 'start_date')
+			}
 
 			var moment_date = moment(value)
 			if (! moment_date.isValid())
@@ -545,23 +538,6 @@ function StartDate (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ start_date: value })
-		},
-		verify: (value, investor_id) =>
-		{	// because DB returns Date() for start_date
-			return investor.table()
-			.where('user_id', investor_id)
-			.select('start_date')
-			.then(one)
-			.then((rs) =>
-			{
-				var moment_date = moment(rs.start_date)
-				if (! moment_date.isValid())
-				{
-					throw WrongStartDateFormat()
-				}
-
-				return true
-			})
 		}
 	})
 }
