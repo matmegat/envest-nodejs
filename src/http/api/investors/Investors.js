@@ -29,7 +29,7 @@ module.exports = function (db, http)
             'symbol'
         ])
 
-		toss(rs, investors.model.list(options))
+		toss(rs, investors.model.public.list(options))
 	})
 
 	investors.express.get('/admin', http.adminRequired, (rq, rs) =>

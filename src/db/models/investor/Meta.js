@@ -11,6 +11,8 @@ var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var ChunkedPaginator = require('../../paginator/Chunked')
 var BookedPaginator = require('../../paginator/Booked')
 
+var Filter = require('../../Filter')
+
 module.exports = function Meta (knexed_table, options)
 {
 	expect(knexed_table, 'meta table relation').a('function')
@@ -22,6 +24,10 @@ module.exports = function Meta (knexed_table, options)
 	}
 
 	var meta = {}
+
+	var filter = Filter({
+		symbol: Filter.by.symbol('investors.user_id')
+	})
 
 	meta.is = function (id, trx)
 	{
@@ -125,6 +131,7 @@ module.exports = function Meta (knexed_table, options)
 			)
 		}
 
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 		/* end of all where clauses */

@@ -18,6 +18,10 @@ get:
     in: query
     type: integer
     description: Page number
+  - name: symbol
+    in: query
+    type: string
+    description: Symbol to filter investors `ticker[.exchange]`
   responses:
     200:
       description: Investors list
