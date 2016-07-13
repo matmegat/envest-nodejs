@@ -70,8 +70,6 @@ function setter (field, set)
 	}
 }
 
-var one = require('../../helpers').one
-
 function verifier (field, verify)
 {
 	if (typeof verify !== 'function')
