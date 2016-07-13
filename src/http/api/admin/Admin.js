@@ -23,7 +23,7 @@ module.exports = function (db, http, admin)
 
 	express.post('/post-as', (rq, rs) =>
 	{
-		var admin_id = rq.user.id
+		var whom_id = rq.user.id
 		var target_user_id = rq.body.target_user_id
 		var type = rq.body.type
 		var date = rq.body.date
@@ -32,7 +32,7 @@ module.exports = function (db, http, admin)
 		return investor_model.ensure(target_user_id)
 		.then(() => 
 		{
-			toss(rs, post_model.createAs(admin_id, target_user_id, type, date, data))
+			toss(rs, post_model.createAs(whom_id, target_user_id, type, date, data))
 		})
 		.catch(toss.err(rs))
 	})
