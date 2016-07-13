@@ -10,9 +10,9 @@ module.exports = function Update (feed)
 	return Type(
 	{
 		validate: validate_update,
-		set: (investor_id, type, date, data) =>
+		set: () =>
 		{
-			return feed.create(investor_id, type, date, data)
+			return
 		}
 	})
 }
