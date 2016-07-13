@@ -59,7 +59,7 @@ module.exports = function name (app)
 
 	db.comments = Comments(db)
 
-	db.symbols = Symbols(app.cfg)
+	db.symbols = Symbols(app.cfg, app.log)
 
 	db.investor = Investor(db)
 	db.portfolio = Portfolio(db)

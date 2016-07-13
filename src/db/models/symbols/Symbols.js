@@ -10,11 +10,11 @@ var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 
-var Symbols = module.exports = function Symbols (cfg)
+var Symbols = module.exports = function Symbols (cfg, log)
 {
 	var symbols = {}
 
-	var xign = Xign(cfg.xignite)
+	var xign = Xign(cfg.xignite, log)
 
 	symbols.resolve = (symbol) =>
 	{
