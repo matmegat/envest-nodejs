@@ -8,6 +8,7 @@ var knexed = require('../../knexed')
 var PaginatorChunked = require('../../paginator/Chunked')
 var PaginatorBooked  = require('../../paginator/Booked')
 var Filter = require('../../Filter')
+var Sorter = require('../../Sorter')
 
 var Err = require('../../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
@@ -41,6 +42,12 @@ module.exports = function Feed (db)
 	})
 
 	paginators.booked = PaginatorBooked()
+
+	var sorter = Sorter(
+	{
+		order_column: 'timestamp',
+		allowed_columns: ['timestamp']
+	})
 
 	var filter = Filter(
 	{
@@ -116,17 +123,6 @@ module.exports = function Feed (db)
 
 		var queryset = feed.feed_table()
 
-		var paginator
-
-		if (options.paginator.page)
-		{
-			paginator = paginators.booked
-		}
-		else
-		{
-			paginator = paginators.chunked
-		}
-
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
@@ -137,6 +133,18 @@ module.exports = function Feed (db)
 		'feed_items.investor_id',
 		'feed_items.type',
 		'feed_items.data')
+
+		var paginator
+
+		if (options.paginator.page)
+		{
+			paginator = paginators.booked
+			queryset = sorter.sort(queryset)
+		}
+		else
+		{
+			paginator = paginators.chunked
+		}
 
 		return paginator.paginate(queryset, options.paginator)
 		.then((feed_items) =>

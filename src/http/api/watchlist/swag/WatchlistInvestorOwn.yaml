@@ -1,0 +1,37 @@
+get:
+  description: |
+    Get Watchlist for current Investor
+  responses:
+    200:
+      description: Investor Watchlist
+      schema:
+        title: Watchlist
+        type: object
+        properties:
+          symbol:
+            $ref: ../../../swagger/Symbol.yaml
+          price:
+            type: number
+            description: current price of asset
+          currency:
+            type: string
+            description: currency of price (mostly common "USD")
+          target_price:
+            type: number
+            description: Investor's target price of asset
+        required:
+          - symbol
+          - price
+          - currency
+          - target_price
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - watchlist

@@ -1,0 +1,14 @@
+type: object
+properties:
+  users:
+    type: array
+    items:
+    - $ref: ./UsersItem.yaml
+  total:
+    type: integer
+  pages:
+    type: integer
+required:
+- users
+- total
+- pages

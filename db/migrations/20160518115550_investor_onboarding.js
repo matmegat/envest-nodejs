@@ -1,4 +1,6 @@
 
+var Symbols = require('../../src/db/models/symbols/Symbols')
+
 exports.up = function (knex, Promise)
 {
 	return Promise.resolve()
@@ -24,8 +26,9 @@ exports.up = function (knex, Promise)
 	{
 		return knex.schema.createTable('symbols', (table) =>
 		{
-			table.increments('id').primary()
-			table.string('ticker').notNullable()
+			Symbols.schema.columns('', table)
+
+			/* additional */
 			table.string('company').notNullable()
 		})
 	})
@@ -34,19 +37,18 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()
-			table.integer('amount').notNullable().comment('Number of Shares')
 
-			table.integer('investor_id')
-			.notNullable()
-			.references('investors.user_id')
-			.onUpdate('cascade')
-			.onDelete('cascade')
+			table.integer('investor_id').notNullable()
+				.references('investors.user_id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
-			table.integer('symbol_id')
-			.notNullable()
-			.references('symbols.id')
-			.onUpdate('cascade')
-			.onDelete('cascade')
+			Symbols.schema.columns('symbol_', table) // REF symbols
+
+			table.integer('amount').notNullable()
+				.comment('Number of Shares')
+
+			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ])
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)

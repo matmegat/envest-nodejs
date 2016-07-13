@@ -26,5 +26,15 @@
     [
       8080, 8081
     ]
+  },
+
+  "xignite":
+  {
+    "token": "5198053EF65A4DE691F4D622001DEE79"
+  },
+
+  "sendgrid":
+  {
+    "key": "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"
   }
 }

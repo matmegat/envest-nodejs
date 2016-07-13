@@ -77,8 +77,17 @@ paths:
   '/watchlist':
     $ref: ../api/watchlist/swag/WatchlistUser.yaml
 
-  '/watchlist/investor/{investor_id}':
+  '/watchlist/{symbol_x}':
+    $ref: ../api/watchlist/swag/PutDelete-WatchlistUser.yaml
+
+  '/watchlist/investor':
+    $ref: ../api/watchlist/swag/WatchlistInvestorOwn.yaml
+
+  '/watchlist/investor/by-id/{investor_id}':
     $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
+
+  '/watchlist/investor/{symbol_x}':
+   $ref: ../api/watchlist/swag/PutDelete-WatchlistInvestor.yaml
 
   '/static/pic/{hash}':
     $ref: ../api/statics/swag/GetPic.yaml
@@ -91,6 +100,12 @@ paths:
 
   '/users/current':
     $ref: ../api/users/swag/UserCurrent.yaml
+
+  '/users/':
+    $ref: ../api/users/swag/UsersList.yaml
+
+  '/users/admins':
+    $ref: ../api/users/swag/AdminsList.yaml
 
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
@@ -126,6 +141,12 @@ definitions:
 
   User:
     $ref: ./User.yaml
+
+  Users:
+    $ref: ../api/users/swag/Users.yaml
+
+  UsersItem:
+    $ref: ../api/users/swag/UsersItem.yaml
 
   Comments:
     $ref: ../api/comments/swag/Comments.yaml

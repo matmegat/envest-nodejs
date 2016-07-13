@@ -12,20 +12,27 @@ get:
       description: Investor Watchlist
       schema:
         title: Watchlist
-        type: object
-        properties:
-          symbol:
-            $ref: ../../../swagger/Symbol.yaml
-          price:
-            type: number
-            description: current price of asset
-          target_price:
-            type: number
-            description: Investor's target price of asset
-        required:
-          - symbol
-          - price
-          - target_price
+        type: array
+        items:
+        - type: object
+          title: Watchlist Item
+          properties:
+            symbol:
+              $ref: ../../../swagger/Symbol.yaml
+            price:
+              type: number
+              description: current price of asset
+            currency:
+              type: string
+              description: currency of price (mostly common "USD")
+            target_price:
+              type: number
+              description: Investor's target price of asset
+          required:
+            - symbol
+            - price
+            - currency
+            - target_price
 
     400:
       description: |
