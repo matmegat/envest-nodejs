@@ -73,7 +73,7 @@ module.exports = function Post (db)
 				//Send notification
 			})
 			.then(noop)
-		}
+		})
 	}
 
 	post.createAs = function (whom_id, investor_id, type, date, data)
@@ -100,7 +100,7 @@ module.exports = function Post (db)
 				//Send notification
 			})
 			.then(noop)
-		}
+		})
 	}
 
 	return post
