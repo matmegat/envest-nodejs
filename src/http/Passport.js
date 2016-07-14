@@ -91,13 +91,14 @@ function useFacebookToken (auth, user)
 	passport.use(new FacebookStrategy(
 	{
 		clientID: clientID,
-		clientSecret: clientSecret
+		clientSecret: clientSecret,
+		passReqToCallback: true
 	},
-	(accessToken, refreshToken, profile, done) =>
+	(req, accessToken, refreshToken, profile, done) =>
 	{
 		var user_data =
 		{
-			email: profile.emails[0].value,
+			email: profile.emails[0].value || req.body.email,
 			first_name: profile.name.givenName,
 			last_name: profile.name.familyName,
 			facebook_id: profile.id,
