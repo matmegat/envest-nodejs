@@ -21,7 +21,11 @@ get:
   - name: symbol
     in: query
     type: string
-    description: Symbol to filter investors `ticker[.exchange]`
+    description: Symbol to filter investors `TICKER[.EXCHANGE]`
+  - name: symbols
+    in: query
+    type: string
+    description: Symbols to filter investors `TICKER.EXCHANGE`
   responses:
     200:
       description: Investors list

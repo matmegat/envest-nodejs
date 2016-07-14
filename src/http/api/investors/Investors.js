@@ -26,7 +26,8 @@ module.exports = function (db, http)
 
 		options.filter = pick(rq.query,
         [
-            'symbol'
+            'symbol',
+			'symbols'
         ])
 
 		toss(rs, investors.model.public.list(options))

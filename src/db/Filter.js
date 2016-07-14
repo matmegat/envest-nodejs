@@ -1,4 +1,6 @@
 
+var raw = require('knex').raw
+
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -167,5 +169,28 @@ Filter.by.symbol = function by_symbol (column)
 				this.where('portfolio_symbols.symbol_exchange', symbol.exchange)
 			}
 		})
+	}
+}
+
+Filter.by.symbols = function (column)
+{
+	return function (queryset, symbols)
+	{
+		symbols = symbols.split(',')
+		symbols = [].concat(symbols)
+		symbols = symbols.map(Symbl)
+
+		var ticker_col = 'portfolio_symbols.symbol_ticker'
+		var exchange_col = 'portfolio_symbols.symbol_exchange'
+
+		return queryset
+		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.whereIn(
+			raw(`${ticker_col} || '.' || ${exchange_col}`),
+			symbols.map(symbol =>
+			{
+				return `${symbol.ticker}.${symbol.exchange}`
+			})
+		)
 	}
 }
