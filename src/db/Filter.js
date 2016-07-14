@@ -153,7 +153,7 @@ Filter.by.name = function by_name (when_column)
 
 var Symbl = require('./models/symbols/Symbl')
 
-Filter.by.symbol = function by_symbol (column)
+Filter.by.portfolio_symbol = function by_symbol (column)
 {
 	return function (queryset, symbol)
 	{
@@ -172,7 +172,7 @@ Filter.by.symbol = function by_symbol (column)
 	}
 }
 
-Filter.by.symbols = function (column)
+Filter.by.portfolio_symbols = function (column)
 {
 	return function (queryset, symbols)
 	{
