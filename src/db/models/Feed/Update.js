@@ -19,8 +19,6 @@ module.exports = function Update (feed)
 
 function validate_update (data)
 {
-	console.log(data)
-
 	var data = pick(data,
 	[
 		'symbols',
