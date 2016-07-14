@@ -4,11 +4,17 @@ var moment = require('moment')
 
 var validate    = require('../../validate')
 var isPositive  = validate.integer.positive
-var validate_time = validate.time
+var validate_date = validate.date
+
+var validateId = require('../../../id').validate.promise
 
 var expect = require('chai').expect
+var noop = require('lodash/noop')
 
 var Err = require('../../../Err')
+
+var Filter = require('../../Filter')
+var Sorter = require('../../Sorter')
 
 module.exports = function Promo (db)
 {
@@ -24,10 +30,19 @@ module.exports = function Promo (db)
 
 	var PromoCreateA = Emitter('promo_create', { group: 'admins' })
 
+	var sorter = Sorter(
+	{
+		order_column: 'end_time',
+		allowed_columns: ['end_time', 'activations', 'type', 'code']
+	})
+
+	var filter = Filter(
+	{
+		type: Filter.by.equal('type')
+	})
+
 	promo.create = function (type, code, end_time, activations)
 	{
-		var end_time = moment(end_time)
-
 		return new Promise(rs =>
 		{
 			if (activations)
@@ -37,7 +52,8 @@ module.exports = function Promo (db)
 
 			if (end_time)
 			{
-				validate_time(end_time, 'promo_code')
+				end_time = moment(end_time)
+				validate_date(end_time)
 			}
 
 			return rs()
@@ -64,6 +80,32 @@ module.exports = function Promo (db)
 				activations: activations
 			})
 		})
+	}
+
+	var WrongPromoId = Err('wrong_promo_id', 'Wrong promocode id')
+
+	promo.remove = function (id)
+	{
+		return validateId(WrongPromoId, id)
+		.then(() =>
+		{
+			return promo.table()
+			.where('id', id)
+			.del()
+			.then(noop)
+		})
+	}
+
+	promo.list = function (options)
+	{
+		var queryset = promo.table()
+
+		queryset = filter(queryset, options.filter)
+
+		queryset = sorter.sort(queryset, options.sorter)
+
+		return queryset
+		.then((list) => { return list })
 	}
 
 	var WrongPromoCode = Err('wrong_promo_code', 'Wrong promo code')

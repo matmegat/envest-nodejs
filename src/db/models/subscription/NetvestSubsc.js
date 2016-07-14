@@ -54,18 +54,18 @@ module.exports = function NetvestSubsc (db, cfg)
 		}
 	})
 
-	var promo = PromoCode(db)
+	netvest_subscr.promo = PromoCode(db)
 
-	netvest_subscr.enterPromo = knexed.transact(knex, (trx, code, user_id) =>
+	netvest_subscr.promo.activate = knexed.transact(knex, (trx, code, user_id) =>
 	{
-		return promo.isValid(code, trx)
+		return netvest_subscr.promo.isValid(code, trx)
 		.then((item) =>
 		{
 			return netvest_subscr.activate(user_id, item.type, null, trx)
 		})
 		.then(() =>
 		{
-			return promo.decrement(code, trx)
+			return netvest_subscr.promo.decrement(code, trx)
 		})
 		.then(() =>
 		{
