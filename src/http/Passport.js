@@ -98,7 +98,7 @@ function useFacebookToken (auth, user)
 	{
 		var user_data =
 		{
-			email: profile.emails[0].value || req.body.email,
+			email: profile.emails[0].value || req.body.email || '',
 			first_name: profile.name.givenName,
 			last_name: profile.name.familyName,
 			facebook_id: profile.id,
