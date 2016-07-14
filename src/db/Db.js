@@ -7,13 +7,12 @@ var Admin = require('./models/Admin')
 var Feed = require('./models/Feed/Feed')
 var Post = require('./models/Feed/Post')
 var Comments = require('./models/Comments')
-var Symbols = require('./models/symbols/Symbols')
-var Investor = require('./models/Investor')
-var Portfolio = require('./models/Portfolio')
+var Investor = require('./models/investor/Investor')
 var Notifications = require('./models/Notifications')
-var Watchlist = require('./models/watchlist/Watchlist')
 var Static = require('./models/Static')
 var Pic = require('./models/Pic')
+var Symbols = require('./models/symbols/Symbols')
+var Watchlist = require('./models/watchlist/Watchlist')
 
 module.exports = function name (app)
 {
@@ -60,17 +59,16 @@ module.exports = function name (app)
 
 	db.comments = Comments(db)
 
-	db.symbols = Symbols(app.cfg, app.log)
-
-	db.investor = Investor(db)
-	db.portfolio = Portfolio(db)
+	db.investor = Investor(db, app)
 	db.feed = Feed(db)
-	db.watchlist = Watchlist(db)
 
 	db.post = Post(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
+
+	db.symbols = Symbols(app.cfg, app.log)
+	db.watchlist = Watchlist(db)
 
 	return db
 }

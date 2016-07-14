@@ -40,8 +40,6 @@ validate.string = function validate__string (field, name)
 }
 
 
-var WrongJSON = Err('wrong_json', 'Wrong JSON')
-
 validate.json = function validate__json (json, name)
 {
 	try
@@ -50,15 +48,41 @@ validate.json = function validate__json (json, name)
 	}
 	catch (e)
 	{
-		throw WrongJSON({ field: name })
+		throw FieldType({ field: name, type: 'json' })
 	}
 }
 
 
-validate.array = function validate__array (ar, name)
+validate.array = function validate__array (field, name)
 {
-	if (! Array.isArray(ar))
+	if (! Array.isArray(field))
 	{
+		throw FieldType({ field: name, type: 'array' })
+	}
+}
+
+
+validate.number = function validate__number (field, name)
+{
+	if (typeof field !== 'number' || ! isFinite(field))
+	{
+		throw FieldType({ field: name, type: 'number' })
+	}
+}
+
+
+var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
+
+validate.length = function validate__length (max)
+{
+	return (field, name) =>
+	{
+		var actual = field.length
+
+		if (actual > max)
+		{
+			throw FieldLength({ field: name, actual: actual, max: max })
+		}
 		throw FieldType({ field: name, type: 'array' })
 	}
 }
