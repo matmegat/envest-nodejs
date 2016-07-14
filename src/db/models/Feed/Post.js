@@ -25,6 +25,10 @@ module.exports = function Post (db)
 
 	var knex = db.knex
 
+	var Emitter = db.notifications.Emitter
+
+	var PostCreated = Emitter('post_created')
+
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
 	post.add = function (investor_id, type, date, data)
@@ -69,6 +73,10 @@ module.exports = function Post (db)
 			{
 				return post.add(investor_id, type, date, data)
 			})
+			.then(() =>
+			{
+				PostCreated({ by: 'investor', investor_id: investor_id })
+			})
 		})
 	}
 
@@ -90,6 +98,10 @@ module.exports = function Post (db)
 			.then(() =>
 			{
 				return post.add(investor_id, type, date, data)
+			})
+			.then(() =>
+			{
+				PostCreated(investor_id, { by: 'admin', admin_id: whom_id })
 			})
 		})
 	}
