@@ -58,9 +58,8 @@ module.exports = function Post (db)
 				validate.date(date)
 
 				var min_date = moment().day(-3)
-				date = moment(date)
 
-				if (! date.isSameOrAfter(min_date))
+				if (! moment(date).isSameOrAfter(min_date))
 				{
 					throw InvestorPostDateErr({date: date, minDate: min_date })
 				}
