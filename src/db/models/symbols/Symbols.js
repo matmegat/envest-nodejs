@@ -56,7 +56,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			{
 				if (! r) /* not_resolved */
 				{
-					return r
+					throw ReferenceError('wrong_scenario')
 				}
 				else
 				{
