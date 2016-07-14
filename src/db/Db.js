@@ -64,7 +64,7 @@ module.exports = function name (app)
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
 
-	db.symbols = Symbols(app.cfg)
+	db.symbols = Symbols(app.cfg, app.log)
 	db.watchlist = Watchlist(db)
 
 	return db

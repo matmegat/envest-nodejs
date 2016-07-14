@@ -82,7 +82,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			{
 				if (! r) /* not_resolved */
 				{
-					return r
+					throw ReferenceError('wrong_scenario')
 				}
 
 				if (model.decorate)

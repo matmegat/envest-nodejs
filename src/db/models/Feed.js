@@ -157,7 +157,7 @@ module.exports = function Feed (db)
 		.then((feed_items) =>
 		{
 			return investor.public.list(
-			{
+			{	// TODO: replace to Filter by ids
 				where:
 				{
 					column_name: 'user_id',
@@ -170,7 +170,7 @@ module.exports = function Feed (db)
 				var response =
 				{
 					feed: feed_items,
-					investors: investors,
+					investors: investors.investors,
 				}
 
 				if (paginator.total)
