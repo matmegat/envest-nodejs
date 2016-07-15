@@ -101,7 +101,12 @@ module.exports = function (db)
 			{
 				emitter(id, { user_id: id })
 			})
-			.then(noop)
+			.then(() =>
+			{
+				return {
+					hash: new_pic
+				}
+			})
 		}
 	}
 
