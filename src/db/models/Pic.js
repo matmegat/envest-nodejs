@@ -15,10 +15,19 @@ module.exports = function (db)
 	var user     = db.user
 	var investor = db.investor
 
+	var Emitter = db.notifications.Emitter
+
+	var emits =
+	{
+		PicUpdated: Emitter('pic_updated'),
+		ProfilePicUpdated: Emitter('profile_pic_updated')
+	}
+
 	/* update User `pic` */
 	pic.update = update_on_model(
 		user.picById,
 		user.updatePic,
+		emits.PicUpdated,
 	{
 		max_size: 10 * 1024 * 1024,
 		ratio: {
@@ -31,6 +40,7 @@ module.exports = function (db)
 	pic.updateProfile = update_on_model(
 		investor.profilePicById,
 		investor.updateProfilePic,
+		emits.ProfilePicUpdated,
 	{
 		max_size: 10 * 1024 * 1024,
 		ratio: {
@@ -43,7 +53,7 @@ module.exports = function (db)
 	var static = db.static
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
 
-	function update_on_model (getter, setter, validations)
+	function update_on_model (getter, setter, emitter, validations)
 	{
 		return (file, id) =>
 		{
@@ -86,6 +96,10 @@ module.exports = function (db)
 			.then(() =>
 			{
 				return static.remove(old_pic)
+			})
+			.then(() =>
+			{
+				emitter(id, { user_id: id })
 			})
 			.then(noop)
 		}
