@@ -18,7 +18,7 @@ post:
         properties:
           hash:
             type: string
-            description: pic hash
+            description: uploaded pic hash
     400:
       description: if something went wrong
 
