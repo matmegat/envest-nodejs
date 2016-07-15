@@ -13,7 +13,7 @@ module.exports = function ResolveCache ()
 
 		cache[key] = data
 
-		console.warn('cache put', key, data)
+		console.info('cache put', key, data)
 	}
 
 	model.in = (symbol) =>
@@ -27,9 +27,14 @@ module.exports = function ResolveCache ()
 	{
 		var key = resolve_key(symbol)
 
-		console.warn('cache get', key, cache[key])
+		var data = cache[key]
 
-		return cache[key]
+		if (data !== undefined)
+		{
+			console.info('cache hit', key, data)
+		}
+
+		return data
 	}
 
 
