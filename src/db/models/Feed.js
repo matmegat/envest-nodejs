@@ -265,11 +265,24 @@ function transform_symbols (items, api)
 
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
-	return api.quotes(symbols)
+
+	var quieries = map(symbols, api.resolve)
+
+	quieries = map(quieries, query =>
+	{
+		return query.catch(err =>
+		{
+			return null
+		})
+	})
+
+	return Promise.all(quieries)
 	.then(quotes =>
 	{
 		quotes = compact(quotes)
-		quotes = map(quotes, 'symbol')
+		//quotes = map(quotes, 'symbol')
+
+		console.log('1', quotes)
 
 		return quotes
 	})
