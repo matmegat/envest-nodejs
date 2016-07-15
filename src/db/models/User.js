@@ -165,7 +165,7 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.create = knexed.transact(knex, (trx, data) =>
+	user.create = function (trx, data)
 	{
 		return ensureEmailNotExists(data.email, trx)
 		.then(() =>
@@ -182,16 +182,8 @@ module.exports = function User (db, app)
 			{
 				return user.password.create(id, data.password, trx)
 			})
-			.then(function (id)
-			{
-				return user.newEmailUpdate(trx,
-				{
-					user_id: id,
-					new_email: data.email
-				})
-			})
 		})
-	})
+	}
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
 	function ensureEmailNotExists (email, trx)
