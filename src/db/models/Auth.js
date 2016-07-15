@@ -28,10 +28,10 @@ module.exports = function Auth (db)
 			.then(function (id)
 			{
 				return user.newEmailUpdate(trx,
-					{
-						user_id: id,
-						new_email: userdata.email
-					})
+				{
+					user_id: id,
+					new_email: userdata.email
+				})
 			})
 		})
 	})
