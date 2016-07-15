@@ -33,7 +33,9 @@ module.exports = function SubscrManager (db, subsc_desc)
 	var find = _.find
 
 	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
-	var FeatureRequired = Err('feature_required', 'Feature required for this operation')
+	var FeatureRequired = Err(
+	'feature_required',
+	'Feature required for this operation')
 
 	subscr_manager.isAble = function (user_id, feature)
 	{

@@ -116,12 +116,10 @@ module.exports = function Promo (db)
 		.where(function ()
 		{
 			this.where('end_time', '>', moment())
-			this.whereNotNull('end_time')
 		})
 		.where(function ()
 		{
 			this.where('activations', '>', 0)
-			this.whereNotNull('activations')
 		})
 		.where('code', code)
 		.then(Err.emptish(WrongPromoCode))

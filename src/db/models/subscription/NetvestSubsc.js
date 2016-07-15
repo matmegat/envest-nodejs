@@ -18,14 +18,16 @@ module.exports = function NetvestSubsc (db, cfg)
 	var Emitter = db.notifications.Emitter
 	var SubscrEnterPromoA = Emitter('enter_promo', { group: 'admins' })
 
-	var OnlyOnceActivate = Err('only_once_activate', 'Subscription can be activated only once')
+	var OnlyOnceActivate = Err(
+	'only_once_activate',
+	'Subscription can be activated only once')
 
-	var once_activate = curry((type, user_id, subscr_table) =>
+	var once_update = curry((type, user_id, subscr_table) =>
 	{
 		return by_user_id_type(user_id, type, subscr_table)
 		.then((items) =>
 		{
-			if (items.length > 1)
+			if (items.length > 2)
 			{
 				throw OnlyOnceActivate({ type: type })
 			}
@@ -50,7 +52,7 @@ module.exports = function NetvestSubsc (db, cfg)
 		{
 			days: 30,
 			features: ['multiple_investors'],
-			fn: once_activate('trial')
+			fn: once_update('trial')
 		}
 	})
 
@@ -79,7 +81,10 @@ module.exports = function NetvestSubsc (db, cfg)
 	{
 		if (option.token === cfg.token)
 		{
-			return netvest_subscr.activate(option.user_id, option.type, option.days)
+			return netvest_subscr.activate(
+			option.user_id,
+			option.type,
+			option.days)
 		}
 		else
 		{
