@@ -99,7 +99,7 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				emitter(id)
+				emitter(id, {user_id: id})
 			})
 			.then(noop)
 		}
