@@ -87,7 +87,12 @@ module.exports = function (db)
 			{
 				return static.remove(old_pic)
 			})
-			.then(noop)
+			.then(() =>
+			{
+				return {
+					hash: new_pic
+				}
+			})
 		}
 	}
 

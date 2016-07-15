@@ -13,6 +13,12 @@ post:
   responses:
     200:
       description: user's avatar updated
+      schema:
+        type: object
+        properties:
+          hash:
+            type: string
+            description: pic hash
     400:
       description: if something went wrong
 
