@@ -93,26 +93,6 @@ module.exports = function Investor (db, app)
 		.then(oneMaybe)
 		.then((investor_id) =>
 		{
-			/* TODO: sent welcome email
-			 * - email verification link: ...
-			 * - link to 'set new password'
-			 * REQUIRED FIELDS:
-			 * - first_name
-			 * - last_name
-			 * - host
-			 * - password_url (password reset url)
-			 * - password_code (password reset code)
-			 * */
-			mailer.send(
-			{
-				to: data.email,
-				first_name: data.first_name,
-				last_name: data.last_name,
-				host: 'localhost:8080',
-				password_url: '/api/auth/change-password',
-				password_code: 'PASTE IT HERE'
-			}, 'welcome')
-
 			/* notification: 'investor created'
 			* - to all admins?
 			* - to created investor?
