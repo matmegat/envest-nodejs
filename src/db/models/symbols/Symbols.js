@@ -3,6 +3,7 @@ var expect = require('chai').expect
 
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
+var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
@@ -13,6 +14,8 @@ var invoke = require('lodash/invokeMap')
 var Symbols = module.exports = function Symbols (cfg, log)
 {
 	var symbols = {}
+
+	var cache = Cache()
 
 	var xign = Xign(cfg.xignite, log)
 
@@ -37,6 +40,12 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
+			})
+			.then(symbol =>
+			{
+				cache.put(symbol, symbol)
+
+				return symbol
 			})
 		})
 	}
