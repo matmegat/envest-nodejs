@@ -57,7 +57,7 @@ module.exports = function Post (db)
 			{
 				validate.date(date)
 
-				var min_date = moment().day(-3)
+				var min_date = moment().subtract(3, 'days')
 
 				if (! moment(date).isSameOrAfter(min_date))
 				{
