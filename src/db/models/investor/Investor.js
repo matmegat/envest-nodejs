@@ -55,7 +55,7 @@ module.exports = function Investor (db, app)
 
 	investor.portfolio = Portfolio(db, investor)
 
-	investor.create = knexed.transact(knex, (trx, data) =>
+	var investor_create = knexed.transact(knex, (trx, data) =>
 	{
 		return generate_code()
 		.then((password) =>
@@ -77,7 +77,6 @@ module.exports = function Investor (db, app)
 				return auth.emailConfirm(user_confirm.code)
 			})
 		})
-		.then(() => user.password.reqReset(data.email))
 		.then(() => user.byEmail(data.email, trx))
 		.then((user) =>
 		{
@@ -107,6 +106,20 @@ module.exports = function Investor (db, app)
 			})
 		})
 	})
+
+	investor.create = function (data)
+	{
+		return investor_create(data)
+		.then((investor_entry) =>
+		{
+			return user.byId(investor_entry.id)
+			.then((user_entry) =>
+			{
+				return user.password.reqReset(user_entry.email)
+			})
+			.then(() => investor_entry)
+		})
+	}
 
 	var get_pic = require('lodash/fp/get')('profile_pic')
 
