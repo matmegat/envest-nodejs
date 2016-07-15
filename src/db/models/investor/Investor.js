@@ -65,19 +65,18 @@ module.exports = function Investor (db, app)
 				password: password /* new Investor should reset his password */
 			})
 
-			return auth.register(user_data)
-		})
-		.then(() =>
-		{
-			return user.email_confirms(trx)
-			.where('new_email', data.email)
-			.then(oneMaybe)
-			.then((user_confirm) =>
+			return user.create(trx, user_data)
+			.then((user_id) =>
 			{
-				return auth.emailConfirm(user_confirm.code)
+				return user.users_table(trx)
+				.where('id', user_id)
+				.update({
+					email: data.email
+				}, 'id')
 			})
+			.then(one)
 		})
-		.then(() => user.byEmail(data.email, trx))
+		.then((user_id) => user.byId(user_id, trx))
 		.then((user) =>
 		{
 			return investor.table(trx)
@@ -112,11 +111,7 @@ module.exports = function Investor (db, app)
 		return investor_create(data)
 		.then((investor_entry) =>
 		{
-			return user.byId(investor_entry.id)
-			.then((user_entry) =>
-			{
-				return user.password.reqReset(user_entry.email)
-			})
+			return user.password.reqReset(data.email)
 			.then(() => investor_entry)
 		})
 	}
