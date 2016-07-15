@@ -57,6 +57,10 @@ get:
     in: query
     type: string
     description: Feed after a date (ISO 8601 strings)
+  - name: symbol
+    in: query
+    type: string
+    description: Symbol to filter investors `TICKER[.EXCHANGE]`
   responses:
     200:
       description: user's Feed

@@ -194,3 +194,24 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 		)
 	}
 }
+
+Filter.by.symbol = function by_symbol (column)
+{
+	return function (queryset, symbol)
+	{
+		symbol = Symbl(symbol)
+
+		var where_clause = `{"ticker": "${symbol.ticker}"}`
+		if (symbol.exchange)
+		{
+			where_clause =
+			`{"ticker": "${symbol.ticker}",` +
+			` "exchange": "${symbol.exchange}"}`
+		}
+
+		queryset
+		.where(column, '@>', where_clause)
+
+		return queryset
+	}
+}
