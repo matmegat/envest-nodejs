@@ -77,10 +77,8 @@ module.exports = function Investor (db, app)
 				return auth.emailConfirm(user_confirm.code)
 			})
 		})
-		.then(() =>
-		{
-			return user.byEmail(data.email, trx)
-		})
+		.then(() => user.password.reqReset(data.email))
+		.then(() => user.byEmail(data.email, trx))
 		.then((user) =>
 		{
 			return investor.table(trx)
