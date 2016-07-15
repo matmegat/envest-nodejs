@@ -50,6 +50,22 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.resolve.cache = (symbol) =>
+	{
+		return new Promise(rs =>
+		{
+			var data = cache.get(symbol)
+
+			if (data)
+			{
+				return rs(data)
+			}
+
+			return rs(symbols.resolve(symbol))
+		})
+	}
+
+
 	symbols.quotes = (symbols) =>
 	{
 		expect(symbols).ok

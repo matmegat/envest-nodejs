@@ -266,7 +266,7 @@ function transform_symbols (items, api)
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
 
-	var quieries = map(symbols, api.resolve)
+	var quieries = map(symbols, api.resolve.cache)
 
 	quieries = map(quieries, query =>
 	{
