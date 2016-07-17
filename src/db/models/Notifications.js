@@ -3,6 +3,7 @@ var knexed = require('../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
+var extend = require('lodash/extend')
 
 var validate   = require('../validate')
 var validateId = require('../../id').validate
@@ -27,6 +28,8 @@ module.exports = function Notifications (db)
 
 	notifications.Emitter = function Emitter (type, options)
 	{
+		options = extend({}, options)
+
 		return function NotificationEmit (target_or_event, event)
 		{
 			var emit =
@@ -34,7 +37,7 @@ module.exports = function Notifications (db)
 				type: type
 			}
 
-			if (options.target === 'recipient')
+			if (! options.group) /* single*/
 			{
 				expect(target_or_event).a('number')
 
@@ -43,7 +46,7 @@ module.exports = function Notifications (db)
 
 				return notifications.create(emit)
 			}
-			else if (options.target === 'group')
+			else /* group */
 			{
 				expect(target_or_event).a('object')
 

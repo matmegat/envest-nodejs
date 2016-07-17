@@ -17,13 +17,7 @@ module.exports = function Abuse (db, comments, Emitter)
 
 	abuse.table = () => knex('abuse_comments')
 
-	var emitter_options =
-	{
-		target: 'group',
-		group:  'admins'
-	}
-
-	var CommentReport = Emitter('comments_reports', emitter_options)
+	var CommentReport = Emitter('comments_reports', { group: 'admins' })
 
 	abuse.create = function (user_id, comment_id)
 	{

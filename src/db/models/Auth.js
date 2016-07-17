@@ -10,7 +10,7 @@ var cr_helpers = require('../../crypto-helpers')
 
 var compare_passwords = cr_helpers.compare_passwords
 
-module.exports = function Auth (db)
+module.exports = function Auth (db, subsc)
 {
 	var auth = {}
 
@@ -23,6 +23,10 @@ module.exports = function Auth (db)
 		.then(() =>
 		{
 			return user.create(userdata)
+		})
+		.then((user_id) =>
+		{
+			return subsc.activate(user_id, 'trial')
 		})
 	}
 
