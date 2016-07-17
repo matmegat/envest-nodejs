@@ -50,6 +50,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	/* cache-first */
 	symbols.resolve.cache = (symbol) =>
 	{
 		return new Promise(rs =>
