@@ -94,6 +94,7 @@ function useFacebookToken (auth, user)
 		clientSecret: clientSecret,
 		passReqToCallback: true
 	},
+	// eslint-disable-next-line max-params
 	(req, accessToken, refreshToken, profile, done) =>
 	{
 		var user_data =

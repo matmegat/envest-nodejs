@@ -99,8 +99,12 @@ module.exports = function User (db, app)
 				'admins.user_id AS admin_user_id',
 				'admins.parent AS parent',
 				'admins.can_intro AS can_intro',
-				knex.raw('(select MAX(start_time) from subscriptions where user_id=users.id) as last_payment_date'),
-				knex.raw('(select date_part(\'day\' , SUM(end_time - start_time)) from subscriptions where user_id=users.id) as total_payment_days')
+				knex.raw(`(select MAX(start_time)
+					from subscriptions where user_id=users.id)
+					as last_payment_date`),
+				knex.raw(`(select date_part('day',
+					SUM(end_time - start_time)) from subscriptions
+					where user_id=users.id) as total_payment_days`)
 			)
 			.from('users')
 			.leftJoin(

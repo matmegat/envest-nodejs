@@ -1,3 +1,4 @@
+
 var knexed = require('../../knexed')
 
 var moment = require('moment')
@@ -105,7 +106,6 @@ module.exports = function Promo (db)
 		queryset = sorter.sort(queryset, options.sorter)
 
 		return queryset
-		.then((list) => { return list })
 	}
 
 	var WrongPromoCode = Err('wrong_promo_code', 'Wrong promo code')
