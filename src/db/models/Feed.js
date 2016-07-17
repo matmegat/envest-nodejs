@@ -14,7 +14,7 @@ var Err = require('../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
-module.exports = function Feed (db)
+var Feed = module.exports = function Feed (db)
 {
 	var feed = {}
 
@@ -220,6 +220,7 @@ module.exports = function Feed (db)
 	return feed
 }
 
+
 function transform_event (item)
 {
 	item.event = {
@@ -232,14 +233,33 @@ function transform_event (item)
 }
 
 
-var map = _.map
+function transform_symbols (items, api)
+{
+	var symbols = Feed.symbolsInvolved(items)
+
+	var quieries = symbols
+	.map(api.resolve.cache)
+	.map(query =>
+	{
+		return query.catch(() => null)
+	})
+
+	return Promise.all(quieries)
+	.then(compact)
+	.then(symbols =>
+	{
+		return items.map(replace_symbol(symbols))
+	})
+}
+
+
 var compact = _.compact
 var flatten = _.flatten
 var uniqBy  = _.uniqBy
 
 var Symbl = require('./symbols/Symbl')
 
-function transform_symbols (items, api)
+Feed.symbolsInvolved = (items) =>
 {
 	var symbols = items.map(item =>
 	{
@@ -265,25 +285,7 @@ function transform_symbols (items, api)
 
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 
-
-	var quieries = symbols
-	.map(api.resolve.cache)
-	.map(query =>
-	{
-		return query.catch(err => null)
-	})
-
-	return Promise.all(quieries)
-	.then(quotes =>
-	{
-		quotes = compact(quotes)
-
-		return quotes
-	})
-	.then(symbols =>
-	{
-		return items.map(replace_symbol(symbols))
-	})
+	return symbols
 }
 
 
