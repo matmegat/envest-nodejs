@@ -93,11 +93,33 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 					r.symbol = symbol
 
-					return r
+					if (r.price != null)
+					{
+						return r
+					}
+					else
+					{
+						log('XIGN Quotes fallback', symbols[i].toXign())
+
+						return quotes_fallback_resolve(r, symbols[i])
+					}
 				}
 			})
 		})
+		.then(it => Promise.all(it)) /* ridiculous wrapper */
 	}
+
+	function quotes_fallback_resolve (r, symbol)
+	{
+		return symbols.resolve.cache(symbol)
+		.then(symbol =>
+		{
+			r.symbol = symbol
+
+			return r
+		})
+	}
+
 
 	return symbols
 }
