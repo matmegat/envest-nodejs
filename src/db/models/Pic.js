@@ -1,6 +1,4 @@
 
-var noop = require('lodash/noop')
-
 var Err = require('../../Err')
 
 var mime = require('mime')
