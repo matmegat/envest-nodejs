@@ -29,6 +29,7 @@ module.exports = function ResolveCache ()
 
 		var data = cache[key]
 
+		// eslint-disable-next-line no-undefined
 		if (data !== undefined)
 		{
 			console.info('cache hit', key, data)
