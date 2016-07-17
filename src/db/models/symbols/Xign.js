@@ -67,7 +67,8 @@ module.exports = function Xign (cfg, log)
 				var struct =
 				{
 					symbol: symbols[i],
-					price:  null
+					price:  null,
+					gain:   null
 				}
 
 				if (r)
