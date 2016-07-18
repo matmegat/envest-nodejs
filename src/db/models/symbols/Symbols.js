@@ -133,6 +133,21 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.historical = (symbol) =>
+	{
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return xign.historical(symbol.toXign())
+			.catch(err =>
+			{
+				console.log(err)
+
+				throw UnknownSymbol({ symbol: symbol })
+			})
+		})
+	}
+
 	return symbols
 }
 

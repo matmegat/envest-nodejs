@@ -22,5 +22,12 @@ module.exports = (model) =>
 		toss(rs, model.series(symbol, end_date, resolution, periods))
 	})
 
+	symbols.express.get('/:symbol', (rq, rs) =>
+	{
+		var symbol = rq.params.symbol
+
+		toss(rs, model.historical(symbol))
+	})
+
 	return symbols
 }

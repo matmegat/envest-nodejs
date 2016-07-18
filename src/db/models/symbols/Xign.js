@@ -150,9 +150,31 @@ module.exports = function Xign (cfg, log)
 		.catch(logger.warn_rethrow)
 	}
 
+	var historical = X.historical = (symbol) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'factsetfundamentals.xignite.com',
 
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
 
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifier: symbol,
 
+				AdjustmentMethod: 'All',
+
+				AsOfDate: util.apidate(),
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+	}
 
 	return X
 }
