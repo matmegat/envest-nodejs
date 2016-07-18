@@ -2,8 +2,9 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-
 var request = require('axios')
+
+var util = require('./util')
 
 module.exports = function Series (token)
 {
@@ -39,14 +40,11 @@ module.exports = function Series (token)
 			}
 		})
 
-		console.log(uri)
-		console.log(String(uri))
 
 		return request(uri)
+		.then(util.unwrap.data)
 		.then(it =>
 		{
-			it = it.data
-
 			console.log('JSON')
 			console.log(it)
 

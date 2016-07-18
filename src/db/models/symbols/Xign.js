@@ -2,7 +2,6 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-
 var request = require('axios')
 
 var moment = require('moment')
@@ -10,6 +9,8 @@ var moment = require('moment')
 var extend = require('lodash/extend')
 
 var Series = require('./Series')
+var util = require('./util')
+
 
 module.exports = function Xign (cfg, log)
 {
@@ -51,13 +52,13 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
+		.then(util.unwrap.data)
 		.then(resl =>
 		{
 			return resl
 			.map(r =>
 			{
-				if (! unwrap.isSuccess(r))
+				if (! util.unwrap.isSuccess(r))
 				{
 					warn(r)
 					return null
@@ -131,9 +132,9 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
-		.then(unwrap.first)
-		.then(unwrap.success)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(util.unwrap.success)
 		.catch(warn_rethrow)
 	}
 
@@ -157,25 +158,4 @@ module.exports = function Xign (cfg, log)
 
 
 	return X
-}
-
-var unwrap = {}
-
-unwrap.data  = (rs) => rs.data
-
-unwrap.first = (rs) => rs[0]
-
-unwrap.success = (rs) =>
-{
-	if (! unwrap.isSuccess(rs))
-	{
-		throw rs
-	}
-
-	return rs
-}
-
-unwrap.isSuccess = (rs) =>
-{
-	return rs.Outcome === 'Success'
 }
