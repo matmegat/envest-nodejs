@@ -98,7 +98,13 @@ module.exports = function User (db, app)
 				'investors.start_date AS start_date',
 				'admins.user_id AS admin_user_id',
 				'admins.parent AS parent',
-				'admins.can_intro AS can_intro'
+				'admins.can_intro AS can_intro',
+				knex.raw(`(select MAX(start_time)
+					from subscriptions where user_id=users.id)
+					as last_payment_date`),
+				knex.raw(`(select date_part('day',
+					SUM(end_time - start_time)) from subscriptions
+					where user_id=users.id) as total_payment_days`)
 			)
 			.from('users')
 			.leftJoin(
@@ -136,7 +142,9 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'email',
-				'pic'
+				'pic',
+				'last_payment_date',
+				'total_payment_days'
 			])
 
 			if (result.investor_user_id)
@@ -165,7 +173,7 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.create = knexed.transact(knex, (trx, data) =>
+	user.create = function (trx, data)
 	{
 		return ensureEmailNotExists(data.email, trx)
 		.then(() =>
@@ -182,16 +190,8 @@ module.exports = function User (db, app)
 			{
 				return user.password.create(id, data.password, trx)
 			})
-			.then(function (id)
-			{
-				return user.newEmailUpdate(trx,
-				{
-					user_id: id,
-					new_email: data.email
-				})
-			})
 		})
-	})
+	}
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
 	function ensureEmailNotExists (email, trx)

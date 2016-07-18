@@ -10,6 +10,7 @@ var Investor = require('./models/investor/Investor')
 var Notifications = require('./models/Notifications')
 var Static = require('./models/Static')
 var Pic = require('./models/Pic')
+var NetvestSubsc = require('./models/subscription/NetvestSubsc')
 var Symbols = require('./models/symbols/Symbols')
 var Watchlist = require('./models/watchlist/Watchlist')
 
@@ -53,12 +54,13 @@ module.exports = function name (app)
 
 	db.user  = User(db, app)
 	db.notifications = Notifications(db)
-	db.auth  = Auth(db)
+	db.subscr = NetvestSubsc(db, cfg.subscr)
+	db.auth  = Auth(db, db.subscr)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
 
-	db.investor = Investor(db, app)
+	db.investor = Investor(db)
 	db.feed = Feed(db)
 
 	db.static = Static(rootpath)

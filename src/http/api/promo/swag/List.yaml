@@ -1,0 +1,22 @@
+get:
+  description: Get promo codes list
+  parameters:
+  - name: type
+    in: query
+    type: string
+    description: Subscription type
+  - name: sort
+    in: query
+    type: string
+    description: Sorting options [column, desc||asc]
+  responses:
+    200:
+      description: Promo code successfully activated
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - promo

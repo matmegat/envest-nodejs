@@ -30,7 +30,7 @@ module.exports = function Notifications (db)
 	{
 		options = extend({}, options)
 
-		return function NotificationEmit (target_or_event, event)
+		return function NotificationEmit (target_or_event, event, trx)
 		{
 			var emit =
 			{
@@ -44,7 +44,7 @@ module.exports = function Notifications (db)
 				emit.recipient_id = target_or_event
 				emit.event        = event
 
-				return notifications.create(emit)
+				return notifications.create(emit, trx)
 			}
 			else /* group */
 			{
@@ -53,31 +53,31 @@ module.exports = function Notifications (db)
 				emit.group = options.group
 				emit.event = target_or_event
 
-				return notifications.createBroadcast(emit)
+				return notifications.createBroadcast(emit, trx)
 			}
 		}
 	}
 
-	notifications.create = function (data)
+	notifications.create = function (data, trx)
 	{
 		return validateNotification(data)
 		.then((data) =>
 		{
-			return notifications.table()
+			return notifications.table(trx)
 			.insert(data)
 			.then(noop)
 			.catch(Err.fromDb('notifications_recipient_id_foreign', user.NotFound))
 		})
 	}
 
-	notifications.createBroadcast = function (data)
+	notifications.createBroadcast = function (data, trx)
 	{
 		return validateNotification(data)
 		.then(() =>
 		{
 			var query_group = get_query_group(data)
 
-			return notifications.table()
+			return notifications.table(trx)
 			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
 			.then(noop)
 		})
