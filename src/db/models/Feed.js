@@ -51,8 +51,8 @@ module.exports = function Feed (db)
 		name: Filter.by.name('feed_items.investor_id'),
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
-		symbol: Filter.by.symbol(knex.raw(`data->'symbol'`)),
-		symbols: Filter.by.symbols(knex.raw(`data->'symbols'`)),
+		symbol: Filter.by.symbol(`data->'symbol'`),
+		symbols: Filter.by.symbols(`data->'symbols'`),
 	})
 
 	expect(db, 'Feed depends on Comments').property('comments')

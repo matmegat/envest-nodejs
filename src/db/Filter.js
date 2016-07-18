@@ -201,18 +201,15 @@ Filter.by.symbol = function by_symbol (column)
 	{
 		symbol = Symbl(symbol)
 
-		var where_clause = `{"ticker": "${symbol.ticker}"}`
-		if (symbol.exchange)
-		{
-			where_clause =
-			`{"ticker": "${symbol.ticker}",` +
-			` "exchange": "${symbol.exchange}"}`
-		}
-
-		queryset
-		.where(column, '@>', where_clause)
-
 		return queryset
+		.where(function ()
+		{
+			this.where(raw(`${column}->>'ticker'`), symbol.ticker)
+			if (symbol.exchange)
+			{
+				this.where(raw(`${column}->>'exchange'`), symbol.exchange)
+			}
+		})
 	}
 }
 
@@ -238,6 +235,6 @@ Filter.by.symbols = function by_symbols (column)
 		})
 
 		return queryset
-		.where(column, '@>', `[${where_clause.join(',')}]`)
+		.where(raw(column), '@>', `[${where_clause.join(',')}]`)
 	}
 }
