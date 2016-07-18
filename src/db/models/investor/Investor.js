@@ -66,15 +66,6 @@ module.exports = function Investor (db, app)
 			})
 
 			return user.create(trx, user_data)
-			.then((user_id) =>
-			{
-				return user.users_table(trx)
-				.where('id', user_id)
-				.update({
-					email: data.email
-				}, 'id')
-			})
-			.then(one)
 		})
 		.then((user_id) => user.byId(user_id, trx))
 		.then((user) =>
@@ -104,14 +95,16 @@ module.exports = function Investor (db, app)
 		return investor_create(data)
 		.then((investor_entry) =>
 		{
-			return user.password.reqReset(data.email)
+			var investor_id = investor_entry.id
+
+			return user.emailConfirm(investor_id, data.email)
+			.then(() => user.password.reqReset(data.email))
 			.then(() =>
 			{
 				/* notification: 'investor created'
 				 * - to all admins?
 				 * - to created investor?
 				 * */
-				var investor_id = investor_entry.id
 
 				emits.NewAdmins({ investor_id: investor_id })
 				emits.NewInvestor(investor_id, { admin_id: data.admin_id })
