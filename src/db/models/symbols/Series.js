@@ -57,5 +57,9 @@ module.exports = function Series (token, logger)
 		.catch(logger.warn_rethrow)
 	}
 
+	// series.intraday = () => {}
+	// or
+	// series.series.intraday = () => {}
+
 	return series
 }
