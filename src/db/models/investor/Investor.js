@@ -15,11 +15,9 @@ var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
 
-module.exports = function Investor (db, app)
+module.exports = function Investor (db)
 {
 	var investor = {}
-
-	var mailer = app.mail
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
@@ -32,9 +30,6 @@ module.exports = function Investor (db, app)
 		return investor.table(trx)
 		.where('is_public', true)
 	}
-
-	expect(db, 'Investors depends on Auth').property('auth')
-	var auth = db.auth
 
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user

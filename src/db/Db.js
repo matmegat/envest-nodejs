@@ -58,7 +58,7 @@ module.exports = function name (app)
 
 	db.comments = Comments(db)
 
-	db.investor = Investor(db, app)
+	db.investor = Investor(db)
 	db.feed = Feed(db)
 
 	db.static = Static(rootpath)
