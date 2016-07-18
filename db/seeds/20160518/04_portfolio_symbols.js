@@ -1,6 +1,9 @@
+
 var random = require('lodash/random')
 var sample = require('lodash/sampleSize')
-var times = require('lodash/times')
+var times  = require('lodash/times')
+
+var symbols = require('../_symbols')
 
 exports.seed = function (knex)
 {
@@ -10,26 +13,8 @@ exports.seed = function (knex)
 		return knex('investors')
 		.select('user_id as id')
 	})
-	.then((investors) =>
+	.then(investors =>
 	{
-		return knex('symbols')
-		.select('exchange', 'ticker')
-		.then(symbols =>
-		{
-			var response_data =
-			{
-				investors: investors,
-				symbols: symbols
-			}
-
-			return response_data
-		})
-	})
-	.then((data) =>
-	{
-		var investors = data.investors
-		var symbols = data.symbols
-
 		var portfolio_symbols = []
 		investors.forEach(investor =>
 		{
