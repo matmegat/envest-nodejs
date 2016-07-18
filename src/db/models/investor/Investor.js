@@ -91,13 +91,6 @@ module.exports = function Investor (db, app)
 		.then(oneMaybe)
 		.then((investor_id) =>
 		{
-			/* notification: 'investor created'
-			* - to all admins?
-			* - to created investor?
-			* */
-			emits.NewAdmins({ investor_id: investor_id })
-			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
-
 			return investor.portfolio.createBrokerage(trx, investor_id, 100000)
 			.then(() =>
 			{
@@ -112,6 +105,17 @@ module.exports = function Investor (db, app)
 		.then((investor_entry) =>
 		{
 			return user.password.reqReset(data.email)
+			.then(() =>
+			{
+				/* notification: 'investor created'
+				 * - to all admins?
+				 * - to created investor?
+				 * */
+				var investor_id = investor_entry.id
+
+				emits.NewAdmins({ investor_id: investor_id })
+				emits.NewInvestor(investor_id, { admin_id: data.admin_id })
+			})
 			.then(() => investor_entry)
 		})
 	}
