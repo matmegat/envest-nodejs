@@ -221,20 +221,34 @@ Filter.by.symbols = function by_symbols (column)
 		symbols = [].concat(symbols)
 		symbols = symbols.map(Symbl)
 
-		var where_clause = symbols.map((symbol) =>
-		{
-			if (symbol.exchange)
-			{
-				return `{"ticker": "${symbol.ticker}",` +
-				` "exchange": "${symbol.exchange}"}`
-			}
-			else
-			{
-				return `{"ticker": "${symbol.ticker}"}`
-			}
-		})
-
 		return queryset
-		.where(raw(column), '@>', `[${where_clause.join(',')}]`)
+		.where(function ()
+		{
+			var that = this
+
+			symbols.forEach((symbol) =>
+			{
+				that.orWhere(function ()
+				{
+					if (symbol.exchange)
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}",` +
+							` "exchange": "${symbol.exchange}"}]`
+						)
+					}
+					else
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}"}]`
+						)
+					}
+				})
+			})
+		})
 	}
 }
