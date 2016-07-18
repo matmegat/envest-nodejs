@@ -194,3 +194,61 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 		)
 	}
 }
+
+Filter.by.symbol = function by_symbol (column)
+{
+	return function (queryset, symbol)
+	{
+		symbol = Symbl(symbol)
+
+		return queryset
+		.where(function ()
+		{
+			this.where(raw(`${column}->>'ticker'`), symbol.ticker)
+			if (symbol.exchange)
+			{
+				this.where(raw(`${column}->>'exchange'`), symbol.exchange)
+			}
+		})
+	}
+}
+
+Filter.by.symbols = function by_symbols (column)
+{
+	return function (queryset, symbols)
+	{
+		symbols = symbols.split(',')
+		symbols = [].concat(symbols)
+		symbols = symbols.map(Symbl)
+
+		return queryset
+		.where(function ()
+		{
+			var that = this
+
+			symbols.forEach((symbol) =>
+			{
+				that.orWhere(function ()
+				{
+					if (symbol.exchange)
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}",` +
+							` "exchange": "${symbol.exchange}"}]`
+						)
+					}
+					else
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}"}]`
+						)
+					}
+				})
+			})
+		})
+	}
+}

@@ -61,6 +61,8 @@ var Feed = module.exports = function Feed (db)
 		name: Filter.by.name('feed_items.investor_id'),
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
+		symbol: Filter.by.symbol(`data->'symbol'`),
+		symbols: Filter.by.symbols(`data->'symbols'`),
 	})
 
 	feed.NotFound = NotFound
