@@ -25,6 +25,8 @@ var Statics = require('./api/statics/Statics')
 
 var Notifications = require('./api/notifications/Notifications')
 
+var Symbols = require('./api/symbols/Symbols')
+
 var Passport = require('./Passport')
 var Swagger = require('./Swagger')
 var CrossOrigin = require('./CrossOrigin')
@@ -85,6 +87,7 @@ module.exports = function Http (app)
 	mount(Watchlist(app.db.watchlist, http), 'watchlist', 'watchlist')
 	mount(Subscr(app.db.subscr), 'subscr', 'subscr')
 	mount(Promo(http, app.db.subscr), 'promo', 'promo')
+	mount(Symbols(app.db.symbols), 'symbols', 'symbols')
 
 
 	http.express.use(internalError)

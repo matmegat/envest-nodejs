@@ -2,13 +2,14 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-// var parse  = require('url').parse
 
 var request = require('axios')
 
 var moment = require('moment')
 
 var extend = require('lodash/extend')
+
+var Series = require('./Series')
 
 module.exports = function Xign (cfg, log)
 {
@@ -19,6 +20,8 @@ module.exports = function Xign (cfg, log)
 	expect(token).a('string')
 
 	var X = {}
+
+	extend(X, Series(token))
 
 	X.quotes = (symbols) =>
 	{

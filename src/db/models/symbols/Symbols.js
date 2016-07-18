@@ -73,6 +73,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.series = (symbol, end_date, resolution, periods) =>
+	{
+		end_date = '7/17/2016'
+
+		return xign.series(symbol, end_date, resolution, periods)
+	}
+
 	return symbols
 }
 
