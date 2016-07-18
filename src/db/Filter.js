@@ -215,3 +215,29 @@ Filter.by.symbol = function by_symbol (column)
 		return queryset
 	}
 }
+
+Filter.by.symbols = function by_symbols (column)
+{
+	return function (queryset, symbols)
+	{
+		symbols = symbols.split(',')
+		symbols = [].concat(symbols)
+		symbols = symbols.map(Symbl)
+
+		var where_clause = symbols.map((symbol) =>
+		{
+			if (symbol.exchange)
+			{
+				return `{"ticker": "${symbol.ticker}",` +
+				` "exchange": "${symbol.exchange}"}`
+			}
+			else
+			{
+				return `{"ticker": "${symbol.ticker}"}`
+			}
+		})
+
+		return queryset
+		.where(column, '@>', `[${where_clause.join(',')}]`)
+	}
+}

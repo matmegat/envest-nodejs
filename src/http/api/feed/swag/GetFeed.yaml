@@ -60,7 +60,15 @@ get:
   - name: symbol
     in: query
     type: string
-    description: Symbol to filter investors `TICKER[.EXCHANGE]`
+    description: |
+      Symbol to filter investors `TICKER[.EXCHANGE]`
+      Refers to `FeedItem.event.data.symbol`
+  - name: symbols
+    in: query
+    type: string
+    description: |
+      Symbol to filter investors `TICKER[.EXCHANGE]`
+      Refers to `FeedItem.event.data.symbols`
   responses:
     200:
       description: user's Feed
