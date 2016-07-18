@@ -75,7 +75,15 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 	symbols.series = (symbol, end_date, resolution, periods) =>
 	{
-		return xign.series(symbol, end_date, resolution, periods)
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return xign.series(symbol.toXign(), end_date, resolution, periods)
+			.catch(() =>
+			{
+				throw UnknownSymbol({ symbol: symbol })
+			})
+		})
 	}
 
 	return symbols
