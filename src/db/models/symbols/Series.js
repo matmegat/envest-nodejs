@@ -44,10 +44,13 @@ module.exports = function Series (token)
 
 		return request(uri)
 		.then(util.unwrap.data)
+		.then(util.unwrap.success)
 		.then(it =>
 		{
 			console.log('JSON')
 			console.log(it)
+
+			// GlobalQuotes
 
 			return it
 		})
