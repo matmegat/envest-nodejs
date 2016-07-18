@@ -71,7 +71,7 @@ module.exports = function Investor (db)
 			.insert(
 			{
 				user_id: user.id,
-				historical_returns: []
+				historical_returns: '[]'	// PostgreSQL json representation
 			}
 			, 'user_id')
 			.catch(Err.fromDb('investors_pkey', AlreadyExists))
