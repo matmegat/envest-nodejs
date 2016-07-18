@@ -2,13 +2,13 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-// var parse  = require('url').parse
-
 var request = require('axios')
 
-var moment = require('moment')
-
 var extend = require('lodash/extend')
+
+var Series = require('./Series')
+var util = require('./util')
+
 
 module.exports = function Xign (cfg, log)
 {
@@ -19,6 +19,21 @@ module.exports = function Xign (cfg, log)
 	expect(token).a('string')
 
 	var X = {}
+
+	var logger = {}
+	logger.warn_rethrow = (rs) =>
+	{
+		logger.warn(rs)
+		throw rs
+	}
+
+	logger.warn = (rs) =>
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
+
+	extend(X, Series(token, logger))
 
 	X.quotes = (symbols) =>
 	{
@@ -48,15 +63,15 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
+		.then(util.unwrap.data)
 		.then(resl =>
 		{
 			return resl
 			.map(r =>
 			{
-				if (! unwrap.isSuccess(r))
+				if (! util.unwrap.isSuccess(r))
 				{
-					warn(r)
+					logger.warn(r)
 					return null
 				}
 
@@ -117,7 +132,7 @@ module.exports = function Xign (cfg, log)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: apidate(),
+				AsOfDate: util.apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
@@ -129,51 +144,15 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
-		.then(unwrap.first)
-		.then(unwrap.success)
-		.catch(warn_rethrow)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(util.unwrap.success)
+		.catch(logger.warn_rethrow)
 	}
 
 
-	function apidate (it)
-	{
-		return moment(it).format('M/DD/YYYY')
-	}
 
-
-	function warn_rethrow (rs)
-	{
-		warn(rs)
-		throw rs
-	}
-
-	function warn (rs)
-	{
-		log('XIGN Error:', rs.Message)
-	}
 
 
 	return X
-}
-
-var unwrap = {}
-
-unwrap.data  = (rs) => rs.data
-
-unwrap.first = (rs) => rs[0]
-
-unwrap.success = (rs) =>
-{
-	if (! unwrap.isSuccess(rs))
-	{
-		throw rs
-	}
-
-	return rs
-}
-
-unwrap.isSuccess = (rs) =>
-{
-	return rs.Outcome === 'Success'
 }
