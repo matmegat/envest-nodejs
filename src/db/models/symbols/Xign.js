@@ -4,8 +4,6 @@ var expect = require('chai').expect
 var format = require('url').format
 var request = require('axios')
 
-var moment = require('moment')
-
 var extend = require('lodash/extend')
 
 var Series = require('./Series')
@@ -120,7 +118,7 @@ module.exports = function Xign (cfg, log)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: apidate(),
+				AsOfDate: util.apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
@@ -136,12 +134,6 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.first)
 		.then(util.unwrap.success)
 		.catch(warn_rethrow)
-	}
-
-
-	function apidate (it)
-	{
-		return moment(it).format('M/DD/YYYY')
 	}
 
 

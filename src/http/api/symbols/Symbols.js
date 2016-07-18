@@ -19,8 +19,6 @@ module.exports = (model) =>
 		var resolution = 'Day'
 		var periods = 180
 
-		console.warn(symbol)
-
 		toss(rs, model.series(symbol, end_date, resolution, periods))
 	})
 

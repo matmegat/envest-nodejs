@@ -14,9 +14,10 @@ module.exports = function Series (token)
 
 	series.series = (symbol, end_date, resolution, periods) =>
 	{
+		end_date = util.apidate(end_date)
 		resolution = 'Day'
 
-		console.log(symbol, end_date, resolution, periods)
+		console.warn(symbol, end_date, resolution, periods)
 
 		var uri = format(
 		{

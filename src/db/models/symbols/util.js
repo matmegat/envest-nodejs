@@ -21,3 +21,11 @@ unwrap.isSuccess = (rs) =>
 {
 	return rs.Outcome === 'Success'
 }
+
+
+var moment = require('moment')
+
+util.apidate = function apidate (it)
+{
+	return moment(it).format('M/DD/YYYY')
+}
