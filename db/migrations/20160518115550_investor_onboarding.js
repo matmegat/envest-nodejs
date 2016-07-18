@@ -24,16 +24,6 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
-		return knex.schema.createTable('symbols', (table) =>
-		{
-			Symbols.schema.columns('', table)
-
-			/* additional */
-			table.string('company').notNullable()
-		})
-	})
-	.then(() =>
-	{
 		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()

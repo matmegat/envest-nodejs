@@ -1,3 +1,4 @@
+
 var _ = require('lodash')
 
 var motivations = require('../../../src/db/models/Motivations')()
@@ -62,27 +63,17 @@ var dummmy_events =
 	}
 ]
 
+var omit = require('lodash/fp/omit')
+
+var symbols = require('../_symbols')
+symbols = symbols.map(omit([ 'company' ]))
+
 exports.seed = function (knex)
 {
 	return knex('investors')
 	.select('user_id as id')
-	.then((investors) =>
+	.then(investors =>
 	{
-		return knex('symbols')
-		.then((symbols) =>
-		{
-			return _.extend({},
-			{
-				investors: investors,
-				symbols: symbols
-			})
-		})
-	})
-	.then((data) =>
-	{
-		var investors = data.investors
-		var symbols = data.symbols
-
 		var feed_items = _.times(100, (i) =>
 		{
 			var event = _.cloneDeep(

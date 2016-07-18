@@ -3,6 +3,7 @@ var expect = require('chai').expect
 
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
+var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
@@ -13,6 +14,8 @@ var invoke = require('lodash/invokeMap')
 var Symbols = module.exports = function Symbols (cfg, log)
 {
 	var symbols = {}
+
+	var cache = Cache()
 
 	var xign = Xign(cfg.xignite, log)
 
@@ -38,8 +41,31 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			{
 				throw UnknownSymbol({ symbol: symbol })
 			})
+			.then(symbol =>
+			{
+				cache.put(symbol, symbol)
+
+				return symbol
+			})
 		})
 	}
+
+	/* cache-first */
+	symbols.resolve.cache = (symbol) =>
+	{
+		return new Promise(rs =>
+		{
+			var data = cache.get(symbol)
+
+			if (data)
+			{
+				return rs(data)
+			}
+
+			return rs(symbols.resolve(symbol))
+		})
+	}
+
 
 	symbols.quotes = (symbols) =>
 	{
@@ -67,11 +93,33 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 					r.symbol = symbol
 
-					return r
+					if (r.price != null)
+					{
+						return r
+					}
+					else
+					{
+						log('XIGN Quotes fallback', symbols[i].toXign())
+
+						return quotes_fallback_resolve(r, symbols[i])
+					}
 				}
 			})
 		})
+		.then(it => Promise.all(it)) /* ridiculous wrapper */
 	}
+
+	function quotes_fallback_resolve (r, symbol)
+	{
+		return symbols.resolve.cache(symbol)
+		.then(symbol =>
+		{
+			r.symbol = symbol
+
+			return r
+		})
+	}
+
 
 	return symbols
 }
