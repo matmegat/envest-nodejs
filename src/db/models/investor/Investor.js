@@ -15,6 +15,8 @@ var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
 
+var validate = require('../../validate')
+
 module.exports = function Investor (db)
 {
 	var investor = {}
@@ -87,7 +89,15 @@ module.exports = function Investor (db)
 
 	investor.create = function (data)
 	{
-		return investor_create(data)
+		return new Promise(rs =>
+		{
+			validate.name(data.first_name, 'first_name')
+			validate.name(data.last_name, 'last_name')
+			validate.email(data.email)
+
+			return rs()
+		})
+		.then(() => investor_create(data))
 		.then((investor_entry) =>
 		{
 			var investor_id = investor_entry.id
