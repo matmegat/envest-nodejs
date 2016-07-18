@@ -1,0 +1,14 @@
+type: object
+title: Added Symbol Model
+properties:
+  price:
+    type: number
+    description: current Symbol price
+  gain:
+    type: number
+    description: gain / loss on symbol
+  symbol:
+    $ref: ../../../swagger/Symbol.yaml
+
+required:
+- symbol

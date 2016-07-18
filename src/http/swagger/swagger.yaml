@@ -157,6 +157,9 @@ definitions:
   Investors:
     $ref: ../api/investors/swag/Investors.yaml
 
+  AddedSymbol:
+    $ref: ../api/watchlist/swag/AddedSymbol.yaml
+
   Symbol:
     $ref: ./Symbol.yaml
 

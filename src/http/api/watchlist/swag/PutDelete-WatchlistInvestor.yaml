@@ -26,6 +26,8 @@ put:
   responses:
     200:
       description: Symbol added
+      schema:
+        $ref: ./AddedSymbol.yaml
 
     400:
       description: |
