@@ -20,7 +20,20 @@ module.exports = function Xign (cfg, log)
 
 	var X = {}
 
-	extend(X, Series(token))
+	var logger = {}
+	logger.warn_rethrow = (rs) =>
+	{
+		logger.warn(rs)
+		throw rs
+	}
+
+	logger.warn = (rs) =>
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
+
+	extend(X, Series(token, logger))
 
 	X.quotes = (symbols) =>
 	{
@@ -58,7 +71,7 @@ module.exports = function Xign (cfg, log)
 			{
 				if (! util.unwrap.isSuccess(r))
 				{
-					warn(r)
+					logger.warn(r)
 					return null
 				}
 
@@ -133,20 +146,11 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.data)
 		.then(util.unwrap.first)
 		.then(util.unwrap.success)
-		.catch(warn_rethrow)
+		.catch(logger.warn_rethrow)
 	}
 
 
-	function warn_rethrow (rs)
-	{
-		warn(rs)
-		throw rs
-	}
 
-	function warn (rs)
-	{
-		log('XIGN Error:', rs.Message)
-	}
 
 
 	return X

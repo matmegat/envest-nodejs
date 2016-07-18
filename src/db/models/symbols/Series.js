@@ -6,7 +6,7 @@ var request = require('axios')
 
 var util = require('./util')
 
-module.exports = function Series (token)
+module.exports = function Series (token, logger)
 {
 	var series = {}
 
@@ -54,6 +54,7 @@ module.exports = function Series (token)
 
 			return it
 		})
+		.catch(logger.warn_rethrow)
 	}
 
 	return series
