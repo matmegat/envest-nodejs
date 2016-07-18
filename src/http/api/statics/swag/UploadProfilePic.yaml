@@ -13,6 +13,12 @@ post:
   responses:
     200:
       description: investor's background updated
+      schema:
+        type: object
+        properties:
+          hash:
+            type: string
+            description: uploaded profile_pic hash
     400:
       description: if something went wrong
 

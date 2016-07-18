@@ -125,6 +125,21 @@ paths:
   '/password/change':
     $ref: ../api/password/swag/Change.yaml
 
+  '/subscr/activate':
+    $ref: ../api/subscr/swag/Activate.yaml
+
+  '/promo/activate':
+    $ref: ../api/promo/swag/Activate.yaml
+
+  '/promo/remove':
+    $ref: ../api/promo/swag/Remove.yaml
+
+  '/promo/create':
+    $ref: ../api/promo/swag/Create.yaml
+
+  '/promo':
+    $ref: ../api/promo/swag/List.yaml
+
 definitions:
 
   Feed:

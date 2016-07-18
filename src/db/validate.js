@@ -1,5 +1,6 @@
 
 var Err = require('../Err')
+var moment = require('moment')
 
 var validate = module.exports = {}
 
@@ -133,6 +134,17 @@ validate.length = function validate__length (max)
 	}
 }
 
+var WrongDate = Err('wrong_date_format', 'Wrong Date Format')
+
+validate.date = function validate__date (date)
+{
+	var date = moment(date)
+
+	if (! date.isValid())
+	{
+		throw WrongDate()
+	}
+}
 
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
