@@ -143,6 +143,9 @@ paths:
   '/symbols/{symbol}/chart':
     $ref: ../api/symbols/swag/Get-SymbolChart.yaml
 
+  '/symbols/{symbol}':
+    $ref: ../api/symbols/swag/Get-SymbolInfo.yaml
+
 definitions:
 
   Feed:

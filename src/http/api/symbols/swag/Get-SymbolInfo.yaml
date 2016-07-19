@@ -1,0 +1,54 @@
+get:
+  description: |
+    Get symbol info
+  parameters:
+  - name: symbol
+    in: path
+    type: string
+    description: Symbol ID `TICKER.EXCHANGE`
+    required: true
+  responses:
+    200:
+      description: Symbol fields
+      schema:
+        type: object
+        title: Symbol Info Model
+        properties:
+          prev_close:
+            type: integer
+          open:
+            type: integer
+          low:
+            type: integer
+          high:
+            type: integer
+          one_year_low:
+            type: integer
+          one_year_high:
+            type: integer
+          market_cap:
+            type: integer
+          volume:
+            type: integer
+          p_e:
+            type: integer
+          dividend:
+            type: integer
+          currency:
+            type: string
+        required:
+        - prev_close
+        - open
+        - low
+        - high
+        - one_year_low
+        - one_year_high
+        - market_cap
+        - volume
+        - currency
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - symbols
