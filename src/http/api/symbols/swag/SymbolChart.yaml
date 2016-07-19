@@ -1,0 +1,34 @@
+type: object
+title: Symbol Chart Model
+properties:
+  today:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+  ytd:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+  m1:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+  m6:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+  y1:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+  y5:
+    type: array
+    items:
+    - $ref: ./SymbolChartItem.yaml
+required:
+- today
+- ytd
+- m1
+- m6
+- y1
+- y5

@@ -9,7 +9,7 @@ module.exports = (model) =>
 	var symbols = {}
 
 	symbols.express = Router()
-	symbols.express.use(authRequired)
+	// symbols.express.use(authRequired)
 
 	symbols.express.get('/:symbol/chart', (rq, rs) =>
 	{
@@ -19,7 +19,7 @@ module.exports = (model) =>
 		var resolution = 'Day'
 		var periods = 180
 
-		toss(rs, model.series(symbol, end_date, resolution, periods))
+		toss(rs, model.mock(symbol))
 	})
 
 	return symbols

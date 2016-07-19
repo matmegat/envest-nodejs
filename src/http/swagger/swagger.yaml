@@ -140,6 +140,9 @@ paths:
   '/promo':
     $ref: ../api/promo/swag/List.yaml
 
+  '/symbols/{symbol}/chart':
+    $ref: ../api/symbols/swag/Get-SymbolChart.yaml
+
 definitions:
 
   Feed:
@@ -162,6 +165,12 @@ definitions:
 
   Symbol:
     $ref: ./Symbol.yaml
+
+  SymbolChart:
+    $ref: ../api/symbols/swag/SymbolChart.yaml
+
+  SymbolChartItem:
+    $ref: ../api/symbols/swag/SymbolChartItem.yaml
 
   PortfolioHolding:
     $ref: ../api/investors/swag/InvestorPortfolioHolding.yaml

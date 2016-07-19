@@ -1,0 +1,11 @@
+type: object
+title: Chart Item Model
+properties:
+  timestamp:
+    type: string
+    format: datetime
+  value:
+    type: number
+required:
+- timestamp
+- value

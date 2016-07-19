@@ -134,6 +134,28 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+
+	symbols.mock = (symbol) =>
+	{
+		console.info(`Return MOCK data for ${symbol}`)
+
+		return Promise.all(
+		[
+			mock_today()
+		])
+		.then((values) =>
+		{
+			return {
+				today: values[0],
+				ytd:   [],
+				m1:    [],
+				m6:    [],
+				y1:    [],
+				y5:    []
+			}
+		})
+	}
+
 	return symbols
 }
 
@@ -152,4 +174,30 @@ Symbols.schema.columns = (prefix, table) =>
 	table.string(prefix + 'ticker').notNullable()
 
 	return table
+}
+
+var moment = require('moment')
+var random = require('lodash/random')
+
+function mock_today ()
+{
+	var today_series = []
+	var timestamp = moment.utc().startOf('day').hours(8)
+	var mock_value = random(50.0, 150.0, true)
+
+	console.log(timestamp)
+
+	for (var i = 0; i <= 32; i ++)
+	{
+		today_series.push(
+		{
+			timestamp: timestamp.format(),
+			value:     mock_value
+		})
+
+		timestamp.add(15, 'm')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(today_series)
 }
