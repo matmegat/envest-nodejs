@@ -1,8 +1,0 @@
-type: object
-title: Featured investor Model
-properties:
-  investor_id:
-    type: integer
-    description: Investor Id
-required:
-- investor_id

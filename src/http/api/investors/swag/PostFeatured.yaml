@@ -1,20 +1,3 @@
-get:
-  description: Get featured investor
-  responses:
-    200:
-      description: Featured investor id
-      schema:
-        $ref: ./Featured.yaml
-    400:
-      description: |
-        **Error object** which follows
-        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
-
-      schema:
-        $ref: ../../../swagger/Error.yaml
-
-  tags:
-  - investors
 post:
   description: Set featured investor
   parameters:

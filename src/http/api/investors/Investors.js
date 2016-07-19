@@ -44,11 +44,6 @@ module.exports = function (db, http)
 		toss(rs, investors.model.all.list(options))
 	})
 
-	investors.express.get('/featured', http.adminRequired, (rq, rs) =>
-	{
-		toss(rs, investors.model.featured.get())
-	})
-
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.featured.set(rq.body.investor_id))
