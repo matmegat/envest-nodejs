@@ -38,7 +38,7 @@ module.exports = function Feed (db)
 			'page'
 		])
 
-		toss(rs, feed.model.list(options))
+		toss(rs, feed.model.list(options, rq.user.id))
 	})
 
 	feed.express.get('/counts', (rq, rs) =>

@@ -33,6 +33,8 @@ var Feed = module.exports = function Feed (db)
 	expect(db, 'Feed depends on Symbols').property('symbols')
 	var symbols = db.symbols
 
+	expect(db, 'Feed depends on Subscription').property('subscr')
+	var subscr = db.subscr
 
 	var paginators = {}
 
@@ -109,7 +111,7 @@ var Feed = module.exports = function Feed (db)
 
 	feed.validateFeedId = require('../../id').validate.promise(WrongFeedId)
 
-	feed.list = function (options)
+	feed.list = function (options, user_id)
 	{
 		options.paginator = _.extend({}, options.paginator,
 		{
@@ -121,13 +123,6 @@ var Feed = module.exports = function Feed (db)
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
-
-		queryset.select(
-		'feed_items.id',
-		'feed_items.timestamp',
-		'feed_items.investor_id',
-		'feed_items.type',
-		'feed_items.data')
 
 		var paginator
 
@@ -141,7 +136,32 @@ var Feed = module.exports = function Feed (db)
 			paginator = paginators.chunked
 		}
 
-		return paginator.paginate(queryset, options.paginator)
+		return subscr.isAble(user_id, 'multiple_investors')
+		.then((subscr_item) =>
+		{
+			if (! subscr_item)
+			{
+				return investor.featured.get()
+				.then((item) =>
+				{
+					queryset
+					.where('investor_id', item.investor_id)
+
+					count_queryset = queryset.clone()
+
+					queryset.select(
+					'feed_items.id',
+					'feed_items.timestamp',
+					'feed_items.investor_id',
+					'feed_items.type',
+					'feed_items.data')
+				})
+			}
+		})
+		.then(() =>
+		{
+			return paginator.paginate(queryset, options.paginator)
+		})
 		.then((feed_items) =>
 		{
 			var feed_ids = _.map(feed_items, 'id')
