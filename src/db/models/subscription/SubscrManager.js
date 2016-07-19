@@ -87,7 +87,7 @@ module.exports = function SubscrManager (db, subsc_desc)
 			})
 			.then((date) =>
 			{
-				subscr_manager.table(trx)
+				return subscr_manager.table(trx)
 				.insert(
 				{
 					user_id: user_id,
@@ -100,11 +100,12 @@ module.exports = function SubscrManager (db, subsc_desc)
 		})
 		.then(() =>
 		{
-			return SubscrActivateA({ user_id: user_id, type: type, days: days })
+			return SubscrActivateA(
+			{ user_id: user_id, type: type, days: days }, trx)
 		})
 		.then(() =>
 		{
-			return SubscrActivateU(user_id, { type: type, days: days })
+			return SubscrActivateU(user_id, { type: type, days: days }, trx)
 		})
 	}
 

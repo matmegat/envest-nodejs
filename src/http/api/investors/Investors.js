@@ -15,23 +15,32 @@ module.exports = function (db, http)
 
 	investors.express.get('/', (rq, rs) =>
 	{
-		var options = pick(rq.query,
+		var options = {}
+
+		options.paginator = pick(rq.query,
 		[
 			'max_id',
 			'since_id',
 			'page'
 		])
+
+		options.filter = pick(rq.query,
+        [
+            'symbol',
+			'symbols'
+        ])
+
 		toss(rs, investors.model.public.list(options))
 	})
 
 	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
 	{
 		var options = pick(rq.query,
-		[
-			'max_id',
-			'since_id',
-			'page'
-		])
+			[
+				'max_id',
+				'since_id',
+				'page'
+			])
 		toss(rs, investors.model.all.list(options))
 	})
 

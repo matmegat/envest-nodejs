@@ -52,6 +52,14 @@ var Symbl = module.exports = function Symbl (it)
 		return s
 	}
 
+	if (Object(it) === it)
+	{
+		if (it.ticker && it.exchange)
+		{
+			return Symbl([ it.ticker, it.exchange ])
+		}
+	}
+
 	throw WrongFormat({ reason: 'unknown_format' })
 }
 
@@ -64,9 +72,18 @@ var inst = () => Object.create(Symbl.prototype)
 
 var Err = require('../../../Err')
 
-var WrongFormat = Err('wrong_symbol_format')
+var WrongFormat = Err('wrong_symbol_format', 'Cannot parse input as Symbol')
 
 Symbl.validate = (it) =>
 {
 	return new Promise(rs => rs(Symbl(it)))
+}
+
+Symbl.equals = (L, R) =>
+{
+	L = Symbl(L)
+	R = Symbl(R)
+
+	return (L.ticker   === R.ticker)
+	    && (L.exchange === R.exchange)
 }
