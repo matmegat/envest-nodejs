@@ -15,9 +15,9 @@ module.exports = (model) =>
 	{
 		var symbol = rq.params.symbol
 
-		var end_date = new Date
-		var resolution = 'Day'
-		var periods = 180
+		// var end_date = new Date
+		// var resolution = 'Day'
+		// var periods = 180
 
 		toss(rs, model.mock(symbol))
 	})

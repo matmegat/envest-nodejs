@@ -142,30 +142,34 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		{
 			console.info(`Return MOCK data for ${symbol.toXign()}`)
 
-			var now = () => moment.utc()
+			var today = () => moment.utc().startOf('day')
 
 			return Promise.all(
 			[
-				mock_today(),
-				mock_from_to(now().startOf('year'), now().endOf('day'), 24),
+				xign.bars(
+					symbol.toXign(),
+					today().subtract(5, 'days'),
+					today().endOf('day')
+				),
+				mock_from_to(today().startOf('year'), today().endOf('day'), 24),
 				mock_from_to(
-					now().startOf('day').subtract(1, 'month'),
-					now().endOf('day'),
+					today().subtract(1, 'month'),
+					today().endOf('day'),
 					30
 				),
 				mock_from_to(
-					now().startOf('day').subtract(6, 'month'),
-					now().endOf('day'),
+					today().subtract(6, 'month'),
+					today().endOf('day'),
 					26
 				),
 				mock_from_to(
-					now().startOf('day').subtract(1, 'year'),
-					now().endOf('day'),
+					today().subtract(1, 'year'),
+					today().endOf('day'),
 					24
 				),
 				mock_from_to(
-					now().startOf('day').subtract(5, 'year'),
-					now().endOf('day'),
+					today().subtract(5, 'year'),
+					today().endOf('day'),
 					20
 				)
 			])
@@ -205,27 +209,6 @@ Symbols.schema.columns = (prefix, table) =>
 
 var moment = require('moment')
 var random = require('lodash/random')
-
-function mock_today ()
-{
-	var today_series = []
-	var timestamp = moment.utc().startOf('day').hours(8)
-	var mock_value = random(50.0, 150.0, true)
-
-	for (var i = 0; i <= 32; i ++)
-	{
-		today_series.push(
-		{
-			timestamp: timestamp.format(),
-			value:     mock_value
-		})
-
-		timestamp.add(15, 'm')
-		mock_value += random(-5.0, 5.0, true)
-	}
-
-	return Promise.resolve(today_series)
-}
 
 function mock_from_to (from, to, count)
 {

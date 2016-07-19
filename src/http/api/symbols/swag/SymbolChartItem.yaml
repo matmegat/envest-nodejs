@@ -4,6 +4,11 @@ properties:
   timestamp:
     type: string
     format: datetime
+    description: Date and time **AS IS** from xIgnite. Local time for exchange
+  utcOffset:
+    type: number
+    format: integer
+    description: UTC Offset to Exchange local time. Hours
   value:
     type: number
 required:
