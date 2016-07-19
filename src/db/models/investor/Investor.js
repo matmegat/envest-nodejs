@@ -14,6 +14,7 @@ var Onboarding = require('./Onboarding')
 var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
+var Featured = require('./Featured')
 
 var validate = require('../../validate')
 
@@ -51,6 +52,7 @@ module.exports = function Investor (db)
 	investor.public = Meta(investor.table, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
+	investor.featured = Featured(db, investor.all)
 
 	var investor_create = knexed.transact(knex, (trx, data) =>
 	{

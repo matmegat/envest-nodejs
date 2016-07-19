@@ -25,6 +25,9 @@ module.exports = function Meta (knexed_table, options)
 
 	var meta = {}
 
+	meta.NotFound = NotFound
+	meta.WrongInvestorId = WrongInvestorId
+
 	var filter = Filter({
 		symbol: Filter.by.portfolio_symbol('investors.user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id')
