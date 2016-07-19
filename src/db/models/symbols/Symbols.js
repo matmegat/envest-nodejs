@@ -137,21 +137,48 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 	symbols.mock = (symbol) =>
 	{
-		console.info(`Return MOCK data for ${symbol}`)
+		return Symbl.validate(symbol)
+		.then((symbol) =>
+		{
+			console.info(`Return MOCK data for ${symbol.toXign()}`)
 
-		return Promise.all(
-		[
-			mock_today()
-		])
+			var now = () => moment.utc()
+
+			return Promise.all(
+			[
+				mock_today(),
+				mock_from_to(now().startOf('year'), now().endOf('day'), 24),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'month'),
+					now().endOf('day'),
+					30
+				),
+				mock_from_to(
+					now().startOf('day').subtract(6, 'month'),
+					now().endOf('day'),
+					26
+				),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'year'),
+					now().endOf('day'),
+					24
+				),
+				mock_from_to(
+					now().startOf('day').subtract(5, 'year'),
+					now().endOf('day'),
+					20
+				)
+			])
+		})
 		.then((values) =>
 		{
 			return {
 				today: values[0],
-				ytd:   [],
-				m1:    [],
-				m6:    [],
-				y1:    [],
-				y5:    []
+				ytd:   values[1],
+				m1:    values[2],
+				m6:    values[3],
+				y1:    values[4],
+				y5:    values[5]
 			}
 		})
 	}
@@ -185,8 +212,6 @@ function mock_today ()
 	var timestamp = moment.utc().startOf('day').hours(8)
 	var mock_value = random(50.0, 150.0, true)
 
-	console.log(timestamp)
-
 	for (var i = 0; i <= 32; i ++)
 	{
 		today_series.push(
@@ -200,4 +225,27 @@ function mock_today ()
 	}
 
 	return Promise.resolve(today_series)
+}
+
+function mock_from_to (from, to, count)
+{
+	var mock_series = []
+	var mock_value = random(50.0, 150.0, true)
+
+	var intervals_count = count - 1 // intervals = 24 points
+	var timestamp_step = to.diff(from) / intervals_count
+
+	for (var i = 0; i < count; i ++)
+	{
+		mock_series.push(
+		{
+			timestamp: from.format(),
+			value:     mock_value
+		})
+
+		from.add(timestamp_step, 'ms')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(mock_series)
 }

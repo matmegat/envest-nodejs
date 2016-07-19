@@ -9,7 +9,7 @@ module.exports = (model) =>
 	var symbols = {}
 
 	symbols.express = Router()
-	// symbols.express.use(authRequired)
+	symbols.express.use(authRequired)
 
 	symbols.express.get('/:symbol/chart', (rq, rs) =>
 	{
