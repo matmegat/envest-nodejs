@@ -54,6 +54,11 @@ module.exports = function (db, http)
 		toss(rs, db.investor.portfolio.list(rq.params.id))
 	})
 
+	investors.express.get('/:id/chart', (rq, rs) =>
+	{
+		toss(rs, db.symbols.mock('INVESTOR.CHART'))
+	})
+
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
 		var data = extend({}, rq.body, { admin_id: rq.user.id })
