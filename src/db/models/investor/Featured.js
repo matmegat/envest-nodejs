@@ -7,7 +7,7 @@ var expect = require('chai').expect
 
 var validateId = require('../../../id').validate.promise
 
-module.exports = function Featured (db)
+module.exports = function Featured (db, investor)
 {
 	var featured = {}
 
@@ -24,9 +24,9 @@ module.exports = function Featured (db)
 	'new_featured_investor',
 	{ group: 'admins' })
 
-	var WrongInvestorId = Err('wrong_investor_id', 'Wrong investor id')
+	var WrongInvestorId = investor.WrongInvestorId
 
-	var InvestorNotFound = Err('investor_not_found', 'Investor not found')
+	var InvestorNotFound = investor.NotFound
 
 	featured.set = function (investor_id)
 	{
@@ -50,9 +50,9 @@ module.exports = function Featured (db)
 			{
 				return featured.table()
 				.insert(data)
-				.catch(Err.fromDb('featured_investor_id_foreign', InvestorNotFound))
 			}
 		})
+		.catch(Err.fromDb('featured_investor_investor_id_foreign', InvestorNotFound))
 		.then( () =>
 		{
 			return NewFeaturedInvestor(data)

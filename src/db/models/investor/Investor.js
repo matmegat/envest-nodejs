@@ -52,7 +52,7 @@ module.exports = function Investor (db)
 	investor.public = Meta(investor.table, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
-	investor.featured = Featured(db)
+	investor.featured = Featured(db, investor.all)
 
 	var investor_create = knexed.transact(knex, (trx, data) =>
 	{
