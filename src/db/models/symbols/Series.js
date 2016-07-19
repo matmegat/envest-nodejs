@@ -105,7 +105,6 @@ module.exports = function Series (token, logger)
 			var last_date = data.Bars[data.Bars.length - 1].StartDate
 
 			return data.Bars
-			.filter((bar) => bar.StartDate === last_date)
 			.map((bar) =>
 			{
 				return {

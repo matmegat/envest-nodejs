@@ -146,11 +146,14 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 			return Promise.all(
 			[
-				xign.bars(
+				xign
+				.bars(
 					symbol.toXign(),
 					today().subtract(5, 'days'),
 					today().endOf('day')
-				),
+				)
+				.then(last_day),
+
 				mock_from_to(today().startOf('year'), today().endOf('day'), 24),
 				mock_from_to(
 					today().subtract(1, 'month'),
@@ -184,6 +187,22 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				y1:    values[4],
 				y5:    values[5]
 			}
+		})
+	}
+
+	function last_day (chart_items)
+	{
+		if (! chart_items.length)
+		{
+			return  chart_items
+		}
+
+		var last_day = chart_items[chart_items.length - 1].timestamp
+		last_day = moment(last_day).dayOfYear()
+
+		return chart_items.filter((char_item) =>
+		{
+			return moment(char_item.timestamp).dayOfYear() === last_day
 		})
 	}
 
