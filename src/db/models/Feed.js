@@ -143,22 +143,22 @@ var Feed = module.exports = function Feed (db)
 		{
 			if (! subscr_item)
 			{
-				return investor.featured.get()
+				investor.featured.get()
 				.then((item) =>
 				{
 					queryset
 					.where('investor_id', item.investor_id)
 
 					count_queryset = queryset.clone()
-
-					queryset.select(
-					'feed_items.id',
-					'feed_items.timestamp',
-					'feed_items.investor_id',
-					'feed_items.type',
-					'feed_items.data')
 				})
 			}
+
+			queryset.select(
+			'feed_items.id',
+			'feed_items.timestamp',
+			'feed_items.investor_id',
+			'feed_items.type',
+			'feed_items.data')
 		})
 		.then(() =>
 		{
