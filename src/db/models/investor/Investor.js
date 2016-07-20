@@ -48,8 +48,8 @@ module.exports = function Investor (db)
 
 	investor.onboarding = Onboarding(db, investor)
 
-	investor.all    = Meta(investor.table, {})
-	investor.public = Meta(investor.table, { is_public: true })
+	investor.all    = Meta(investor.table, knex, {})
+	investor.public = Meta(investor.table, knex, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor.all)
