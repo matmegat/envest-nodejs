@@ -172,6 +172,9 @@ definitions:
   SymbolChartItem:
     $ref: ../api/symbols/swag/SymbolChartItem.yaml
 
+  ChartPoint:
+    $ref: ../api/symbols/swag/ChartPoint.yaml
+
   PortfolioHolding:
     $ref: ../api/investors/swag/InvestorPortfolioHolding.yaml
 
