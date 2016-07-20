@@ -164,11 +164,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					today().diff(today().subtract(1, 'month'), 'days')
 				),
 
-				mock_from_to(
-					today().subtract(6, 'month'),
-					today().endOf('day'),
-					26
-				),
+				xign.series(symbol.toXign(), today(), 'Week', 26)
+				.then(take_n(26)),
+
 				mock_from_to(
 					today().subtract(1, 'year'),
 					today().endOf('day'),
@@ -239,7 +237,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				return Promise.resolve(chart_items)
 			}
 
-			var step = Math.floor(chart_items.length / amount)
+			var step = Math.round(chart_items.length / amount)
 			var equidistant_points = []
 
 			for (var i = 0; i < chart_items.length; i += step)
