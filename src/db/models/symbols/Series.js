@@ -17,7 +17,6 @@ module.exports = function Series (token, logger)
 	series.series = (symbol, end_date, resolution, periods) =>
 	{
 		end_date = util.apidate(end_date)
-		resolution = 'Day'
 
 		console.warn(symbol, end_date, resolution, periods)
 

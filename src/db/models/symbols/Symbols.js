@@ -157,11 +157,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				year_to_date(symbol)
 				.then(take_n(24)),
 
-				mock_from_to(
-					today().subtract(1, 'month'),
-					today().endOf('day'),
-					30
+				xign.series(
+					symbol.toXign(),
+					today(),
+					'Day',
+					today().diff(today().subtract(1, 'month'), 'days')
 				),
+
 				mock_from_to(
 					today().subtract(6, 'month'),
 					today().endOf('day'),
