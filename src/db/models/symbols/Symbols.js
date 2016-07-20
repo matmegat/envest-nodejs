@@ -123,27 +123,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	symbols.series = (symbol, end_date, resolution, periods) =>
+	symbols.series = (symbol) =>
 	{
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return xign.series(symbol.toXign(), end_date, resolution, periods)
-			.catch(() =>
-			{
-				throw UnknownSymbol({ symbol: symbol })
-			})
-		})
-	}
-
-
-	symbols.mock = (symbol) =>
-	{
-		return Symbl.validate(symbol)
-		.then((symbol) =>
-		{
-			console.info(`Return MOCK data for ${symbol.toXign()}`)
-
 			var today = () => moment.utc().startOf('day')
 
 			return Promise.all(

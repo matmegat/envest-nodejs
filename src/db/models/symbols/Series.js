@@ -8,7 +8,7 @@ var util = require('./util')
 
 var orderBy = require('lodash/orderBy')
 
-module.exports = function Series (token, logger)
+module.exports = function Series (token)
 {
 	var series = {}
 
