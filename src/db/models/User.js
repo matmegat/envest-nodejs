@@ -101,11 +101,13 @@ module.exports = function User (db, app)
 				'admins.can_intro AS can_intro',
 				knex.raw(`(select end_time
 					from subscriptions where user_id = users.id
+					and end_time > current_timestamp
 					ORDER BY start_time DESC limit 1)`),
 				knex.raw(`COALESCE(
 					(select type
 					from subscriptions
 					where user_id = users.id
+					and end_time > current_timestamp
 					ORDER BY start_time DESC limit 1),
 					'standard') AS type`)
 			)

@@ -27,7 +27,7 @@ module.exports = function NetvestSubsc (db, cfg)
 		return by_user_id_type(user_id, type, subscr_table)
 		.then((items) =>
 		{
-			if (items.length > 2)
+			if (items.length > 1)
 			{
 				throw OnlyOnceActivate({ type: type })
 			}
