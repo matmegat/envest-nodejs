@@ -146,8 +146,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 			return Promise.all(
 			[
-				xign
-				.bars(
+				xign.bars(
 					symbol.toXign(),
 					today().subtract(5, 'days'),
 					today().endOf('day')
@@ -167,11 +166,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				xign.series(symbol.toXign(), today(), 'Week', 26)
 				.then(take_n(26)),
 
-				mock_from_to(
-					today().subtract(1, 'year'),
-					today().endOf('day'),
-					24
-				),
+				xign.series(symbol.toXign(), today(), 'Day', 365)
+				.then(take_n(24)),
+
 				mock_from_to(
 					today().subtract(5, 'year'),
 					today().endOf('day'),
@@ -245,7 +242,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				equidistant_points.push(chart_items[i])
 			}
 
-			return Promise.resolve(equidistant_points)
+			return equidistant_points
 		}
 	}
 
