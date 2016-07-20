@@ -26,7 +26,7 @@ module.exports = (model) =>
 	{
 		var symbol = rq.params.symbol
 
-		toss(rs, model.historical(symbol))
+		toss(rs, model.getInfo(symbol))
 	})
 
 	return symbols

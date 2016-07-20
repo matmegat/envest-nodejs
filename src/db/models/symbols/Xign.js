@@ -155,7 +155,7 @@ module.exports = function Xign (cfg, log)
 		var uri = format(
 		{
 			protocol: 'https',
-			host: 'factsetfundamentals.xignite.com',
+			host: 'xignite.com',
 
 			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
 
@@ -174,6 +174,47 @@ module.exports = function Xign (cfg, log)
 
 		return request(uri)
 		.then(util.unwrap.data)
+		.then(resl =>
+		{
+			return {
+				prev_close: resl.LastClose,
+				low: resl.Low,
+				high: resl.High,
+				volume: resl.Volume,
+				currency: resl.Currency
+			}
+		})
+	}
+
+	var fundamentalsLast = X.fundamentalsLast = (symbol) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'factsetfundamentals.xignite.com',
+
+			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbol,
+
+				FundamentalTypes: 'MarketCapitalization,HighPriceLast52Weeks,LowPriceLast52Weeks,DividendYieldDaily',
+				UpdatedSince: '',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(resl =>
+		{
+			return resl.FundamentalsSets
+		})
+		.then(util.unwrap.first)
 	}
 
 	return X

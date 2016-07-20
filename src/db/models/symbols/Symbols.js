@@ -133,7 +133,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.historical = (symbol) =>
+	function getHistorical (symbol)
 	{
 		return Symbl.validate(symbol)
 		.then(symbol =>
@@ -145,6 +145,36 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 				throw UnknownSymbol({ symbol: symbol })
 			})
+		})
+	}
+
+	function getLastFundamentals (symbol)
+	{
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return xign.fundamentalsLast(symbol.toXign())
+			.catch(err =>
+			{
+				console.log('wtf!')
+				console.log(err)
+
+				throw UnknownSymbol({ symbol: symbol })
+			})
+		})
+	}
+
+	symbols.getInfo = (symbol) =>
+	{
+		return Promise.all(
+		[
+			getHistorical(symbol),
+			getLastFundamentals(symbol)
+		])
+		.then(so =>
+		{
+			console.log(so[0])
+			console.log(so[1])
 		})
 	}
 
