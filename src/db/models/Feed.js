@@ -143,7 +143,7 @@ var Feed = module.exports = function Feed (db)
 		{
 			if (! subscr_item)
 			{
-				investor.featured.get()
+				return investor.featured.get()
 				.then((item) =>
 				{
 					queryset
@@ -152,16 +152,16 @@ var Feed = module.exports = function Feed (db)
 					count_queryset = queryset.clone()
 				})
 			}
-
+		})
+		.then(() =>
+		{
 			queryset.select(
 			'feed_items.id',
 			'feed_items.timestamp',
 			'feed_items.investor_id',
 			'feed_items.type',
 			'feed_items.data')
-		})
-		.then(() =>
-		{
+
 			return paginator.paginate(queryset, options.paginator)
 		})
 		.then((feed_items) =>
