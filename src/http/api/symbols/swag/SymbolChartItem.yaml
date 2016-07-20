@@ -1,11 +1,20 @@
 type: object
 title: Chart Item Model
 properties:
-  timestamp:
+  period:
     type: string
-    format: datetime
-  value:
-    type: number
+    description: period name
+    enum:
+    - today
+    - ytd
+    - m1
+    - m6
+    - y1
+    - y5
+  points:
+    type: array
+    items:
+    - $ref: ./ChartPoint.yaml
 required:
-- timestamp
-- value
+- period
+- points
