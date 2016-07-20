@@ -154,7 +154,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				)
 				.then(last_day),
 
-				mock_from_to(today().startOf('year'), today().endOf('day'), 24),
+				year_to_date(symbol)
+				.then(take_n(24)),
+
 				mock_from_to(
 					today().subtract(1, 'month'),
 					today().endOf('day'),
@@ -204,6 +206,47 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		{
 			return moment(char_item.timestamp).dayOfYear() === last_day
 		})
+	}
+
+	function year_to_date (symbol)
+	{
+		var start_date = moment.utc().startOf('year')
+		var end_date = moment.utc().endOf('day')
+
+		var days = end_date.diff(start_date, 'days')
+
+		if (days <= 20)
+		{
+			return xign.bars(symbol.toXign(), start_date, end_date)
+		}
+		else
+		{
+			return xign.series(symbol.toXign(), end_date, 'Day', days)
+		}
+	}
+
+	function take_n (amount)
+	{
+		/* takes ${amount} of points from  chart items
+		* - every point should be equidistant from one to another
+		* */
+		return (chart_items) =>
+		{
+			if (chart_items.length <= amount)
+			{
+				return Promise.resolve(chart_items)
+			}
+
+			var step = Math.floor(chart_items.length / amount)
+			var equidistant_points = []
+
+			for (var i = 0; i < chart_items.length; i += step)
+			{
+				equidistant_points.push(chart_items[i])
+			}
+
+			return Promise.resolve(equidistant_points)
+		}
 	}
 
 	return symbols

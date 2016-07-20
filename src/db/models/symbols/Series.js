@@ -6,6 +6,8 @@ var request = require('axios')
 
 var util = require('./util')
 
+var orderBy = require('lodash/orderBy')
+
 module.exports = function Series (token, logger)
 {
 	var series = {}
@@ -44,17 +46,21 @@ module.exports = function Series (token, logger)
 
 		return request(uri)
 		.then(util.unwrap.data)
-		.then(util.unwrap.success)
 		.then(it =>
 		{
-			console.log('JSON')
-			console.log(it)
+			var quotes = orderBy(it.GlobalQuotes, (quote) =>
+			{
+				return new Date(quote.Date)
+			})
 
-			// GlobalQuotes
-
-			return it
+			return quotes.map((quote) =>
+			{
+				return {
+					timestamp: quote.Date,
+					value:     quote.LastClose
+				}
+			})
 		})
-		.catch(logger.warn_rethrow)
 	}
 
 	// series.intraday = () => {}
@@ -101,8 +107,6 @@ module.exports = function Series (token, logger)
 			{
 				return []
 			}
-
-			var last_date = data.Bars[data.Bars.length - 1].StartDate
 
 			return data.Bars
 			.map((bar) =>
