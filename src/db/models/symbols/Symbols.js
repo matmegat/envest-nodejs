@@ -196,14 +196,14 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 		.then((values) =>
 		{
-			return {
-				today: values[0],
-				ytd:   values[1],
-				m1:    values[2],
-				m6:    values[3],
-				y1:    values[4],
-				y5:    values[5]
-			}
+			return [
+				{ period: 'today', points: values[0] },
+				{ period: 'ytd', points: values[1] },
+				{ period: 'm1', points: values[2] },
+				{ period: 'm6', points: values[3] },
+				{ period: 'y1', points: values[4] },
+				{ period: 'y5', points: values[5] },
+			]
 		})
 	}
 
