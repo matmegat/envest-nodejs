@@ -11,6 +11,8 @@ var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 
+var moment = require('moment')
+
 var Symbols = module.exports = function Symbols (cfg, log)
 {
 	var symbols = {}
@@ -169,11 +171,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				xign.series(symbol.toXign(), today(), 'Day', 365)
 				.then(take_n(24)),
 
-				mock_from_to(
-					today().subtract(5, 'year'),
-					today().endOf('day'),
-					20
-				)
+				xign.series(symbol.toXign(), today(), 'Quarter', 20)
+				.then(take_n(24)),
 			])
 		})
 		.then((values) =>
@@ -264,30 +263,4 @@ Symbols.schema.columns = (prefix, table) =>
 	table.string(prefix + 'ticker').notNullable()
 
 	return table
-}
-
-var moment = require('moment')
-var random = require('lodash/random')
-
-function mock_from_to (from, to, count)
-{
-	var mock_series = []
-	var mock_value = random(50.0, 150.0, true)
-
-	var intervals_count = count - 1 // intervals = 24 points
-	var timestamp_step = to.diff(from) / intervals_count
-
-	for (var i = 0; i < count; i ++)
-	{
-		mock_series.push(
-		{
-			timestamp: from.format(),
-			value:     mock_value
-		})
-
-		from.add(timestamp_step, 'ms')
-		mock_value += random(-5.0, 5.0, true)
-	}
-
-	return Promise.resolve(mock_series)
 }
