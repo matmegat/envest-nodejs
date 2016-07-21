@@ -15,18 +15,14 @@ module.exports = (model) =>
 	{
 		var symbol = rq.params.symbol
 
-		var end_date = new Date
-		var resolution = 'Day'
-		var periods = 180
-
-		toss(rs, model.mock(symbol))
+		toss(rs, model.series(symbol))
 	})
 
 	symbols.express.get('/:symbol', (rq, rs) =>
 	{
 		var symbol = rq.params.symbol
 
-		toss(rs, model.getInfoMock(symbol))
+		toss(rs, model.getInfo(symbol))
 	})
 
 	return symbols
