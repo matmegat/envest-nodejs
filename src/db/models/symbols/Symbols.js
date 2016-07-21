@@ -10,6 +10,8 @@ var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
+var forEach = require('lodash/forEach')
+var merge = require('lodash/merge')
 
 var Symbols = module.exports = function Symbols (cfg, log)
 {
@@ -156,11 +158,27 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			return xign.fundamentalsLast(symbol.toXign())
 			.catch(err =>
 			{
-				console.log('wtf!')
 				console.log(err)
 
 				throw UnknownSymbol({ symbol: symbol })
 			})
+		})
+		.then(resl =>
+		{
+			var fundamentals = resl.Fundamentals || []
+			var obj = {}
+
+			forEach(fundamentals, (el) =>
+			{
+				var prop = el.Type
+
+				obj[prop] = {
+					value: el.Value,
+					unit: el.Unit 
+				}
+			})
+
+			return obj
 		})
 	}
 
@@ -173,8 +191,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		])
 		.then(so =>
 		{
-			console.log(so[0])
-			console.log(so[1])
+			return merge(so[0], so[1])
 		})
 	}
 
