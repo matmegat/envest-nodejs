@@ -174,16 +174,6 @@ module.exports = function Xign (cfg, log)
 
 		return request(uri)
 		.then(util.unwrap.data)
-		.then(resl =>
-		{
-			return {
-				prev_close: resl.LastClose,
-				low: resl.Low,
-				high: resl.High,
-				volume: resl.Volume,
-				currency: resl.Currency
-			}
-		})
 	}
 
 	var fundamentalsLast = X.fundamentalsLast = (symbol) =>

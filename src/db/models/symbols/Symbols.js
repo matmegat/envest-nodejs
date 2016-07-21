@@ -152,6 +152,16 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				throw GetDataErr({ symbol: symbol })
 			})
 		})
+		.then(resl =>
+		{
+			return {
+				prev_close: resl.LastClose,
+				low: resl.Low,
+				high: resl.High,
+				volume: resl.Volume,
+				currency: resl.Currency
+			}
+		})
 	}
 
 	function getLastFundamentals (symbol)
