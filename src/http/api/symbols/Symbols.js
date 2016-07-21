@@ -22,7 +22,7 @@ module.exports = (model) =>
 	{
 		var symbol = rq.params.symbol
 
-		toss(rs, model.getInfoMock(symbol))
+		toss(rs, model.getInfo(symbol))
 	})
 
 	return symbols

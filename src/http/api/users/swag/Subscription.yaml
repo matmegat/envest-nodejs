@@ -1,0 +1,11 @@
+type: object
+description: |
+  Subscription info
+properties:
+  type:
+    type: string
+    description: Subscription type
+  end_time:
+    type: string
+    format: date-time
+    description: Subscription expiration date

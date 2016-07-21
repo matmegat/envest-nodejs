@@ -16,8 +16,8 @@ post:
           type: string
           description: Promo code
         end_time:
-          type: integer
-          description: Expiration time (if null is used ∞)
+          type: string
+          description: Expiration time ISO 8601 (if null is used ∞) 
         activations:
           type: integer
           description: Number of activations (if null is used ∞)

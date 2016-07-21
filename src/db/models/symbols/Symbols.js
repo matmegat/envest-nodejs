@@ -7,9 +7,15 @@ var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
+var GetDataErr = Err(
+	'unable_to_retrive_data_from_server',
+	'Unable to retrive data from server'
+)
 
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
+var forEach = require('lodash/forEach')
+var merge = require('lodash/merge')
 
 var moment = require('moment')
 
@@ -123,30 +129,94 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	symbols.getInfoMock = (symbol) =>
+	function get_historical (symbol)
 	{
-		var round = require('lodash/round')
-		var random = require('lodash/random')
-
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
+			return xign.historical(symbol.toXign())
+			.catch(err =>
+			{
+				console.log(err)
+
+				throw GetDataErr({ symbol: symbol })
+			})
+		})
+		.then(resl =>
+		{
 			return {
-				prev_close: round(random(50, 60, true), 1),
-				open: round(random(50, 60, true), 1),
-				low: round(random(50, 60, true), 1),
-				high: round(random(50, 60, true), 1),
-				one_year_low: round(random(50, 60, true), 1),
-				one_year_high: round(random(50, 60, true), 1),
-				market_cap: random(22000000, 55000000),
-				volume: random(2000000, 3000000),
-				p_e: null,
-				dividend: null,
-				currency: 'USD'
+				prev_close: resl.LastClose,
+				low: resl.Low,
+				high: resl.High,
+				volume: resl.Volume,
+				currency: resl.Currency
 			}
 		})
 	}
 
+
+	function get_last_fundamentals (symbol)
+	{
+		var fundamentalsDefault = {
+			market_cap: null,
+			dividend: null,
+			one_year_low: null,
+			one_year_high: null
+		}
+
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return xign.fundamentalsLast(symbol.toXign())
+		})
+		.then(resl =>
+		{
+			var fundamentals = resl.Fundamentals || []
+			var obj = {}
+
+			forEach(fundamentals, (el) =>
+			{
+				var prop = el.Type
+
+				obj[prop] = {
+					value: el.Value,
+					unit: el.Unit
+				}
+			})
+
+			return obj
+		})
+		.then(obj =>
+		{
+			fundamentalsDefault.market_cap = {
+				value: Number(obj.MarketCapitalization.value) || null,
+				unit: obj.MarketCapitalization.unit
+			}
+			fundamentalsDefault.dividend = Number(obj.DividendYieldDaily.value) || null
+			fundamentalsDefault.one_year_low = Number(obj.LowPriceLast52Weeks.value) || null
+			fundamentalsDefault.one_year_high = Number(obj.HighPriceLast52Weeks.value) || null
+
+			return fundamentalsDefault
+		})
+		.catch(() =>
+		{
+			return fundamentalsDefault
+		})
+	}
+
+
+	symbols.getInfo = (symbol) =>
+	{
+		return Promise.all(
+		[
+			get_historical(symbol),
+			get_last_fundamentals(symbol)
+		])
+		.then(so =>
+		{
+			return merge(so[0], so[1])
+		})
+	}
 
 	symbols.series = (symbol) =>
 	{
