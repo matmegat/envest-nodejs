@@ -4,7 +4,7 @@ properties:
   timestamp:
     type: string
     format: datetime
-    description: ISO 8601 string. Local time for exchange
+    description: ISO 8601 string. UTC time
   utcOffset:
     type: number
     format: integer
