@@ -4,6 +4,7 @@
 
   "host": "ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
   "port": 8081,
+  "real_port": 8080,
 
   "pg":
   {

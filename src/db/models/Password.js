@@ -135,9 +135,9 @@ module.exports = function Password (db, user, app)
 				.then(() =>
 				{
 					var host = `${app.cfg.host}`
-					if (app.cfg.port !== 80)
+					if (app.cfg.real_port !== 80)
 					{
-						host += `:${app.cfg.port}`
+						host += `:${app.cfg.real_port}`
 					}
 
 					return mailer.send('default', null,
