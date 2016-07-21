@@ -61,7 +61,7 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/chart', (rq, rs) =>
 	{
-		toss(rs, db.symbols.mock('INVESTOR.CHART'))
+		toss(rs, db.symbols.series('TSLA'))
 	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>

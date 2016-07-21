@@ -4,7 +4,7 @@ properties:
   timestamp:
     type: string
     format: datetime
-    description: Date and time **AS IS** from xIgnite. Local time for exchange
+    description: ISO 8601 string. UTC time
   utcOffset:
     type: number
     format: integer

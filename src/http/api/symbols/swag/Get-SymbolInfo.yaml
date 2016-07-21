@@ -16,34 +16,35 @@ get:
         properties:
           prev_close:
             type: integer
-          open:
-            type: integer
           low:
             type: integer
           high:
             type: integer
-          one_year_low:
-            type: integer
-          one_year_high:
-            type: integer
-          market_cap:
-            type: integer
           volume:
             type: integer
-          p_e:
+          market_cap:
+            type: object
+            description: Fundamental type – MarketCapitalization
+            properties:
+              value:
+                type: integer
+              unit: 
+                type: string
+          one_year_low:
             type: integer
+            description: Fundamental type – LowPriceLast52Weeks
+          one_year_high:
+            type: integer
+            description: Fundamental type – HighPriceLast52Weeks
           dividend:
             type: integer
+            description: Fundamental type – DividendYieldDaily
           currency:
             type: string
         required:
         - prev_close
-        - open
         - low
         - high
-        - one_year_low
-        - one_year_high
-        - market_cap
         - volume
         - currency
     400:

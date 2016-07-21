@@ -29,3 +29,8 @@ util.apidate = function apidate (it)
 {
 	return moment(it).format('M/DD/YYYY')
 }
+
+util.apitime = function apitime (it)
+{
+	return moment(it).format('HH:mm a')
+}
