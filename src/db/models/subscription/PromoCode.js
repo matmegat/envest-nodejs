@@ -23,6 +23,7 @@ module.exports = function Promo (db)
 
 	var knex = db.knex
 	var one = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	promo.table = knexed(knex, 'promo_codes')
 
@@ -116,13 +117,16 @@ module.exports = function Promo (db)
 		.where(function ()
 		{
 			this.where('end_time', '>', moment())
+			this.orWhereNull('end_time')
 		})
 		.where(function ()
 		{
 			this.where('activations', '>', 0)
+			this.orWhereNull('end_time')
 		})
 		.where('code', code)
 		.then(Err.emptish(WrongPromoCode))
+		.then(oneMaybe)
 	}
 
 	promo.decrement = function (code)

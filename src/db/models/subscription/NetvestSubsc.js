@@ -45,6 +45,7 @@ module.exports = function NetvestSubsc (db, cfg)
 	{
 		premium:
 		{
+			days: 30,
 			features: ['multiple_investors'],
 			fn: () => Promise.resolve()
 		},
