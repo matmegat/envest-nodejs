@@ -157,7 +157,10 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	function get_last_fundamentals (symbol)
 	{
 		var fundamentalsDefault = {
-			market_cap: null,
+			market_cap: {
+				value: null,
+				unit: null
+			},
 			dividend: null,
 			one_year_low: null,
 			one_year_high: null

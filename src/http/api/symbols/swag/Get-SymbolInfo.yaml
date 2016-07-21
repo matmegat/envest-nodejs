@@ -24,6 +24,7 @@ get:
             type: integer
           market_cap:
             type: object
+            description: Fundamental type – MarketCapitalization
             properties:
               value:
                 type: integer
@@ -31,10 +32,13 @@ get:
                 type: string
           one_year_low:
             type: integer
+            description: Fundamental type – LowPriceLast52Weeks
           one_year_high:
             type: integer
+            description: Fundamental type – HighPriceLast52Weeks
           dividend:
             type: integer
+            description: Fundamental type – DividendYieldDaily
           currency:
             type: string
         required:
