@@ -8,6 +8,8 @@ var util = require('./util')
 
 var orderBy = require('lodash/orderBy')
 
+var moment = require('moment')
+
 module.exports = function Series (token)
 {
 	var series = {}
@@ -55,7 +57,7 @@ module.exports = function Series (token)
 			return quotes.map((quote) =>
 			{
 				return {
-					timestamp: quote.Date,
+					timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
 					value:     quote.LastClose
 				}
 			})
@@ -110,8 +112,25 @@ module.exports = function Series (token)
 			return data.Bars
 			.map((bar) =>
 			{
+				var offset = moment.duration(bar.UTCOffset, 'hours')
+
+				if (offset < 0)
+				{
+					offset = ('00' + Math.abs(offset.hours())).slice(-2) +
+						('00' + Math.abs(offset.minutes())).slice(-2)
+					offset = `-${offset}`
+				}
+				else
+				{
+					offset = ('00' + offset.hours()).slice(-2) +
+						('00' + offset.minutes()).slice(-2)
+				}
+
+				var timestamp = `${bar.StartDate} ${bar.StartTime} ${offset}`
+				var format = 'M/DD/YYYY hh:mm:ss a ZZ'
+
 				return {
-					timestamp: `${bar.StartDate} ${bar.StartTime}`,
+					timestamp: moment(timestamp, format).utc().format(),
 					utcOffset: bar.UTCOffset,
 					value:     bar.Close
 				}
