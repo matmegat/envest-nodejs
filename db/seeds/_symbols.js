@@ -2,93 +2,108 @@
 module.exports =
 [
 {
+	exchange: 'XASE',
+	ticker:   'AA/P',
+	company:  'Alcoa Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'EPAM',
+	company:  'EPAM Systems Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'GNW',
+	company:  'Genworth Financial Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'JEC',
+	company:  'Jacobs Engineering Group Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'PARR',
+	company:  'Par Pacific Holdings Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'RUBI',
+	company:  'The Rubicon Project Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'TDS',
+	company:  'Telephone And Data Systems Inc'
+},
+{
+	exchange: 'BATS',
+	ticker:   'HDEZ',
+	company:  'DBX ETF Shs Deutsche X-tr MSCI Eurozone High Divid Yield Hedged Eq ETF'
+},
+{
+	exchange: 'BATS',
+	ticker:   'PTH',
+	company:  'Pws DWA Hth Pfl Shs '
+},
+{
+	exchange: 'BATS',
+	ticker:   'XHE',
+	company:  'SPDR SP HlCr Eq Shs'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'BYFC',
+	company:  'Broadway Financial Corp'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'FCBC',
+	company:  'First Community Bancshares Inc'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'LCNB',
+	company:  'LCNB Corp'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'PLCE',
+	company:  'Children\'s Place Inc'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'TRIP',
+	company:  'TripAdvisor Inc'
+},
+{
+	exchange: 'XNAS',
+	ticker:   'FLN',
+	company:  'FstTr ET AlDx2 Shs First Trust Latin America AlphaDEX Fund'
+},
+{
 	exchange: 'XNYS',
-	ticker:   'BABA',
-	company:  'Alibaba Group Holding Limited'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'MBUU',
-	company:  'Malibu Boats Inc'
-},
-{
-	exchange: 'PINX',
-	ticker:   'CXBMF',
-	company:  'Calibre Mining Corp'
-},
-{
-	exchange: 'PINX',
-	ticker:   'EXCFF',
-	company:  'Excalibur Resources Ltd.'
-},
-{
-	exchange: 'PINX',
-	ticker:   'CABE',
-	company:  'Calibre Energy'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'AAPL',
-	company:  'Apple Inc'
+	ticker:   'BLOX',
+	company:  'Infoblox Inc'
 },
 {
 	exchange: 'XNYS',
-	ticker:   'CMG',
-	company:  'Chipotle Mexican Grill'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'COKE',
-	company:  'Coca-Cola Bottle Corp.'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'FB',
-	company:  'Facebook'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'NFLX',
-	company:  'Netflix Inc'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'GOOG',
-	company:  'Alphabet Inc'
+	ticker:   'FHN',
+	company:  'First Horizon National Corp'
 },
 {
 	exchange: 'XNYS',
-	ticker:   'GE',
-	company:  'Genral Electric'
+	ticker:   'MITT',
+	company:  'AG Mortgage Investment Trust Inc'
 },
 {
 	exchange: 'XNYS',
-	ticker:   'FIT',
-	company:  'Firbit Inc'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'YHOO',
-	company:  'YAhoo Inc'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'GRMN',
-	company:  'Garmin Ltd.'
+	ticker:   'SCHW',
+	company:  'Charles Schwab Corp'
 },
 {
 	exchange: 'XNYS',
-	ticker:   'TWTR',
-	company:  'Twitter'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'ATVI',
-	company:  'Activation Blizzard'
-},
-{
-	exchange: 'XNAS',
-	ticker:   'ZG',
-	company:  'Zillow'
+	ticker:   'BAC/PC',
+	company:  'Bank of America Deposit Shs Repr 1/1000th 6 1/5 % Non-Cum Pfd Shs Series -CC-'
 }
 ]
