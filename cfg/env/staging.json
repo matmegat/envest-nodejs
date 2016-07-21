@@ -2,6 +2,7 @@
   "dev":  false,
   "env": "staging",
 
+  "host": "ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
   "port": 81,
 
   "pg":

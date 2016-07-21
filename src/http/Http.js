@@ -116,7 +116,7 @@ module.exports = function Http (app)
 		})
 		.then(() =>
 		{
-			console.info('http at :%s', app.cfg.port)
+			console.info(`http at ${app.cfg.host}:${app.cfg.port}`)
 		}),
 
 		app.swagger

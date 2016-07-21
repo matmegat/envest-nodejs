@@ -2,6 +2,7 @@
   "dev":  true,
   "env": "test",
 
+  "host": "ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
   "port": 8081,
 
   "pg":
