@@ -150,7 +150,7 @@ module.exports = function Xign (cfg, log)
 		.catch(logger.warn_rethrow)
 	}
 
-	var historical = X.historical = (symbol) =>
+	X.historical = (symbol) =>
 	{
 		var uri = format(
 		{
@@ -176,7 +176,7 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.data)
 	}
 
-	var fundamentalsLast = X.fundamentalsLast = (symbol) =>
+	X.fundamentalsLast = (symbol) =>
 	{
 		var types = [
 			'MarketCapitalization',
