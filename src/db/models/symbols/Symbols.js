@@ -191,9 +191,12 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				value: Number(obj.MarketCapitalization.value) || null,
 				unit: obj.MarketCapitalization.unit
 			}
-			fundamentalsDefault.dividend = Number(obj.DividendYieldDaily.value) || null
-			fundamentalsDefault.one_year_low = Number(obj.LowPriceLast52Weeks.value) || null
-			fundamentalsDefault.one_year_high = Number(obj.HighPriceLast52Weeks.value) || null
+			fundamentalsDefault.dividend =
+				Number(obj.DividendYieldDaily.value) || null
+			fundamentalsDefault.one_year_low =
+				Number(obj.LowPriceLast52Weeks.value) || null
+			fundamentalsDefault.one_year_high =
+				Number(obj.HighPriceLast52Weeks.value) || null
 
 			return fundamentalsDefault
 		})
