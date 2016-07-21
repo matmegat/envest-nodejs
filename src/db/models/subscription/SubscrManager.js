@@ -121,10 +121,11 @@ module.exports = function SubscrManager (db, subsc_desc)
 					return date
 				}
 
-				var end_time = moment(subscrs[0].end_time)
-				var remaining_time = end_time.subtract(moment().toObject())
+				var end_time = moment(subscrs[0].end_time).valueOf()
+				var remaining_time = end_time - moment().valueOf()
+				var time = date.valueOf() + remaining_time
 
-				return date.add(remaining_time.toObject())
+				return moment(time)
 			})
 		})
 	}
