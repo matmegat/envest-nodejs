@@ -24,16 +24,6 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
-		return knex.schema.createTable('symbols', (table) =>
-		{
-			Symbols.schema.columns('', table)
-
-			/* additional */
-			table.string('company').notNullable()
-		})
-	})
-	.then(() =>
-	{
 		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()
@@ -48,7 +38,12 @@ exports.up = function (knex, Promise)
 			table.integer('amount').notNullable()
 				.comment('Number of Shares')
 
-			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ])
+			table.decimal('buy_price', 10, 4)
+				.notNullable()
+				.defaultTo(7.62)
+
+			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ],
+				'portfolio_symbol_unique')
 		})
 
 		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)

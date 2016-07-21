@@ -1,0 +1,20 @@
+get:
+  description: |
+    Get chart for Symbols
+  parameters:
+  - name: symbol
+    in: path
+    type: string
+    description: Symbol ID `TICKER.EXCHANGE`
+    required: true
+  responses:
+    200:
+      description: Chart data for each resolution
+      schema:
+        $ref: ./SymbolChart.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - symbols

@@ -3,6 +3,7 @@ var expect = require('chai').expect
 
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
+var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
@@ -10,11 +11,13 @@ var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 
-var Symbols = module.exports = function Symbols (cfg)
+var Symbols = module.exports = function Symbols (cfg, log)
 {
 	var symbols = {}
 
-	var xign = Xign(cfg.xignite)
+	var cache = Cache()
+
+	var xign = Xign(cfg.xignite, log)
 
 	symbols.resolve = (symbol) =>
 	{
@@ -38,8 +41,31 @@ var Symbols = module.exports = function Symbols (cfg)
 			{
 				throw UnknownSymbol({ symbol: symbol })
 			})
+			.then(symbol =>
+			{
+				cache.put(symbol, symbol)
+
+				return symbol
+			})
 		})
 	}
+
+	/* cache-first */
+	symbols.resolve.cache = (symbol) =>
+	{
+		return new Promise(rs =>
+		{
+			var data = cache.get(symbol)
+
+			if (data)
+			{
+				return rs(data)
+			}
+
+			return rs(symbols.resolve(symbol))
+		})
+	}
+
 
 	symbols.quotes = (symbols) =>
 	{
@@ -56,7 +82,7 @@ var Symbols = module.exports = function Symbols (cfg)
 			{
 				if (! r) /* not_resolved */
 				{
-					return r
+					throw ReferenceError('wrong_scenario')
 				}
 				else
 				{
@@ -67,9 +93,117 @@ var Symbols = module.exports = function Symbols (cfg)
 
 					r.symbol = symbol
 
-					return r
+					if (r.price != null)
+					{
+						return r
+					}
+					else
+					{
+						log('XIGN Quotes fallback', symbols[i].toXign())
+
+						return quotes_fallback_resolve(r, symbols[i])
+					}
 				}
 			})
+		})
+		.then(it => Promise.all(it)) /* ridiculous wrapper */
+	}
+
+	function quotes_fallback_resolve (r, symbol)
+	{
+		return symbols.resolve.cache(symbol)
+		.then(symbol =>
+		{
+			r.symbol = symbol
+
+			return r
+		})
+	}
+
+
+	symbols.series = (symbol, end_date, resolution, periods) =>
+	{
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return xign.series(symbol.toXign(), end_date, resolution, periods)
+			.catch(() =>
+			{
+				throw UnknownSymbol({ symbol: symbol })
+			})
+		})
+	}
+
+	symbols.getInfoMock = (symbol) =>
+	{
+		var round = require('lodash/round')
+		var random = require('lodash/random')
+
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return {
+				prev_close: round(random(50, 60, true), 1),
+				open: round(random(50, 60, true), 1),
+				low: round(random(50, 60, true), 1),
+				high: round(random(50, 60, true), 1),
+				one_year_low: round(random(50, 60, true), 1),
+				one_year_high: round(random(50, 60, true), 1),
+				market_cap: random(22000000, 55000000),
+				volume: random(2000000, 3000000),
+				p_e: null,
+				dividend: null,
+				currency: 'USD'
+			}
+		})
+	}
+
+
+	symbols.mock = (symbol) =>
+	{
+		return Symbl.validate(symbol)
+		.then((symbol) =>
+		{
+			console.info(`Return MOCK data for ${symbol.toXign()}`)
+
+			var now = () => moment.utc()
+
+			return Promise.all(
+			[
+				mock_today(),
+				mock_from_to(now().startOf('year'), now().endOf('day'), 24),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'month'),
+					now().endOf('day'),
+					30
+				),
+				mock_from_to(
+					now().startOf('day').subtract(6, 'month'),
+					now().endOf('day'),
+					26
+				),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'year'),
+					now().endOf('day'),
+					24
+				),
+				mock_from_to(
+					now().startOf('day').subtract(5, 'year'),
+					now().endOf('day'),
+					20
+				)
+			])
+		})
+		.then((values) =>
+		{
+			return [
+				{ period: 'today', points: values[0] },
+				{ period: 'ytd', points: values[1] },
+				{ period: 'm1', points: values[2] },
+				{ period: 'm6', points: values[3] },
+				{ period: 'y1', points: values[4] },
+				{ period: 'y5', points: values[5] },
+			]
 		})
 	}
 
@@ -91,4 +225,51 @@ Symbols.schema.columns = (prefix, table) =>
 	table.string(prefix + 'ticker').notNullable()
 
 	return table
+}
+
+var moment = require('moment')
+var random = require('lodash/random')
+
+function mock_today ()
+{
+	var today_series = []
+	var timestamp = moment.utc().startOf('day').hours(8)
+	var mock_value = random(50.0, 150.0, true)
+
+	for (var i = 0; i <= 32; i ++)
+	{
+		today_series.push(
+		{
+			timestamp: timestamp.format(),
+			value:     mock_value
+		})
+
+		timestamp.add(15, 'm')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(today_series)
+}
+
+function mock_from_to (from, to, count)
+{
+	var mock_series = []
+	var mock_value = random(50.0, 150.0, true)
+
+	var intervals_count = count - 1 // intervals = 24 points
+	var timestamp_step = to.diff(from) / intervals_count
+
+	for (var i = 0; i < count; i ++)
+	{
+		mock_series.push(
+		{
+			timestamp: from.format(),
+			value:     mock_value
+		})
+
+		from.add(timestamp_step, 'ms')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(mock_series)
 }

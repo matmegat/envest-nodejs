@@ -3,6 +3,7 @@ var knexed = require('../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
+var extend = require('lodash/extend')
 
 var validate   = require('../validate')
 var validateId = require('../../id').validate
@@ -27,54 +28,56 @@ module.exports = function Notifications (db)
 
 	notifications.Emitter = function Emitter (type, options)
 	{
-		return function NotificationEmit (target_or_event, event)
+		options = extend({}, options)
+
+		return function NotificationEmit (target_or_event, event, trx)
 		{
 			var emit =
 			{
 				type: type
 			}
 
-			if (options.target === 'recipient')
+			if (! options.group) /* single*/
 			{
 				expect(target_or_event).a('number')
 
 				emit.recipient_id = target_or_event
 				emit.event        = event
 
-				return notifications.create(emit)
+				return notifications.create(emit, trx)
 			}
-			else if (options.target === 'group')
+			else /* group */
 			{
 				expect(target_or_event).a('object')
 
 				emit.group = options.group
 				emit.event = target_or_event
 
-				return notifications.createBroadcast(emit)
+				return notifications.createBroadcast(emit, trx)
 			}
 		}
 	}
 
-	notifications.create = function (data)
+	notifications.create = function (data, trx)
 	{
 		return validateNotification(data)
 		.then((data) =>
 		{
-			return notifications.table()
+			return notifications.table(trx)
 			.insert(data)
 			.then(noop)
 			.catch(Err.fromDb('notifications_recipient_id_foreign', user.NotFound))
 		})
 	}
 
-	notifications.createBroadcast = function (data)
+	notifications.createBroadcast = function (data, trx)
 	{
 		return validateNotification(data)
 		.then(() =>
 		{
 			var query_group = get_query_group(data)
 
-			return notifications.table()
+			return notifications.table(trx)
 			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
 			.then(noop)
 		})

@@ -1,4 +1,6 @@
 
+var raw = require('knex').raw
+
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -146,5 +148,107 @@ Filter.by.name = function by_name (when_column)
 		.innerJoin('users', 'users.id', when_column)
 		.whereRaw("lower(users.first_name || ' ' || users.last_name) LIKE ?",
 		pattern)
+	}
+}
+
+var Symbl = require('./models/symbols/Symbl')
+
+Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
+{
+	return function (queryset, symbol)
+	{
+		symbol = Symbl(symbol)
+
+		return queryset
+		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.where(function ()
+		{
+			this.where('portfolio_symbols.symbol_ticker', symbol.ticker)
+			if (symbol.exchange)
+			{
+				this.where('portfolio_symbols.symbol_exchange', symbol.exchange)
+			}
+		})
+	}
+}
+
+Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
+{
+	return function (queryset, symbols)
+	{
+		symbols = symbols.split(',')
+		symbols = [].concat(symbols)
+		symbols = symbols.map(Symbl)
+
+		var ticker_col = 'portfolio_symbols.symbol_ticker'
+		var exchange_col = 'portfolio_symbols.symbol_exchange'
+
+		return queryset
+		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.whereIn(
+			raw(`${ticker_col} || '.' || ${exchange_col}`),
+			symbols.map(symbol =>
+			{
+				return `${symbol.ticker}.${symbol.exchange}`
+			})
+		)
+	}
+}
+
+Filter.by.symbol = function by_symbol (column)
+{
+	return function (queryset, symbol)
+	{
+		symbol = Symbl(symbol)
+
+		return queryset
+		.where(function ()
+		{
+			this.where(raw(`${column}->>'ticker'`), symbol.ticker)
+			if (symbol.exchange)
+			{
+				this.where(raw(`${column}->>'exchange'`), symbol.exchange)
+			}
+		})
+	}
+}
+
+Filter.by.symbols = function by_symbols (column)
+{
+	return function (queryset, symbols)
+	{
+		symbols = symbols.split(',')
+		symbols = [].concat(symbols)
+		symbols = symbols.map(Symbl)
+
+		return queryset
+		.where(function ()
+		{
+			var that = this
+
+			symbols.forEach((symbol) =>
+			{
+				that.orWhere(function ()
+				{
+					if (symbol.exchange)
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}",` +
+							` "exchange": "${symbol.exchange}"}]`
+						)
+					}
+					else
+					{
+						this.where(
+							raw(column),
+							'@>',
+							`[{"ticker": "${symbol.ticker}"}]`
+						)
+					}
+				})
+			})
+		})
 	}
 }

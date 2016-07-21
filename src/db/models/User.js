@@ -98,7 +98,21 @@ module.exports = function User (db, app)
 				'investors.start_date AS start_date',
 				'admins.user_id AS admin_user_id',
 				'admins.parent AS parent',
-				'admins.can_intro AS can_intro'
+				'admins.can_intro AS can_intro',
+				knex.raw(`(select end_time
+					from subscriptions where user_id = users.id
+					and end_time > current_timestamp
+					ORDER BY start_time DESC limit 1)`),
+				knex.raw(`COALESCE(
+					(select type
+					from subscriptions
+					where user_id = users.id
+					and end_time > current_timestamp
+					ORDER BY start_time DESC limit 1),
+					'standard') AS type`),
+				knex.raw(`(select * from featured_investor
+					where investor_id = users.id)
+					is not null  as is_featured`)
 			)
 			.from('users')
 			.leftJoin(
@@ -136,7 +150,15 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'email',
-				'pic'
+				'pic',
+				'last_payment_date',
+				'total_payment_days'
+			])
+
+			user_data.subscription = pick(result,
+			[
+				'type',
+				'end_time'
 			])
 
 			if (result.investor_user_id)
@@ -149,6 +171,7 @@ module.exports = function User (db, app)
 					'historical_returns',
 					'is_public',
 					'start_date',
+					'is_featured'
 				])
 			}
 
@@ -165,7 +188,7 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.create = knexed.transact(knex, (trx, data) =>
+	user.create = function (trx, data)
 	{
 		return ensureEmailNotExists(data.email, trx)
 		.then(() =>
@@ -182,16 +205,8 @@ module.exports = function User (db, app)
 			{
 				return user.password.create(id, data.password, trx)
 			})
-			.then(function (id)
-			{
-				return user.newEmailUpdate(trx,
-				{
-					user_id: id,
-					new_email: data.email
-				})
-			})
 		})
-	})
+	}
 
 	/* ensures email not exists in BOTH tables (sparse unique) */
 	function ensureEmailNotExists (email, trx)
@@ -248,10 +263,9 @@ module.exports = function User (db, app)
 		.whereIn('id', ids)
 	}
 
-	user.byFacebookId = function (facebook_id)
+	user.byFacebookId = function (facebook_id, trx)
 	{
-		return knex.select('*')
-		.from('users')
+		return user.users_table(trx)
 		.leftJoin(
 			'auth_facebook',
 			'users.id',
@@ -290,7 +304,7 @@ module.exports = function User (db, app)
 			})
 			.then(() =>
 			{
-				return user.byFacebookId(data.facebook_id)
+				return user.byFacebookId(data.facebook_id, trx)
 			})
 			.then(result =>
 			{
@@ -378,7 +392,8 @@ module.exports = function User (db, app)
 			return email_confirms_upsert(where, data)
 			.catch(error =>
 			{
-				if (error.constraint && ends(error.constraint, 'email_confirms_new_email_unique'))
+				if (error.constraint
+				 && ends(error.constraint, 'email_confirms_new_email_unique'))
 				{
 					throw EmailAlreadyExists()
 				}
@@ -391,14 +406,16 @@ module.exports = function User (db, app)
 			{
 				return user.byId(user_id, trx)
 			})
-			.then((user) =>
+			.then((user_item) =>
 			{
-				return mailer.send('default', null,
+				mailer.send('default', null,
 				{
-					to: user.email,
+					to: user_item.email,
 					text: 'Email confirm code: '
 					+ data.code.toUpperCase()
 				})
+
+				return user_item.id
 			})
 		})
 	}

@@ -2,13 +2,15 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-// var parse  = require('url').parse
-
 var request = require('axios')
 
-var moment = require('moment')
+var extend = require('lodash/extend')
 
-module.exports = function Xign (cfg)
+var Series = require('./Series')
+var util = require('./util')
+
+
+module.exports = function Xign (cfg, log)
 {
 	expect(cfg).property('token')
 
@@ -17,6 +19,21 @@ module.exports = function Xign (cfg)
 	expect(token).a('string')
 
 	var X = {}
+
+	var logger = {}
+	logger.warn_rethrow = (rs) =>
+	{
+		logger.warn(rs)
+		throw rs
+	}
+
+	logger.warn = (rs) =>
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
+
+	extend(X, Series(token, logger))
 
 	X.quotes = (symbols) =>
 	{
@@ -46,29 +63,43 @@ module.exports = function Xign (cfg)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
+		.then(util.unwrap.data)
 		.then(resl =>
 		{
 			return resl
 			.map(r =>
 			{
-				if (! unwrap.isSuccess(r))
+				if (! util.unwrap.isSuccess(r))
 				{
+					logger.warn(r)
 					return null
 				}
 
 				return r
 			})
-			.map(unwrap.maybe((r, i) =>
+			.map((r, i) =>
 			{
-				return {
-					symbol:   symbols[i],
-					currency: r.Currency,
-					price:    r.Last,
-					company:  r.Security.Name,
-					gain:     r.PercentChangeFromPreviousClose
+				var struct =
+				{
+					symbol: symbols[i],
+					price:  null,
+					gain:   null
 				}
-			}))
+
+				if (r)
+				{
+					extend(struct,
+					{
+						symbol:   symbols[i],
+						currency: r.Currency,
+						price:    r.Last,
+						company:  r.Security.Name,
+						gain:     r.PercentChangeFromPreviousClose
+					})
+				}
+
+				return struct
+			})
 		})
 	}
 
@@ -101,7 +132,7 @@ module.exports = function Xign (cfg)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: apidate(),
+				AsOfDate: util.apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
@@ -113,51 +144,15 @@ module.exports = function Xign (cfg)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
-		.then(unwrap.first)
-		.then(unwrap.success)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(util.unwrap.success)
+		.catch(logger.warn_rethrow)
 	}
 
-	function apidate (it)
-	{
-		return moment(it).format('M/DD/YYYY')
-	}
+
+
+
 
 	return X
-}
-
-var unwrap = {}
-
-unwrap.data  = (rs) => rs.data
-
-unwrap.first = (rs) => rs[0]
-
-unwrap.success = (rs) =>
-{
-	if (! unwrap.isSuccess(rs))
-	{
-		throw rs
-	}
-
-	return rs
-}
-
-unwrap.isSuccess = (rs) =>
-{
-	return rs.Outcome === 'Success'
-}
-
-unwrap.maybe = (fn) =>
-{
-	return function (it)
-	{
-		if (it)
-		{
-			return fn.apply(this, arguments)
-		}
-		else
-		{
-			return it
-		}
-	}
 }

@@ -1,0 +1,75 @@
+get:
+  description: |
+    Get list of investors sorted by `last_name`
+  parameters:
+  - name: max_id
+    in: query
+    type: number
+    description: |
+      Get feed items that are added before *max_id* (inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: since_id
+    in: query
+    type: number
+    description: |
+      Get feed items greater than *since_id* (non inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  - name: symbol
+    in: query
+    type: string
+    description: Symbol to filter investors `TICKER[.EXCHANGE]`
+  - name: symbols
+    in: query
+    type: string
+    description: Symbols to filter investors `TICKER.EXCHANGE`
+  responses:
+    200:
+      description: Investors list
+      schema:
+        $ref: ./Investors.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors
+
+post:
+  description: |
+    Creates new Investor of app [Netvest Investor](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Investor)
+    NOTE: after creation Investor should use **change password** mechanism to
+    get access to his account
+  parameters:
+  - name: payload
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        last_name:
+          type: string
+          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        email:
+          type: string
+          description: Email
+      required:
+      - first_name
+      - last_name
+      - email
+  responses:
+    200:
+      description: Investor
+      schema:
+        $ref: ./Investor.yaml
+    400:
+      $ref: ./400.yaml
+  tags:
+  - investors
+  - admin

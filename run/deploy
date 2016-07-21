@@ -4,7 +4,6 @@ require('console-ultimate/global').replace()
 
 var f = require('util').format
 var home = require('home').resolve
-var tmp = require('os').tmpdir
 
 var fs = require('fs-sync')
 var read  = fs.read
@@ -84,6 +83,8 @@ function outputify (name, fn)
 var rootpath = require('rootpath')(__dirname, '..')
 var merge = require('lodash').merge
 
+var tmp = require('rootpath')(require('os').tmpdir())
+
 
 function remote_rootpath (path)
 {
@@ -127,11 +128,11 @@ function rev ()
 rev()
 .then(fullrev =>
 {
-	var tmprev = tmp() + '/netvest-REV'
+	var tmp_rev = tmp('netvest-REV')
 
-	write(tmprev, fullrev)
+	write(tmp_rev, fullrev)
 
-	return scp(tmprev, target('REV'))
+	return scp(tmp_rev, target('REV'))
 })
 .then(outputify('copy package.json', () =>
 {
@@ -160,10 +161,10 @@ rev()
 
 	var config = merge({}, base, cenv)
 
-	var tmp = rootpath('var/deploy-config.json')
-	dump(tmp, config)
+	var tmp_f = tmp('netvest-deploy-config.json')
+	dump(tmp_f, config)
 
-	return scp(tmp, target('cfg/config.json'))
+	return scp(tmp_f, target('cfg/config.json'))
 	.then(() => config)
 }))
 .then(config =>
@@ -182,14 +183,15 @@ rev()
 
 		var rendered = render(template,
 		{
+			env:  env,
 			port: port,
 			port_nginx: port - 1
 		})
 
-		var tmp = rootpath('var/deploy-nginx.conf')
-		write(tmp, rendered)
+		var tmp_f = tmp('netvest-deploy-nginx.conf')
+		write(tmp_f, rendered)
 
-		return scp(tmp, target('cfg/nginx.conf'))
+		return scp(tmp_f, target('cfg/nginx.conf'))
 	})()
 })
 .then(() =>

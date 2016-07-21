@@ -28,7 +28,9 @@ module.exports = function Feed (db)
 			'last_years',
 			'name',
 			'mindate',
-			'maxdate'
+			'maxdate',
+			'symbol',
+			'symbols'
 		])
 
 		options.paginator = _.pick(rq.query,
@@ -38,7 +40,7 @@ module.exports = function Feed (db)
 			'page'
 		])
 
-		toss(rs, feed.model.list(options))
+		toss(rs, feed.model.list(options, rq.user.id))
 	})
 
 	feed.express.get('/counts', (rq, rs) =>
@@ -53,7 +55,9 @@ module.exports = function Feed (db)
 			'last_years',
 			'name',
 			'mindate',
-			'maxdate'
+			'maxdate',
+			'symbol',
+			'symbols'
 		])
 
 		toss(rs, feed.model.counts(options))

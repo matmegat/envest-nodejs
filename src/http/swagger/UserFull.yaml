@@ -16,8 +16,20 @@ properties:
   pic:
     type: string
     description: URL to User's image
+  subscription:
+    type: object
+    title: Subscription Model
+    properties:
+      type:
+        type: string
+        description: Subscription type
+      end_time:
+        type: string
+        format: date-time
+        description: Subscription expiration date
   investor:
     type: object
+    title: Investor Model
     description: |
       Investor's info if User is investor
     properties:
@@ -32,8 +44,10 @@ properties:
         description: Investor's background
       historical_returns:
         type: array
+        title: Historical Returns Model
         items:
           type: object
+          title: Historical Return Model
           properties:
             year:
               type: number
@@ -44,11 +58,15 @@ properties:
       is_public:
         type: boolean
         description: If Investor is public
-      start_date: 
+      start_date:
         type: string
         description: Date of Investor's publicity
+      is_featured:
+        type: boolean
+        description: Is featured Investor
   admin:
     type: object
+    title: Admin Model
     description: |
       Investor's info if User is admin
     properties:
