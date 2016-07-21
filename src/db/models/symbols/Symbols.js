@@ -197,10 +197,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 		.then(obj =>
 		{
-			fundamentalsDefault.market_cap = obj.MarketCapitalization
-			fundamentalsDefault.dividend = obj.DividendYieldDaily.value
-			fundamentalsDefault.one_year_low = obj.LowPriceLast52Weeks.value
-			fundamentalsDefault.one_year_high = obj.HighPriceLast52Weeks.value
+			fundamentalsDefault.market_cap = {
+				value: Number(obj.MarketCapitalization.value) || null,
+				unit: obj.MarketCapitalization.unit
+			}
+			fundamentalsDefault.dividend = Number(obj.DividendYieldDaily.value) || null 
+			fundamentalsDefault.one_year_low = Number(obj.LowPriceLast52Weeks.value) || null 
+			fundamentalsDefault.one_year_high = Number(obj.HighPriceLast52Weeks.value) || null 
 
 			return fundamentalsDefault
 		})
