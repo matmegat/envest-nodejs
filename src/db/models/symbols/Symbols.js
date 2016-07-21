@@ -139,7 +139,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	function getHistorical (symbol)
+	function get_historical (symbol)
 	{
 		return Symbl.validate(symbol)
 		.then(symbol =>
@@ -164,7 +164,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	function getLastFundamentals (symbol)
+	function get_last_fundamentals (symbol)
 	{
 		var fundamentalsDefault = {
 			market_cap: null,
@@ -214,8 +214,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		return Promise.all(
 		[
-			getHistorical(symbol),
-			getLastFundamentals(symbol)
+			get_historical(symbol),
+			get_last_fundamentals(symbol)
 		])
 		.then(so =>
 		{
