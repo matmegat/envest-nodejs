@@ -14,7 +14,6 @@ var GetDataErr = Err(
 
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
-var forEach = require('lodash/forEach')
 var merge = require('lodash/merge')
 
 var moment = require('moment')
@@ -174,7 +173,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			var fundamentals = resl.Fundamentals || []
 			var obj = {}
 
-			forEach(fundamentals, (el) =>
+			fundamentals.forEach((el) =>
 			{
 				var prop = el.Type
 
