@@ -188,6 +188,13 @@ module.exports = function Xign (cfg, log)
 
 	var fundamentalsLast = X.fundamentalsLast = (symbol) =>
 	{
+		var types = [
+			'MarketCapitalization',
+			'HighPriceLast52Weeks',
+			'LowPriceLast52Weeks',
+			'DividendYieldDaily'
+		]
+
 		var uri = format(
 		{
 			protocol: 'https',
@@ -200,7 +207,7 @@ module.exports = function Xign (cfg, log)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				FundamentalTypes: 'MarketCapitalization,HighPriceLast52Weeks,LowPriceLast52Weeks,DividendYieldDaily',
+				FundamentalTypes: types.join(','),
 				UpdatedSince: '',
 
 				_Token: token
