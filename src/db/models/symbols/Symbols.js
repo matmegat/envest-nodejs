@@ -214,30 +214,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.getInfoMock = (symbol) =>
-	{
-		var round = require('lodash/round')
-		var random = require('lodash/random')
-
-		return Symbl.validate(symbol)
-		.then(symbol =>
-		{
-			return {
-				prev_close: round(random(50, 60, true), 1),
-				open: round(random(50, 60, true), 1),
-				low: round(random(50, 60, true), 1),
-				high: round(random(50, 60, true), 1),
-				one_year_low: round(random(50, 60, true), 1),
-				one_year_high: round(random(50, 60, true), 1),
-				market_cap: random(22000000, 55000000),
-				volume: random(2000000, 3000000),
-				p_e: null,
-				dividend: null,
-				currency: 'USD'
-			}
-		})
-	}
-
 
 	symbols.getInfo = (symbol) =>
 	{

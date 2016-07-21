@@ -26,13 +26,6 @@ module.exports = (model) =>
 	{
 		var symbol = rq.params.symbol
 
-		toss(rs, model.getInfoMock(symbol))
-	})
-
-	symbols.express.get('/:symbol', (rq, rs) =>
-	{
-		var symbol = rq.params.symbol
-
 		toss(rs, model.getInfo(symbol))
 	})
 
