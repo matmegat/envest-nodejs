@@ -68,6 +68,12 @@ module.exports = function Http (app)
 
 		file(app.root('static/detect-device.html')).pipe(rs)
 	})
+	http.express.get('/reset-password', (rq, rs) =>
+	{
+		var file = require('fs').createReadStream
+
+		file(app.root('static/reset-password.html')).pipe(rs)
+	})
 
 	http.api = {}
 
