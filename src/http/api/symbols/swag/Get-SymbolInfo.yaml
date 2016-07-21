@@ -16,21 +16,22 @@ get:
         properties:
           prev_close:
             type: integer
-          open:
-            type: integer
           low:
             type: integer
           high:
             type: integer
+          volume:
+            type: integer
+          market_cap:
+            type: object
+            properties:
+              value:
+                type: integer
+              unit: 
+                type: string
           one_year_low:
             type: integer
           one_year_high:
-            type: integer
-          market_cap:
-            type: integer
-          volume:
-            type: integer
-          p_e:
             type: integer
           dividend:
             type: integer
@@ -38,12 +39,8 @@ get:
             type: string
         required:
         - prev_close
-        - open
         - low
         - high
-        - one_year_low
-        - one_year_high
-        - market_cap
         - volume
         - currency
     400:
