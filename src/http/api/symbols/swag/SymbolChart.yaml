@@ -1,0 +1,4 @@
+title: Symbol Chart Model
+type: array
+items:
+- $ref: ./SymbolChartItem.yaml

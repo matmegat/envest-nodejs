@@ -48,7 +48,7 @@ module.exports = function Promo (db)
 		{
 			if (activations)
 			{
-				isPositive('activations', activations)
+				isPositive(activations, 'activations')
 			}
 
 			if (end_time)

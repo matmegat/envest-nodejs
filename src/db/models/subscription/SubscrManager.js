@@ -33,9 +33,6 @@ module.exports = function SubscrManager (db, subsc_desc)
 	var find = _.find
 
 	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
-	var FeatureRequired = Err(
-	'feature_required',
-	'Feature required for this operation')
 
 	subscr_manager.isAble = function (user_id, feature)
 	{
@@ -54,13 +51,6 @@ module.exports = function SubscrManager (db, subsc_desc)
 			{
 				return includes(subsc_desc[subscr.type].features, feature)
 			})
-		})
-		.then((subscr) =>
-		{
-			if (! subscr)
-			{
-				throw FeatureRequired({ feature: feature })
-			}
 		})
 	}
 
@@ -95,7 +85,9 @@ module.exports = function SubscrManager (db, subsc_desc)
 					end_time: date
 				})
 				.then(noop)
-				.catch(Err.fromDb('subscription_user_id_foreign', db.user.NotFound))
+				.catch(Err.fromDb(
+				'subscriptions_user_id_foreign',
+				db.user.NotFound))
 			})
 		})
 		.then(() =>
@@ -130,10 +122,9 @@ module.exports = function SubscrManager (db, subsc_desc)
 				}
 
 				var end_time = moment(subscrs[0].end_time)
+				var remaining_time = end_time.subtract(moment().toObject())
 
-				var remaining_time = end_time.subtract(moment())
-
-				return date.add(remaining_time)
+				return date.add(remaining_time.toObject())
 			})
 		})
 	}

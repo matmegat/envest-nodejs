@@ -164,6 +164,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+
 	function get_last_fundamentals (symbol)
 	{
 		var fundamentalsDefault = {
@@ -213,6 +214,31 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.getInfoMock = (symbol) =>
+	{
+		var round = require('lodash/round')
+		var random = require('lodash/random')
+
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return {
+				prev_close: round(random(50, 60, true), 1),
+				open: round(random(50, 60, true), 1),
+				low: round(random(50, 60, true), 1),
+				high: round(random(50, 60, true), 1),
+				one_year_low: round(random(50, 60, true), 1),
+				one_year_high: round(random(50, 60, true), 1),
+				market_cap: random(22000000, 55000000),
+				volume: random(2000000, 3000000),
+				p_e: null,
+				dividend: null,
+				currency: 'USD'
+			}
+		})
+	}
+
+
 	symbols.getInfo = (symbol) =>
 	{
 		return Promise.all(
@@ -223,6 +249,54 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(so =>
 		{
 			return merge(so[0], so[1])
+		})
+	}
+
+	symbols.mock = (symbol) =>
+	{
+		return Symbl.validate(symbol)
+		.then((symbol) =>
+		{
+			console.info(`Return MOCK data for ${symbol.toXign()}`)
+
+			var now = () => moment.utc()
+
+			return Promise.all(
+			[
+				mock_today(),
+				mock_from_to(now().startOf('year'), now().endOf('day'), 24),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'month'),
+					now().endOf('day'),
+					30
+				),
+				mock_from_to(
+					now().startOf('day').subtract(6, 'month'),
+					now().endOf('day'),
+					26
+				),
+				mock_from_to(
+					now().startOf('day').subtract(1, 'year'),
+					now().endOf('day'),
+					24
+				),
+				mock_from_to(
+					now().startOf('day').subtract(5, 'year'),
+					now().endOf('day'),
+					20
+				)
+			])
+		})
+		.then((values) =>
+		{
+			return [
+				{ period: 'today', points: values[0] },
+				{ period: 'ytd', points: values[1] },
+				{ period: 'm1', points: values[2] },
+				{ period: 'm6', points: values[3] },
+				{ period: 'y1', points: values[4] },
+				{ period: 'y5', points: values[5] },
+			]
 		})
 	}
 
@@ -244,4 +318,51 @@ Symbols.schema.columns = (prefix, table) =>
 	table.string(prefix + 'ticker').notNullable()
 
 	return table
+}
+
+var moment = require('moment')
+var random = require('lodash/random')
+
+function mock_today ()
+{
+	var today_series = []
+	var timestamp = moment.utc().startOf('day').hours(8)
+	var mock_value = random(50.0, 150.0, true)
+
+	for (var i = 0; i <= 32; i ++)
+	{
+		today_series.push(
+		{
+			timestamp: timestamp.format(),
+			value:     mock_value
+		})
+
+		timestamp.add(15, 'm')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(today_series)
+}
+
+function mock_from_to (from, to, count)
+{
+	var mock_series = []
+	var mock_value = random(50.0, 150.0, true)
+
+	var intervals_count = count - 1 // intervals = 24 points
+	var timestamp_step = to.diff(from) / intervals_count
+
+	for (var i = 0; i < count; i ++)
+	{
+		mock_series.push(
+		{
+			timestamp: from.format(),
+			value:     mock_value
+		})
+
+		from.add(timestamp_step, 'ms')
+		mock_value += random(-5.0, 5.0, true)
+	}
+
+	return Promise.resolve(mock_series)
 }

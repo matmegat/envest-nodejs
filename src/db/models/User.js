@@ -101,13 +101,18 @@ module.exports = function User (db, app)
 				'admins.can_intro AS can_intro',
 				knex.raw(`(select end_time
 					from subscriptions where user_id = users.id
+					and end_time > current_timestamp
 					ORDER BY start_time DESC limit 1)`),
 				knex.raw(`COALESCE(
 					(select type
 					from subscriptions
 					where user_id = users.id
+					and end_time > current_timestamp
 					ORDER BY start_time DESC limit 1),
-					'standard') AS type`)
+					'standard') AS type`),
+				knex.raw(`(select * from featured_investor
+					where investor_id = users.id)
+					is not null  as is_featured`)
 			)
 			.from('users')
 			.leftJoin(
@@ -166,6 +171,7 @@ module.exports = function User (db, app)
 					'historical_returns',
 					'is_public',
 					'start_date',
+					'is_featured'
 				])
 			}
 

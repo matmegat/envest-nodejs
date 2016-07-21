@@ -71,8 +71,14 @@ paths:
   '/investors/admin':
     $ref: ../api/investors/swag/Get-InvestorsByAdmin.yaml
 
+  '/investors/featured':
+    $ref: ../api/investors/swag/PostFeatured.yaml
+
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
+
+  '/investors/{investor_id}/chart':
+    $ref: ../api/investors/swag/Get-InvestorChart.yaml
 
   '/investors/{investor_id}/portfolio':
     $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
@@ -140,6 +146,12 @@ paths:
   '/promo':
     $ref: ../api/promo/swag/List.yaml
 
+  '/symbols/{symbol}/chart':
+    $ref: ../api/symbols/swag/Get-SymbolChart.yaml
+
+  '/symbols/{symbol}':
+    $ref: ../api/symbols/swag/Get-SymbolInfo.yaml
+
 definitions:
 
   Feed:
@@ -162,6 +174,15 @@ definitions:
 
   Symbol:
     $ref: ./Symbol.yaml
+
+  SymbolChart:
+    $ref: ../api/symbols/swag/SymbolChart.yaml
+
+  SymbolChartItem:
+    $ref: ../api/symbols/swag/SymbolChartItem.yaml
+
+  ChartPoint:
+    $ref: ../api/symbols/swag/ChartPoint.yaml
 
   PortfolioHolding:
     $ref: ../api/investors/swag/InvestorPortfolioHolding.yaml

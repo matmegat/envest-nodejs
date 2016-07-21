@@ -44,6 +44,11 @@ module.exports = function (db, http)
 		toss(rs, investors.model.all.list(options))
 	})
 
+	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.featured.set(rq.body.investor_id))
+	})
+
 	investors.express.get('/:id', (rq, rs) =>
 	{
 		toss(rs, investors.model.public.byId(rq.params.id))
@@ -52,6 +57,11 @@ module.exports = function (db, http)
 	investors.express.get('/:id/portfolio', (rq, rs) =>
 	{
 		toss(rs, db.investor.portfolio.list(rq.params.id))
+	})
+
+	investors.express.get('/:id/chart', (rq, rs) =>
+	{
+		toss(rs, db.symbols.mock('INVESTOR.CHART'))
 	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
