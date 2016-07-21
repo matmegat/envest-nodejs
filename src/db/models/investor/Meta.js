@@ -13,7 +13,7 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
-module.exports = function Meta (knexed_table, knex, options)
+module.exports = function Meta (knexed_table, raw, options)
 {
 	expect(knexed_table, 'meta table relation').a('function')
 
@@ -70,7 +70,7 @@ module.exports = function Meta (knexed_table, knex, options)
 				'investors.background',
 				'investors.historical_returns',
 				'investors.profile_pic',
-				knex.raw(`(select * from featured_investor
+				raw(`(select * from featured_investor
 					where investor_id = users.id)
 					is not null  as is_featured`)
 			)
@@ -152,7 +152,7 @@ module.exports = function Meta (knexed_table, knex, options)
 			'investors.focus',
 			'investors.historical_returns',
 			'investors.profile_pic',
-			knex.raw(`(select * from featured_investor
+			raw(`(select * from featured_investor
 				where investor_id = users.id)
 				is not null  as is_featured`)
 		)
