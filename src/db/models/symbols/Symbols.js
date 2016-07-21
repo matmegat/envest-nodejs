@@ -7,6 +7,10 @@ var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
+var GetDataErr = Err(
+	'unable_to_retrive_data_from_server',
+	'Unable to retrive data from server'
+)
 
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
@@ -145,23 +149,24 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			{
 				console.log(err)
 
-				throw UnknownSymbol({ symbol: symbol })
+				throw GetDataErr({ symbol: symbol })
 			})
 		})
 	}
 
 	function getLastFundamentals (symbol)
 	{
+		var fundamentalsDefault = {
+			market_cap: null,
+			dividend: null,
+			one_year_low: null,
+			one_year_high: null
+		}
+
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
 			return xign.fundamentalsLast(symbol.toXign())
-			.catch(err =>
-			{
-				console.log(err)
-
-				throw UnknownSymbol({ symbol: symbol })
-			})
 		})
 		.then(resl =>
 		{
@@ -179,6 +184,19 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			})
 
 			return obj
+		})
+		.then(obj =>
+		{
+			fundamentalsDefault.market_cap = obj.MarketCapitalization
+			fundamentalsDefault.dividend = obj.DividendYieldDaily.value
+			fundamentalsDefault.one_year_low = obj.LowPriceLast52Weeks.value
+			fundamentalsDefault.one_year_high = obj.HighPriceLast52Weeks.value
+
+			return fundamentalsDefault
+		})
+		.catch(() =>
+		{
+			return fundamentalsDefault
 		})
 	}
 
