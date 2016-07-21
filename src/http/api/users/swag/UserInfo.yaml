@@ -22,6 +22,9 @@ properties:
   admin:
     schema:
     $ref: './Admin.yaml'
+  subscription:
+    schema:
+    $ref: './Subscription.yaml'
 required:
 - id
 - first_name

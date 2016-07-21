@@ -13,7 +13,7 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
-module.exports = function Meta (knexed_table, options)
+module.exports = function Meta (knexed_table, raw, options)
 {
 	expect(knexed_table, 'meta table relation').a('function')
 
@@ -69,7 +69,10 @@ module.exports = function Meta (knexed_table, options)
 				'investors.focus',
 				'investors.background',
 				'investors.historical_returns',
-				'investors.profile_pic'
+				'investors.profile_pic',
+				raw(`(select * from featured_investor
+					where investor_id = users.id)
+					is not null  as is_featured`)
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
@@ -148,7 +151,10 @@ module.exports = function Meta (knexed_table, options)
 			'users.pic',
 			'investors.focus',
 			'investors.historical_returns',
-			'investors.profile_pic'
+			'investors.profile_pic',
+			raw(`(select * from featured_investor
+				where investor_id = users.id)
+				is not null  as is_featured`)
 		)
 
 		var paginator
@@ -193,7 +199,8 @@ module.exports = function Meta (knexed_table, options)
 			'pic',
 			'profile_pic',
 			'focus',
-			'annual_return'
+			'annual_return',
+			'is_featured'
 		])
 	}
 

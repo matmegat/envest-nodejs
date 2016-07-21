@@ -16,6 +16,17 @@ properties:
   pic:
     type: string
     description: URL to User's image
+  subscription:
+    type: object
+    title: Subscription Model
+    properties:
+      type:
+        type: string
+        description: Subscription type
+      end_time:
+        type: string
+        format: date-time
+        description: Subscription expiration date
   investor:
     type: object
     title: Investor Model
@@ -50,6 +61,9 @@ properties:
       start_date:
         type: string
         description: Date of Investor's publicity
+      is_featured:
+        type: boolean
+        description: Is featured Investor
   admin:
     type: object
     title: Admin Model

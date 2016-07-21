@@ -23,6 +23,7 @@ module.exports = function Investor (db)
 	var investor = {}
 
 	var knex = db.knex
+	var raw = knex.raw
 	var oneMaybe = db.helpers.oneMaybe
 	var one = db.helpers.one
 
@@ -48,8 +49,8 @@ module.exports = function Investor (db)
 
 	investor.onboarding = Onboarding(db, investor)
 
-	investor.all    = Meta(investor.table, {})
-	investor.public = Meta(investor.table, { is_public: true })
+	investor.all    = Meta(investor.table, raw, {})
+	investor.public = Meta(investor.table, raw, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor.all)
