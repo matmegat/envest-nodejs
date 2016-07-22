@@ -148,7 +148,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				low: resl.Low,
 				high: resl.High,
 				volume: resl.Volume,
-				currency: resl.Currency
+				currency: resl.Currency,
+				last: resl.Last,
+				percent_change_from_open: resl.PercentChangeFromOpen
 			}
 		})
 	}

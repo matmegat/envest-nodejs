@@ -1,6 +1,6 @@
 put:
   description: |
-    Put Symbol in User's Watchlist
+    Put Symbol in User's Watchlist (watchlist limited to 500 item)
   parameters:
   - name: symbol_x
     in: path

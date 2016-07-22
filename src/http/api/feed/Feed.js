@@ -86,7 +86,7 @@ module.exports = function Feed (db)
 
 			options.filter.type = type
 
-			toss(rs, feed.model.list(options))
+			toss(rs, feed.model.list(options, rq.user.id))
 		}
 	}
 
