@@ -76,7 +76,15 @@ module.exports = function Portfolio (db, investor)
 
 				return {
 					total: portfolio_holdings.length,
-					holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc')
+					holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc'),
+					full_portfolio:
+					{
+						value: brokerage.cash_value
+						       * brokerage.multiplier
+						       + _.sumBy(portfolio_holdings, 'allocation'),
+						gain: _.sumBy(portfolio_holdings, 'gain')
+						      / portfolio_holdings.length
+					}
 				}
 			})
 		})
