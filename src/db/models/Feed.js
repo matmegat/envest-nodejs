@@ -131,7 +131,6 @@ var Feed = module.exports = function Feed (db)
 		if (options.paginator.page)
 		{
 			paginator = paginators.booked
-			queryset = sorter.sort(queryset)
 		}
 		else
 		{
@@ -150,7 +149,13 @@ var Feed = module.exports = function Feed (db)
 					.where('investor_id', item.investor_id)
 
 					count_queryset = queryset.clone()
+
+					queryset = sorter.sort(queryset)
 				})
+			}
+			else
+			{
+				queryset = sorter.sort(queryset)
 			}
 		})
 		.then(() =>
