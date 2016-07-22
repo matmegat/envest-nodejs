@@ -23,18 +23,34 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 	model.byId = (owner_id) =>
 	{
+		return byId(owner_id)
+		.then(transform)
+	}
+
+	function byId (owner_id)
+	{
 		return model.validateId(owner_id)
 		.then(() =>
 		{
 			return table()
 			.where('owner_id', owner_id)
 		})
-		.then(transform)
 	}
+
+	var limit_watchlist = 500
+
+	var LimitWatchlist = Err('limit_watchlist', 'Watchlist limited')
 
 	model.add = (owner_id, symbol, additional) =>
 	{
-		return model.validateId(owner_id)
+		return byId(owner_id)
+		.then((items) =>
+		{
+			if(items.length >= limit_watchlist)
+			{
+				throw LimitWatchlist({limit: limit_watchlist})
+			}
+		})
 		.then(() =>
 		{
 			return symbols.resolve(symbol)
