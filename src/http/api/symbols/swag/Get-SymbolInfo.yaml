@@ -22,6 +22,10 @@ get:
             type: integer
           volume:
             type: integer
+          last:
+            type: integer
+          percent_change_from_open:
+            type: integer
           market_cap:
             type: object
             description: Fundamental type – MarketCapitalization
