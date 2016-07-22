@@ -9,6 +9,17 @@ properties:
     description: Investor Portfolio Symbols
     items:
     - $ref: ./InvestorPortfolioHolding.yaml
+  full_portfolio:
+    type: object
+    description: Investor's Full Portfolio.
+    properties:
+      value:
+        type: number
+        description: Sum of investors Brokerage and Holdings
+      gain:
+        type: number
+        description: The arithmetic mean of each Investor Portfolio Holding
 required:
 - total
 - holdings
+- full_portfolio
