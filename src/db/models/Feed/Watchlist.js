@@ -10,7 +10,7 @@ module.exports = function Watchlist (watchlist)
 	return Type(
 	{
 		validate: validate_watchlist,
-		set: (investor_id, type, date, data) =>
+		set: (trx, investor_id, type, date, data) =>
 		{
 			var symbol = data.symbol
 			var additional = pick(data,

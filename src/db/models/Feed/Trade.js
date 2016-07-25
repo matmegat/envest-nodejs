@@ -10,9 +10,9 @@ module.exports = function Trade (portfolio)
 	return Type(
 	{
 		validate: validate_trade,
-		set: (investor_id, type, data) =>
+		set: (trx, investor_id, type, date, data) =>
 		{
-			return portfolio.updateBrokerage(4)
+			return portfolio.updateBrokerage(trx, investor_id)
 			.then(result =>
 			{
 				console.log('Result')
