@@ -32,7 +32,9 @@ module.exports = function Feed (db, http)
 			'last_years',
 			'name',
 			'mindate',
-			'maxdate'
+			'maxdate',
+			'symbol',
+			'symbols'
 		])
 
 		options.paginator = _.pick(rq.query,
@@ -42,7 +44,7 @@ module.exports = function Feed (db, http)
 			'page'
 		])
 
-		toss(rs, feed.model.list(options))
+		toss(rs, feed.model.list(options, rq.user.id))
 	})
 
 	feed.express.get('/counts', (rq, rs) =>
@@ -57,7 +59,9 @@ module.exports = function Feed (db, http)
 			'last_years',
 			'name',
 			'mindate',
-			'maxdate'
+			'maxdate',
+			'symbol',
+			'symbols'
 		])
 
 		toss(rs, feed.model.counts(options))
@@ -86,7 +90,7 @@ module.exports = function Feed (db, http)
 
 			options.filter.type = type
 
-			toss(rs, feed.model.list(options))
+			toss(rs, feed.model.list(options, rq.user.id))
 		}
 	}
 

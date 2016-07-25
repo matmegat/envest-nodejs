@@ -2,13 +2,13 @@
 var expect = require('chai').expect
 
 var format = require('url').format
-// var parse  = require('url').parse
-
 var request = require('axios')
 
-var moment = require('moment')
-
 var extend = require('lodash/extend')
+
+var Series = require('./Series')
+var util = require('./util')
+
 
 module.exports = function Xign (cfg, log)
 {
@@ -19,6 +19,21 @@ module.exports = function Xign (cfg, log)
 	expect(token).a('string')
 
 	var X = {}
+
+	var logger = {}
+	logger.warn_rethrow = (rs) =>
+	{
+		logger.warn(rs)
+		throw rs
+	}
+
+	logger.warn = (rs) =>
+	{
+		log('XIGN Error:', rs.Message)
+	}
+
+
+	extend(X, Series(token, logger))
 
 	X.quotes = (symbols) =>
 	{
@@ -48,15 +63,15 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
+		.then(util.unwrap.data)
 		.then(resl =>
 		{
 			return resl
 			.map(r =>
 			{
-				if (! unwrap.isSuccess(r))
+				if (! util.unwrap.isSuccess(r))
 				{
-					warn(r)
+					logger.warn(r)
 					return null
 				}
 
@@ -67,7 +82,8 @@ module.exports = function Xign (cfg, log)
 				var struct =
 				{
 					symbol: symbols[i],
-					price:  null
+					price:  null,
+					gain:   null
 				}
 
 				if (r)
@@ -116,7 +132,7 @@ module.exports = function Xign (cfg, log)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: apidate(),
+				AsOfDate: util.apidate(),
 
 				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
 				ReportType: 'Annual',
@@ -128,51 +144,75 @@ module.exports = function Xign (cfg, log)
 		})
 
 		return request(uri)
-		.then(unwrap.data)
-		.then(unwrap.first)
-		.then(unwrap.success)
-		.catch(warn_rethrow)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(util.unwrap.success)
+		.catch(logger.warn_rethrow)
 	}
 
-
-	function apidate (it)
+	X.historical = (symbol) =>
 	{
-		return moment(it).format('M/DD/YYYY')
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifier: symbol,
+
+				AdjustmentMethod: 'All',
+
+				AsOfDate: util.apidate(),
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
 	}
 
-
-	function warn_rethrow (rs)
+	X.fundamentalsLast = (symbol) =>
 	{
-		warn(rs)
-		throw rs
-	}
+		var types = [
+			'MarketCapitalization',
+			'HighPriceLast52Weeks',
+			'LowPriceLast52Weeks',
+			'DividendYieldDaily'
+		]
 
-	function warn (rs)
-	{
-		log('XIGN Error:', rs.Message)
-	}
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'factsetfundamentals.xignite.com',
 
+			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbol,
+
+				FundamentalTypes: types.join(','),
+				UpdatedSince: '',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(resl =>
+		{
+			return resl.FundamentalsSets
+		})
+		.then(util.unwrap.first)
+	}
 
 	return X
-}
-
-var unwrap = {}
-
-unwrap.data  = (rs) => rs.data
-
-unwrap.first = (rs) => rs[0]
-
-unwrap.success = (rs) =>
-{
-	if (! unwrap.isSuccess(rs))
-	{
-		throw rs
-	}
-
-	return rs
-}
-
-unwrap.isSuccess = (rs) =>
-{
-	return rs.Outcome === 'Success'
 }

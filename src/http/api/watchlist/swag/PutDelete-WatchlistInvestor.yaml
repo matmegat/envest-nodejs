@@ -1,6 +1,6 @@
 put:
   description: |
-    Put Symbol in Investors's Watchlist
+    Put Symbol in Investors's Watchlist (watchlist limited to 500 item)
   parameters:
   - name: symbol_x
     in: path
@@ -26,6 +26,8 @@ put:
   responses:
     200:
       description: Symbol added
+      schema:
+        $ref: ./AddedSymbol.yaml
 
     400:
       description: |

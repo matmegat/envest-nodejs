@@ -24,7 +24,7 @@ var Watchlist = require('./Watchlist')
 var Update = require('./Update')
 
 
-module.exports = function Feed (db)
+var Feed = module.exports = function Feed (db)
 {
 	var feed = {}
 
@@ -33,6 +33,18 @@ module.exports = function Feed (db)
 	var count = db.helpers.count
 
 	feed.feed_table = knexed(knex, 'feed_items')
+
+	expect(db, 'Feed depends on Comments').property('comments')
+	var comments = db.comments
+
+	expect(db, 'Feed depends on Investor').property('investor')
+	var investor = db.investor
+
+	expect(db, 'Feed depends on Symbols').property('symbols')
+	var symbols = db.symbols
+
+	expect(db, 'Feed depends on Subscription').property('subscr')
+	var subscr = db.subscr
 
 	var paginators = {}
 
@@ -61,13 +73,9 @@ module.exports = function Feed (db)
 		name: Filter.by.name('feed_items.investor_id'),
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
+		symbol: Filter.by.symbol(`data->'symbol'`),
+		symbols: Filter.by.symbols(`data->'symbols'`),
 	})
-
-	expect(db, 'Feed depends on Comments').property('comments')
-	var comments = db.comments
-
-	expect(db, 'Feed depends on Investor').property('investor')
-	var investor = db.investor
 
 	feed.NotFound = NotFound
 
@@ -97,7 +105,8 @@ module.exports = function Feed (db)
 
 				transform_event(feed_item)
 
-				return feed_item
+				return transform_symbols([ feed_item ], symbols)
+				.then(it => it[0])
 			})
 		})
 		.then((feed_item) =>
@@ -114,7 +123,7 @@ module.exports = function Feed (db)
 
 	feed.validateFeedId = require('../../../id').validate.promise(WrongFeedId)
 
-	feed.list = function (options)
+	feed.list = function (options, user_id)
 	{
 		options.paginator = _.extend({}, options.paginator,
 		{
@@ -127,26 +136,49 @@ module.exports = function Feed (db)
 
 		var count_queryset = queryset.clone()
 
-		queryset.select(
-		'feed_items.id',
-		'feed_items.timestamp',
-		'feed_items.investor_id',
-		'feed_items.type',
-		'feed_items.data')
-
 		var paginator
 
 		if (options.paginator.page)
 		{
 			paginator = paginators.booked
-			queryset = sorter.sort(queryset)
 		}
 		else
 		{
 			paginator = paginators.chunked
 		}
 
-		return paginator.paginate(queryset, options.paginator)
+		return subscr.isAble(user_id, 'multiple_investors')
+		.then((subscr_item) =>
+		{
+			if (! subscr_item)
+			{
+				return investor.featured.get()
+				.then((item) =>
+				{
+					queryset
+					.where('investor_id', item.investor_id)
+
+					count_queryset = queryset.clone()
+
+					queryset = sorter.sort(queryset)
+				})
+			}
+			else
+			{
+				queryset = sorter.sort(queryset)
+			}
+		})
+		.then(() =>
+		{
+			queryset.select(
+			'feed_items.id',
+			'feed_items.timestamp',
+			'feed_items.investor_id',
+			'feed_items.type',
+			'feed_items.data')
+
+			return paginator.paginate(queryset, options.paginator)
+		})
 		.then((feed_items) =>
 		{
 			var feed_ids = _.map(feed_items, 'id')
@@ -161,13 +193,13 @@ module.exports = function Feed (db)
 					transform_event(item)
 				})
 
-				return feed_items
+				return transform_symbols(feed_items, symbols)
 			})
 		})
 		.then((feed_items) =>
 		{
 			return investor.public.list(
-			{
+			{	// TODO: replace to Filter by ids
 				where:
 				{
 					column_name: 'user_id',
@@ -180,7 +212,7 @@ module.exports = function Feed (db)
 				var response =
 				{
 					feed: feed_items,
-					investors: investors,
+					investors: investors.investors,
 				}
 
 				if (paginator.total)
@@ -237,6 +269,7 @@ module.exports = function Feed (db)
 	return feed
 }
 
+
 function transform_event (item)
 {
 	item.event = {
@@ -247,3 +280,96 @@ function transform_event (item)
 	delete item.type
 	delete item.data
 }
+
+
+function transform_symbols (items, api)
+{
+	var symbols = Feed.symbolsInvolved(items)
+
+	var quieries = symbols
+	.map(api.resolve.cache)
+	.map(query =>
+	{
+		return query.catch(() => null)
+	})
+
+	return Promise.all(quieries)
+	.then(compact)
+	.then(symbols =>
+	{
+		return items.map(replace_symbol(symbols))
+	})
+}
+
+
+var compact = _.compact
+var flatten = _.flatten
+var uniqBy  = _.uniqBy
+
+var Symbl = require('../symbols/Symbl')
+
+Feed.symbolsInvolved = (items) =>
+{
+	var symbols = items.map(item =>
+	{
+		var data = item.event.data
+
+		if (data.symbol)
+		{
+			return data.symbol
+		}
+		if (data.symbols)
+		{
+			return data.symbols
+		}
+	})
+
+	symbols = flatten(symbols)
+	symbols = compact(symbols)
+
+	symbols = symbols.map(symbol =>
+	{
+		return Symbl([ symbol.ticker, symbol.exchange ])
+	})
+
+	symbols = uniqBy(symbols, symbol => symbol.toXign())
+
+	return symbols
+}
+
+
+var find = _.find
+var curry = _.curry
+
+var replace_symbol = curry((symbols, item) =>
+{
+	var pick = pick_symbol(symbols)
+
+	var data = item.event.data
+
+	if (data.symbol)
+	{
+		data.symbol = pick(data.symbol)
+	}
+	if (data.symbols)
+	{
+		data.symbols = data.symbols.map(pick)
+	}
+
+	return item
+})
+
+var pick_symbol = curry((symbols, item_s) =>
+{
+	var symbol = find(symbols, s =>
+	{
+		return Symbl.equals(s, item_s)
+	})
+
+	if (! symbol)
+	{
+		return item_s
+	}
+
+	return symbol
+})

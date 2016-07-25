@@ -11,7 +11,9 @@ var WrongInvestorId = Err('wrong_investor_id', 'Wrong Investor Id')
 var ChunkedPaginator = require('../../paginator/Chunked')
 var BookedPaginator = require('../../paginator/Booked')
 
-module.exports = function Meta (knexed_table, options)
+var Filter = require('../../Filter')
+
+module.exports = function Meta (knexed_table, raw, options)
 {
 	expect(knexed_table, 'meta table relation').a('function')
 
@@ -22,6 +24,14 @@ module.exports = function Meta (knexed_table, options)
 	}
 
 	var meta = {}
+
+	meta.NotFound = NotFound
+	meta.WrongInvestorId = WrongInvestorId
+
+	var filter = Filter({
+		symbol: Filter.by.portfolio_symbol('investors.user_id'),
+		symbols: Filter.by.portfolio_symbols('investors.user_id')
+	})
 
 	meta.is = function (id, trx)
 	{
@@ -59,7 +69,10 @@ module.exports = function Meta (knexed_table, options)
 				'investors.focus',
 				'investors.background',
 				'investors.historical_returns',
-				'investors.profile_pic'
+				'investors.profile_pic',
+				raw(`(select * from featured_investor
+					where investor_id = users.id)
+					is not null  as is_featured`)
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
@@ -125,6 +138,7 @@ module.exports = function Meta (knexed_table, options)
 			)
 		}
 
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 		/* end of all where clauses */
@@ -137,7 +151,10 @@ module.exports = function Meta (knexed_table, options)
 			'users.pic',
 			'investors.focus',
 			'investors.historical_returns',
-			'investors.profile_pic'
+			'investors.profile_pic',
+			raw(`(select * from featured_investor
+				where investor_id = users.id)
+				is not null  as is_featured`)
 		)
 
 		var paginator
@@ -182,7 +199,8 @@ module.exports = function Meta (knexed_table, options)
 			'pic',
 			'profile_pic',
 			'focus',
-			'annual_return'
+			'annual_return',
+			'is_featured'
 		])
 	}
 

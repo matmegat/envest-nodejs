@@ -1,0 +1,37 @@
+post:
+  description: Create promo code
+  parameters:
+  - name: payload
+    in: body
+    description: JSON payload to create promo code.
+    required: true
+    schema:
+      type: object
+      title: Promo code Payload
+      properties:
+        type:
+          type: string
+          description: Subscription type
+        code:
+          type: string
+          description: Promo code
+        end_time:
+          type: string
+          description: Expiration time ISO 8601 (if null is used ∞) 
+        activations:
+          type: integer
+          description: Number of activations (if null is used ∞)
+      required:
+      - type
+      - code
+  responses:
+    200:
+      description: Promo code successfully created
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - promo

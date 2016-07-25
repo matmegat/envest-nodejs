@@ -134,11 +134,21 @@ module.exports = function Password (db, user, app)
 				return password_upsert(where, data)
 				.then(() =>
 				{
+					var host = `${app.cfg.host}`
+					if (app.cfg.real_port !== 80)
+					{
+						host += `:${app.cfg.real_port}`
+					}
+
 					return mailer.send('default', null,
 					{
 						to: email,
 						text: 'Password reset code: '
-						+ code.toUpperCase()
+						+ code.toUpperCase(),
+						html: 'Password reset code: '
+						+ `<a href="http://${host}/reset-password?code=${code.toUpperCase()}" target="_blank">
+							${code.toUpperCase()}
+						</a>`
 					})
 				})
 			})

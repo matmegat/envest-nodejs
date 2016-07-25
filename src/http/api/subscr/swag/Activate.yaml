@@ -1,0 +1,38 @@
+post:
+  description: Activated subscription
+  parameters:
+  - name: payload
+    in: body
+    description: JSON payload to activated subscription.
+    required: true
+    schema:
+      type: object
+      title: Subscription Payload
+      properties:
+        type:
+          type: string
+          description: Subscription type
+        user_id:
+          type: integer
+          description: User Id
+        days:
+          type: integer
+          description: Number of subscription days (if null is used default)
+        token:
+          type: string
+          description: Authorization token for activation
+      required:
+      - type
+      - user_id
+      - token
+  responses:
+    200:
+      description: Subscription successfully created
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - subscription

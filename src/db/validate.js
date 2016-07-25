@@ -1,5 +1,6 @@
 
 var Err = require('../Err')
+var moment = require('moment')
 
 var includes = require('lodash/includes')
 var moment = require('moment')

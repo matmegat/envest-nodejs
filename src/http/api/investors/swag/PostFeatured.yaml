@@ -1,0 +1,27 @@
+post:
+  description: Set featured investor
+  parameters:
+  - name: payload
+    description: JSON payload to set featured investor
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Featured investor Model
+      properties:
+        investor_id:
+          type: integer
+          description: Investor Id
+  responses:
+    200:
+      description: Set featured investor
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors

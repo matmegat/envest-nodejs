@@ -14,14 +14,16 @@ var Onboarding = require('./Onboarding')
 var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
+var Featured = require('./Featured')
 
-module.exports = function Investor (db, app)
+var validate = require('../../validate')
+
+module.exports = function Investor (db)
 {
 	var investor = {}
 
-	var mailer = app.mail
-
 	var knex = db.knex
+	var raw = knex.raw
 	var oneMaybe = db.helpers.oneMaybe
 	var one = db.helpers.one
 
@@ -32,9 +34,6 @@ module.exports = function Investor (db, app)
 		return investor.table(trx)
 		.where('is_public', true)
 	}
-
-	expect(db, 'Investors depends on Auth').property('auth')
-	var auth = db.auth
 
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
@@ -50,12 +49,13 @@ module.exports = function Investor (db, app)
 
 	investor.onboarding = Onboarding(db, investor)
 
-	investor.all    = Meta(investor.table, {})
-	investor.public = Meta(investor.table, { is_public: true })
+	investor.all    = Meta(investor.table, raw, {})
+	investor.public = Meta(investor.table, raw, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
+	investor.featured = Featured(db, investor.all)
 
-	investor.create = knexed.transact(knex, (trx, data) =>
+	var investor_create = knexed.transact(knex, (trx, data) =>
 	{
 		return generate_code()
 		.then((password) =>
@@ -65,29 +65,16 @@ module.exports = function Investor (db, app)
 				password: password /* new Investor should reset his password */
 			})
 
-			return auth.register(user_data)
+			return user.create(trx, user_data)
 		})
-		.then(() =>
-		{
-			return user.email_confirms(trx)
-			.where('new_email', data.email)
-			.then(oneMaybe)
-			.then((user_confirm) =>
-			{
-				return auth.emailConfirm(user_confirm.code)
-			})
-		})
-		.then(() =>
-		{
-			return user.byEmail(data.email, trx)
-		})
+		.then((user_id) => user.byId(user_id, trx))
 		.then((user) =>
 		{
 			return investor.table(trx)
 			.insert(
 			{
 				user_id: user.id,
-				historical_returns: []
+				historical_returns: '[]'	// PostgreSQL json representation
 			}
 			, 'user_id')
 			.catch(Err.fromDb('investors_pkey', AlreadyExists))
@@ -95,33 +82,6 @@ module.exports = function Investor (db, app)
 		.then(oneMaybe)
 		.then((investor_id) =>
 		{
-			/* TODO: sent welcome email
-			 * - email verification link: ...
-			 * - link to 'set new password'
-			 * REQUIRED FIELDS:
-			 * - first_name
-			 * - last_name
-			 * - host
-			 * - password_url (password reset url)
-			 * - password_code (password reset code)
-			 * */
-			mailer.send(
-			{
-				to: data.email,
-				first_name: data.first_name,
-				last_name: data.last_name,
-				host: 'localhost:8080',
-				password_url: '/api/auth/change-password',
-				password_code: 'PASTE IT HERE'
-			}, 'welcome')
-
-			/* notification: 'investor created'
-			* - to all admins?
-			* - to created investor?
-			* */
-			emits.NewAdmins({ investor_id: investor_id })
-			emits.NewInvestor(investor_id, { admin_id: data.admin_id })
-
 			return investor.portfolio.createBrokerage(trx, investor_id, 100000)
 			.then(() =>
 			{
@@ -129,6 +89,37 @@ module.exports = function Investor (db, app)
 			})
 		})
 	})
+
+	investor.create = function (data)
+	{
+		return new Promise(rs =>
+		{
+			validate.name(data.first_name, 'first_name')
+			validate.name(data.last_name, 'last_name')
+			validate.email(data.email)
+
+			return rs()
+		})
+		.then(() => investor_create(data))
+		.then((investor_entry) =>
+		{
+			var investor_id = investor_entry.id
+
+			return user.emailConfirm(investor_id, data.email)
+			.then(() => user.password.reqReset(data.email))
+			.then(() =>
+			{
+				/* notification: 'investor created'
+				 * - to all admins?
+				 * - to created investor?
+				 * */
+
+				emits.NewAdmins({ investor_id: investor_id })
+				emits.NewInvestor(investor_id, { admin_id: data.admin_id })
+			})
+			.then(() => investor_entry)
+		})
+	}
 
 	var get_pic = require('lodash/fp/get')('profile_pic')
 
