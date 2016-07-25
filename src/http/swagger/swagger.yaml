@@ -193,6 +193,9 @@ definitions:
   User:
     $ref: ./User.yaml
 
+  UserFull:
+    $ref: ./UserFull.yaml
+
   Users:
     $ref: ../api/users/swag/Users.yaml
 
