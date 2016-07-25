@@ -21,6 +21,8 @@ var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
 
+var moment = require('moment')
+
 module.exports = function User (db, app)
 {
 	var user = {}
@@ -102,13 +104,13 @@ module.exports = function User (db, app)
 				knex.raw(`(select end_time
 					from subscriptions where user_id = users.id
 					and end_time > current_timestamp
-					ORDER BY start_time DESC limit 1)`),
+					ORDER BY end_time DESC limit 1)`),
 				knex.raw(`COALESCE(
 					(select type
 					from subscriptions
 					where user_id = users.id
 					and end_time > current_timestamp
-					ORDER BY start_time DESC limit 1),
+					ORDER BY end_time DESC limit 1),
 					'standard') AS type`),
 				knex.raw(`(select * from featured_investor
 					where investor_id = users.id)
@@ -150,9 +152,7 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'email',
-				'pic',
-				'last_payment_date',
-				'total_payment_days'
+				'pic'
 			])
 
 			user_data.subscription = pick(result,
@@ -184,7 +184,51 @@ module.exports = function User (db, app)
 				])
 			}
 
-			return user_data
+			return knex('subscriptions')
+			.where('user_id', id)
+			.orderBy('start_time', 'desc')
+			.then((subscrs) =>
+			{
+				if (subscrs.length > 0)
+				{
+					user_data
+					.subscription
+					.last_payment_date = subscrs[0].start_time
+
+					user_data
+					.subscription
+					.total_payment_days = 0
+
+					subscrs.forEach((subscr, i) =>
+					{
+						var start_time = moment(subscr.start_time).valueOf()
+						var end_time = moment(subscr.end_time).valueOf()
+
+						var prev_i = i + 1
+
+						if (prev_i < subscrs.length)
+						{
+							var prev_subscr = subscrs[prev_i]
+
+							var prev_end_time = moment(prev_subscr.end_time).valueOf()
+
+							if (start_time < prev_end_time)
+							{
+								end_time -= (prev_end_time - start_time)
+							}
+						}
+
+						var days = (end_time - start_time) / 24 / 60 / 60 / 1000 >> 0
+
+						user_data
+						.subscription
+						.total_payment_days += days + 1
+					})
+				}
+
+
+				return user_data
+			})
 		})
 	}
 
