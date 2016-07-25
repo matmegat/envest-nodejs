@@ -178,13 +178,17 @@ module.exports = function Password (db, user, app)
 					return password.reset_table(trx)
 					.where('code', code)
 					.del()
-					.then(noop)
 				})
+				.then(() => user.byId(data.user_id))
 			}
 			else
 			{
 				throw ExpiredCode()
 			}
+		})
+		.then((user_data) =>
+		{
+			return db.auth.login(user_data.email, new_pass)
 		})
 	})
 
