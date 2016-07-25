@@ -140,6 +140,15 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.updateBrokerage = function (trx, investor_id, type, data)
+	{
+		return holdings.byInvestorId(investor_id)
+		.catch(err =>
+		{
+			console.log(err)
+		})
+	}
+
 	portfolio.full = function (investor_id)
 	{
 		return investor.all.ensure(investor_id)

@@ -5,14 +5,23 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-module.exports = function Trade ()
+module.exports = function Trade (portfolio)
 {
 	return Type(
 	{
 		validate: validate_trade,
-		set: (data) =>
+		set: (investor_id, type, data) =>
 		{
-			return data
+			return portfolio.updateBrokerage(4)
+			.then(result =>
+			{
+				console.log('Result')
+				console.log(result)
+			})
+			.catch(err =>
+			{
+				console.log(err)
+			})
 		}
 	})
 }

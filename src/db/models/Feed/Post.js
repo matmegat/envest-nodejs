@@ -19,7 +19,7 @@ module.exports = function Post (db)
 	post.feed_model = db.feed
 
 	post.types = {}
-	post.types.trade = Trade()
+	post.types.trade = Trade(db.investor.portfolio)
 	post.types.watchlist = Watchlist(db.watchlist)
 	post.types.update = Update()
 
