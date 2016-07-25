@@ -188,7 +188,7 @@ module.exports = function Password (db, user, app)
 		})
 		.then((user_data) =>
 		{
-			return db.auth.login(user_data.email, new_pass)
+			return db.auth.login(user_data.email, new_pass, trx)
 		})
 	})
 

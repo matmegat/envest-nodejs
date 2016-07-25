@@ -40,14 +40,14 @@ module.exports = function Auth (db, subsc)
 		})
 	})
 
-	auth.login = function (email, password)
+	auth.login = function (email, password, trx)
 	{
 		email = email.toLowerCase()
 
 		return validate_login(email, password)
 		.then(() =>
 		{
-			return user.byEmail(email)
+			return user.byEmail(email, trx)
 		})
 		.then(Err.nullish(WrongLogin))
 		.then(user_data =>
