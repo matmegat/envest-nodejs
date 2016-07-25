@@ -143,12 +143,12 @@ module.exports = function Password (db, user, app)
 					return mailer.send('default', null,
 					{
 						to: email,
-						text: 'Password reset code: '
-						+ code.toUpperCase(),
-						html: 'Password reset code: '
+						// text: 'Password reset code: '
+						// + code.toUpperCase(),
+						html: 'Please tap the link to reset password: '
 						+ `<a href="http://${host}/reset-password?code=${code.toUpperCase()}" target="_blank">
-							${code.toUpperCase()}
-						</a>`
+							Reset Password</a><br>`
+						+ `Your password reset code: ${code.toUpperCase()}`
 					})
 				})
 			})
