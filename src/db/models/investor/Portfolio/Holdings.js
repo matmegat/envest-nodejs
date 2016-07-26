@@ -109,5 +109,72 @@ module.exports = function Holdings (db, investor)
 		.where('investor_id', investor_id)
 	}
 
+	holdings.buyHoldings = function (trx, investor_id, symbol, amount, sum)
+	{
+
+	}
+
+	holdings.sellHoldings = function (trx, investor_id, symbol, amount, price)
+	{
+		return holdings.table(trx)
+		.where(
+		{	
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker
+		})
+		.update(
+		{
+			amount: symbol.amount - amount,
+		})
+		.then(() =>
+		{
+			return amount * price
+		})
+	}
+
+	holdings.buy = function (investor_id, symbol, amount, price)
+	{
+
+	}
+
+	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
+	var NotEnoughtAmount = Err('not_enought_amount_to_sell',
+		'Not Enought Amount To Sell')
+
+	holdings.sell = function (trx, investor_id, symbol, amount, price, cash)
+	{
+		return holdings.byInvestorId(investor_id)
+		.then(resl =>
+		{
+			var hold_symbol = _.find(resl, symbol)
+
+			if (! symbol)
+			{
+				throw SymbolNotFound({ symbol: symbol })
+			}
+
+			return hold_symbol
+		})
+		.then(symbol =>
+		{
+			if (symbol.amount < amount)
+			{
+				throw NotEnoughtAmount(
+				{
+					available_amount: symbol.amount,
+					sell_amount: amount
+				})
+			}
+
+			return holdings.sellHoldings(trx, investor_id, symbol, amount, price)
+		})
+	}
+
+	function calculate_price_after_buy ()
+	{
+
+	}
+
 	return holdings
 }

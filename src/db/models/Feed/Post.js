@@ -92,11 +92,11 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.feed_model.create(investor_id, type, date, data, trx)
+				return post.feed_model.create(trx, investor_id, type, date, data, trx)
 			})
 			.then(() =>
 			{
-				return post.add(investor_id, type, date, data)
+				return post.add(trx, investor_id, type, date, data)
 			})
 			.then(() =>
 			{

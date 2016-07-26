@@ -5,6 +5,8 @@ var _ = require('lodash')
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
+var Err = require('../../../../Err')
+
 module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
@@ -148,13 +150,39 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.updateBrokerage = function (trx, investor_id, type, data)
+	var WrontPostType = Err('wrong_post_type', 'Wrong Post Type')
+
+	portfolio.updateBrokerage = function (trx, investor_id, type, date, data)
 	{
-		return holdings.byInvestorId(investor_id)
-		.catch(err =>
+		var symbol = data.symbol.split('.')
+		var ticker = symbol[0]
+		var exchange = symbol[1]
+
+		symbol = {symbol_exchange: exchange, symbol_ticker: ticker}
+
+		if (data.dir == 'sold')
 		{
-			console.log(err)
-		})
+			return brokerage.byInvestorId(investor_id)
+			.then(resl =>
+			{
+				var cash = resl.cash
+
+				return holdings.sell(trx, investor_id, symbol, data.amount, data.price, cash)
+				.then(cash =>
+				{
+					console.log('Update brokerage now: ')
+					console.log(cash)
+				})
+			})
+			
+		}
+		else if (data.dir == 'bought')
+		{
+
+			return holdings.buy(trx, investor_id, symbol, data.amount, data.price)
+		}
+
+		throw WrontPostType({ type: data.type })
 	}
 
 	portfolio.full = function (investor_id)
