@@ -204,11 +204,11 @@ module.exports = function User (db, app)
 						var start_time = moment(subscr.start_time).valueOf()
 						var end_time = moment(subscr.end_time).valueOf()
 
-						var prev_i = i + 1
+						var next_index = i + 1
 
-						if (prev_i < subscrs.length)
+						if (next_index < subscrs.length)
 						{
-							var prev_subscr = subscrs[prev_i]
+							var prev_subscr = subscrs[next_index]
 
 							var prev_end_time = moment(prev_subscr.end_time).valueOf()
 
@@ -218,11 +218,11 @@ module.exports = function User (db, app)
 							}
 						}
 
-						var days = (end_time - start_time) / 24 / 60 / 60 / 1000 >> 0
+						var days = (end_time - start_time) / 24 / 60 / 60 / 1000
 
 						user_data
 						.subscription
-						.total_payment_days += days + 1
+						.total_payment_days += Math.ceil(days)
 					})
 				}
 
