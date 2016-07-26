@@ -32,13 +32,27 @@ var concat = require('lodash/concat')
 
 knexed.transact = function (knex, method)
 {
-	return function ()
+	return function (trx)
 	{
 		var args = arguments
 
-		return knex.transaction(trx =>
+		if (isTrx(trx))
 		{
-			return method.apply(this, concat(trx, args))
-		})
+			return method.apply(this, args)
+		}
+		else
+		{
+			return knex.transaction(trx =>
+			{
+				return method.apply(this, concat(trx, args))
+			})
+		}
 	}
+}
+
+var isFunction = require('lodash/isFunction')
+
+function isTrx (trx)
+{
+	return isFunction(trx.transaction)
 }
