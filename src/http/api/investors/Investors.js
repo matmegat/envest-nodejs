@@ -5,6 +5,9 @@ var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
 
+var compose = require('composable-middleware')
+var AccessRequired = require('../../access-required')
+
 module.exports = function (db, http)
 {
 	var investors = {}
@@ -67,14 +70,17 @@ module.exports = function (db, http)
 	/***************************************************************************
 	* Admin Routes
 	* *************************************************************************/
+	var accessRequired =
+		compose(authRequired, AccessRequired(investors.model.all, db.admin))
+
 	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
 	{
 		var options = pick(rq.query,
-			[
-				'max_id',
-				'since_id',
-				'page'
-			])
+		[
+			'max_id',
+			'since_id',
+			'page'
+		])
 		toss(rs, investors.model.all.list(options))
 	})
 
@@ -82,6 +88,11 @@ module.exports = function (db, http)
 	{
 		var data = extend({}, rq.body, { admin_id: rq.user.id })
 		toss(rs, investors.model.create(data))
+	})
+
+	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.all.byId(rq.params.id))
 	})
 
 	investors.express.post('/:id/go-public', http.adminRequired, (rq, rs) =>
