@@ -86,7 +86,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			) / investor.historical_returns.length
 			// FIXME: refactor annual return when it comes more complecated
 
-			return _.omit(investor, [ 'historical_returns' ])
+			return investor
 		})
 	}
 
