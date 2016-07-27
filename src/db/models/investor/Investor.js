@@ -55,9 +55,17 @@ module.exports = function Investor (db)
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor.all)
 
-	var investor_create = knexed.transact(knex, (trx, data) =>
+	investor.create = knexed.transact(knex, (trx, data) =>
 	{
-		return generate_code()
+		return new Promise(rs =>
+		{
+			validate.name(data.first_name, 'first_name')
+			validate.name(data.last_name, 'last_name')
+			validate.email(data.email)
+
+			return rs()
+		})
+		.then(() => generate_code())
 		.then((password) =>
 		{
 			var user_data = _.extend({}, data,
@@ -88,25 +96,12 @@ module.exports = function Investor (db)
 				return investor.all.byId(investor_id, trx)
 			})
 		})
-	})
-
-	investor.create = function (data)
-	{
-		return new Promise(rs =>
-		{
-			validate.name(data.first_name, 'first_name')
-			validate.name(data.last_name, 'last_name')
-			validate.email(data.email)
-
-			return rs()
-		})
-		.then(() => investor_create(data))
 		.then((investor_entry) =>
 		{
 			var investor_id = investor_entry.id
 
-			return user.emailConfirm(investor_id, data.email)
-			.then(() => user.password.reqReset(data.email))
+			return user.emailConfirm(trx, investor_id, data.email)
+			.then(() => user.password.reqReset(trx, data.email))
 			.then(() =>
 			{
 				/* notification: 'investor created'
@@ -119,7 +114,7 @@ module.exports = function Investor (db)
 			})
 			.then(() => investor_entry)
 		})
-	}
+	})
 
 	var get_pic = require('lodash/fp/get')('profile_pic')
 
