@@ -150,39 +150,43 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	var WrontPostType = Err('wrong_post_type', 'Wrong Post Type')
+	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
+
+	holdings.dirs = {}
+	holdings.dirs.bought = holdings.buy
+	holdings.dirs.sold = holdings.sell
 
 	portfolio.updateBrokerage = function (trx, investor_id, type, date, data)
 	{
+		var dir = data.dir
 		var symbol = data.symbol.split('.')
 		var ticker = symbol[0]
 		var exchange = symbol[1]
 
-		symbol = {symbol_exchange: exchange, symbol_ticker: ticker}
-
-		if (data.dir == 'sold')
+		symbol =
 		{
-			return brokerage.byInvestorId(investor_id)
-			.then(resl =>
-			{
-				var cash = resl.cash
-
-				return holdings.sell(trx, investor_id, symbol, data.amount, data.price, cash)
-				.then(cash =>
-				{
-					console.log('Update brokerage now: ')
-					console.log(cash)
-				})
-			})
-			
-		}
-		else if (data.dir == 'bought')
-		{
-
-			return holdings.buy(trx, investor_id, symbol, data.amount, data.price)
+			symbol_exchange: exchange,
+			symbol_ticker: ticker
 		}
 
-		throw WrontPostType({ type: data.type })
+		if (! (dir in holdings.dirs))
+		{
+			throw WrongTradeDir({ dir: dir })
+		}
+
+		return brokerage.byInvestorId(investor_id)
+		.then(resl =>
+		{
+			var cash = resl.cash_value
+
+			return holdings.dirs[dir](trx, investor_id, symbol, data, cash)
+		})
+		.then(sum =>
+		{
+			console.log(sum)
+
+			return sum
+		})
 	}
 
 	portfolio.full = function (investor_id)
