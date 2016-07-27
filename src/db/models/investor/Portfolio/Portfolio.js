@@ -183,8 +183,6 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(sum =>
 		{
-			console.log(sum)
-
 			return sum
 		})
 	}
