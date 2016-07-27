@@ -345,22 +345,19 @@ module.exports = function User (db, app)
 		.then(oneMaybe)
 	}
 
-	user.emailConfirm = function (user_id, new_email)
+	user.emailConfirm = knexed.transact(knex, (trx, user_id, new_email) =>
 	{
-		return knex.transaction(function (trx)
+		return user.users_table(trx)
+		.where('id', user_id)
+		.update({
+			email: new_email
+		}, 'id')
+		.then(one)
+		.then(function (id)
 		{
-			return user.users_table(trx)
-			.where('id', user_id)
-			.update({
-				email: new_email
-			}, 'id')
-			.then(one)
-			.then(function (id)
-			{
-				return newEmailRemove(id, trx)
-			})
+			return newEmailRemove(id, trx)
 		})
-	}
+	})
 
 	function newEmailRemove (user_id, trx)
 	{
