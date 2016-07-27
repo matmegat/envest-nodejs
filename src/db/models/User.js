@@ -328,43 +328,40 @@ module.exports = function User (db, app)
 		.then(oneMaybe)
 	}
 
-	user.createFacebook = function (data)
+	user.createFacebook = knexed.transact(knex, (trx, data) =>
 	{
-		return knex.transaction(function (trx)
+		return user.users_table(trx)
+		.insert({
+			first_name: data.first_name,
+			last_name: data.last_name,
+			email: null
+		}
+		, 'id')
+		.then(one)
+		.then(id =>
 		{
-			return user.users_table(trx)
-			.insert({
-				first_name: data.first_name,
-				last_name: data.last_name,
-				email: null
-			}
-			, 'id')
-			.then(one)
-			.then(id =>
+			return user.newEmailUpdate(trx,
 			{
-				return user.newEmailUpdate(trx,
-				{
-					user_id: id,
-					new_email: data.email
-				})
-			})
-			.then(id =>
-			{
-				return createFacebookUser({
-					user_id: id,
-					facebook_id: data.facebook_id
-				}, trx)
-			})
-			.then(() =>
-			{
-				return user.byFacebookId(data.facebook_id, trx)
-			})
-			.then(result =>
-			{
-				return result.id
+				user_id: id,
+				new_email: data.email
 			})
 		})
-	}
+		.then(id =>
+		{
+			return createFacebookUser({
+				user_id: id,
+				facebook_id: data.facebook_id
+			}, trx)
+		})
+		.then(() =>
+		{
+			return user.byFacebookId(data.facebook_id, trx)
+		})
+		.then(result =>
+		{
+			return result.id
+		})
+	})
 
 	user.byFB = function (data)
 	{
@@ -398,22 +395,19 @@ module.exports = function User (db, app)
 		.then(oneMaybe)
 	}
 
-	user.emailConfirm = function (user_id, new_email)
+	user.emailConfirm = knexed.transact(knex, (trx, user_id, new_email) =>
 	{
-		return knex.transaction(function (trx)
+		return user.users_table(trx)
+		.where('id', user_id)
+		.update({
+			email: new_email
+		}, 'id')
+		.then(one)
+		.then(function (id)
 		{
-			return user.users_table(trx)
-			.where('id', user_id)
-			.update({
-				email: new_email
-			}, 'id')
-			.then(one)
-			.then(function (id)
-			{
-				return newEmailRemove(id, trx)
-			})
+			return newEmailRemove(id, trx)
 		})
-	}
+	})
 
 	function newEmailRemove (user_id, trx)
 	{

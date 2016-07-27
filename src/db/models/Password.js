@@ -3,6 +3,7 @@ var knexed = require('../knexed')
 var upsert = require('../upsert')
 
 var Err = require('../../Err')
+
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
@@ -104,7 +105,7 @@ module.exports = function Password (db, user, app)
 		})
 		.then(() =>
 		{
-			return user.byEmail(email)
+			return user.byEmail(email, trx)
 		})
 		.then(Err.nullish(EmailNotFound))
 		.then(user =>
