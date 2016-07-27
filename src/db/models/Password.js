@@ -3,7 +3,6 @@ var knexed = require('../knexed')
 var upsert = require('../upsert')
 
 var Err = require('../../Err')
-var noop = require('lodash/noop')
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
@@ -146,8 +145,9 @@ module.exports = function Password (db, user, app)
 						// text: 'Password reset code: '
 						// + code.toUpperCase(),
 						html: 'Please tap the link to reset password: '
-						+ `<a href="http://${host}/reset-password?code=${code.toUpperCase()}" target="_blank">
-							Reset Password</a><br>`
+						+ `<a href="http://${host}/reset-password?code=`
+						+ `${code.toUpperCase()}" target="_blank">`
+						+ `Reset Password</a><br>`
 						+ `Your password reset code: ${code.toUpperCase()}`
 					})
 				})
