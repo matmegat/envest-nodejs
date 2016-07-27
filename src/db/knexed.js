@@ -36,7 +36,7 @@ knexed.transact = function (knex, method)
 	{
 		var args = arguments
 
-		if (isTrx(trx))
+		if (istx(trx))
 		{
 			return method.apply(this, args)
 		}
@@ -48,11 +48,4 @@ knexed.transact = function (knex, method)
 			})
 		}
 	}
-}
-
-var isFunction = require('lodash/isFunction')
-
-function isTrx (trx)
-{
-	return isFunction(trx.transaction)
 }
