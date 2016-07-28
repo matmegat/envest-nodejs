@@ -172,6 +172,12 @@ definitions:
   HistoricalReturn:
     $ref: ../api/investors/swag/HistoricalReturn.yaml
 
+  Holdings:
+    $ref: ../api/investors/swag/Holdings.yaml
+
+  Holding:
+    $ref: ../api/investors/swag/Holding.yaml
+
   Investors:
     $ref: ../api/investors/swag/Investors.yaml
 
