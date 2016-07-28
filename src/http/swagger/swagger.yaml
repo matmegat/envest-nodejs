@@ -17,6 +17,9 @@ paths:
   '/feed':
     $ref: ../api/feed/swag/GetFeed.yaml
 
+  '/feed/post':
+    $ref: ../api/feed/swag/FeedPost.yaml
+
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
