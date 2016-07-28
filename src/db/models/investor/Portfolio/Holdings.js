@@ -14,6 +14,7 @@ module.exports = function Holdings (db, investor)
 
 	var knex = db.knex
 	var oneMaybe = db.helpers.oneMaybe
+	var one = db.helpers.one
 
 	holdings.table = knexed(knex, 'portfolio_symbols')
 
@@ -110,6 +111,17 @@ module.exports = function Holdings (db, investor)
 		.where('investor_id', investor_id)
 	}
 
+	holdings.removeSymbol = function (trx, investor_id, symbol)
+	{
+		return holdings.table(trx)
+		.where({
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker
+		})
+		.del()
+	}
+
 	holdings.getSymbol = function (investor_id, symbol)
 	{
 		return holdings.table()
@@ -164,6 +176,14 @@ module.exports = function Holdings (db, investor)
 		.update(
 		{
 			amount: symbol.amount - amount,
+		}, 'amount')
+		.then(one)
+		.then(amount =>
+		{
+			if (amount === 0)
+			{
+				return holdings.removeSymbol(trx, investor_id, symbol)
+			}
 		})
 		.then(() =>
 		{
