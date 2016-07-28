@@ -43,6 +43,8 @@ module.exports = function Promo (db)
 		type: Filter.by.equal('type')
 	})
 
+	var PromoAlreadyExists = Err('promo_code_already_3xists', 'Promo code already exists')
+
 	promo.create = function (type, code, end_time, activations)
 	{
 		return new Promise(rs =>
@@ -82,6 +84,7 @@ module.exports = function Promo (db)
 				activations: activations
 			})
 		})
+		.catch(Err.fromDb('promo_codes_pkey', PromoAlreadyExists))
 	}
 
 	var WrongPromoId = Err('wrong_promo_id', 'Wrong promocode id')
