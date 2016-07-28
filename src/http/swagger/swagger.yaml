@@ -77,6 +77,9 @@ paths:
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
 
+  '/investors/{investor_id}/admin':
+    $ref: ../api/investors/swag/GetInvestorAdmin.yaml
+
   '/investors/{investor_id}/chart':
     $ref: ../api/investors/swag/Get-InvestorChart.yaml
 
