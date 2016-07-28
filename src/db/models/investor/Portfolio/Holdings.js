@@ -240,8 +240,6 @@ module.exports = function Holdings (db, investor)
 
 	function calculate_buy_price (amount_old, price_old, amount, price)
 	{
-		console.log(amount_old, price_old, amount, price)
-
 		return (amount_old * price_old + amount * price) / (amount_old + amount)
 	}
 

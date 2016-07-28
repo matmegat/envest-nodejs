@@ -131,7 +131,7 @@ module.exports = function Brokerage (db, investor)
 		{
 			throw InvalidAmount()
 		}
-		if (amount + brokerage.cash_value < 0)
+		if (amount + Number(brokerage.cash_value) < 0)
 		{
 			throw InvalidAmount(
 			{
