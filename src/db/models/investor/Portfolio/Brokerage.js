@@ -98,7 +98,7 @@ module.exports = function Brokerage (db, investor)
 				throw InvalidOperation()
 			}
 
-			data.cash_value = amount + brokerage.cash_value
+			data.cash_value = amount + Number(brokerage.cash_value)
 			return set_brokerage(trx, investor_id, data)
 		})
 	})
