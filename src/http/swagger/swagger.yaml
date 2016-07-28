@@ -166,6 +166,12 @@ definitions:
   Investor:
     $ref: ../api/investors/swag/Investor.yaml
 
+  HistoricalReturns:
+    $ref: ../api/investors/swag/HistoricalReturns.yaml
+
+  HistoricalReturn:
+    $ref: ../api/investors/swag/HistoricalReturn.yaml
+
   Investors:
     $ref: ../api/investors/swag/Investors.yaml
 

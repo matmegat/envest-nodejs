@@ -30,6 +30,8 @@ properties:
   annual_return:
     type: number
     description: Investor's 5 year annual return in percentage
+  historical_returns:
+    $ref: ./HistoricalReturns.yaml
   is_featured:
     type: boolean
     description: Is featured Investor
