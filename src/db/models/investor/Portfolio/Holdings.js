@@ -228,7 +228,7 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.sell = function (trx, investor_id, symbol, data, cash)
+	holdings.sell = function (trx, investor_id, symbol, data)
 	{
 		var amount = data.amount
 		var price = data.price
@@ -236,7 +236,7 @@ module.exports = function Holdings (db, investor)
 		return holdings.getSymbol(investor_id, symbol)
 		.then(symbl =>
 		{
-			if (! symbol)
+			if (! symbl)
 			{
 				throw SymbolNotFound({ symbol: symbol })
 			}

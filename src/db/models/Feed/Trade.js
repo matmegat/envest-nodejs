@@ -49,7 +49,7 @@ function validate_trade (data)
 		validate.required(data.price, 'price')
 		validate.empty(data.price, 'price')
 
-		if (data.price <= 0)
+		if (data.price < 0)
 		{
 			throw InvalidAmount({field: 'price'})
 		}
@@ -57,7 +57,7 @@ function validate_trade (data)
 		validate.required(data.amount, 'amount')
 		validate.empty(data.amount, 'amount')
 
-		if (data.amount <= 0)
+		if (data.amount < 0)
 		{
 			throw InvalidAmount({field: 'amount'})
 		}
