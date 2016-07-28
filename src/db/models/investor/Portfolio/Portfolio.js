@@ -156,7 +156,7 @@ module.exports = function Portfolio (db, investor)
 	holdings.dirs.bought = holdings.buy
 	holdings.dirs.sold = holdings.sell
 
-	portfolio.updateBrokerage = function (trx, investor_id, type, date, data)
+	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
 		var dir = data.dir
 		var symbol = data.symbol.split('.')

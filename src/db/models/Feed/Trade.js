@@ -13,7 +13,7 @@ module.exports = function Trade (portfolio)
 		validate: validate_trade,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return portfolio.updateBrokerage(trx, investor_id, type, date, data)
+			return portfolio.makeTrade(trx, investor_id, type, date, data)
 		}
 	})
 }
