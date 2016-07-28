@@ -5,6 +5,8 @@ var _ = require('lodash')
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
+var Symbl = require('../../symbols/Symbl')
+
 var Err = require('../../../../Err')
 
 module.exports = function Portfolio (db, investor)
@@ -163,18 +165,22 @@ module.exports = function Portfolio (db, investor)
 		var ticker = symbol[0]
 		var exchange = symbol[1]
 
-		symbol =
+		return Symbl.validate(symbol)
+		.then(() =>
 		{
-			symbol_exchange: exchange,
-			symbol_ticker: ticker
-		}
+			symbol =
+			{
+				symbol_exchange: exchange,
+				symbol_ticker: ticker
+			}
 
-		if (! (dir in holdings.dirs))
-		{
-			throw WrongTradeDir({ dir: dir })
-		}
+			if (! (dir in holdings.dirs))
+			{
+				throw WrongTradeDir({ dir: dir })
+			}
 
-		return brokerage.byInvestorId(investor_id)
+			return brokerage.byInvestorId(investor_id)
+		})
 		.then(resl =>
 		{
 			var cash = resl.cash_value
