@@ -238,11 +238,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					symbol.toXign(),
 					today().subtract(5, 'days'),
 					today().endOf('day')
-				)
-				.then(last_day),
+				),
 
-				year_to_date(symbol)
-				.then(take_n(24)),
+				year_to_date(symbol),
 
 				xign.series(
 					symbol.toXign(),
@@ -251,14 +249,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					today().diff(today().subtract(1, 'month'), 'days')
 				),
 
-				xign.series(symbol.toXign(), today(), 'Week', 26)
-				.then(take_n(26)),
+				xign.series(symbol.toXign(), today(), 'Week', 26),
 
-				xign.series(symbol.toXign(), today(), 'Day', 365)
-				.then(take_n(24)),
+				xign.series(symbol.toXign(), today(), 'Day', 365),
 
-				xign.series(symbol.toXign(), today(), 'Quarter', 20)
-				.then(take_n(24)),
+				xign.series(symbol.toXign(), today(), 'Quarter', 20),
 			])
 		})
 		.then((values) =>
@@ -295,16 +290,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		var start_date = moment.utc().startOf('year')
 		var end_date = moment.utc().endOf('day')
 
+		var today = () => moment.utc().startOf('day')
+
 		var days = end_date.diff(start_date, 'days')
 
-		if (days <= 20)
-		{
-			return xign.bars(symbol.toXign(), start_date, end_date)
-		}
-		else
-		{
-			return xign.series(symbol.toXign(), end_date, 'Day', days)
-		}
+		return xign.series(symbol.toXign(), today(), 'Day', days)
 	}
 
 	function take_n (amount)
