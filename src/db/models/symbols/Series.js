@@ -71,7 +71,7 @@ module.exports = function Series (token)
 	series.bars = (symbol, start_date, end_date) =>
 	{
 		var precision = 'Minutes'
-		var period = 15
+		var period = 5
 
 		var uri = format(
 		{
