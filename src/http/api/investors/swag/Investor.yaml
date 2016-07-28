@@ -34,6 +34,8 @@ properties:
     $ref: ./HistoricalReturns.yaml
   holdings:
     $ref: ./Holdings.yaml
+  brokerage:
+    $ref: ./Brokerage.yaml
   is_featured:
     type: boolean
     description: Is featured Investor

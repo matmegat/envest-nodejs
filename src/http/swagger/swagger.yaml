@@ -178,6 +178,9 @@ definitions:
   Holding:
     $ref: ../api/investors/swag/Holding.yaml
 
+  Brokerage:
+    $ref: ../api/investors/swag/Brokerage.yaml
+
   Investors:
     $ref: ../api/investors/swag/Investors.yaml
 
