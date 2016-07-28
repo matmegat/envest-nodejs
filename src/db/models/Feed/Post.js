@@ -44,7 +44,7 @@ module.exports = function Post (db)
 	}
 
 	var InvestorPostDateErr =
-		Err('investor_post_date_exeeded', 'Investor post date investor_post_date_exeeded')
+		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
 	post.create = function (investor_id, type, date, data)
 	{

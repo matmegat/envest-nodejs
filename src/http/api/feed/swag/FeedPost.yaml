@@ -15,6 +15,10 @@ post:
         type:
           type: string
           description: Post type trade / watchlist / update
+        date:
+          type: string
+          format: date-time
+          description: Post date
         trade_data:
           type: object
           description: Post properties
