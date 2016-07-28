@@ -78,7 +78,6 @@ module.exports = function NetvestSubsc (db, cfg)
 				})
 			})
 		})
-		
 	})
 
 	var WrongToken = Err('wrong_subscr_token', 'Wrong subscription token')
