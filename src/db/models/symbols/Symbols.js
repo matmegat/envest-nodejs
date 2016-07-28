@@ -238,11 +238,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					symbol.toXign(),
 					today().subtract(5, 'days'),
 					today().endOf('day')
-				)
-				.then(last_day),
+				),
 
-				year_to_date(symbol)
-				.then(take_n(24)),
+				year_to_date(symbol),
 
 				xign.series(
 					symbol.toXign(),
@@ -251,14 +249,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					today().diff(today().subtract(1, 'month'), 'days')
 				),
 
-				xign.series(symbol.toXign(), today(), 'Week', 26)
-				.then(take_n(26)),
+				xign.series(symbol.toXign(), today(), 'Week', 182),
 
-				xign.series(symbol.toXign(), today(), 'Day', 365)
-				.then(take_n(24)),
+				xign.series(symbol.toXign(), today(), 'Day', 365),
 
-				xign.series(symbol.toXign(), today(), 'Quarter', 20)
-				.then(take_n(24)),
+				xign.series(symbol.toXign(), today(), 'Day', 1825),
 			])
 		})
 		.then((values) =>
@@ -274,61 +269,16 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	function last_day (chart_items)
-	{
-		if (! chart_items.length)
-		{
-			return  chart_items
-		}
-
-		var last_day = chart_items[chart_items.length - 1].timestamp
-		last_day = moment(last_day).dayOfYear()
-
-		return chart_items.filter((char_item) =>
-		{
-			return moment(char_item.timestamp).dayOfYear() === last_day
-		})
-	}
-
 	function year_to_date (symbol)
 	{
 		var start_date = moment.utc().startOf('year')
 		var end_date = moment.utc().endOf('day')
 
+		var today = () => moment.utc().startOf('day')
+
 		var days = end_date.diff(start_date, 'days')
 
-		if (days <= 20)
-		{
-			return xign.bars(symbol.toXign(), start_date, end_date)
-		}
-		else
-		{
-			return xign.series(symbol.toXign(), end_date, 'Day', days)
-		}
-	}
-
-	function take_n (amount)
-	{
-		/* takes ${amount} of points from  chart items
-		* - every point should be equidistant from one to another
-		* */
-		return (chart_items) =>
-		{
-			if (chart_items.length <= amount)
-			{
-				return Promise.resolve(chart_items)
-			}
-
-			var step = Math.round(chart_items.length / amount)
-			var equidistant_points = []
-
-			for (var i = 0; i < chart_items.length; i += step)
-			{
-				equidistant_points.push(chart_items[i])
-			}
-
-			return equidistant_points
-		}
+		return xign.series(symbol.toXign(), today(), 'Day', days)
 	}
 
 	return symbols
