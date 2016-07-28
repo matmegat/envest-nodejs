@@ -9,8 +9,12 @@ exports.up = function (knex)
 
 		table.integer('activations')
 
-		table.string('type').notNullable()
-		table.string('code').notNullable()
+		table.string('type')
+		.notNullable()
+
+		table.string('code')
+		.notNullable()
+		.unique()
 	})
 }
 
