@@ -48,7 +48,33 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/chart', (rq, rs) =>
 	{
-		toss(rs, db.symbols.series('TSLA'))
+		var filter = require('lodash/filter')
+		var moment = require('moment')
+
+		 var y2 = moment.utc().startOf('day').substract(2, 'years')
+
+		// toss(rs, db.symbols.series('TSLA'))
+		db.symbols.series('TSLA')
+		.then((chart_data) =>
+		{
+			if (! chart_data[0].points.length)
+			{
+				chart_data[0].points = chart_data[2].points	// m1 resolution
+			}
+
+			chart_data[5].period = '2y'
+			chart_data[5].points = filter(
+				chart_data[5].points,
+				(point) =>
+				{
+					return moment.utc(point.timestamp) >= y2
+				}
+			)
+
+			return chart_data
+		})
+		.then(toss.ok(rs))
+		.catch(toss.err(rs))
 	})
 
 	investors.express.post('/:id/field', (rq, rs) =>
