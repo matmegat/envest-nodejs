@@ -9,6 +9,7 @@ var validate = require('../validate')
 var Err = require('../../Err')
 
 var _ = require('lodash')
+var noop = _.noop
 
 module.exports = function Comments (db)
 {
@@ -26,6 +27,9 @@ module.exports = function Comments (db)
 
 	expect(db, 'Comments depends on User').property('user')
 	var user = db.user
+
+	expect(db, 'Comments depends on Admin').property('admin')
+	var admin = db.admin
 
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments, Emitter)
@@ -144,6 +148,8 @@ module.exports = function Comments (db)
 		})
 	}
 
+	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+	var validate_id = require('../../id').validate.promise(WrongCommentId)
 
 	comments.byId = function (id)
 	{
@@ -156,9 +162,36 @@ module.exports = function Comments (db)
 		})
 	}
 
+	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
 
-	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
-	var validate_id = require('../../id').validate.promise(WrongCommentId)
+	comments.remove = function (user_id, id)
+	{
+		return comments.byId(id)
+		.then(Err.nullish(CommentNotExist))
+		.then((comment) =>
+		{
+			if (comment.user_id === user_id)
+			{
+				return remove_by_id(id)
+			}
+			else
+			{
+				return admin.ensure(user_id)
+				.then(() =>
+				{
+					return remove_by_id(id)
+				})
+			}
+		})
+		.then(noop)
+	}
+
+	function remove_by_id (id)
+	{
+		return comments.table()
+		.where('id', id)
+		.del()
+	}
 
 	return comments
 }

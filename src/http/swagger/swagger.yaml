@@ -56,6 +56,9 @@ paths:
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
+  '/comments/{id}':
+    $ref: ../api/comments/swag/Remove.yaml
+
   '/comments/count':
     $ref: ../api/comments/swag/GetCount.yaml
 
