@@ -15,6 +15,7 @@ var GetDataErr = Err(
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
+var filter = require('lodash/filter')
 
 var moment = require('moment')
 
@@ -236,49 +237,45 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			[
 				xign.bars(
 					symbol.toXign(),
-					today().subtract(5, 'days'),
+					today(),
 					today().endOf('day')
 				),
-
-				year_to_date(symbol),
 
 				xign.series(
 					symbol.toXign(),
 					today(),
 					'Day',
-					today().diff(today().subtract(1, 'month'), 'days')
+					today().diff(
+						today().subtract(5, 'years'),
+						'days'
+					)
 				),
-
-				xign.series(symbol.toXign(), today(), 'Week', 182),
-
-				xign.series(symbol.toXign(), today(), 'Day', 365),
-
-				xign.series(symbol.toXign(), today(), 'Day', 1825),
 			])
 		})
 		.then((values) =>
 		{
+			var by_date = (points, date) =>
+			{
+				return filter(points, (point) =>
+				{
+					return moment.utc(point.timestamp) >= date
+				})
+			}
+
+			var ytd = moment.utc().startOf('year')
+			var m1 = moment.utc().startOf('day').subtract(1, 'month')
+			var m6 = moment.utc().startOf('day').subtract(6, 'month')
+			var y1 = moment.utc().startOf('day').subtract(1, 'year')
+
 			return [
 				{ period: 'today', points: values[0] },
-				{ period: 'ytd', points: values[1] },
-				{ period: 'm1', points: values[2] },
-				{ period: 'm6', points: values[3] },
-				{ period: 'y1', points: values[4] },
-				{ period: 'y5', points: values[5] },
+				{ period: 'ytd', points: by_date(values[1], ytd) },
+				{ period: 'm1', points: by_date(values[1], m1) },
+				{ period: 'm6', points: by_date(values[1], m6) },
+				{ period: 'y1', points: by_date(values[1], y1) },
+				{ period: 'y5', points: values[1] },
 			]
 		})
-	}
-
-	function year_to_date (symbol)
-	{
-		var start_date = moment.utc().startOf('year')
-		var end_date = moment.utc().endOf('day')
-
-		var today = () => moment.utc().startOf('day')
-
-		var days = end_date.diff(start_date, 'days')
-
-		return xign.series(symbol.toXign(), today(), 'Day', days)
 	}
 
 	return symbols
