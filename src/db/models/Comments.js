@@ -172,23 +172,25 @@ module.exports = function Comments (db)
 		{
 			if (comment.user_id === user_id)
 			{
-				return comments.table()
-				.where('id', id)
-				.andWhere('user_id', user_id)
-				.del()
+				return remove_by_id(id)
 			}
 			else
 			{
 				return admin.ensure(user_id)
 				.then(() =>
 				{
-					return comments.table()
-					.where('id', id)
-					.del()
+					return remove_by_id(id)
 				})
 			}
 		})
 		.then(noop)
+	}
+
+	function remove_by_id (id)
+	{
+		return comments.table()
+		.where('id', id)
+		.del()
 	}
 
 	return comments
