@@ -51,7 +51,7 @@ module.exports = function (db, http)
 		var filter = require('lodash/filter')
 		var moment = require('moment')
 
-		 var y2 = moment.utc().startOf('day').substract(2, 'years')
+		 var y2 = moment.utc().startOf('day').subtract(2, 'years')
 
 		// toss(rs, db.symbols.series('TSLA'))
 		db.symbols.series('TSLA')
@@ -62,7 +62,7 @@ module.exports = function (db, http)
 				chart_data[0].points = chart_data[2].points	// m1 resolution
 			}
 
-			chart_data[5].period = '2y'
+			chart_data[5].period = 'y2'
 			chart_data[5].points = filter(
 				chart_data[5].points,
 				(point) =>
