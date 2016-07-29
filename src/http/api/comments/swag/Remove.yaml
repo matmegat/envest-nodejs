@@ -1,0 +1,22 @@
+delete:
+  description: |
+    Remove comment for Post (Feed Item)
+  parameters:
+  - name: id
+    in: path
+    type: integer
+    description: Comment id
+    required: true
+
+  responses:
+    200:
+      description: Post comment (Feed Item) successfull removed
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - comments
+  - admin
