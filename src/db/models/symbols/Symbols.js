@@ -135,9 +135,10 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(symbol =>
 		{
 			return xign.historical(symbol.toXign())
-			.catch(err =>
+			.catch(() =>
 			{
-				console.log(err)
+				// warn_rethrow ~
+				// util.unwrap
 
 				throw GetDataErr({ symbol: symbol })
 			})
