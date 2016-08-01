@@ -1,4 +1,5 @@
 var _ = require('lodash')
+var at = require('lodash/fp/at')
 
 var generate_code = require('../../../crypto-helpers').generate_code
 
@@ -15,6 +16,8 @@ var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
+
+var Symbl = require('../symbols/Symbl')
 
 var validate = require('../../validate')
 
@@ -146,6 +149,34 @@ module.exports = function Investor (db)
 		})
 		.then(one)
 	})
+
+
+	investor.chart = function(id)
+	{
+		return investor.all.ensure(id)
+		.then(() => investor.portfolio.full(id))
+		.then((full_portfolio) =>
+		{
+			var brokerage = full_portfolio.brokerage
+			var holdings  = full_portfolio.holdings
+
+			console.info('Full Portfolio for', id)
+			console.info('\n', JSON.stringify(full_portfolio, null, 4))
+
+			var symbols = holdings
+			.map(at([ 'symbol.ticker', 'symbol.exchange' ]))
+			.map(Symbl)
+
+			return {
+				today: [],
+				ytd:   [],
+				m1:    [],
+				m6:    [],
+				y1:    [],
+				y2:    []
+			}
+		})
+	}
 
 	return investor
 }
