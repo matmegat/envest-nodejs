@@ -36,6 +36,20 @@ module.exports = function (db, http)
 		toss(rs, investors.model.public.list(options))
 	})
 
+	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
+	{
+		var options = {}
+
+		options.paginator = pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page'
+		])
+
+		toss(rs, investors.model.all.list(options))
+	})
+
 	investors.express.get('/:id', (rq, rs) =>
 	{
 		toss(rs, investors.model.public.byId(rq.params.id))
@@ -98,17 +112,6 @@ module.exports = function (db, http)
 	* *************************************************************************/
 	var accessRequired =
 		compose(authRequired, AccessRequired(investors.model.all, db.admin))
-
-	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
-	{
-		var options = pick(rq.query,
-		[
-			'max_id',
-			'since_id',
-			'page'
-		])
-		toss(rs, investors.model.all.list(options))
-	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
