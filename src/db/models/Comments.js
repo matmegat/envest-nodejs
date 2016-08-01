@@ -34,6 +34,8 @@ module.exports = function Comments (db)
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments, Emitter)
 
+	var map = _.map
+
 	comments.list = function (options)
 	{
 		return db.feed.validateFeedId(options.feed_id)
@@ -45,7 +47,7 @@ module.exports = function Comments (db)
 		})
 		.then((comments_items) =>
 		{
-			return user.list(_.map(comments_items, 'user_id'))
+			return user.list(map(comments_items, 'user_id'))
 			.then((users) =>
 			{
 				var response =
@@ -162,26 +164,53 @@ module.exports = function Comments (db)
 		})
 	}
 
-	var CommentNotExist = Err('comment_not_exist', 'Comment not exist')
+	var find = _.find
+
+	var CommentNotExist = Err('comment_not_exist',
+	'Comment not exist')
+
+	var AdminOwnerRequired = Err('admin_owner_required',
+	'You must be the administrator or owner of comment')
 
 	comments.remove = function (user_id, id)
 	{
 		return comments.byId(id)
 		.then(Err.nullish(CommentNotExist))
-		.then((comment) =>
+		.then(() =>
 		{
-			if (comment.user_id === user_id)
+			return admin.is(user_id)
+			.then((is_admin) =>
 			{
-				return remove_by_id(id)
-			}
-			else
-			{
-				return admin.ensure(user_id)
-				.then(() =>
+				if (is_admin)
 				{
 					return remove_by_id(id)
-				})
-			}
+				}
+				else
+				{
+					return knex('feed_items')
+					.where('investor_id', user_id)
+					.then((feeds) =>
+					{
+						return map(feeds, 'id')
+					})
+					.then((feed_ids) =>
+					{
+						return comments.table()
+						.whereIn('feed_id', feed_ids)
+					})
+					.then((comments_item) =>
+					{
+						var comment_id = toNumber(id)
+
+						return find(comments_item, { id: comment_id })
+					})
+					.then(Err.nullish(AdminOwnerRequired))
+					.then(() =>
+					{
+						return remove_by_id(id)
+					})
+				}
+			})
 		})
 		.then(noop)
 	}
