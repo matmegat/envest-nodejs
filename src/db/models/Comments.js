@@ -10,6 +10,7 @@ var Err = require('../../Err')
 
 var _ = require('lodash')
 var noop = _.noop
+var map  = _.map
 
 module.exports = function Comments (db)
 {
@@ -33,8 +34,6 @@ module.exports = function Comments (db)
 
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments, Emitter)
-
-	var map = _.map
 
 	comments.list = function (options)
 	{
@@ -166,53 +165,41 @@ module.exports = function Comments (db)
 
 	var find = _.find
 
-	var CommentNotExist = Err('comment_not_exist',
+	comments.CommentNotExist = Err('comment_not_exist',
 	'Comment not exist')
 
 	var AdminOwnerRequired = Err('admin_owner_required',
-	'You must be the administrator or owner of comment')
+	'You must be the administrator or owner of feed post')
 
 	comments.remove = function (user_id, id)
 	{
 		return comments.byId(id)
-		.then(Err.nullish(CommentNotExist))
+		.then(Err.nullish(comments.CommentNotExist))
 		.then(() =>
 		{
-			return admin.is(user_id)
-			.then((is_admin) =>
-			{
-				if (is_admin)
-				{
-					return remove_by_id(id)
-				}
-				else
-				{
-					return knex('feed_items')
-					.where('investor_id', user_id)
-					.then((feeds) =>
-					{
-						return map(feeds, 'id')
-					})
-					.then((feed_ids) =>
-					{
-						return comments.table()
-						.whereIn('feed_id', feed_ids)
-					})
-					.then((comments_item) =>
-					{
-						var comment_id = toNumber(id)
-
-						return find(comments_item, { id: comment_id })
-					})
-					.then(Err.nullish(AdminOwnerRequired))
-					.then(() =>
-					{
-						return remove_by_id(id)
-					})
-				}
-			})
+			return comments.ensure(user_id, id)
+		})
+		.then(() =>
+		{
+			return remove_by_id(id)
 		})
 		.then(noop)
+	}
+
+	comments.ensure = function (user_id, id)
+	{
+		return admin.is(user_id)
+		.then((is_admin) =>
+		{
+			if (! is_admin)
+			{
+				return comments.table()
+				.where('comments.id', id)
+				.leftJoin('feed_items',
+				'investor_id', user_id)
+				.then(Err.nullish(AdminOwnerRequired))
+			}
+		})
 	}
 
 	function remove_by_id (id)
