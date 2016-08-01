@@ -163,10 +163,8 @@ module.exports = function Comments (db)
 		})
 	}
 
-	var find = _.find
-
-	comments.CommentNotExist = Err('comment_not_exist',
-	'Comment not exist')
+	comments.CommentNotFound = Err('comment_not_found',
+	'Comment not found')
 
 	var AdminOwnerRequired = Err('admin_owner_required',
 	'You must be the administrator or owner of feed post')
@@ -174,12 +172,12 @@ module.exports = function Comments (db)
 	comments.remove = function (user_id, id)
 	{
 		return comments.byId(id)
-		.then(Err.nullish(comments.CommentNotExist))
+		.then(Err.nullish(comments.CommentNotFound))
 		.then(() =>
 		{
 			return comments.ensure(user_id, id)
 		})
-		.then(() =>
+		.then((ttt) =>
 		{
 			return remove_by_id(id)
 		})
@@ -194,10 +192,11 @@ module.exports = function Comments (db)
 			if (! is_admin)
 			{
 				return comments.table()
-				.where('comments.id', id)
 				.leftJoin('feed_items',
-				'investor_id', user_id)
-				.then(Err.nullish(AdminOwnerRequired))
+				'feed_items.id', 'comments.feed_id')
+				.where('comments.id', id)
+				.andWhere('investor_id', user_id)
+				.then(Err.emptish(AdminOwnerRequired))
 			}
 		})
 	}

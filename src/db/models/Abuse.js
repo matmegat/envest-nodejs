@@ -21,7 +21,7 @@ module.exports = function Abuse (db, comments, Emitter)
 	abuse.create = function (user_id, comment_id)
 	{
 		return comments.byId(comment_id)
-		.then(Err.nullish(comments.CommentNotExist))
+		.then(Err.nullish(comments.CommentNotFound))
 		.then((comment_items) =>
 		{
 			if (comment_items.user_id === user_id)
