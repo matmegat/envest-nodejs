@@ -111,7 +111,7 @@ module.exports = function Holdings (db, investor)
 		.where('investor_id', investor_id)
 	}
 
-	holdings.removeSymbol = function (trx, investor_id, symbol)
+	function remove_symbol (trx, investor_id, symbol)
 	{
 		return holdings.table(trx)
 		.where({
@@ -122,7 +122,7 @@ module.exports = function Holdings (db, investor)
 		.del()
 	}
 
-	holdings.getSymbol = function (investor_id, symbol)
+	function get_symbol (investor_id, symbol)
 	{
 		return holdings.table()
 		.where({
@@ -133,7 +133,7 @@ module.exports = function Holdings (db, investor)
 		.then(oneMaybe)
 	}
 
-	holdings.addSymbol = function (trx, investor_id, symbol)
+	function add_symbol (trx, investor_id, symbol)
 	{
 		/* @todo: Check if symbol valid */
 
@@ -148,7 +148,7 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.buySymbols = function (trx, investor_id, symbol, amount, price)
+	function buy_symbol (trx, investor_id, symbol, amount, price)
 	{
 		return holdings.table(trx)
 		.where(
@@ -164,7 +164,7 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.sellSymbols = function (trx, investor_id, symbol, amount, price)
+	function sell_symbol (trx, investor_id, symbol, amount, price)
 	{
 		return holdings.table(trx)
 		.where(
@@ -182,7 +182,7 @@ module.exports = function Holdings (db, investor)
 		{
 			if (amount === 0)
 			{
-				return holdings.removeSymbol(trx, investor_id, symbol)
+				return remove_symbol(trx, investor_id, symbol)
 			}
 		})
 		.then(() =>
@@ -208,7 +208,7 @@ module.exports = function Holdings (db, investor)
 			throw NotEnoughtMoney()
 		}
 
-		return holdings.getSymbol(investor_id, symbol)
+		return get_symbol(investor_id, symbol)
 		.then(symbl =>
 		{
 			if (! symbl)
@@ -217,10 +217,10 @@ module.exports = function Holdings (db, investor)
 				symbl.amount = amount
 				symbl.price = price
 
-				return holdings.addSymbol(trx, investor_id, symbl)
+				return add_symbol(trx, investor_id, symbl)
 			}
 			
-			return holdings.buySymbols(trx, investor_id, symbl, amount, price)
+			return buy_symbol(trx, investor_id, symbl, amount, price)
 		})
 		.then(() =>
 		{
@@ -233,7 +233,7 @@ module.exports = function Holdings (db, investor)
 		var amount = data.amount
 		var price = data.price
 
-		return holdings.getSymbol(investor_id, symbol)
+		return get_symbol(investor_id, symbol)
 		.then(symbl =>
 		{
 			if (! symbl)
@@ -254,7 +254,7 @@ module.exports = function Holdings (db, investor)
 				})
 			}
 
-			return holdings.sellSymbols(trx, investor_id, symbl, amount, price)
+			return sell_symbol(trx, investor_id, symbl, amount, price)
 		})
 	}
 
