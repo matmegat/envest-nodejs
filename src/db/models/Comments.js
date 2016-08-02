@@ -175,16 +175,16 @@ module.exports = function Comments (db)
 		.then(Err.nullish(comments.CommentNotFound))
 		.then(() =>
 		{
-			return comments.ensure(user_id, id)
+			return comments.ensureDelete(user_id, id)
 		})
-		.then((ttt) =>
+		.then(() =>
 		{
 			return remove_by_id(id)
 		})
 		.then(noop)
 	}
 
-	comments.ensure = function (user_id, id)
+	comments.ensureDelete = function (user_id, id)
 	{
 		return admin.is(user_id)
 		.then((is_admin) =>
@@ -192,13 +192,14 @@ module.exports = function Comments (db)
 			if (! is_admin)
 			{
 				return comments.table()
-				.leftJoin('feed_items',
-				'feed_items.id', 'comments.feed_id')
+				.rightJoin('feed_items',
+				'feed_items.id', 'comments.feed_id ')
 				.where('comments.id', id)
-				.andWhere('investor_id', user_id)
+				.where('investor_id', user_id)
 				.then(Err.emptish(AdminOwnerRequired))
 			}
 		})
+		.then(Boolean)
 	}
 
 	function remove_by_id (id)
