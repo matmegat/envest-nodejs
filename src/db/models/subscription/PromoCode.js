@@ -43,7 +43,10 @@ module.exports = function Promo (db)
 		type: Filter.by.equal('type')
 	})
 
-	var PromoAlreadyExists = Err('promo_code_already_3xists', 'Promo code already exists')
+	var PromoAlreadyExists = Err(
+		'promo_code_already_exists',
+		'Promo code already exists'
+	)
 
 	promo.create = function (type, code, end_time, activations)
 	{
