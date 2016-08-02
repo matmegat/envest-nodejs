@@ -1,6 +1,5 @@
 
 var extend = require('lodash/extend')
-var same = require('lodash/identity')
 var noop = require('lodash/noop')
 
 module.exports = function Type (options)

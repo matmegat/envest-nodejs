@@ -168,7 +168,7 @@ module.exports = function Holdings (db, investor)
 	{
 		return holdings.table(trx)
 		.where(
-		{	
+		{
 			investor_id: investor_id,
 			symbol_exchange: symbol.symbol_exchange,
 			symbol_ticker: symbol.symbol_ticker
@@ -219,7 +219,7 @@ module.exports = function Holdings (db, investor)
 
 				return add_symbol(trx, investor_id, symbl)
 			}
-			
+
 			return buy_symbol(trx, investor_id, symbl, amount, price)
 		})
 		.then(() =>

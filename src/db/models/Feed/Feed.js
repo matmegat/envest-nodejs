@@ -19,11 +19,6 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-var Trade = require('./Trade')
-var Watchlist = require('./Watchlist')
-var Update = require('./Update')
-
-
 var Feed = module.exports = function Feed (db)
 {
 	var feed = {}

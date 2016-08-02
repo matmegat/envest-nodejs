@@ -28,7 +28,7 @@ function validate_trade (data)
 		'amount',
 		'text',
 		'risk',
-		'motivations'	
+		'motivations'
 	])
 
 	var trade_dirs = ['bought', 'sold']
@@ -51,7 +51,7 @@ function validate_trade (data)
 
 		if (data.price < 0)
 		{
-			throw InvalidAmount({field: 'price'})
+			throw InvalidAmount({ field: 'price' })
 		}
 
 		validate.required(data.amount, 'amount')
@@ -59,7 +59,7 @@ function validate_trade (data)
 
 		if (data.amount < 0)
 		{
-			throw InvalidAmount({field: 'amount'})
+			throw InvalidAmount({ field: 'amount' })
 		}
 
 		validate.required(data.risk, 'risk')

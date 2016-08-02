@@ -144,9 +144,9 @@ validate.date = function validate__date (date)
 	var date = moment(date)
 
 	if (! date.isValid())
- 	{
-  		throw WrongDate()
-  	}
+	{
+		throw WrongDate()
+	}
 }
 
 var NotIncluded = Err('item_not_included', 'Item Not Included')
@@ -157,7 +157,7 @@ validate.collection = function validate__collection (collection)
 	{
 		if (! includes(collection, item))
 		{
-			throw NotIncluded({possible_values: collection, item: item})
+			throw NotIncluded({ possible_values: collection, item: item })
 		}
 	}
 }

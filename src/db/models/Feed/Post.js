@@ -4,13 +4,10 @@ var validate = require('../../validate')
 var Err = require('../../../Err')
 
 var moment = require('moment')
-var noop = require('lodash/noop')
 
 var Trade = require('./Trade')
 var Watchlist = require('./Watchlist')
 var Update = require('./Update')
-
-var Feed = require('./Feed')
 
 module.exports = function Post (db)
 {
@@ -37,7 +34,7 @@ module.exports = function Post (db)
 		{
 			throw WrongPostType({ type: type })
 		}
-		
+
 		var post_type = post.types[type]
 
 		return post_type.set(trx, investor_id, type, date, data)
@@ -61,7 +58,7 @@ module.exports = function Post (db)
 
 				if (! moment(date).isSameOrAfter(min_date))
 				{
-					throw InvestorPostDateErr({date: date, minDate: min_date })
+					throw InvestorPostDateErr({ date: date, minDate: min_date })
 				}
 			})
 			.then(() =>

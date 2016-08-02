@@ -46,9 +46,9 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		return byId(owner_id)
 		.then((items) =>
 		{
-			if(items.length >= limit_watchlist)
+			if (items.length >= limit_watchlist)
 			{
-				throw LimitWatchlist({limit: limit_watchlist})
+				throw LimitWatchlist({ limit: limit_watchlist })
 			}
 		})
 		.then(() =>

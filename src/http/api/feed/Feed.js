@@ -4,9 +4,6 @@ var _ = require('lodash')
 var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
-var investorRequired = require('../../investor-required')
-
-var pick = require('lodash/pick')
 
 module.exports = function Feed (db, http)
 {
