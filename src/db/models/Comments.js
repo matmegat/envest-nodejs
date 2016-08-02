@@ -192,14 +192,13 @@ module.exports = function Comments (db)
 			if (! is_admin)
 			{
 				return comments.table()
-				.rightJoin('feed_items',
+				.innerJoin('feed_items',
 				'feed_items.id', 'comments.feed_id ')
 				.where('comments.id', id)
 				.where('investor_id', user_id)
 				.then(Err.emptish(AdminOwnerRequired))
 			}
 		})
-		.then(Boolean)
 	}
 
 	function remove_by_id (id)
