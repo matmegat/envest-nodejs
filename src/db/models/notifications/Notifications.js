@@ -1,15 +1,15 @@
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
 var extend = require('lodash/extend')
 
-var validate   = require('../validate')
-var validateId = require('../../id').validate
-var Paginator  = require('../paginator/Ordered')
+var validate   = require('../../validate')
+var validateId = require('../../../id').validate
+var Paginator  = require('../../paginator/Ordered')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
 
 module.exports = function Notifications (db)
 {
