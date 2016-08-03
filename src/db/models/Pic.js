@@ -97,7 +97,7 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				emitter(id, { user_id: id })
+				emitter(id, { user: [ ':user-id', id ]})
 			})
 			.then(() =>
 			{

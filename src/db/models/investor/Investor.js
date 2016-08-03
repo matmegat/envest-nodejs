@@ -43,7 +43,7 @@ module.exports = function Investor (db)
 
 	var emits =
 	{
-		NewAdmins:   Emitter('investor_reports', { group: 'admins' }),
+		NewAdmin:    Emitter('investor_reports', { group: 'admins' }),
 		NewInvestor: Emitter('investor_reports')
 	}
 
@@ -109,8 +109,14 @@ module.exports = function Investor (db)
 				 * - to created investor?
 				 * */
 
-				emits.NewAdmins({ investor_id: investor_id })
-				emits.NewInvestor(investor_id, { admin_id: data.admin_id })
+				emits.NewAdmin(
+				{
+					investor: [ ':user-id', investor_id ]
+				})
+				emits.NewInvestor(investor_id,
+				{
+					admin: [ ':user-id', data.admin_id ]
+				})
 			})
 			.then(() => investor_entry)
 		})
