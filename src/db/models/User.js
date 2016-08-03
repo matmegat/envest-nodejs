@@ -82,6 +82,18 @@ module.exports = function User (db, app)
 		})
 	}
 
+	user.nameByIds = function (ids)
+	{
+		return user.users_table()
+		.select(
+			'id',
+			'first_name',
+			'last_name'
+		)
+		.whereIn('id', ids)
+	}
+
+
 	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 	user.validateId = require('../../id').validate.promise(WrongUserId)
 

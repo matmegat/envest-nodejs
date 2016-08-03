@@ -92,11 +92,21 @@ module.exports = function SubscrManager (db, subsc_desc)
 			.then(() =>
 			{
 				return SubscrActivateA(
-				{ user_id: user_id, type: type, days: days }, trx)
+				{
+					user: [ ':user-id', user_id ],
+					type: type,
+					days: days
+				}
+				, trx)
 			})
 			.then(() =>
 			{
-				return SubscrActivateU(user_id, { type: type, days: days }, trx)
+				return SubscrActivateU(user_id,
+				{
+					type: type,
+					days: days
+				}
+				, trx)
 			})
 			.then(() =>
 			{

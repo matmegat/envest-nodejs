@@ -59,11 +59,17 @@ module.exports = function Onboarding (db, investor)
 		{
 			if (mode === 'mode:investor')
 			{
-				FieldEditedA({ by: 'investor', investor_id: investor_id })
+				FieldEditedA({
+					by: 'investor',
+					investor: [ ':user-id', investor_id ]
+				})
 			}
 			else
 			{
-				FieldEditedI(investor_id, { by: 'admin', admin_id: whom_id })
+				FieldEditedI(investor_id, {
+					by: 'admin',
+					admin: [ ':user-id', whom_id ]
+				})
 			}
 		})
 	}
@@ -152,7 +158,10 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_id) =>
 		{
-			PublicChanged(investor_id, { by: 'admin', admin_id: whom_id })
+			PublicChanged(investor_id, {
+				by: 'admin',
+				admin: [ ':user-id', whom_id ]
+			})
 		})
 	}
 
