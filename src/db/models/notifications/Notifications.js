@@ -11,9 +11,13 @@ var Paginator  = require('../../paginator/Ordered')
 
 var Err = require('../../../Err')
 
+var Evaluate = require('./Evaluate')
+
 module.exports = function Notifications (db)
 {
 	var notifications = {}
+
+	var evaluate = Evaluate(db)
 
 	var knex = db.knex
 

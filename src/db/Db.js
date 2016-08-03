@@ -52,7 +52,7 @@ module.exports = function name (app)
 		console.info('DB: ok')
 	})
 
-	db.user  = User(db, app)
+	db.user = User(db, app)
 	db.notifications = Notifications(db)
 	db.subscr = NetvestSubsc(db, cfg.subscr)
 	db.auth  = Auth(db, db.subscr)
