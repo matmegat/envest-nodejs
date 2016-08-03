@@ -25,9 +25,11 @@ module.exports = function (db)
 
 	var fns =
 	{
-		':user-id': (args) =>
+		':user-id': (args, total) =>
 		{
-			console.info(2, args)
+			console.info(2, args, total)
+
+			return { id: 1, name: 'LAL' }
 		}
 	}
 
@@ -45,7 +47,7 @@ module.exports = function (db)
 				return
 			}
 
-			var fn   = head(value)
+			var fn = head(value)
 
 			if (! (fn in prefns))
 			{
@@ -61,7 +63,26 @@ module.exports = function (db)
 			pretotal[fn].push(preres)
 		})
 
-		console.warn(pretotal)
+		form = map(form, (value, key) =>
+		{
+			if (! isExpr(value))
+			{
+				return value
+			}
+
+			var fn = head(value)
+
+			if (! (fn in fns))
+			{
+				return value
+			}
+
+			var args = tail(value)
+
+			var res = fns[fn](args, pretotal[fn])
+
+			return res
+		})
 
 		console.log(form)
 

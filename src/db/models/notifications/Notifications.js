@@ -19,6 +19,12 @@ module.exports = function Notifications (db)
 
 	var evaluate = Evaluate(db)
 
+	evaluate({
+		x: 1,
+		user: [ ':user-id', 1, 2, 3 ],
+		investor: [ ':user-id', 1 ]
+	})
+
 	var knex = db.knex
 
 	var oneMaybe = db.helpers.oneMaybe
