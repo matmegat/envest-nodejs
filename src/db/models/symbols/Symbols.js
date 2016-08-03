@@ -194,10 +194,30 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 		.then(obj =>
 		{
-			fundamentalsDefault.market_cap = {
-				value: Number(obj.MarketCapitalization.value) || null,
-				unit: obj.MarketCapitalization.unit
+			var market_cap = Number(obj.MarketCapitalization.value) || null
+			var unit = obj.MarketCapitalization.unit
+
+			if (market_cap)
+			{
+				switch (unit)
+				{
+					case 'Actual': break
+					case 'Thousands': /* stub */
+						market_cap *= 1e3
+						break
+					case 'Millions':
+						market_cap *= 1e6
+						break
+					case 'Billions': /* stub */
+						market_cap *= 1e9
+						break
+					default:
+						log.error('Unhandled Market Cap Unit:', unit)
+						market_cap = null
+				}
 			}
+
+			fundamentalsDefault.market_cap = market_cap
 			fundamentalsDefault.dividend =
 				Number(obj.DividendYieldDaily.value) || null
 			fundamentalsDefault.one_year_low =
