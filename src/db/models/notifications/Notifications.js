@@ -1,23 +1,27 @@
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
 var extend = require('lodash/extend')
+var map = require('lodash/map')
+var each = require('lodash/forEach')
 
-var validate   = require('../validate')
-var validateId = require('../../id').validate
-var Paginator  = require('../paginator/Ordered')
+var validate   = require('../../validate')
+var validateId = require('../../../id').validate
+var Paginator  = require('../../paginator/Ordered')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
+
+var Evaluate = require('./Evaluate')
 
 module.exports = function Notifications (db)
 {
 	var notifications = {}
 
-	var knex = db.knex
+	var evaluate = Evaluate(db)
 
-	var oneMaybe = db.helpers.oneMaybe
+	var knex = db.knex
 
 	expect(db, 'Notifications depends on User').property('user')
 	var user = db.user
@@ -144,13 +148,21 @@ module.exports = function Notifications (db)
 		var queryset = byUserId(options.user_id)
 
 		return paginator.paginate(queryset, options)
-	}
+		.then(seq =>
+		{
+			var events = map(seq, 'event')
 
-	notifications.byIdType = function (user_id, type)
-	{
-		return byUserId(user_id)
-		.andWhere('type', type)
-		.then(oneMaybe)
+			return evaluate(events)
+			.then(events =>
+			{
+				each(events, (event, index) =>
+				{
+					seq[index].event = event
+				})
+
+				return seq
+			})
+		})
 	}
 
 	function byUserId (user_id)

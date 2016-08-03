@@ -71,7 +71,11 @@ module.exports = function NetvestSubsc (db, cfg)
 			return netvest_subscr.promo.decrement(code, trx)
 			.then(() =>
 			{
-				return SubscrEnterPromoA({ user_id: user_id, code: code })
+				return SubscrEnterPromoA(
+				{
+					user: [ ':user-id', user_id ],
+					code: code
+				})
 			})
 			.then(() =>
 			{
