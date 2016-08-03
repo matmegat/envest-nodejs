@@ -156,13 +156,6 @@ module.exports = function Notifications (db)
 		return paginator.paginate(queryset, options)
 	}
 
-	notifications.byIdType = function (user_id, type)
-	{
-		return byUserId(user_id)
-		.andWhere('type', type)
-		.then(oneMaybe)
-	}
-
 	function byUserId (user_id)
 	{
 		return notifications.table()
