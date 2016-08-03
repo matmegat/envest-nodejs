@@ -2,7 +2,6 @@
 var expect = require('chai').expect
 
 var each = require('lodash/forEach')
-var own  = require('lodash/forOwn')
 var map  = require('lodash/map')
 var mapv = require('lodash/mapValues')
 
@@ -50,7 +49,7 @@ module.exports = function (db)
 
 		each(forms, form =>
 		{
-			each(form, (value, key) =>
+			each(form, value =>
 			{
 				if (! isExpr(value))
 				{
@@ -88,7 +87,7 @@ module.exports = function (db)
 
 			forms = map(forms, form =>
 			{
-				return mapv(form, (value, key) =>
+				return mapv(form, value =>
 				{
 					if (! isExpr(value))
 					{

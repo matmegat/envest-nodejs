@@ -34,8 +34,6 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
-	var oneMaybe = db.helpers.oneMaybe
-
 	expect(db, 'Notifications depends on User').property('user')
 	var user = db.user
 
