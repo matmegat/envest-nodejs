@@ -42,8 +42,6 @@ module.exports = function (db)
 
 	var evaluate = function evaluate (forms)
 	{
-		console.log(forms)
-
 		var pretotal = {}
 		var preresults = {}
 
@@ -71,8 +69,6 @@ module.exports = function (db)
 			})
 		})
 
-		console.warn(pretotal)
-
 		return Promise.all(map(pretotal, (args2, fn) =>
 		{
 			return new Promise(rs => rs(prefns[fn](args2)))
@@ -83,9 +79,7 @@ module.exports = function (db)
 		}))
 		.then(() =>
 		{
-			console.warn(preresults)
-
-			forms = map(forms, form =>
+			return map(forms, form =>
 			{
 				return mapv(form, value =>
 				{
@@ -108,12 +102,7 @@ module.exports = function (db)
 					return res
 				})
 			})
-
-			console.log(forms)
-
-			return forms
 		})
-		.catch(console.error)
 	}
 
 

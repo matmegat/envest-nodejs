@@ -21,17 +21,6 @@ module.exports = function Notifications (db)
 
 	var evaluate = Evaluate(db)
 
-	0 && evaluate([
-	{
-		x: 1,
-		user: [ ':user-id', 4 ],
-		investor: [ ':user-id', 5 ]
-	},
-	{
-		x: 2,
-		user: [ ':user-id', 4 ]
-	}])
-
 	var knex = db.knex
 
 	expect(db, 'Notifications depends on User').property('user')
@@ -170,8 +159,6 @@ module.exports = function Notifications (db)
 				{
 					seq[index].event = event
 				})
-
-				console.log(seq)
 
 				return seq
 			})
