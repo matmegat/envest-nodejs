@@ -16,24 +16,27 @@ module.exports = function (db)
 	var user = db.user
 
 
-	var prefns =
-	{
-		':user-id': (args2) =>
-		{
-			console.info(1, args2)
+	var prefns = {}
+	var fns = {}
 
-			return Promise.resolve('abc')
-		}
+
+	var flat = require('lodash/flatten')
+	var uniq = require('lodash/uniq')
+
+	prefns[':user-id'] = (args2) =>
+	{
+		args2 = flat(args2)
+		args2 = uniq(args2)
+
+		return user.nameByIds(args2)
 	}
 
-	var fns =
-	{
-		':user-id': (args, total) =>
-		{
-			console.info(2, args, total)
 
-			return { id: 1, name: 'LAL' }
-		}
+	var find = require('lodash/find')
+
+	fns[':user-id'] = (args, total) =>
+	{
+		return find(total, [ 'id', args[0] ])
 	}
 
 

@@ -21,8 +21,8 @@ module.exports = function Notifications (db)
 
 	evaluate({
 		x: 1,
-		user: [ ':user-id', 1, 2, 3 ],
-		investor: [ ':user-id', 1 ]
+		user: [ ':user-id', 4 ],
+		investor: [ ':user-id', 5 ]
 	})
 
 	var knex = db.knex
