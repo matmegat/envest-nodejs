@@ -4,6 +4,8 @@ var expect = require('chai').expect
 
 var noop = require('lodash/noop')
 var extend = require('lodash/extend')
+var map = require('lodash/map')
+var each = require('lodash/forEach')
 
 var validate   = require('../../validate')
 var validateId = require('../../../id').validate
@@ -19,7 +21,7 @@ module.exports = function Notifications (db)
 
 	var evaluate = Evaluate(db)
 
-	evaluate([
+	0 && evaluate([
 	{
 		x: 1,
 		user: [ ':user-id', 4 ],
@@ -159,6 +161,23 @@ module.exports = function Notifications (db)
 		var queryset = byUserId(options.user_id)
 
 		return paginator.paginate(queryset, options)
+		.then(seq =>
+		{
+			var events = map(seq, 'event')
+
+			return evaluate(events)
+			.then(events =>
+			{
+				each(events, (event, index) =>
+				{
+					seq[index].event = event
+				})
+
+				console.log(seq)
+
+				return seq
+			})
+		})
 	}
 
 	function byUserId (user_id)
