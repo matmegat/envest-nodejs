@@ -18,9 +18,9 @@ module.exports = function (db)
 
 	var prefns =
 	{
-		':user-id': (args) =>
+		':user-id': (args2) =>
 		{
-			console.info(1, args)
+			console.info(1, args2)
 
 			return Promise.resolve('abc')
 		}
@@ -42,8 +42,9 @@ module.exports = function (db)
 		console.log(form)
 
 		var pretotal = {}
+		var preresults = {}
 
-		return Promise.all(map(form, (value, key) =>
+		map(form, (value, key) =>
 		{
 			if (! isExpr(value))
 			{
@@ -59,16 +60,25 @@ module.exports = function (db)
 
 			var args = tail(value)
 
-			return Promise.resolve(prefns[fn](args))
-			.then(preres =>
-			{
-				pretotal[fn] || (pretotal[fn] = [])
+			pretotal[fn] || (pretotal[fn] = [])
 
-				pretotal[fn].push(preres)
+			pretotal[fn].push(args)
+		})
+
+		console.log(pretotal)
+
+		return Promise.all(map(pretotal, (args2, fn) =>
+		{
+			return new Promise(rs => rs(prefns[fn](args2)))
+			.then(rs =>
+			{
+				preresults[fn] = rs
 			})
 		}))
 		.then(() =>
 		{
+			console.log(preresults)
+
 			form = mapv(form, (value, key) =>
 			{
 				if (! isExpr(value))
@@ -85,7 +95,7 @@ module.exports = function (db)
 
 				var args = tail(value)
 
-				var res = fns[fn](args, pretotal[fn])
+				var res = fns[fn](args, preresults[fn])
 
 				return res
 			})
@@ -94,6 +104,7 @@ module.exports = function (db)
 
 			return form
 		})
+		.catch(console.error)
 	}
 
 
