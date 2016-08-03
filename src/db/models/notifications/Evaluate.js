@@ -1,8 +1,9 @@
 
 var expect = require('chai').expect
 
-var own = require('lodash/forOwn')
-var map = require('lodash/mapValues')
+var own  = require('lodash/forOwn')
+var map  = require('lodash/map')
+var mapv = require('lodash/mapValues')
 
 var head = require('lodash/head')
 var tail = require('lodash/tail')
@@ -20,6 +21,8 @@ module.exports = function (db)
 		':user-id': (args) =>
 		{
 			console.info(1, args)
+
+			return Promise.resolve('abc')
 		}
 	}
 
@@ -40,7 +43,7 @@ module.exports = function (db)
 
 		var pretotal = {}
 
-		own(form, (value, key) =>
+		return Promise.all(map(form, (value, key) =>
 		{
 			if (! isExpr(value))
 			{
@@ -56,37 +59,41 @@ module.exports = function (db)
 
 			var args = tail(value)
 
-			var preres = prefns[fn](args)
+			return Promise.resolve(prefns[fn](args))
+			.then(preres =>
+			{
+				pretotal[fn] || (pretotal[fn] = [])
 
-			pretotal[fn] || (pretotal[fn] = [])
-
-			pretotal[fn].push(preres)
-		})
-
-		form = map(form, (value, key) =>
+				pretotal[fn].push(preres)
+			})
+		}))
+		.then(() =>
 		{
-			if (! isExpr(value))
+			form = mapv(form, (value, key) =>
 			{
-				return value
-			}
+				if (! isExpr(value))
+				{
+					return value
+				}
 
-			var fn = head(value)
+				var fn = head(value)
 
-			if (! (fn in fns))
-			{
-				return value
-			}
+				if (! (fn in fns))
+				{
+					return value
+				}
 
-			var args = tail(value)
+				var args = tail(value)
 
-			var res = fns[fn](args, pretotal[fn])
+				var res = fns[fn](args, pretotal[fn])
 
-			return res
+				return res
+			})
+
+			console.log(form)
+
+			return form
 		})
-
-		console.log(form)
-
-		return form
 	}
 
 
