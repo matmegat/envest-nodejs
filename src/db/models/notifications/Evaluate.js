@@ -68,8 +68,6 @@ module.exports = function (db)
 			pretotal[fn].push(args)
 		})
 
-		console.log(pretotal)
-
 		return Promise.all(map(pretotal, (args2, fn) =>
 		{
 			return new Promise(rs => rs(prefns[fn](args2)))
@@ -80,8 +78,6 @@ module.exports = function (db)
 		}))
 		.then(() =>
 		{
-			console.log(preresults)
-
 			form = mapv(form, (value, key) =>
 			{
 				if (! isExpr(value))
