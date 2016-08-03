@@ -59,9 +59,6 @@ paths:
   '/comments/{id}':
     $ref: ../api/comments/swag/Remove.yaml
 
-  '/comments/count':
-    $ref: ../api/comments/swag/GetCount.yaml
-
   '/comments/abuse':
     $ref: ../api/comments/swag/Abuse.yaml
 
@@ -223,8 +220,8 @@ definitions:
   UsersItem:
     $ref: ../api/users/swag/UsersItem.yaml
 
-  Comments:
-    $ref: ../api/comments/swag/Comments.yaml
+  Comment:
+    $ref: ../api/comments/swag/Comment.yaml
 
   CommentsItem:
     $ref: ../api/comments/swag/CommentItem.yaml

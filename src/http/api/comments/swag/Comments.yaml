@@ -1,4 +1,0 @@
-type: array
-title: Comments
-items:
-- $ref: ./Comment.yaml
