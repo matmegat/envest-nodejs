@@ -72,7 +72,7 @@ module.exports = function Meta (knexed_table, raw, options)
 				'investors.profile_pic',
 				raw(`(select * from featured_investor
 					where investor_id = users.id)
-					is not null  as is_featured`)
+					is not null as is_featured`)
 			)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
@@ -149,12 +149,12 @@ module.exports = function Meta (knexed_table, raw, options)
 			'users.first_name',
 			'users.last_name',
 			'users.pic',
+			'investors.profile_pic',
 			'investors.focus',
 			'investors.historical_returns',
-			'investors.profile_pic',
 			raw(`(select * from featured_investor
 				where investor_id = users.id)
-				is not null  as is_featured`)
+				is not null as is_featured`)
 		)
 
 		var paginator
