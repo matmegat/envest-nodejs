@@ -22,6 +22,17 @@ module.exports = function Users (http, user_model)
 	users.express.get('/', http.adminRequired, by_group('users'))
 	users.express.get('/admins', http.adminRequired, by_group('admins'))
 
+	users.express.post('/change-name', (rq, rs) =>
+	{
+		var target_user_id = rq.user.id
+		var credentials = {}
+
+		credentials.first_name = rq.body.first_name
+		credentials.last_name = rq.body.last_name
+
+		toss(rs, users.model.changeName(target_user_id, credentials))
+	})
+
 
 	function by_group (group)
 	{

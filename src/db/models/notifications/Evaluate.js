@@ -12,9 +12,6 @@ module.exports = function (db)
 {
 	expect(db).ok
 
-	expect(db, 'Evaluate depends on User').property('user')
-	var user = db.user
-
 
 	var prefns = {}
 	var fns = {}
@@ -28,7 +25,7 @@ module.exports = function (db)
 		args2 = flat(args2)
 		args2 = uniq(args2)
 
-		return user.nameByIds(args2)
+		return db.user.nameByIds(args2)
 	}
 
 

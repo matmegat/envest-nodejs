@@ -155,6 +155,11 @@ validate.name = function validate__name (name, field_name)
 {
 	validate.required(name, field_name)
 	validate.empty(name, field_name)
+	validate.word(name, field_name)
+}
+
+validate.word = function validate__word (name, field_name)
+{
 	validateNameLength(name, field_name)
 
 	/*
@@ -175,7 +180,6 @@ validate.name = function validate__name (name, field_name)
 		throw WrongName()
 	}
 }
-
 
 var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 
