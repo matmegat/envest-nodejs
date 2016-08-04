@@ -53,6 +53,9 @@ paths:
   '/admin/intro':
     $ref: ../api/admin/swag/Intro.yaml
 
+  '/admin/change-name':
+    $ref: ../api/admin/swag/ChangeName.yaml
+
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
@@ -124,6 +127,9 @@ paths:
 
   '/users/admins':
     $ref: ../api/users/swag/AdminsList.yaml
+
+  '/users/change-name':
+    $ref: ../api/users/swag/ChangeName.yaml
 
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml

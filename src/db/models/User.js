@@ -7,8 +7,7 @@ var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
-
-var pick = require('lodash/pick')
+var noop   = require('lodash/noop')
 
 var Password = require('./Password')
 
@@ -611,6 +610,86 @@ module.exports = function User (db, app)
 		})
 		.where('id', data.user_id)
 	}
+
+	var validate = require('../validate')
+	var validate_word = validate.word
+
+	var EmptyCredentials = Err('name_credentials_are_empty',
+		'Name credentials are empty')
+
+	var change_name = knexed.transact(knex, (trx, user_id, credentials) =>
+	{
+		var creds_obj = {}
+
+		return user.ensure(user_id, trx)
+		.then(() =>
+		{
+			if (! credentials.first_name && ! credentials.last_name)
+			{
+				throw EmptyCredentials()
+			}
+
+			if (credentials.first_name)
+			{
+				validate_word(credentials.first_name, 'first_name')
+				creds_obj.first_name = credentials.first_name
+			}
+
+			if (credentials.last_name)
+			{
+				validate_word(credentials.last_name, 'last_name')
+				creds_obj.last_name = credentials.last_name
+			}
+
+		})
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.where('id', user_id)
+			.update(creds_obj, 'id')
+		})
+		.then(one)
+	})
+
+	user.changeName = knexed.transact(knex, (trx, user_id, credentials) =>
+	{
+		return change_name(trx, user_id, credentials)
+		.then(noop)
+	})
+
+
+	var Emitter = db.notifications.Emitter
+
+	var NameChangedI = Emitter('username_changed')
+	var NameChangedU = Emitter('username_changed', { group: 'admins' })
+
+	user.changeNameAs = knexed.transact(
+		knex, (trx, user_id, credentials, whom_id) =>
+	{
+		return change_name(trx, user_id, credentials)
+		.then(id =>
+		{
+			return db.investor.all.is(id, trx)
+		})
+		.then(is_investor =>
+		{
+			if (is_investor)
+			{
+				return NameChangedI(user_id,
+				{
+					admin: [ ':user-id', whom_id ]
+				})
+			}
+			else
+			{
+				return NameChangedU(
+				{
+					user: [ ':user-id', user_id ],
+					admin: [ ':user-id', whom_id ]
+				})
+			}
+		})
+	})
 
 	return user
 }

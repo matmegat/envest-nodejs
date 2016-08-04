@@ -2,11 +2,13 @@
 var Router = require('express').Router
 var toss = require('../../toss')
 
-module.exports = function (http, admin)
+module.exports = function (db, http, admin)
 {
 	var ctrl = {}
 
 	var express = ctrl.express = Router()
+
+	var user_model = db.user
 
 	express.use(http.adminRequired)
 
@@ -16,6 +18,19 @@ module.exports = function (http, admin)
 		var target_user_id = rq.body.target_user_id
 
 		toss(rs, admin.intro(target_user_id, by_user_id))
+	})
+
+	express.post('/change-name', (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+
+		var credentials = {}
+
+		credentials.first_name = rq.body.first_name
+		credentials.last_name = rq.body.last_name
+
+		toss(rs, user_model.changeNameAs(target_user_id, credentials, whom_id))
 	})
 
 	return ctrl
