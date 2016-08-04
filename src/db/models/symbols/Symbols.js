@@ -197,24 +197,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			var market_cap = Number(obj.MarketCapitalization.value) || null
 			var unit = obj.MarketCapitalization.unit
 
-			if (market_cap)
+			if (market_cap && unit === 'Millions')
 			{
-				switch (unit)
-				{
-					case 'Actual': break
-					case 'Thousands': /* stub */
-						market_cap *= 1e3
-						break
-					case 'Millions':
-						market_cap *= 1e6
-						break
-					case 'Billions': /* stub */
-						market_cap *= 1e9
-						break
-					default:
-						log.error('Unhandled Market Cap Unit:', unit)
-						market_cap = null
-				}
+				market_cap *= 1e6
+			}
+			else
+			{
+				market_cap = null
 			}
 
 			fundamentalsDefault.market_cap = market_cap
