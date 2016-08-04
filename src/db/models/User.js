@@ -50,6 +50,7 @@ module.exports = function User (db, app)
 	{	/* should accept trx, or create own */
 		return user.users_table(trx)
 		.where('id', user_id)
+		.then(oneMaybe)
 		.then(Boolean)
 	})
 
