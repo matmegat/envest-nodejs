@@ -23,9 +23,6 @@ module.exports = function Notifications (db)
 
 	var knex = db.knex
 
-	expect(db, 'Notifications depends on User').property('user')
-	var user = db.user
-
 	var paginator = Paginator()
 
 	notifications.table = knexed(knex, 'notifications')
@@ -70,7 +67,7 @@ module.exports = function Notifications (db)
 			return notifications.table(trx)
 			.insert(data)
 			.then(noop)
-			.catch(Err.fromDb('notifications_recipient_id_foreign', user.NotFound))
+			.catch(Err.fromDb('notifications_recipient_id_foreign', db.user.NotFound))
 		})
 	}
 
@@ -113,13 +110,13 @@ module.exports = function Notifications (db)
 
 	function get_query_group (data)
 	{
-		if (user.groups.isAdmin(data.group) || user.groups.isInvestor(data.group))
+		if (db.user.groups.isAdmin(data.group) || db.user.groups.isInvestor(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
 			.from(data.group)
 		}
-		else if (user.groups.isUser(data.group))
+		else if (db.user.groups.isUser(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, users.id', [data.type, data.event]))

@@ -176,6 +176,21 @@ validate.name = function validate__name (name, field_name)
 	}
 }
 
+validate.word = function validate__word (name, field_name)
+{
+	validateNameLength(name, field_name)
+
+	var re = XRegExp.build(`^ {{word}} (\\s {{word}})* $`,
+	{
+		word: XRegExp(`\\pL+ ([' -] \\pL+)* \\.?`, 'x')
+	},
+	'x')
+
+	if (! re.test(name))
+	{
+		throw WrongName()
+	}
+}
 
 var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 
