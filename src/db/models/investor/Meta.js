@@ -78,16 +78,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			.where('user_id', id)
 		})
 		.then(helpers.oneMaybe)
-		.then((investor) =>
-		{
-			investor.annual_return = _.sumBy(
-				investor.historical_returns,
-				'percentage'
-			) / investor.historical_returns.length
-			// FIXME: refactor annual return when it comes more complecated
-
-			return investor
-		})
+		.then(transform_investor)
 	}
 
 	var paging_table = function (trx)
@@ -199,6 +190,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			'pic',
 			'profile_pic',
 			'focus',
+			'historical_returns',
 			'annual_return',
 			'is_featured'
 		])
