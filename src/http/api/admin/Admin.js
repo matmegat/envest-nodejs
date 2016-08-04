@@ -2,11 +2,13 @@
 var Router = require('express').Router
 var toss = require('../../toss')
 
-module.exports = function (http, admin)
+module.exports = function (db, http, admin)
 {
 	var ctrl = {}
 
 	var express = ctrl.express = Router()
+
+	var user_model = db.user
 
 	express.use(http.adminRequired)
 

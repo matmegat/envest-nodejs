@@ -9,6 +9,7 @@ var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
 
 var pick = require('lodash/pick')
+var noop = require('lodash/noop')
 
 var Password = require('./Password')
 
