@@ -1,0 +1,30 @@
+post:
+  description: Change target user first_name and last_name
+  parameters:
+  - name: payload
+    in: body
+    schema:
+      type: object
+      properties:
+        target_user_id:
+          type: integer
+          description: Target user id
+        first_name:
+          type: string
+          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+        last_name:
+          type: string
+          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+      required:
+      - target_user_id
+      - first_name
+      - last_name
+  responses:
+    200:
+      description: success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - admin
