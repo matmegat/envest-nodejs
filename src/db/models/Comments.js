@@ -46,13 +46,18 @@ module.exports = function Comments (db)
 		})
 		.then((comments_items) =>
 		{
-			return user.list(map(comments_items, 'user_id'))
-			.then((users) =>
+			return Promise.all(
+			[
+				user.list(map(comments_items, 'user_id')),
+				comments.count(options.feed_id)
+			])
+			.then(so =>
 			{
 				var response =
 				{
 					comments: comments_items,
-					users: users
+					users: so[0],
+					count: so[1]
 				}
 
 				return response
@@ -123,6 +128,7 @@ module.exports = function Comments (db)
 			.then(one)
 		})
 		.then(row => row.count)
+		.then(Number)
 	}
 
 	var at  = require('lodash/fp/at')

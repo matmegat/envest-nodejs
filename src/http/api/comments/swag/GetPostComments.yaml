@@ -23,7 +23,7 @@ get:
     200:
       description: Post (Feed Item) comments
       schema:
-        $ref: ./Comments.yaml
+        $ref: ./Comment.yaml
     400:
       description: if something went wrong
       schema:

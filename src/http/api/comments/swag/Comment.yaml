@@ -8,6 +8,11 @@ properties:
     type: array
     items:
     - $ref: ./CommentUser.yaml
+  count:
+    type: number
+    format: integer
+    description: Amount of comments
 required:
 - comments
 - users
+- count

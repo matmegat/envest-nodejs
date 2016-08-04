@@ -48,11 +48,6 @@ module.exports = function Comments (сomments_model)
 		toss(rs,  comments.model.remove(user_id, id))
 	})
 
-	comments.express.get('/count', (rq, rs) =>
-	{
-		toss(rs, comments.model.count(rq.query.feed_id))
-	})
-
 	comments.express.post('/abuse', (rq, rs) =>
 	{
 		toss(rs, comments.model.abuse.create(rq.user.id, rq.body.comment_id))
