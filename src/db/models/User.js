@@ -46,9 +46,15 @@ module.exports = function User (db, app)
 	user.NotFound = Err('user_not_found', 'User not found')
 
 	user.is = knexed.transact(knex, (trx, user_id) =>
-	{	/* should accept trx, or create own */
-		return user.users_table(trx)
-		.where('id', user_id)
+	{
+		return user.validateId(user_id)
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.select('id')
+			.where('users.id', user_id)
+			.then(oneMaybe)
+		})
 		.then(Boolean)
 	})
 
