@@ -610,7 +610,8 @@ module.exports = function User (db, app)
 	var validate = require('../validate')
 	var validate_word = validate.word
 
-	var EmptyCredentials = Err('name_credentials_are_empty', 'Name credentials are empty')
+	var EmptyCredentials = Err('name_credentials_are_empty',
+		'Name credentials are empty')
 
 	var change_name = knexed.transact(knex, (trx, user_id, credentials) =>
 	{
@@ -635,7 +636,7 @@ module.exports = function User (db, app)
 				validate_word(credentials.last_name, 'last_name')
 				creds_obj.last_name = credentials.last_name
 			}
-			
+
 		})
 		.then(() =>
 		{
@@ -658,7 +659,8 @@ module.exports = function User (db, app)
 	var NameChangedI = Emitter('username_changed')
 	var NameChangedU = Emitter('username_changed', { group: 'admins' })
 
-	user.changeNameAs = knexed.transact(knex, (trx, user_id, credentials, whom_id) =>
+	user.changeNameAs = knexed.transact(
+		knex, (trx, user_id, credentials, whom_id) =>
 	{
 		return change_name(trx, user_id, credentials)
 		.then(id =>
