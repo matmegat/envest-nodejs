@@ -64,12 +64,12 @@ module.exports = function Meta (knexed_table, raw, options)
 				'users.id',
 				'users.first_name',
 				'users.last_name',
-				'users.pic',
 				'investors.profession',
+				'users.pic',
+				'investors.profile_pic',
 				'investors.focus',
 				'investors.background',
 				'investors.historical_returns',
-				'investors.profile_pic',
 				raw(`(select * from featured_investor
 					where investor_id = users.id)
 					is not null as is_featured`)
@@ -187,9 +187,11 @@ module.exports = function Meta (knexed_table, raw, options)
 			'id',
 			'first_name',
 			'last_name',
+			'profession',
 			'pic',
 			'profile_pic',
 			'focus',
+			'background',
 			'historical_returns',
 			'annual_return',
 			'is_featured'
