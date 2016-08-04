@@ -15,33 +15,28 @@ get:
         title: Symbol Info Model
         properties:
           prev_close:
-            type: integer
+            type: number
           low:
-            type: integer
+            type: number
           high:
-            type: integer
+            type: number
           volume:
             type: integer
           last:
-            type: integer
+            type: number
           percent_change_from_open:
-            type: integer
+            type: number
           market_cap:
-            type: object
+            type: number
             description: Fundamental type – MarketCapitalization
-            properties:
-              value:
-                type: integer
-              unit: 
-                type: string
           one_year_low:
-            type: integer
+            type: number
             description: Fundamental type – LowPriceLast52Weeks
           one_year_high:
-            type: integer
+            type: number
             description: Fundamental type – HighPriceLast52Weeks
           dividend:
-            type: integer
+            type: number
             description: Fundamental type – DividendYieldDaily
           currency:
             type: string
