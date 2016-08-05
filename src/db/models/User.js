@@ -621,7 +621,7 @@ module.exports = function User (db, app)
 	{
 		var creds_obj = {}
 
-		return user.ensure(user_id, trx)
+		return user.ensure(trx, user_id)
 		.then(() =>
 		{
 			if (! credentials.first_name && ! credentials.last_name)
