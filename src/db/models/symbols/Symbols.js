@@ -173,7 +173,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return xign.fundamentals(symbol.toXign())
+			return xign.fundamentalsLast(symbol.toXign())
 		})
 		.then(resl =>
 		{

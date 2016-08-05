@@ -109,7 +109,7 @@ module.exports = function Xign (cfg, log)
 	{
 		expect(symbol).ok
 
-		return fund(symbol)
+		return fundamentals(symbol)
 		.then(data =>
 		{
 			return {
@@ -120,39 +120,25 @@ module.exports = function Xign (cfg, log)
 		})
 	}
 
-	X.fundamentals = (symbol) =>
+	var fundamentals = X.fundamentals = (symbol) =>
 	{
-		return fund(symbol)
-		.then(data =>
-		{
-			return data.FundamentalsSets
-		})
-		.then(util.unwrap.first)
-	}
-
-	function fund (symbol)
-	{
-		var types =
-		[
-			'MarketCapitalization',
-			'HighPriceLast52Weeks',
-			'LowPriceLast52Weeks',
-			'DividendYieldDaily'
-		]
-
 		var uri = format(
 		{
-			protocol: 'https',
+			protocol: 'https:',
 			host: 'factsetfundamentals.xignite.com',
 
-			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
+			pathname: '/xFactSetFundamentals.json/GetFundamentals',
 
 			query:
 			{
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				FundamentalTypes: types.join(','),
+				AsOfDate: util.apidate(),
+
+				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
+				ReportType: 'Annual',
+				ExcludeRestated: 'false',
 				UpdatedSince: '',
 
 				_Token: token
@@ -190,6 +176,44 @@ module.exports = function Xign (cfg, log)
 
 		return request(uri)
 		.then(util.unwrap.data)
+	}
+
+	X.fundamentalsLast = (symbol) =>
+	{
+		var types = [
+			'MarketCapitalization',
+			'HighPriceLast52Weeks',
+			'LowPriceLast52Weeks',
+			'DividendYieldDaily'
+		]
+
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'factsetfundamentals.xignite.com',
+
+			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbol,
+
+				FundamentalTypes: types.join(','),
+				UpdatedSince: '',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(util.unwrap.first)
+		.then(resl =>
+		{
+			return resl.FundamentalsSets
+		})
+		.then(util.unwrap.first)
 	}
 
 	X.lastTradeDate = (symbol) =>
