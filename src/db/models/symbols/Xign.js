@@ -150,32 +150,6 @@ module.exports = function Xign (cfg, log)
 		.catch(logger.warn_rethrow)
 	}
 
-	X.historical = (symbol) =>
-	{
-		var uri = format(
-		{
-			protocol: 'https',
-			host: 'xignite.com',
-
-			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
-
-			query:
-			{
-				IdentifierType: 'Symbol',
-				Identifier: symbol,
-
-				AdjustmentMethod: 'All',
-
-				AsOfDate: util.apidate(),
-
-				_Token: token
-			}
-		})
-
-		return request(uri)
-		.then(util.unwrap.data)
-	}
-
 	X.fundamentalsLast = (symbol) =>
 	{
 		var types = [
@@ -212,6 +186,32 @@ module.exports = function Xign (cfg, log)
 			return resl.FundamentalsSets
 		})
 		.then(util.unwrap.first)
+	}
+
+	X.historical = (symbol) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https',
+			host: 'xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifier: symbol,
+
+				AdjustmentMethod: 'All',
+
+				AsOfDate: util.apidate(),
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
 	}
 
 	return X
