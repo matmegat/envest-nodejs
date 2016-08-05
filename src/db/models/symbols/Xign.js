@@ -107,7 +107,7 @@ module.exports = function Xign (cfg, log)
 	{
 		expect(symbol).ok
 
-		return fundamentals(symbol)
+		return _fundamentals(symbol)
 		.then(data =>
 		{
 			return {
@@ -118,41 +118,20 @@ module.exports = function Xign (cfg, log)
 		})
 	}
 
-	var fundamentals = X.fundamentals = (symbol) =>
-	{
-		var uri = format(
-		{
-			protocol: 'https:',
-			host: 'factsetfundamentals.xignite.com',
-
-			pathname: '/xFactSetFundamentals.json/GetFundamentals',
-
-			query:
-			{
-				IdentifierType: 'Symbol',
-				Identifiers: symbol,
-
-				AsOfDate: util.apidate(),
-
-				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
-				ReportType: 'Annual',
-				ExcludeRestated: 'false',
-				UpdatedSince: '',
-
-				_Token: token
-			}
-		})
-
-		return request(uri)
-		.then(util.unwrap.data)
-		.then(util.unwrap.first)
-		.then(util.unwrap.success)
-		.catch(logger.warn_rethrow)
-	}
-
 	X.fundamentalsLast = (symbol) =>
 	{
-		var types = [
+		return _fundamentals(symbol)
+		.then(data =>
+		{
+			return data.FundamentalsSets
+		})
+		.then(util.unwrap.first)
+	}
+
+	function _fundamentals (symbol)
+	{
+		var types =
+		[
 			'MarketCapitalization',
 			'HighPriceLast52Weeks',
 			'LowPriceLast52Weeks',
@@ -181,11 +160,8 @@ module.exports = function Xign (cfg, log)
 		return request(uri)
 		.then(util.unwrap.data)
 		.then(util.unwrap.first)
-		.then(resl =>
-		{
-			return resl.FundamentalsSets
-		})
-		.then(util.unwrap.first)
+		.then(util.unwrap.success)
+		.catch(logger.warn_rethrow)
 	}
 
 	X.historical = (symbol) =>
