@@ -242,6 +242,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(symbol =>
 		{
 			var today = () => moment.utc().startOf('day')
+			var allowed_offset = 10
 
 			return Promise.all(
 			[
@@ -251,7 +252,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					today().endOf('day')
 				),
 
-				get_latest_today(symbol),
+				get_trading_in_period(symbol, allowed_offset),
 
 				xign.series(
 					symbol.toXign(),
@@ -300,31 +301,23 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	function get_latest_today (symbol)
+	function get_trading_in_period (symbol, days_count)
 	{
 		var today = moment.utc().startOf('day')
-		var historical_bars_count = 20
 
 		return xign.lastTradeDate(symbol.toXign())
 		.then((date) =>
 		{
-			if (date === null)
+			if (date === null || today.diff(date, 'days') > days_count)
 			{
 				return []
 			}
 
-			if (today.diff(date, 'days') > historical_bars_count)
-			{
-				return xign.series(symbol.toXign(), date, 'Day', 1 )
-			}
-			else
-			{
-				return xign.bars(
-					symbol.toXign(),
-					date.startOf('day'),
-					date.endOf('day')
-				)
-			}
+			return xign.bars(
+				symbol.toXign(),
+				date.startOf('day'),
+				date.clone().endOf('day')
+			)
 		})
 	}
 
