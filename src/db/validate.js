@@ -111,6 +111,16 @@ validate.number.decimal = function (power)
 	}
 }
 
+validate.number.positive = function (field, name)
+{
+	validate.number(field, name)
+
+	if (! (field > 0))
+	{
+		throw FieldType({ field: name, type: 'number/positive' })
+	}
+}
+
 
 var isInteger = require('lodash/isInteger')
 
@@ -126,11 +136,7 @@ validate.integer = function validate__integer (field, name)
 validate.integer.positive = function validate__integer__positive (field, name)
 {
 	validate.integer(field, name)
-
-	if (! (field > 0))
-	{
-		throw FieldType({ field: name, type: 'integer/positive' })
-	}
+	validate.number.positive(field, name)
 }
 
 

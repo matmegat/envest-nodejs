@@ -34,14 +34,18 @@ var Watchlist = module.exports = function Watchlist (db)
 
 		w.investor.validateId = db.investor.all.ensure
 
+		var decimal = validate.number.decimal(10)
+
 		w.investor.add =
 		wrap(w.investor.add, (sup, owner_id, symbol, additional) =>
 		{
 			return new Promise(rs =>
 			{
 				var target_price = get(additional, 'target_price')
+
 				validate.required(target_price, 'target_price')
-				validate.integer.positive(target_price, 'target_price')
+				decimal(target_price, 'target_price')
+				validate.number.positive(target_price, 'target_price')
 
 				additional = pick(additional, 'target_price')
 
