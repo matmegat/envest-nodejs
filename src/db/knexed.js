@@ -34,11 +34,11 @@ knexed.transact = function (knex, method)
 {
 	return function (trx)
 	{
-		var args = [].slice.call(arguments, 1)
+		var args = arguments
 
 		if (istx(trx))
 		{
-			return method.apply(this, arguments)
+			return method.apply(this, args)
 		}
 		else
 		{
