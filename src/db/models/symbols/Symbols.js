@@ -242,6 +242,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(symbol =>
 		{
 			var today = () => moment.utc().startOf('day')
+			var allowed_offset = 10
 
 			return Promise.all(
 			[
@@ -250,6 +251,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					today(),
 					today().endOf('day')
 				),
+
+				get_trading_in_period(symbol, allowed_offset),
 
 				xign.series(
 					symbol.toXign(),
@@ -277,14 +280,44 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			var m6 = moment.utc().startOf('day').subtract(6, 'month')
 			var y1 = moment.utc().startOf('day').subtract(1, 'year')
 
+			var today_points = []
+			if (values[0].length)
+			{
+				today_points = values[0]
+			}
+			else
+			{
+				today_points = values[1]
+			}
+
 			return [
-				{ period: 'today', points: values[0] },
-				{ period: 'ytd', points: by_date(values[1], ytd) },
-				{ period: 'm1', points: by_date(values[1], m1) },
-				{ period: 'm6', points: by_date(values[1], m6) },
-				{ period: 'y1', points: by_date(values[1], y1) },
-				{ period: 'y5', points: values[1] },
+				{ period: 'today', points: today_points },
+				{ period: 'ytd', points: by_date(values[2], ytd) },
+				{ period: 'm1', points: by_date(values[2], m1) },
+				{ period: 'm6', points: by_date(values[2], m6) },
+				{ period: 'y1', points: by_date(values[2], y1) },
+				{ period: 'y5', points: values[2] },
 			]
+		})
+	}
+
+	function get_trading_in_period (symbol, days_count)
+	{
+		var today = moment.utc().startOf('day')
+
+		return xign.lastTradeDate(symbol.toXign())
+		.then((date) =>
+		{
+			if (date === null || today.diff(date, 'days') > days_count)
+			{
+				return []
+			}
+
+			return xign.bars(
+				symbol.toXign(),
+				date.startOf('day'),
+				date.clone().endOf('day')
+			)
 		})
 	}
 
