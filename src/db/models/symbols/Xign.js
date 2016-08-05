@@ -107,7 +107,7 @@ module.exports = function Xign (cfg, log)
 	{
 		expect(symbol).ok
 
-		return _fundamentals(symbol)
+		return fund(symbol)
 		.then(data =>
 		{
 			return {
@@ -120,7 +120,7 @@ module.exports = function Xign (cfg, log)
 
 	X.fundamentals = (symbol) =>
 	{
-		return _fundamentals(symbol)
+		return fund(symbol)
 		.then(data =>
 		{
 			return data.FundamentalsSets
@@ -128,7 +128,7 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.first)
 	}
 
-	function _fundamentals (symbol)
+	function fund (symbol)
 	{
 		var types =
 		[
