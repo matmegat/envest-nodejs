@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line complexity
 var Symbl = module.exports = function Symbl (it)
 {
 	if (Symbl.is(it))

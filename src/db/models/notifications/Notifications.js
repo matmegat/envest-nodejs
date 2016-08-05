@@ -67,7 +67,10 @@ module.exports = function Notifications (db)
 			return notifications.table(trx)
 			.insert(data)
 			.then(noop)
-			.catch(Err.fromDb('notifications_recipient_id_foreign', db.user.NotFound))
+			.catch(Err.fromDb(
+				'notifications_recipient_id_foreign',
+				db.user.NotFound
+			))
 		})
 	}
 
@@ -110,13 +113,15 @@ module.exports = function Notifications (db)
 
 	function get_query_group (data)
 	{
-		if (db.user.groups.isAdmin(data.group) || db.user.groups.isInvestor(data.group))
+		var groups = db.user.groups
+
+		if (groups.isAdmin(data.group) || groups.isInvestor(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
 			.from(data.group)
 		}
-		else if (db.user.groups.isUser(data.group))
+		else if (groups.isUser(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, users.id', [data.type, data.event]))
