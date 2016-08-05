@@ -57,11 +57,11 @@ module.exports = function User (db, app)
 		.then(Boolean)
 	})
 
-	user.ensure = function (id, trx)
+	user.ensure = knexed.transact(knex, (trx, id) =>
 	{
 		return user.is(trx, id)
 		.then(Err.falsy(user.NotFound))
-	}
+	})
 
 	user.byId = function (id, trx)
 	{
