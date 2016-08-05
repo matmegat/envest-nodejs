@@ -96,6 +96,21 @@ validate.number = function validate__number (field, name)
 	}
 }
 
+validate.number.decimal = function (power)
+{
+	var max = Math.pow(10, power)
+
+	return (field, name) =>
+	{
+		validate.number(field, name)
+
+		if (! (Math.abs(field) < max))
+		{
+			throw FieldType({ field: name, type: 'decimal', power: power })
+		}
+	}
+}
+
 
 var isInteger = require('lodash/isInteger')
 
