@@ -118,7 +118,7 @@ module.exports = function Xign (cfg, log)
 		})
 	}
 
-	X.fundamentalsLast = (symbol) =>
+	X.fundamentals = (symbol) =>
 	{
 		return _fundamentals(symbol)
 		.then(data =>
