@@ -164,13 +164,9 @@ module.exports = function Portfolio (db, investor)
 		var symbol = {}
 
 		return Symbl.validate(data.symbol)
-		.then(resl =>
+		.then(symbl =>
 		{
-			symbol =
-			{
-				symbol_exchange: resl.exchange,
-				symbol_ticker: resl.ticker
-			}
+			symbol = symbl
 
 			if (! (dir in holdings.dirs))
 			{

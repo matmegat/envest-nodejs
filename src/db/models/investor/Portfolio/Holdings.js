@@ -128,8 +128,8 @@ module.exports = function Holdings (db, investor)
 		return holdings.table()
 		.where({
 			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
+			symbol_exchange: symbol.exchange,
+			symbol_ticker: symbol.ticker
 		})
 		.then(oneMaybe)
 	}
