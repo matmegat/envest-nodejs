@@ -27,8 +27,15 @@ module.exports = function (db, http, admin)
 
 		var credentials = {}
 
-		credentials.first_name = rq.body.first_name
-		credentials.last_name = rq.body.last_name
+		if ('first_name' in rq.body)
+		{
+			credentials.first_name = rq.body.first_name
+		}
+
+		if ('last_name' in rq.body)
+		{
+			credentials.last_name = rq.body.last_name
+		}
 
 		toss(rs, user_model.changeNameAs(target_user_id, credentials, whom_id))
 	})

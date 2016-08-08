@@ -612,7 +612,9 @@ module.exports = function User (db, app)
 	}
 
 	var validate = require('../validate')
-	var validate_word = validate.word
+	var validate_name = validate.name
+	var validate_required = validate.required
+	var validate_empty = validate.empty
 
 	var EmptyCredentials = Err('name_credentials_are_empty',
 		'Name credentials are empty')
@@ -629,15 +631,15 @@ module.exports = function User (db, app)
 				throw EmptyCredentials()
 			}
 
-			if (credentials.first_name)
+			if ('first_name' in credentials)
 			{
-				validate_word(credentials.first_name, 'first_name')
+				validate_name(credentials.first_name, 'first_name')
 				creds_obj.first_name = credentials.first_name
 			}
 
-			if (credentials.last_name)
+			if ('last_name' in credentials)
 			{
-				validate_word(credentials.last_name, 'last_name')
+				validate_name(credentials.last_name, 'last_name')
 				creds_obj.last_name = credentials.last_name
 			}
 
@@ -666,7 +668,14 @@ module.exports = function User (db, app)
 	user.changeNameAs = knexed.transact(
 		knex, (trx, user_id, credentials, whom_id) =>
 	{
-		return change_name(trx, user_id, credentials)
+		return Promise.resolve()
+		.then(() =>
+		{
+			validate_required(user_id, 'target_user_id')
+			validate_empty(user_id, 'target_user_id')
+
+			return change_name(trx, user_id, credentials)
+		})
 		.then(id =>
 		{
 			return db.investor.all.is(id, trx)
