@@ -15,6 +15,7 @@ var GetDataErr = Err(
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
+var filter = require('lodash/filter')
 
 var moment = require('moment')
 
@@ -134,9 +135,10 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(symbol =>
 		{
 			return xign.historical(symbol.toXign())
-			.catch(err =>
+			.catch(() =>
 			{
-				console.log(err)
+				// warn_rethrow ~
+				// util.unwrap
 
 				throw GetDataErr({ symbol: symbol })
 			})
@@ -192,10 +194,19 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 		.then(obj =>
 		{
-			fundamentalsDefault.market_cap = {
-				value: Number(obj.MarketCapitalization.value) || null,
-				unit: obj.MarketCapitalization.unit
+			var market_cap = Number(obj.MarketCapitalization.value) || null
+			var unit = obj.MarketCapitalization.unit
+
+			if (market_cap && unit === 'Millions')
+			{
+				market_cap *= 1e6
 			}
+			else
+			{
+				market_cap = null
+			}
+
+			fundamentalsDefault.market_cap = market_cap
 			fundamentalsDefault.dividend =
 				Number(obj.DividendYieldDaily.value) || null
 			fundamentalsDefault.one_year_low =
@@ -231,104 +242,83 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		.then(symbol =>
 		{
 			var today = () => moment.utc().startOf('day')
+			var allowed_offset = 10
 
 			return Promise.all(
 			[
 				xign.bars(
 					symbol.toXign(),
-					today().subtract(5, 'days'),
+					today(),
 					today().endOf('day')
-				)
-				.then(last_day),
+				),
 
-				year_to_date(symbol)
-				.then(take_n(24)),
+				get_trading_in_period(symbol, allowed_offset),
 
 				xign.series(
 					symbol.toXign(),
 					today(),
 					'Day',
-					today().diff(today().subtract(1, 'month'), 'days')
+					today().diff(
+						today().subtract(5, 'years'),
+						'days'
+					)
 				),
-
-				xign.series(symbol.toXign(), today(), 'Week', 26)
-				.then(take_n(26)),
-
-				xign.series(symbol.toXign(), today(), 'Day', 365)
-				.then(take_n(24)),
-
-				xign.series(symbol.toXign(), today(), 'Quarter', 20)
-				.then(take_n(24)),
 			])
 		})
 		.then((values) =>
 		{
+			var by_date = (points, date) =>
+			{
+				return filter(points, (point) =>
+				{
+					return moment.utc(point.timestamp) >= date
+				})
+			}
+
+			var ytd = moment.utc().startOf('year')
+			var m1 = moment.utc().startOf('day').subtract(1, 'month')
+			var m6 = moment.utc().startOf('day').subtract(6, 'month')
+			var y1 = moment.utc().startOf('day').subtract(1, 'year')
+
+			var today_points = []
+			if (values[0].length)
+			{
+				today_points = values[0]
+			}
+			else
+			{
+				today_points = values[1]
+			}
+
 			return [
-				{ period: 'today', points: values[0] },
-				{ period: 'ytd', points: values[1] },
-				{ period: 'm1', points: values[2] },
-				{ period: 'm6', points: values[3] },
-				{ period: 'y1', points: values[4] },
-				{ period: 'y5', points: values[5] },
+				{ period: 'today', points: today_points },
+				{ period: 'ytd', points: by_date(values[2], ytd) },
+				{ period: 'm1', points: by_date(values[2], m1) },
+				{ period: 'm6', points: by_date(values[2], m6) },
+				{ period: 'y1', points: by_date(values[2], y1) },
+				{ period: 'y5', points: values[2] },
 			]
 		})
 	}
 
-	function last_day (chart_items)
+	function get_trading_in_period (symbol, days_count)
 	{
-		if (! chart_items.length)
-		{
-			return  chart_items
-		}
+		var today = moment.utc().startOf('day')
 
-		var last_day = chart_items[chart_items.length - 1].timestamp
-		last_day = moment(last_day).dayOfYear()
-
-		return chart_items.filter((char_item) =>
+		return xign.lastTradeDate(symbol.toXign())
+		.then((date) =>
 		{
-			return moment(char_item.timestamp).dayOfYear() === last_day
+			if (date === null || today.diff(date, 'days') > days_count)
+			{
+				return []
+			}
+
+			return xign.bars(
+				symbol.toXign(),
+				date.startOf('day'),
+				date.clone().endOf('day')
+			)
 		})
-	}
-
-	function year_to_date (symbol)
-	{
-		var start_date = moment.utc().startOf('year')
-		var end_date = moment.utc().endOf('day')
-
-		var days = end_date.diff(start_date, 'days')
-
-		if (days <= 20)
-		{
-			return xign.bars(symbol.toXign(), start_date, end_date)
-		}
-		else
-		{
-			return xign.series(symbol.toXign(), end_date, 'Day', days)
-		}
-	}
-
-	function take_n (amount)
-	{
-		/* takes ${amount} of points from  chart items
-		* - every point should be equidistant from one to another
-		* */
-		return (chart_items) =>
-		{
-			if (chart_items.length <= amount)
-			{
-				return Promise.resolve(chart_items)
-			}
-
-			var step = Math.round(chart_items.length / amount)
-			var equidistant_points = []
-
-			for (var i = 0; i < chart_items.length; i += step)
-			{
-				equidistant_points.push(chart_items[i])
-			}
-
-			return equidistant_points
-		}
 	}
 
 	return symbols

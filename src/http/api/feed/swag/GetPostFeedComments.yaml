@@ -23,7 +23,7 @@ get:
     200:
       description: Post (Feed Item) comments
       schema:
-        $ref: ../../comments/swag/Comments.yaml
+        $ref: ../../comments/swag/Comment.yaml
     400:
       description: if something went wrong
       schema:

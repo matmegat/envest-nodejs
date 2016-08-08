@@ -1,0 +1,5 @@
+type: array
+title: Historical Returns Model
+description: Array by year of historical returns
+items:
+- $ref: ./HistoricalReturn.yaml

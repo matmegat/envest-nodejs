@@ -10,6 +10,7 @@ module.exports = function (db, http, admin)
 
 	var post_model = db.post
 	var investor_model = db.investor
+	var user_model = db.user
 
 	express.use(http.adminRequired)
 
@@ -36,6 +37,19 @@ module.exports = function (db, http, admin)
 				post_model.createAs(whom_id, target_user_id, type, date, data))
 		})
 		.catch(toss.err(rs))
+	})
+
+	express.post('/change-name', (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+
+		var credentials = {}
+
+		credentials.first_name = rq.body.first_name
+		credentials.last_name = rq.body.last_name
+
+		toss(rs, user_model.changeNameAs(target_user_id, credentials, whom_id))
 	})
 
 	return ctrl

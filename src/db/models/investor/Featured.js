@@ -53,17 +53,22 @@ module.exports = function Featured (db, investor)
 			}
 		})
 		.catch(Err.fromDb(
-			'featured_investor_investor_id_foreign', InvestorNotFound)
-		)
-		.then( () =>
+			'featured_investor_investor_id_foreign',
+			InvestorNotFound
+		))
+		.then(() =>
 		{
-			return NewFeaturedInvestor(data)
+			return NewFeaturedInvestor(
+			{
+				investor: [ ':user-id', investor_id ]
+			})
 		})
 	}
 
 	var FeaturedInvestorNotFound = Err(
-	'featured_investor_not_found',
-	'Featured investor not found')
+		'featured_investor_not_found',
+		'Featured investor not found'
+	)
 
 	featured.get = function ()
 	{

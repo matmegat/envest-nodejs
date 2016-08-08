@@ -37,7 +37,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 	}
 
-	var limit_watchlist = 500
+	var limit_watchlist = 250
 
 	var LimitWatchlist = Err('limit_watchlist', 'Watchlist limited')
 

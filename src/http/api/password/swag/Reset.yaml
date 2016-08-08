@@ -4,8 +4,7 @@ post:
   - name: payload
     in: body
     description: |
-      JSON payload to log in.
-      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+      JSON payload with password reset code
     schema:
       type: object
       properties:
@@ -21,6 +20,8 @@ post:
   responses:
     200:
       description: Password changed
+      schema:
+        $ref: ../../../swagger/UserFull.yaml
     400:
       description: if something went wrong
       schema:

@@ -17,6 +17,23 @@ post:
   responses:
     200:
       description: Promo code successfully activated
+      schema:
+        type: object
+        title: Subscription Model
+        description: |
+          Subscription info
+        properties:
+          user_id:
+            type: number
+            format: integer
+            description: User ID
+          type:
+            type: string
+            description: Subscription type
+          end_time:
+            type: string
+            format: date-time
+            description: Subscription expiration date
     400:
       description: |
         **Error object** which follows

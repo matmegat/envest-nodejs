@@ -71,33 +71,51 @@ module.exports = function SubscrManager (db, subsc_desc)
 		.then(() =>
 		{
 			return subsc_desc[type].fn(user_id, subscr_manager.table)
+		})
+		.then(() =>
+		{
+			return calculate_whole_range(user_id, days)
+		})
+		.then((date) =>
+		{
+			return subscr_manager.table(trx)
+			.insert(
+			{
+				user_id: user_id,
+				type: type,
+				end_time: date
+			})
+			.then(noop)
+			.catch(Err.fromDb(
+			'subscriptions_user_id_foreign',
+			db.user.NotFound))
 			.then(() =>
 			{
-				return calculate_whole_range(user_id, days)
-			})
-			.then((date) =>
-			{
-				return subscr_manager.table(trx)
-				.insert(
+				return SubscrActivateA(
 				{
+					user: [ ':user-id', user_id ],
+					type: type,
+					days: days
+				}
+				, trx)
+			})
+			.then(() =>
+			{
+				return SubscrActivateU(user_id,
+				{
+					type: type,
+					days: days
+				}
+				, trx)
+			})
+			.then(() =>
+			{
+				return {
 					user_id: user_id,
 					type: type,
 					end_time: date
-				})
-				.then(noop)
-				.catch(Err.fromDb(
-				'subscriptions_user_id_foreign',
-				db.user.NotFound))
+				}
 			})
-		})
-		.then(() =>
-		{
-			return SubscrActivateA(
-			{ user_id: user_id, type: type, days: days }, trx)
-		})
-		.then(() =>
-		{
-			return SubscrActivateU(user_id, { type: type, days: days }, trx)
 		})
 	}
 

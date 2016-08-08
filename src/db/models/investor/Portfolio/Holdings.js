@@ -108,6 +108,7 @@ module.exports = function Holdings (db, investor)
 	holdings.byInvestorId = function (investor_id)
 	{
 		return holdings.table()
+		.select(['amount', 'buy_price', 'symbol_ticker', 'symbol_exchange'])
 		.where('investor_id', investor_id)
 	}
 

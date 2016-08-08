@@ -3,7 +3,7 @@ var knexed = require('../knexed')
 var upsert = require('../upsert')
 
 var Err = require('../../Err')
-var noop = require('lodash/noop')
+
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
@@ -105,7 +105,7 @@ module.exports = function Password (db, user, app)
 		})
 		.then(() =>
 		{
-			return user.byEmail(email)
+			return user.byEmail(email, trx)
 		})
 		.then(Err.nullish(EmailNotFound))
 		.then(user =>
@@ -143,12 +143,13 @@ module.exports = function Password (db, user, app)
 					return mailer.send('default', null,
 					{
 						to: email,
-						text: 'Password reset code: '
-						+ code.toUpperCase(),
-						html: 'Password reset code: '
-						+ `<a href="http://${host}/reset-password?code=${code.toUpperCase()}" target="_blank">
-							${code.toUpperCase()}
-						</a>`
+						// text: 'Password reset code: '
+						// + code.toUpperCase(),
+						html: 'Please tap the link to reset password: '
+						+ `<a href="http://${host}/reset-password?code=`
+						+ `${code.toUpperCase()}" target="_blank">`
+						+ `Reset Password</a><br>`
+						+ `Your password reset code: ${code.toUpperCase()}`
 					})
 				})
 			})
@@ -178,13 +179,17 @@ module.exports = function Password (db, user, app)
 					return password.reset_table(trx)
 					.where('code', code)
 					.del()
-					.then(noop)
 				})
+				.then(() => user.byId(data.user_id))
 			}
 			else
 			{
 				throw ExpiredCode()
 			}
+		})
+		.then((user_data) =>
+		{
+			return db.auth.login(user_data.email, new_pass, trx)
 		})
 	})
 

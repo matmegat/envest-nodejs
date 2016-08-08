@@ -30,6 +30,12 @@ properties:
   annual_return:
     type: number
     description: Investor's 5 year annual return in percentage
+  historical_returns:
+    $ref: ./HistoricalReturns.yaml
+  holdings:
+    $ref: ./Holdings.yaml
+  brokerage:
+    $ref: ./Brokerage.yaml
   is_featured:
     type: boolean
     description: Is featured Investor
@@ -39,3 +45,4 @@ required:
 - last_name
 - focus
 - annual_return
+- historical_returns

@@ -9,6 +9,8 @@ var extend = require('lodash/extend')
 var Series = require('./Series')
 var util = require('./util')
 
+var moment = require('moment')
+
 
 module.exports = function Xign (cfg, log)
 {
@@ -212,6 +214,61 @@ module.exports = function Xign (cfg, log)
 			return resl.FundamentalsSets
 		})
 		.then(util.unwrap.first)
+	}
+
+	X.lastTradeDate = (symbol) =>
+	{
+		expect(symbol).ok
+
+		return last_closing_price(symbol)
+		.then(data =>
+		{
+			if (! data.date)
+			{
+				return null
+			}
+
+			var date = moment.utc(data.date, 'M/D/YYYY')
+
+			if (! date.isValid())
+			{
+				return null
+			}
+
+			return date
+		})
+	}
+
+	var last_closing_price = (symbol) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https:',
+			host: 'xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalLastClosingPrice',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifier: symbol,
+
+				AdjustmentMethod: 'None',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(data =>
+		{
+			return {
+				date: data.Date,
+				last: data.LastClose,
+				currency: data.Currency
+			}
+		})
 	}
 
 	return X

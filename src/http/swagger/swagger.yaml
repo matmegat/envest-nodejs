@@ -56,11 +56,14 @@ paths:
   '/admin/intro':
     $ref: ../api/admin/swag/Intro.yaml
 
+  '/admin/change-name':
+    $ref: ../api/admin/swag/ChangeName.yaml
+
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
-  '/comments/count':
-    $ref: ../api/comments/swag/GetCount.yaml
+  '/comments/{id}':
+    $ref: ../api/comments/swag/Remove.yaml
 
   '/comments/abuse':
     $ref: ../api/comments/swag/Abuse.yaml
@@ -79,6 +82,9 @@ paths:
 
   '/investors/{investor_id}':
     $ref: ../api/investors/swag/GetInvestor.yaml
+
+  '/investors/{investor_id}/admin':
+    $ref: ../api/investors/swag/GetInvestorAdmin.yaml
 
   '/investors/{investor_id}/chart':
     $ref: ../api/investors/swag/Get-InvestorChart.yaml
@@ -125,6 +131,9 @@ paths:
   '/users/admins':
     $ref: ../api/users/swag/AdminsList.yaml
 
+  '/users/change-name':
+    $ref: ../api/users/swag/ChangeName.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 
@@ -169,6 +178,21 @@ definitions:
   Investor:
     $ref: ../api/investors/swag/Investor.yaml
 
+  HistoricalReturns:
+    $ref: ../api/investors/swag/HistoricalReturns.yaml
+
+  HistoricalReturn:
+    $ref: ../api/investors/swag/HistoricalReturn.yaml
+
+  Holdings:
+    $ref: ../api/investors/swag/Holdings.yaml
+
+  Holding:
+    $ref: ../api/investors/swag/Holding.yaml
+
+  Brokerage:
+    $ref: ../api/investors/swag/Brokerage.yaml
+
   Investors:
     $ref: ../api/investors/swag/Investors.yaml
 
@@ -196,14 +220,17 @@ definitions:
   User:
     $ref: ./User.yaml
 
+  UserFull:
+    $ref: ./UserFull.yaml
+
   Users:
     $ref: ../api/users/swag/Users.yaml
 
   UsersItem:
     $ref: ../api/users/swag/UsersItem.yaml
 
-  Comments:
-    $ref: ../api/comments/swag/Comments.yaml
+  Comment:
+    $ref: ../api/comments/swag/Comment.yaml
 
   CommentsItem:
     $ref: ../api/comments/swag/CommentItem.yaml

@@ -20,8 +20,6 @@ module.exports = function Series (token)
 	{
 		end_date = util.apidate(end_date)
 
-		console.warn(symbol, end_date, resolution, periods)
-
 		var uri = format(
 		{
 			protocol: 'https:',
@@ -71,7 +69,7 @@ module.exports = function Series (token)
 	series.bars = (symbol, start_date, end_date) =>
 	{
 		var precision = 'Minutes'
-		var period = 15
+		var period = 5
 
 		var uri = format(
 		{

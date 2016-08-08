@@ -59,11 +59,17 @@ module.exports = function Onboarding (db, investor)
 		{
 			if (mode === 'mode:investor')
 			{
-				FieldEditedA({ by: 'investor', investor_id: investor_id })
+				FieldEditedA({
+					by: 'investor',
+					investor: [ ':user-id', investor_id ]
+				})
 			}
 			else
 			{
-				FieldEditedI(investor_id, { by: 'admin', admin_id: whom_id })
+				FieldEditedI(investor_id, {
+					by: 'admin',
+					admin: [ ':user-id', whom_id ]
+				})
 			}
 		})
 	}
@@ -152,7 +158,10 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_id) =>
 		{
-			PublicChanged(investor_id, { by: 'admin', admin_id: whom_id })
+			PublicChanged(investor_id, {
+				by: 'admin',
+				admin: [ ':user-id', whom_id ]
+			})
 		})
 	}
 
@@ -391,6 +400,8 @@ var WrongBrokerageFormat = Err('wrong_brokerage_format',
 
 function Brokerage (investor_model, db)
 {
+	var decimal = validate.number.decimal(10)
+
 	return Field(investor_model,
 	{
 		get: (queryset, investor_id) =>
@@ -401,7 +412,9 @@ function Brokerage (investor_model, db)
 		},
 		validate: (value) =>
 		{
-			if (! isFinite(value) || value < 0)
+			decimal(value, 'brokerage')
+
+			if (value < 0)
 			{
 				throw WrongBrokerageFormat({ field: 'brokerage' })
 			}
@@ -444,6 +457,8 @@ var WrongHoldingsFormat = Err('wrong_holdings_format',
 
 function Holdings (investor_model, db)
 {
+	var decimal = validate.number.decimal(6)
+
 	function vrow (row, i)
 	{
 		expect(row).an('object')
@@ -457,7 +472,7 @@ function Holdings (investor_model, db)
 			throw WrongHoldingsFormat({ field: `holdings[${i}].amount` })
 		}
 
-		validate.number(row.buy_price, `holdings[${i}].buy_price`)
+		decimal(row.buy_price, `holdings[${i}].buy_price`)
 		if (row.buy_price <= 0)
 		{
 			throw WrongHoldingsFormat({ field: `holdings[${i}].buy_price` })

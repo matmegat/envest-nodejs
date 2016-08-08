@@ -99,6 +99,31 @@ validate.number = function validate__number (field, name)
 	}
 }
 
+validate.number.decimal = function (power)
+{
+	var max = Math.pow(10, power)
+
+	return (field, name) =>
+	{
+		validate.number(field, name)
+
+		if (! (Math.abs(field) < max))
+		{
+			throw FieldType({ field: name, type: 'decimal', power: power })
+		}
+	}
+}
+
+validate.number.positive = function (field, name)
+{
+	validate.number(field, name)
+
+	if (! (field > 0))
+	{
+		throw FieldType({ field: name, type: 'number/positive' })
+	}
+}
+
 
 var isInteger = require('lodash/isInteger')
 
@@ -114,11 +139,7 @@ validate.integer = function validate__integer (field, name)
 validate.integer.positive = function validate__integer__positive (field, name)
 {
 	validate.integer(field, name)
-
-	if (! (field > 0))
-	{
-		throw FieldType({ field: name, type: 'integer/positive' })
-	}
+	validate.number.positive(field, name)
 }
 
 
@@ -171,6 +192,11 @@ validate.name = function validate__name (name, field_name)
 {
 	validate.required(name, field_name)
 	validate.empty(name, field_name)
+	validate.word(name, field_name)
+}
+
+validate.word = function validate__word (name, field_name)
+{
 	validateNameLength(name, field_name)
 
 	/*
@@ -191,7 +217,6 @@ validate.name = function validate__name (name, field_name)
 		throw WrongName()
 	}
 }
-
 
 var WrongEmail = Err('wrong_email_format', 'Wrong email format')
 

@@ -9,6 +9,8 @@ var validate = require('../validate')
 var Err = require('../../Err')
 
 var _ = require('lodash')
+var noop = _.noop
+var map  = _.map
 
 module.exports = function Comments (db)
 {
@@ -27,6 +29,9 @@ module.exports = function Comments (db)
 	expect(db, 'Comments depends on User').property('user')
 	var user = db.user
 
+	expect(db, 'Comments depends on Admin').property('admin')
+	var admin = db.admin
+
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments, Emitter)
 
@@ -41,13 +46,18 @@ module.exports = function Comments (db)
 		})
 		.then((comments_items) =>
 		{
-			return user.list(_.map(comments_items, 'user_id'))
-			.then((users) =>
+			return Promise.all(
+			[
+				user.list(map(comments_items, 'user_id')),
+				comments.count(options.feed_id)
+			])
+			.then(so =>
 			{
 				var response =
 				{
 					comments: comments_items,
-					users: users
+					users: so[0],
+					count: so[1]
 				}
 
 				return response
@@ -118,6 +128,7 @@ module.exports = function Comments (db)
 			.then(one)
 		})
 		.then(row => row.count)
+		.then(Number)
 	}
 
 	var at  = require('lodash/fp/at')
@@ -144,6 +155,8 @@ module.exports = function Comments (db)
 		})
 	}
 
+	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
+	var validate_id = require('../../id').validate.promise(WrongCommentId)
 
 	comments.byId = function (id)
 	{
@@ -156,9 +169,50 @@ module.exports = function Comments (db)
 		})
 	}
 
+	comments.CommentNotFound = Err('comment_not_found',
+	'Comment not found')
 
-	var WrongCommentId = Err('wrong_comment_id', 'Wrong comment id')
-	var validate_id = require('../../id').validate.promise(WrongCommentId)
+	var AdminOwnerRequired = Err('admin_owner_required',
+	'You must be the administrator or owner of feed post')
+
+	comments.remove = function (user_id, id)
+	{
+		return comments.byId(id)
+		.then(Err.nullish(comments.CommentNotFound))
+		.then(() =>
+		{
+			return comments.ensureDelete(user_id, id)
+		})
+		.then(() =>
+		{
+			return remove_by_id(id)
+		})
+		.then(noop)
+	}
+
+	comments.ensureDelete = function (user_id, id)
+	{
+		return admin.is(user_id)
+		.then((is_admin) =>
+		{
+			if (! is_admin)
+			{
+				return comments.table()
+				.innerJoin('feed_items',
+				'feed_items.id', 'comments.feed_id ')
+				.where('comments.id', id)
+				.where('investor_id', user_id)
+				.then(Err.emptish(AdminOwnerRequired))
+			}
+		})
+	}
+
+	function remove_by_id (id)
+	{
+		return comments.table()
+		.where('id', id)
+		.del()
+	}
 
 	return comments
 }

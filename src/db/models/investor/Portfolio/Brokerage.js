@@ -28,6 +28,7 @@ module.exports = function Brokerage (db, investor)
 	brokerage.byInvestorId = function (investor_id)
 	{
 		return brokerage.table()
+		.select(['cash_value', 'multiplier'])
 		.where('investor_id', investor_id)
 		.then(db.helpers.one)
 	}

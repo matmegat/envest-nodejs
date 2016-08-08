@@ -5,6 +5,9 @@ var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
 
+var compose = require('composable-middleware')
+var AccessRequired = require('../../access-required')
+
 module.exports = function (db, http)
 {
 	var investors = {}
@@ -25,28 +28,26 @@ module.exports = function (db, http)
 		])
 
 		options.filter = pick(rq.query,
-        [
-            'symbol',
+		[
+			'symbol',
 			'symbols'
-        ])
+		])
 
 		toss(rs, investors.model.public.list(options))
 	})
 
 	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
 	{
-		var options = pick(rq.query,
-			[
-				'max_id',
-				'since_id',
-				'page'
-			])
-		toss(rs, investors.model.all.list(options))
-	})
+		var options = {}
 
-	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
-	{
-		toss(rs, investors.model.featured.set(rq.body.investor_id))
+		options.paginator = pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page'
+		])
+
+		toss(rs, investors.model.all.list(options))
 	})
 
 	investors.express.get('/:id', (rq, rs) =>
@@ -61,13 +62,33 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/chart', (rq, rs) =>
 	{
-		toss(rs, db.symbols.series('TSLA'))
-	})
+		var filter = require('lodash/filter')
+		var moment = require('moment')
 
-	investors.express.post('/', http.adminRequired, (rq, rs) =>
-	{
-		var data = extend({}, rq.body, { admin_id: rq.user.id })
-		toss(rs, investors.model.create(data))
+		 var y2 = moment.utc().startOf('day').subtract(2, 'years')
+
+		// toss(rs, db.symbols.series('TSLA'))
+		db.symbols.series('TSLA')
+		.then((chart_data) =>
+		{
+			if (! chart_data[0].points.length)
+			{
+				chart_data[0].points = chart_data[2].points	// m1 resolution
+			}
+
+			chart_data[5].period = 'y2'
+			chart_data[5].points = filter(
+				chart_data[5].points,
+				(point) =>
+				{
+					return moment.utc(point.timestamp) >= y2
+				}
+			)
+
+			return chart_data
+		})
+		.then(toss.ok(rs))
+		.catch(toss.err(rs))
 	})
 
 	investors.express.post('/:id/field', (rq, rs) =>
@@ -86,12 +107,41 @@ module.exports = function (db, http)
 		))
 	})
 
+	/***************************************************************************
+	* Admin Routes
+	* *************************************************************************/
+	var accessRequired =
+		compose(authRequired, AccessRequired(investors.model.all, db.admin))
+
+	investors.express.post('/', http.adminRequired, (rq, rs) =>
+	{
+		var data = extend({}, rq.body, { admin_id: rq.user.id })
+		toss(rs, investors.model.create(data))
+	})
+
+	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
+	{
+		return Promise.all(
+		[
+			investors.model.all.byId(rq.params.id),
+			investors.model.portfolio.full(rq.params.id)
+		])
+		.then((response) => extend({}, response[0], response[1]))
+		.then(toss.ok(rs))
+		.catch(toss.err(rs))
+	})
+
 	investors.express.post('/:id/go-public', http.adminRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.params.id
 
 		toss(rs, investors.model.onboarding.goPublic(whom_id, investor_id))
+	})
+
+	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.featured.set(rq.body.investor_id))
 	})
 
 	return investors

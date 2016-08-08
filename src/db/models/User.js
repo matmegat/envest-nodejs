@@ -7,8 +7,7 @@ var generate_code = require('../../crypto-helpers').generate_code
 var extend = require('lodash/extend')
 var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
-
-var pick = require('lodash/pick')
+var noop   = require('lodash/noop')
 
 var Password = require('./Password')
 
@@ -20,6 +19,8 @@ var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
+
+var moment = require('moment')
 
 module.exports = function User (db, app)
 {
@@ -43,11 +44,24 @@ module.exports = function User (db, app)
 
 	user.NotFound = Err('user_not_found', 'User not found')
 
-	user.ensure = function (id, trx)
+	user.is = knexed.transact(knex, (trx, user_id) =>
 	{
-		return user.byId(id, trx)
-		.then(Err.nullish(user.NotFound))
-	}
+		return user.validateId(user_id)
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.select('id')
+			.where('users.id', user_id)
+			.then(oneMaybe)
+		})
+		.then(Boolean)
+	})
+
+	user.ensure = knexed.transact(knex, (trx, id) =>
+	{
+		return user.is(trx, id)
+		.then(Err.falsy(user.NotFound))
+	})
 
 	user.byId = function (id, trx)
 	{
@@ -72,6 +86,18 @@ module.exports = function User (db, app)
 			.then(oneMaybe)
 		})
 	}
+
+	user.nameByIds = function (ids)
+	{
+		return user.users_table()
+		.select(
+			'id',
+			'first_name',
+			'last_name'
+		)
+		.whereIn('id', ids)
+	}
+
 
 	var WrongUserId = Err('wrong_user_id', 'Wrong user id')
 	user.validateId = require('../../id').validate.promise(WrongUserId)
@@ -102,13 +128,17 @@ module.exports = function User (db, app)
 				knex.raw(`(select end_time
 					from subscriptions where user_id = users.id
 					and end_time > current_timestamp
-					ORDER BY start_time DESC limit 1)`),
+					ORDER BY end_time DESC limit 1)`),
+				knex.raw(`(select start_time
+					from subscriptions where user_id = users.id
+					and end_time > current_timestamp
+					ORDER BY end_time DESC limit 1)`),
 				knex.raw(`COALESCE(
 					(select type
 					from subscriptions
 					where user_id = users.id
 					and end_time > current_timestamp
-					ORDER BY start_time DESC limit 1),
+					ORDER BY end_time DESC limit 1),
 					'standard') AS type`),
 				knex.raw(`(select * from featured_investor
 					where investor_id = users.id)
@@ -150,14 +180,13 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'email',
-				'pic',
-				'last_payment_date',
-				'total_payment_days'
+				'pic'
 			])
 
 			user_data.subscription = pick(result,
 			[
 				'type',
+				'start_time',
 				'end_time'
 			])
 
@@ -184,7 +213,55 @@ module.exports = function User (db, app)
 				])
 			}
 
-			return user_data
+			return get_total_payment_days(id)
+			.then((total_payment_days) =>
+			{
+				user_data
+				.subscription
+				.total_payment_days = total_payment_days
+
+				return user_data
+			})
+		})
+	}
+
+	function get_total_payment_days (user_id)
+	{
+		var total_payment_days = 0
+
+		return knex('subscriptions')
+		.where('user_id', user_id)
+		.orderBy('start_time', 'desc')
+		.then((subscrs) =>
+		{
+			if (subscrs.length > 0)
+			{
+				subscrs.forEach((subscr, i) =>
+				{
+					var start_time = moment(subscr.start_time).valueOf()
+					var end_time = moment(subscr.end_time).valueOf()
+
+					var next_index = i + 1
+
+					if (next_index < subscrs.length)
+					{
+						var prev_subscr = subscrs[next_index]
+
+						var prev_end_time = moment(prev_subscr.end_time).valueOf()
+
+						if (start_time < prev_end_time)
+						{
+							end_time -= (prev_end_time - start_time)
+						}
+					}
+
+					var days = (end_time - start_time) / 24 / 60 / 60 / 1000
+
+					total_payment_days += Math.ceil(days)
+				})
+			}
+
+			return total_payment_days
 		})
 	}
 
@@ -275,43 +352,40 @@ module.exports = function User (db, app)
 		.then(oneMaybe)
 	}
 
-	user.createFacebook = function (data)
+	user.createFacebook = knexed.transact(knex, (trx, data) =>
 	{
-		return knex.transaction(function (trx)
+		return user.users_table(trx)
+		.insert({
+			first_name: data.first_name,
+			last_name: data.last_name,
+			email: null
+		}
+		, 'id')
+		.then(one)
+		.then(id =>
 		{
-			return user.users_table(trx)
-			.insert({
-				first_name: data.first_name,
-				last_name: data.last_name,
-				email: null
-			}
-			, 'id')
-			.then(one)
-			.then(id =>
+			return user.newEmailUpdate(trx,
 			{
-				return user.newEmailUpdate(trx,
-				{
-					user_id: id,
-					new_email: data.email
-				})
-			})
-			.then(id =>
-			{
-				return createFacebookUser({
-					user_id: id,
-					facebook_id: data.facebook_id
-				}, trx)
-			})
-			.then(() =>
-			{
-				return user.byFacebookId(data.facebook_id, trx)
-			})
-			.then(result =>
-			{
-				return result.id
+				user_id: id,
+				new_email: data.email
 			})
 		})
-	}
+		.then(id =>
+		{
+			return createFacebookUser({
+				user_id: id,
+				facebook_id: data.facebook_id
+			}, trx)
+		})
+		.then(() =>
+		{
+			return user.byFacebookId(data.facebook_id, trx)
+		})
+		.then(result =>
+		{
+			return result.id
+		})
+	})
 
 	user.byFB = function (data)
 	{
@@ -345,22 +419,19 @@ module.exports = function User (db, app)
 		.then(oneMaybe)
 	}
 
-	user.emailConfirm = function (user_id, new_email)
+	user.emailConfirm = knexed.transact(knex, (trx, user_id, new_email) =>
 	{
-		return knex.transaction(function (trx)
+		return user.users_table(trx)
+		.where('id', user_id)
+		.update({
+			email: new_email
+		}, 'id')
+		.then(one)
+		.then(function (id)
 		{
-			return user.users_table(trx)
-			.where('id', user_id)
-			.update({
-				email: new_email
-			}, 'id')
-			.then(one)
-			.then(function (id)
-			{
-				return newEmailRemove(id, trx)
-			})
+			return newEmailRemove(id, trx)
 		})
-	}
+	})
 
 	function newEmailRemove (user_id, trx)
 	{
@@ -539,6 +610,86 @@ module.exports = function User (db, app)
 		})
 		.where('id', data.user_id)
 	}
+
+	var validate = require('../validate')
+	var validate_word = validate.word
+
+	var EmptyCredentials = Err('name_credentials_are_empty',
+		'Name credentials are empty')
+
+	var change_name = knexed.transact(knex, (trx, user_id, credentials) =>
+	{
+		var creds_obj = {}
+
+		return user.ensure(trx, user_id)
+		.then(() =>
+		{
+			if (! credentials.first_name && ! credentials.last_name)
+			{
+				throw EmptyCredentials()
+			}
+
+			if (credentials.first_name)
+			{
+				validate_word(credentials.first_name, 'first_name')
+				creds_obj.first_name = credentials.first_name
+			}
+
+			if (credentials.last_name)
+			{
+				validate_word(credentials.last_name, 'last_name')
+				creds_obj.last_name = credentials.last_name
+			}
+
+		})
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.where('id', user_id)
+			.update(creds_obj, 'id')
+		})
+		.then(one)
+	})
+
+	user.changeName = knexed.transact(knex, (trx, user_id, credentials) =>
+	{
+		return change_name(trx, user_id, credentials)
+		.then(noop)
+	})
+
+
+	var Emitter = db.notifications.Emitter
+
+	var NameChangedI = Emitter('username_changed')
+	var NameChangedU = Emitter('username_changed', { group: 'admins' })
+
+	user.changeNameAs = knexed.transact(
+		knex, (trx, user_id, credentials, whom_id) =>
+	{
+		return change_name(trx, user_id, credentials)
+		.then(id =>
+		{
+			return db.investor.all.is(id, trx)
+		})
+		.then(is_investor =>
+		{
+			if (is_investor)
+			{
+				return NameChangedI(user_id,
+				{
+					admin: [ ':user-id', whom_id ]
+				})
+			}
+			else
+			{
+				return NameChangedU(
+				{
+					user: [ ':user-id', user_id ],
+					admin: [ ':user-id', whom_id ]
+				})
+			}
+		})
+	})
 
 	return user
 }

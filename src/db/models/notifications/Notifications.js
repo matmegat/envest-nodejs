@@ -1,26 +1,27 @@
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 var expect = require('chai').expect
 
 var noop = require('lodash/noop')
 var extend = require('lodash/extend')
+var map = require('lodash/map')
+var each = require('lodash/forEach')
 
-var validate   = require('../validate')
-var validateId = require('../../id').validate
-var Paginator  = require('../paginator/Ordered')
+var validate   = require('../../validate')
+var validateId = require('../../../id').validate
+var Paginator  = require('../../paginator/Ordered')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
+
+var Evaluate = require('./Evaluate')
 
 module.exports = function Notifications (db)
 {
 	var notifications = {}
 
+	var evaluate = Evaluate(db)
+
 	var knex = db.knex
-
-	var oneMaybe = db.helpers.oneMaybe
-
-	expect(db, 'Notifications depends on User').property('user')
-	var user = db.user
 
 	var paginator = Paginator()
 
@@ -66,7 +67,10 @@ module.exports = function Notifications (db)
 			return notifications.table(trx)
 			.insert(data)
 			.then(noop)
-			.catch(Err.fromDb('notifications_recipient_id_foreign', user.NotFound))
+			.catch(Err.fromDb(
+				'notifications_recipient_id_foreign',
+				db.user.NotFound
+			))
 		})
 	}
 
@@ -109,13 +113,15 @@ module.exports = function Notifications (db)
 
 	function get_query_group (data)
 	{
-		if (user.groups.isAdmin(data.group) || user.groups.isInvestor(data.group))
+		var groups = db.user.groups
+
+		if (groups.isAdmin(data.group) || groups.isInvestor(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
 			.from(data.group)
 		}
-		else if (user.groups.isUser(data.group))
+		else if (groups.isUser(data.group))
 		{
 			return knex
 			.select(knex.raw('?, ?, users.id', [data.type, data.event]))
@@ -144,13 +150,21 @@ module.exports = function Notifications (db)
 		var queryset = byUserId(options.user_id)
 
 		return paginator.paginate(queryset, options)
-	}
+		.then(seq =>
+		{
+			var events = map(seq, 'event')
 
-	notifications.byIdType = function (user_id, type)
-	{
-		return byUserId(user_id)
-		.andWhere('type', type)
-		.then(oneMaybe)
+			return evaluate(events)
+			.then(events =>
+			{
+				each(events, (event, index) =>
+				{
+					seq[index].event = event
+				})
+
+				return seq
+			})
+		})
 	}
 
 	function byUserId (user_id)

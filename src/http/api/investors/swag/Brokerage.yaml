@@ -1,0 +1,13 @@
+type: object
+title: Brokerage Model
+description: Available for admin and Ivestor only
+properties:
+  cash_value:
+    type: number
+    description: Real amount of brokerage value
+  multiplier:
+    type: number
+    description: Index that equilize full portfolio to 100.000
+required:
+- cash_value
+- multiplier
