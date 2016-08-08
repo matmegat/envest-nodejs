@@ -187,7 +187,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(sum =>
 		{
-			return brokerage.update(investor_id,
+			return brokerage.update(trx, investor_id,
 			{
 				operation: 'trade',
 				amount: sum
