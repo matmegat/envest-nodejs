@@ -4,7 +4,6 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
-var Err = require('../../../Err')
 
 module.exports = function Trade (portfolio)
 {

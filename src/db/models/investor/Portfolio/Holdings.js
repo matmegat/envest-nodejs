@@ -202,8 +202,8 @@ module.exports = function Holdings (db, investor)
 
 	holdings.buy = function (trx, investor_id, symbol, data, cash)
 	{
-		validate.number.positive(data.amount, 'amount')
-		validate.number.positive(data.price, 'price')
+		validate_positive(data.amount, 'amount')
+		validate_positive(data.price, 'price')
 
 		var amount = data.amount
 		var price = data.price
@@ -236,8 +236,8 @@ module.exports = function Holdings (db, investor)
 
 	holdings.sell = function (trx, investor_id, symbol, data)
 	{
-		validate.number.positive(data.amount, 'amount')
-		validate.number.positive(data.price, 'price')
+		validate_positive(data.amount, 'amount')
+		validate_positive(data.price, 'price')
 
 		var amount = data.amount
 		var price = data.price
