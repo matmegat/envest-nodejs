@@ -60,6 +60,8 @@ post:
             symbol:
               type: string
               description: Symbol ticker.exchange
+            target_price:
+              type: integer
             text:
               type: string
               description: Watchlist description

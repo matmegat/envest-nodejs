@@ -16,7 +16,8 @@ module.exports = function Watchlist (watchlist)
 			var additional = pick(data,
 			[
 				'text',
-				'motivations'
+				'motivations',
+				'target_price'
 			])
 
 			if (data.dir === 'added')
