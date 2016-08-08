@@ -15,9 +15,6 @@ var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var noop = require('lodash/noop')
-var pick = require('lodash/pick')
-
-var validate = require('../../validate')
 
 var Feed = module.exports = function Feed (db)
 {

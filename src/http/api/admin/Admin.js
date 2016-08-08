@@ -30,9 +30,10 @@ module.exports = function (db, http, admin)
 		var data = rq.body.data
 
 		return investor_model.all.ensure(target_user_id)
-		.then(() => 
+		.then(() =>
 		{
-			toss(rs, post_model.createAs(whom_id, target_user_id, type, date, data))
+			toss(rs,
+				post_model.createAs(whom_id, target_user_id, type, date, data))
 		})
 		.catch(toss.err(rs))
 	})

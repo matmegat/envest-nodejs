@@ -52,7 +52,9 @@ module.exports = function Featured (db, investor)
 				.insert(data)
 			}
 		})
-		.catch(Err.fromDb('featured_investor_investor_id_foreign', InvestorNotFound))
+		.catch(Err.fromDb(
+			'featured_investor_investor_id_foreign', InvestorNotFound)
+		)
 		.then( () =>
 		{
 			return NewFeaturedInvestor(data)

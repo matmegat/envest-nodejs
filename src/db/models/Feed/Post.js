@@ -71,7 +71,11 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				PostCreated(investor_id, { by: 'investor', investor_id: investor_id })
+				PostCreated(investor_id,
+				{
+					by: 'investor',
+					investor_id: investor_id
+				})
 			})
 		})
 	}
@@ -89,7 +93,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.feed_model.create(trx, investor_id, type, date, data, trx)
+				return post.feed_model.create(trx, investor_id, type, date, data)
 			})
 			.then(() =>
 			{

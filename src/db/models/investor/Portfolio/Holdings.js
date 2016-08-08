@@ -160,7 +160,8 @@ module.exports = function Holdings (db, investor)
 		.update(
 		{
 			amount: symbol.amount + amount,
-			buy_price: calculate_buy_price(symbol.amount, symbol.buy_price, amount, price)
+			buy_price: calculate_buy_price(
+				symbol.amount, symbol.buy_price, amount, price)
 		})
 	}
 
