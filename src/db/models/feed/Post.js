@@ -73,8 +73,7 @@ module.exports = function Post (db)
 			{
 				PostCreated(investor_id,
 				{
-					by: 'investor',
-					investor_id: investor_id
+					investor: [ ':user-id', investor_id ]
 				})
 			})
 		})
@@ -101,7 +100,10 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				PostCreated(investor_id, { by: 'admin', admin_id: whom_id })
+				PostCreated(investor_id,
+				{
+					admin: [ ':user-id', whom_id ]
+				})
 			})
 		})
 	}
