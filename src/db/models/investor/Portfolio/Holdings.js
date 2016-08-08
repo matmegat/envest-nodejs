@@ -13,6 +13,8 @@ module.exports = function Holdings (db, investor)
 	var holdings = {}
 
 	var knex = db.knex
+	var oneMaybe = db.helpers.oneMaybe
+	var one = db.helpers.one
 
 	holdings.table = knexed(knex, 'portfolio_symbols')
 
@@ -108,6 +110,166 @@ module.exports = function Holdings (db, investor)
 		return holdings.table()
 		.select(['amount', 'buy_price', 'symbol_ticker', 'symbol_exchange'])
 		.where('investor_id', investor_id)
+	}
+
+	function remove_symbol (trx, investor_id, symbol)
+	{
+		return holdings.table(trx)
+		.where({
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker
+		})
+		.del()
+	}
+
+	function get_symbol (investor_id, symbol)
+	{
+		return holdings.table()
+		.where({
+			investor_id: investor_id,
+			symbol_exchange: symbol.exchange,
+			symbol_ticker: symbol.ticker
+		})
+		.then(oneMaybe)
+	}
+
+	function add_symbol (trx, investor_id, symbol)
+	{
+		/* @todo: Check if symbol valid */
+
+		return holdings.table(trx)
+		.insert(
+		{
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker,
+			amount: symbol.amount,
+			buy_price: symbol.price
+		})
+	}
+
+	function buy_symbol (trx, investor_id, symbol, amount, price)
+	{
+		return holdings.table(trx)
+		.where(
+		{
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker
+		})
+		.update(
+		{
+			amount: symbol.amount + amount,
+			buy_price: calculate_buy_price(
+				symbol.amount, symbol.buy_price, amount, price)
+		})
+	}
+
+	function sell_symbol (trx, investor_id, symbol, amount, price)
+	{
+		return holdings.table(trx)
+		.where(
+		{
+			investor_id: investor_id,
+			symbol_exchange: symbol.symbol_exchange,
+			symbol_ticker: symbol.symbol_ticker
+		})
+		.update(
+		{
+			amount: symbol.amount - amount,
+		}, 'amount')
+		.then(one)
+		.then(amount =>
+		{
+			if (amount === 0)
+			{
+				return remove_symbol(trx, investor_id, symbol)
+			}
+		})
+		.then(() =>
+		{
+			return amount * price
+		})
+	}
+
+	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
+	var NotEnoughtAmount = Err('not_enought_amount_to_sell',
+		'Not Enought Amount To Sell')
+	var NotEnoughtMoney = Err('not_enought_money_to_buy',
+		'Not Enought Money To Buy')
+	var validate_positive = validate.number.positive
+
+	holdings.buy = function (trx, investor_id, symbol, data, cash)
+	{
+		validate_positive(data.amount, 'amount')
+		validate_positive(data.price, 'price')
+
+		var amount = data.amount
+		var price = data.price
+		var sum = amount * price
+
+		if (sum > cash)
+		{
+			throw NotEnoughtMoney()
+		}
+
+		return get_symbol(investor_id, symbol)
+		.then(symbl =>
+		{
+			if (! symbl)
+			{
+				symbl = symbol
+				symbl.amount = amount
+				symbl.price = price
+
+				return add_symbol(trx, investor_id, symbl)
+			}
+
+			return buy_symbol(trx, investor_id, symbl, amount, price)
+		})
+		.then(() =>
+		{
+			return -sum
+		})
+	}
+
+	holdings.sell = function (trx, investor_id, symbol, data)
+	{
+		validate_positive(data.amount, 'amount')
+		validate_positive(data.price, 'price')
+
+		var amount = data.amount
+		var price = data.price
+
+		return get_symbol(investor_id, symbol)
+		.then(symbl =>
+		{
+			if (! symbl)
+			{
+				throw SymbolNotFound({ symbol: symbol })
+			}
+
+			return symbl
+		})
+		.then(symbl =>
+		{
+			if (symbl.amount < amount)
+			{
+				throw NotEnoughtAmount(
+				{
+					available_amount: symbl.amount,
+					sell_amount: amount
+				})
+			}
+
+			return sell_symbol(trx, investor_id, symbl, amount, price)
+		})
+	}
+
+	function calculate_buy_price (amount_old, price_old, amount, price)
+	{
+		return (amount_old * price_old + amount * price) / (amount_old + amount)
 	}
 
 	return holdings

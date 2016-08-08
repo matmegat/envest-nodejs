@@ -2,6 +2,9 @@
 var Err = require('../Err')
 var moment = require('moment')
 
+var includes = require('lodash/includes')
+var moment = require('moment')
+
 var validate = module.exports = {}
 
 
@@ -164,6 +167,19 @@ validate.date = function validate__date (date)
 	if (! date.isValid())
 	{
 		throw WrongDate()
+	}
+}
+
+var NotIncluded = Err('item_not_included', 'Item Not Included')
+
+validate.collection = function validate__collection (collection)
+{
+	return function (item)
+	{
+		if (! includes(collection, item))
+		{
+			throw NotIncluded({ possible_values: collection, item: item })
+		}
 	}
 }
 

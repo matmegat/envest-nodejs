@@ -3,16 +3,18 @@ var expect = require('chai').expect
 
 var _ = require('lodash')
 
-var knexed = require('../knexed')
+var knexed = require('../../knexed')
 
-var PaginatorChunked = require('../paginator/Chunked')
-var PaginatorBooked  = require('../paginator/Booked')
-var Filter = require('../Filter')
-var Sorter = require('../Sorter')
+var PaginatorChunked = require('../../paginator/Chunked')
+var PaginatorBooked  = require('../../paginator/Booked')
+var Filter = require('../../Filter')
+var Sorter = require('../../Sorter')
 
-var Err = require('../../Err')
+var Err = require('../../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
+
+var noop = require('lodash/noop')
 
 // eslint-disable-next-line max-statements
 var Feed = module.exports = function Feed (db)
@@ -112,7 +114,7 @@ var Feed = module.exports = function Feed (db)
 		})
 	}
 
-	feed.validateFeedId = require('../../id').validate.promise(WrongFeedId)
+	feed.validateFeedId = require('../../../id').validate.promise(WrongFeedId)
 
 	feed.list = function (options, user_id)
 	{
@@ -245,6 +247,18 @@ var Feed = module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
+	feed.create = function (trx, investor_id, type, date, data)
+	{
+		return feed.feed_table(trx)
+		.insert({
+			investor_id: investor_id,
+			type: type,
+			timestamp: date,
+			data: data
+		})
+		.then(noop)
+	}
+
 	return feed
 }
 
@@ -285,7 +299,7 @@ var compact = _.compact
 var flatten = _.flatten
 var uniqBy  = _.uniqBy
 
-var Symbl = require('./symbols/Symbl')
+var Symbl = require('../symbols/Symbl')
 
 Feed.symbolsInvolved = (items) =>
 {

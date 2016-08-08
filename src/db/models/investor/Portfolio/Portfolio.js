@@ -5,6 +5,10 @@ var _ = require('lodash')
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
+var Symbl = require('../../symbols/Symbl')
+
+var Err = require('../../../../Err')
+
 module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
@@ -145,6 +149,45 @@ module.exports = function Portfolio (db, investor)
 			investor_id: investor_id,
 			cash_value: amount,
 			multiplier: 1.0
+		})
+	}
+
+	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
+
+	holdings.dirs = {}
+	holdings.dirs.bought = holdings.buy
+	holdings.dirs.sold = holdings.sell
+
+	portfolio.makeTrade = function (trx, investor_id, type, date, data)
+	{
+		var dir = data.dir
+		var symbol = {}
+
+		return Symbl.validate(data.symbol)
+		.then(symbl =>
+		{
+			symbol = symbl
+
+			if (! (dir in holdings.dirs))
+			{
+				throw WrongTradeDir({ dir: dir })
+			}
+
+			return brokerage.byInvestorId(investor_id)
+		})
+		.then(resl =>
+		{
+			var cash = resl.cash_value
+
+			return holdings.dirs[dir](trx, investor_id, symbol, data, cash)
+		})
+		.then(sum =>
+		{
+			return brokerage.update(trx, investor_id,
+			{
+				operation: 'trade',
+				amount: sum
+			})
 		})
 	}
 

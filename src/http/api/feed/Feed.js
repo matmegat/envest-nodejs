@@ -5,11 +5,12 @@ var Router = require('express').Router
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
-module.exports = function Feed (db)
+module.exports = function Feed (db, http)
 {
 	var feed = {}
 
 	feed.model = db.feed
+	feed.post = db.post
 	feed.express = Router()
 	feed.express.use(authRequired)
 
@@ -115,6 +116,16 @@ module.exports = function Feed (db)
 		comment_data.user_id = rq.user.id
 
 		toss(rs, db.comments.create(comment_data))
+	})
+
+	feed.express.post('/post', http.investorRequired, (rq, rs) =>
+	{
+		var investor_id = rq.user.id
+		var type = rq.body.type
+		var data = rq.body.data
+		var date = rq.body.date
+
+		toss(rs, feed.post.create(investor_id, type, date, data))
 	})
 
 	return feed

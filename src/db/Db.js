@@ -4,7 +4,8 @@ var knex = require('knex')
 var User = require('./models/User')
 var Auth = require('./models/Auth')
 var Admin = require('./models/Admin')
-var Feed = require('./models/Feed')
+var Feed = require('./models/Feed/Feed')
+var Post = require('./models/Feed/Post')
 var Comments = require('./models/Comments')
 var Investor = require('./models/investor/Investor')
 var Notifications = require('./models/notifications/Notifications')
@@ -66,6 +67,8 @@ module.exports = function name (app)
 
 	db.investor = Investor(db)
 	db.feed = Feed(db)
+
+	db.post = Post(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
