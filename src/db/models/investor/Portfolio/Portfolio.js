@@ -161,17 +161,15 @@ module.exports = function Portfolio (db, investor)
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
 		var dir = data.dir
-		var symbol = data.symbol.split('.')
-		var ticker = symbol[0]
-		var exchange = symbol[1]
+		var symbol = {}
 
-		return Symbl.validate(symbol)
-		.then(() =>
+		return Symbl.validate(data.symbol)
+		.then(resl =>
 		{
 			symbol =
 			{
-				symbol_exchange: exchange,
-				symbol_ticker: ticker
+				symbol_exchange: resl.exchange,
+				symbol_ticker: resl.ticker
 			}
 
 			if (! (dir in holdings.dirs))
