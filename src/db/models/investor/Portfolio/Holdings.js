@@ -198,9 +198,13 @@ module.exports = function Holdings (db, investor)
 		'Not Enought Amount To Sell')
 	var NotEnoughtMoney = Err('not_enought_money_to_buy',
 		'Not Enought Money To Buy')
+	var validate_positive = validate.number.positive
 
 	holdings.buy = function (trx, investor_id, symbol, data, cash)
 	{
+		validate.number.positive(data.amount, 'amount')
+		validate.number.positive(data.price, 'price')
+
 		var amount = data.amount
 		var price = data.price
 		var sum = amount * price
@@ -232,6 +236,9 @@ module.exports = function Holdings (db, investor)
 
 	holdings.sell = function (trx, investor_id, symbol, data)
 	{
+		validate.number.positive(data.amount, 'amount')
+		validate.number.positive(data.price, 'price')
+
 		var amount = data.amount
 		var price = data.price
 
