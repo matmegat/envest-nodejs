@@ -25,17 +25,8 @@ module.exports = function Users (http, user_model)
 	users.express.post('/change-name', (rq, rs) =>
 	{
 		var target_user_id = rq.user.id
-		var credentials = {}
 
-		if ('first_name' in rq.body)
-		{
-			credentials.first_name = rq.body.first_name
-		}
-
-		if ('last_name' in rq.body)
-		{
-			credentials.last_name = rq.body.last_name
-		}
+		var credentials = _.pick(rq.body, 'first_name', 'last_name')
 
 		toss(rs, users.model.changeName(target_user_id, credentials))
 	})

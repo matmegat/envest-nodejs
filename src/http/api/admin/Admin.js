@@ -1,4 +1,6 @@
 
+var _ = require('lodash')
+
 var Router = require('express').Router
 var toss = require('../../toss')
 
@@ -25,17 +27,7 @@ module.exports = function (db, http, admin)
 		var whom_id = rq.user.id
 		var target_user_id = rq.body.target_user_id
 
-		var credentials = {}
-
-		if ('first_name' in rq.body)
-		{
-			credentials.first_name = rq.body.first_name
-		}
-
-		if ('last_name' in rq.body)
-		{
-			credentials.last_name = rq.body.last_name
-		}
+		var credentials = _.pick(rq.body, 'first_name', 'last_name')
 
 		toss(rs, user_model.changeNameAs(target_user_id, credentials, whom_id))
 	})
