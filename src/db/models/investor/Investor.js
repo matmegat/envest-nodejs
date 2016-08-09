@@ -1,5 +1,5 @@
-var _ = require('lodash')
-var at = require('lodash/fp/at')
+
+var extend = require('lodash/extend')
 
 var generate_code = require('../../../crypto-helpers').generate_code
 
@@ -16,8 +16,6 @@ var Meta = require('./Meta')
 
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
-
-var Symbl = require('../symbols/Symbl')
 
 var validate = require('../../validate')
 
@@ -71,7 +69,7 @@ module.exports = function Investor (db)
 		.then(() => generate_code())
 		.then((password) =>
 		{
-			var user_data = _.extend({}, data,
+			var user_data = extend({}, data,
 			{
 				password: password /* new Investor should reset his password */
 			})
@@ -151,29 +149,15 @@ module.exports = function Investor (db)
 	})
 
 
-	investor.chart = function(id)
+	investor.chart = function (id)
 	{
 		return investor.all.ensure(id)
-		.then(() => investor.portfolio.full(id))
-		.then((full_portfolio) =>
+		//.then(() => investor.portfolio.full(id))
+		.then(() =>
 		{
-			var brokerage = full_portfolio.brokerage
-			var holdings  = full_portfolio.holdings
-
-			console.info('Full Portfolio for', id)
-			console.info('\n', JSON.stringify(full_portfolio, null, 4))
-
-			var symbols = holdings
-			.map(at([ 'symbol.ticker', 'symbol.exchange' ]))
-			.map(Symbl)
-
 			return {
 				today: [],
-				ytd:   [],
-				m1:    [],
-				m6:    [],
-				y1:    [],
-				y2:    []
+				ytd:   []
 			}
 		})
 	}
