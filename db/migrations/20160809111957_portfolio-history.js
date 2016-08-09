@@ -31,6 +31,10 @@ exports.up = (knex) =>
 		]
 		, 'timed_portfolio_symbol_unique')
 	})
+	.then(() =>
+	{
+		return knex.seed.run({ directory: './seeds/portfolio-history' })
+	})
 }
 
 exports.down = (knex) =>
