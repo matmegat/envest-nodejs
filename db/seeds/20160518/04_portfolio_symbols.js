@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 
 var random = require('lodash/random')
 var sample = require('lodash/sampleSize')

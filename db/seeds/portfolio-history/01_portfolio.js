@@ -11,6 +11,7 @@ exports.seed = (knex) =>
 	{
 		var id = user.id
 
+		/* eslint-disable max-len */
 		return insert(id,
 		[
 			{ symbol_exchange: 'XNAS', symbol_ticker: 'TSLA', amount: 1, price: 100,  timestamp: prev },
@@ -19,6 +20,7 @@ exports.seed = (knex) =>
 			{ symbol_exchange: 'XNAS', symbol_ticker: 'AAPL', amount: 1, price: 1000, timestamp: now },
 			{ symbol_exchange: 'XNYS', symbol_ticker: 'GE',   amount: 0, price: 130,  timestamp: now },
 		])
+		/* eslint-enable max-len */
 	})
 
 

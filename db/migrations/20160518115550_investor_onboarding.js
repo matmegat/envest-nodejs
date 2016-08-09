@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 
 var Symbols = require('../../src/db/models/symbols/Symbols')
 
