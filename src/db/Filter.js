@@ -160,13 +160,13 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 		symbol = Symbl(symbol)
 
 		return queryset
-		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.innerJoin('portfolio_current', 'portfolio_current.investor_id', column)
 		.where(function ()
 		{
-			this.where('portfolio_symbols.symbol_ticker', symbol.ticker)
+			this.where('portfolio_current.symbol_ticker', symbol.ticker)
 			if (symbol.exchange)
 			{
-				this.where('portfolio_symbols.symbol_exchange', symbol.exchange)
+				this.where('portfolio_current.symbol_exchange', symbol.exchange)
 			}
 		})
 	}
@@ -180,11 +180,11 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 		symbols = [].concat(symbols)
 		symbols = symbols.map(Symbl)
 
-		var ticker_col = 'portfolio_symbols.symbol_ticker'
-		var exchange_col = 'portfolio_symbols.symbol_exchange'
+		var ticker_col = 'portfolio_current.symbol_ticker'
+		var exchange_col = 'portfolio_current.symbol_exchange'
 
 		return queryset
-		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.innerJoin('portfolio_current', 'portfolio_current.investor_id', column)
 		.whereIn(
 			raw(`${ticker_col} || '.' || ${exchange_col}`),
 			symbols.map(symbol =>
