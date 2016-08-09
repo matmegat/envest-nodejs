@@ -109,16 +109,17 @@ module.exports = function Holdings (db, investor)
 	{
 		var raw = knex.raw
 
-		return table()
+		// TODO table() trx
+		return knex(raw('portfolio AS P'))
 		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		.where('investor_id', investor_id)
 		.where('timestamp',
 			table().max('timestamp')
 			.where(
 			{
-				investor_id:     raw('portfolio.investor_id'),
-				symbol_exchange: raw('portfolio.symbol_exchange'),
-				symbol_ticker:   raw('portfolio.symbol_ticker'),
+				investor_id:     raw('P.investor_id'),
+				symbol_exchange: raw('P.symbol_exchange'),
+				symbol_ticker:   raw('P.symbol_ticker'),
 				// timestamp:       raw('NOW()')
 			})
 		)
