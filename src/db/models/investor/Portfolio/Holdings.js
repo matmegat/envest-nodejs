@@ -13,10 +13,10 @@ module.exports = function Holdings (db, investor)
 	var holdings = {}
 
 	var knex = db.knex
-	var oneMaybe = db.helpers.oneMaybe
-	var one = db.helpers.one
+	var table = knexed(knex, 'portfolio')
 
-	holdings.table = knexed(knex, 'portfolio_symbols')
+	var one      = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	function set_holdings (trx, investor_id, holding_entries)
 	{

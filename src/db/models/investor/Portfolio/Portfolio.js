@@ -13,10 +13,7 @@ module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
 
-	var knex    = db.knex
-	// var helpers = db.helpers
-
-	portfolio.holdings_table = knexed(knex, 'portfolio_symbols')
+	var knex = db.knex
 
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
