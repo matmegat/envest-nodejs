@@ -24,6 +24,8 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
+		return /* do not create this one in favor of portfolio-history */
+
 		return knex.schema.createTable('portfolio_symbols', (table) =>
 		{
 			table.increments('id').primary()

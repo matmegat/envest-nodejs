@@ -7,6 +7,8 @@ var symbols = require('../_symbols')
 
 exports.seed = function (knex)
 {
+	return /* do not create this one in favor of portfolio-history */
+
 	return knex('portfolio_symbols').del()
 	.then(() =>
 	{
