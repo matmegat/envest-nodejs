@@ -30,7 +30,8 @@ post:
               - sold
               - bought
             symbol:
-              $ref: ../../../swagger/Symbol.yaml
+              type: string
+              description: Symbol ticker.exchange
             price:
               type: number
               format: float
@@ -68,7 +69,8 @@ post:
               - added
               - removed
             symbol:
-              $ref: ../../../swagger/Symbol.yaml
+              type: string
+              description: Symbol ticker.exchange
             target_price:
               type: number
               format: float
@@ -90,7 +92,8 @@ post:
             symbols:
               type: array
               items:
-                $ref: ../../../swagger/Symbol.yaml
+                type: string
+                description: Symbol ticker.exchange
             title:
               type: string
               description: Update title
