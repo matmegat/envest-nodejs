@@ -265,7 +265,7 @@ function Background (investor)
 
 
 var WrongHistFormat = Err('wrong_hist_return',
-   'Wrong historical returns format')
+	'Wrong historical returns format')
 
 var isInteger = require('lodash/isInteger')
 var isFinite = require('lodash/isFinite')

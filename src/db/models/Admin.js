@@ -3,10 +3,10 @@ var knexed = require('../knexed')
 
 var Err = require('../../Err')
 var AdminRequired =
-    Err('admin_required', 'Admin privileges is required for this operation')
+	Err('admin_required', 'Admin privileges is required for this operation')
 
 var CannotIntro =
-    Err('admin_cannot_intro', 'This admin cannot introduce another')
+	Err('admin_cannot_intro', 'This admin cannot introduce another')
 
 var AlreadyAdmin = Err('already_admin', 'This user is admin already')
 
