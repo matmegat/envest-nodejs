@@ -16,7 +16,8 @@ allOf:
         symbol:
           $ref: ../../../swagger/Symbol.yaml
         price:
-          type: integer
+          type: number
+          format: float
           minimum: 0
         amount:
           type: integer
