@@ -105,7 +105,7 @@ module.exports = function Holdings (db, investor)
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	holdings.byInvestorId = function (investor_id)
+	holdings.byInvestorId = function (investor_id, for_date)
 	{
 		var raw = knex.raw
 
@@ -120,7 +120,13 @@ module.exports = function Holdings (db, investor)
 				investor_id:     raw('P.investor_id'),
 				symbol_exchange: raw('P.symbol_exchange'),
 				symbol_ticker:   raw('P.symbol_ticker'),
-				// timestamp:       raw('NOW()')
+			})
+			.where(function ()
+			{
+				if (for_date)
+				{
+					this.where('timestamp', '<=', for_date)
+				}
 			})
 		)
 		.debug()
@@ -135,7 +141,7 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.byInvestorId(120)
+	holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
 	.then(console.info, console.error)
 
 	function remove_symbol (trx, investor_id, symbol)
