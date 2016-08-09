@@ -37,7 +37,7 @@ module.exports = function Portfolio (db, investor)
 			{
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
-					portfolio_holding.buy_price *
+					portfolio_holding.price *
 					brokerage.multiplier
 			})
 
@@ -64,7 +64,7 @@ module.exports = function Portfolio (db, investor)
 						portfolio_holdings[i].symbol = quoted_symbol.symbol
 						portfolio_holdings[i].gain = /* calculated percentage */
 							( quoted_symbol.price /
-							portfolio_holdings[i].buy_price - 1 ) * 100
+							portfolio_holdings[i].price - 1 ) * 100
 					}
 
 					return _.pick(portfolio_holdings[i],
@@ -107,7 +107,7 @@ module.exports = function Portfolio (db, investor)
 
 			holding_entries.forEach((holding) =>
 			{
-				real_allocation += holding.amount * holding.buy_price
+				real_allocation += holding.amount * holding.price
 			})
 
 			var multiplier = indexed_amount / real_allocation
@@ -205,11 +205,9 @@ module.exports = function Portfolio (db, investor)
 
 			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
 			{
-				portfolio_holding.buy_price = Number(portfolio_holding.buy_price)
-
 				portfolio_holding.allocation =
 					portfolio_holding.amount *
-					portfolio_holding.buy_price *
+					portfolio_holding.price *
 					brokerage.multiplier
 
 				portfolio_holding.symbol =

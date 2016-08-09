@@ -28,13 +28,13 @@ SELECT
 FROM
   portfolio AS P
 
-WHERE investor_id = 1000
+WHERE investor_id = 120
   AND timestamp =
   (
     SELECT MAX(timestamp) FROM portfolio
     WHERE investor_id     = P.investor_id
       AND symbol_exchange = P.symbol_exchange
       AND symbol_ticker   = P.symbol_ticker
-    -- AND timestamp <= 2000
+    -- AND timestamp <= NOW()
   );
 --

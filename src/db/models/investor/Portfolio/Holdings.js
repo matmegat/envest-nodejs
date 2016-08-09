@@ -107,10 +107,35 @@ module.exports = function Holdings (db, investor)
 
 	holdings.byInvestorId = function (investor_id)
 	{
-		return holdings.table()
-		.select(['amount', 'buy_price', 'symbol_ticker', 'symbol_exchange'])
+		var raw = knex.raw
+
+		return table()
+		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		.where('investor_id', investor_id)
+		.where('timestamp',
+			table().max('timestamp')
+			.where(
+			{
+				investor_id:     raw('portfolio.investor_id'),
+				symbol_exchange: raw('portfolio.symbol_exchange'),
+				symbol_ticker:   raw('portfolio.symbol_ticker'),
+				// timestamp:       raw('NOW()')
+			})
+		)
+		.debug()
+		.then(r =>
+		{
+			r.forEach(it =>
+			{
+				it.price = Number(it.price)
+			})
+
+			return r
+		})
 	}
+
+	holdings.byInvestorId(120)
+	.then(console.info, console.error)
 
 	function remove_symbol (trx, investor_id, symbol)
 	{
