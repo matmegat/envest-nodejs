@@ -35,9 +35,45 @@ exports.up = (knex) =>
 	{
 		return knex.seed.run({ directory: './seeds/portfolio-history' })
 	})
+	.then(() =>
+	{
+		return knex.schema.raw(
+`CREATE VIEW portfolio_current
+(
+  investor_id,
+  symbol_exchange,
+  symbol_ticker,
+  amount,
+  price
+)
+AS SELECT
+  investor_id,
+  symbol_exchange,
+  symbol_ticker,
+  amount,
+  price
+
+FROM
+  portfolio AS P
+
+WHERE amount > 0
+  AND timestamp =
+  (
+    SELECT MAX(timestamp) FROM portfolio
+    WHERE investor_id     = P.investor_id
+      AND symbol_exchange = P.symbol_exchange
+      AND symbol_ticker   = P.symbol_ticker
+  );
+`
+		)
+	})
 }
 
 exports.down = (knex) =>
 {
-	return knex.schema.dropTableIfExists('portfolio')
+	return knex.schema.raw('DROP VIEW portfolio_current')
+	.then(() =>
+	{
+		return knex.schema.dropTableIfExists('portfolio')
+	})
 }

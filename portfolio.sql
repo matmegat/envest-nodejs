@@ -29,6 +29,7 @@ FROM
   portfolio AS P
 
 WHERE investor_id = 120
+  AND amount > 0
   AND timestamp =
   (
     SELECT MAX(timestamp) FROM portfolio
