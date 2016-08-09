@@ -11,7 +11,7 @@ get:
     200:
       description: Investor Chart by resolutions.
       schema:
-        $ref: ../../symbols/swag/SymbolChart.yaml
+        $ref: ./InvestorChart.yaml
     400:
       description: if something went wrong
       schema:
