@@ -113,6 +113,7 @@ module.exports = function Holdings (db, investor)
 		return knex(raw('portfolio AS P'))
 		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		.where('investor_id', investor_id)
+		.where('amount', '>', 0)
 		.where('timestamp',
 			table().max('timestamp')
 			.where(
@@ -141,7 +142,8 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
+	// holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
+	holdings.byInvestorId(120)
 	.then(console.info, console.error)
 
 	function remove_symbol (trx, investor_id, symbol)
