@@ -122,7 +122,7 @@ module.exports = function Xign (cfg, log)
 
 	X.fundamentals = (symbol) =>
 	{
-		return fund(symbol)
+		return fund(symbol, 'ext')
 		.then(data =>
 		{
 			return data.FundamentalsSets
@@ -130,15 +130,22 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.first)
 	}
 
-	function fund (symbol)
+	var t1 = 'MarketCapitalization,BookValue,CEO'
+	var t2 =
+	[
+		'MarketCapitalization',
+		'HighPriceLast52Weeks',
+		'LowPriceLast52Weeks',
+		'DividendYieldDaily'
+	].join(',')
+
+	function fund (symbol, ext)
 	{
-		var types =
-		[
-			'MarketCapitalization',
-			'HighPriceLast52Weeks',
-			'LowPriceLast52Weeks',
-			'DividendYieldDaily'
-		]
+		var types = t1
+		if (ext)
+		{
+			types = t2
+		}
 
 		var uri = format(
 		{
@@ -152,7 +159,7 @@ module.exports = function Xign (cfg, log)
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				FundamentalTypes: types.join(','),
+				FundamentalTypes: types,
 				UpdatedSince: '',
 
 				_Token: token
