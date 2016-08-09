@@ -192,7 +192,7 @@ validate.name = function validate__name (name, field_name)
 {
 	validate.required(name, field_name)
 	validate.empty(name, field_name)
-	
+
 	validateNameLength(name, field_name)
 
 	/*
