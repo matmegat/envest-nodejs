@@ -19,7 +19,7 @@ module.exports = function Holdings (db, investor)
 	var oneMaybe = db.helpers.oneMaybe
 
 
-	/* byInvestorId */
+	// byInvestorId
 	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		var raw = knex.raw
@@ -57,12 +57,12 @@ module.exports = function Holdings (db, investor)
 		})
 	})
 
-	// holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
+	/* holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
 	holdings.byInvestorId(120)
 	.then(console.info, console.error)
 
 
-	/* set */
+	// set
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -88,7 +88,7 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			// TODO resolveMany
+			/* TODO resolveMany */
 			return Promise.all(_.map(holding_entries, (holding) =>
 			{
 				return db.symbols.resolve(holding.symbol)
@@ -209,6 +209,7 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
+	// buy, sell
 	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
 	var NotEnoughtAmount = Err('not_enought_amount_to_sell',
 		'Not Enought Amount To Sell')
