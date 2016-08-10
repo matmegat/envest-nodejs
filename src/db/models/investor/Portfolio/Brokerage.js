@@ -90,9 +90,7 @@ module.exports = function Brokerage (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.table(trx)
-			.where('investor_id', investor_id)
-			.then(one)
+			return brokerage.byInvestorId(trx, investor_id)
 		})
 		.then((brokerage) =>
 		{
@@ -105,7 +103,7 @@ module.exports = function Brokerage (db, investor)
 				throw InvalidOperation()
 			}
 
-			data.cash_value = amount + Number(brokerage.cash_value)
+			data.cash_value = amount + brokerage.cash_value
 			return set_brokerage(trx, investor_id, data)
 		})
 	})
@@ -138,7 +136,7 @@ module.exports = function Brokerage (db, investor)
 		{
 			throw InvalidAmount()
 		}
-		if (amount + Number(brokerage.cash_value) < 0)
+		if (amount + brokerage.cash_value < 0)
 		{
 			throw InvalidAmount(
 			{
