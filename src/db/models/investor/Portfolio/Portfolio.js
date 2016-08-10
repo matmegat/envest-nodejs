@@ -103,7 +103,7 @@ module.exports = function Portfolio (db, investor)
 			var holding_entries = values[1]
 
 			var indexed_amount = 100000
-			var real_allocation = Number(brokerage_entry.cash_value)
+			var real_allocation = brokerage_entry.cash_value
 
 			holding_entries.forEach((holding) =>
 			{
@@ -114,7 +114,7 @@ module.exports = function Portfolio (db, investor)
 
 			return brokerage.set(investor_id,
 			{
-				cash_value: Number(brokerage_entry.cash_value),
+				cash_value: brokerage_entry.cash_value,
 				multiplier: multiplier
 			})
 		})

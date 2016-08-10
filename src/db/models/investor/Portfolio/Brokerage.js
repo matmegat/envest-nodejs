@@ -10,8 +10,8 @@ module.exports = function Brokerage (db, investor)
 {
 	var brokerage = {}
 
-	var knex    = db.knex
-	var helpers = db.helpers
+	var knex = db.knex
+	var one  = db.helpers.one
 
 	brokerage.table = knexed(knex, 'brokerage')
 
@@ -28,9 +28,15 @@ module.exports = function Brokerage (db, investor)
 	brokerage.byInvestorId = function (investor_id)
 	{
 		return brokerage.table()
-		.select(['cash_value', 'multiplier'])
+		.select('cash_value', 'multiplier')
 		.where('investor_id', investor_id)
-		.then(db.helpers.one)
+		.then(one)
+		.then(r =>
+		{
+			r.cash_value = Number(r.cash_value)
+
+			return r
+		})
 	}
 
 	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
@@ -86,7 +92,7 @@ module.exports = function Brokerage (db, investor)
 		{
 			return brokerage.table(trx)
 			.where('investor_id', investor_id)
-			.then(helpers.one)
+			.then(one)
 		})
 		.then((brokerage) =>
 		{
