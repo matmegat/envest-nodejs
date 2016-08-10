@@ -16,7 +16,6 @@ var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
 var filter = require('lodash/filter')
-var uniq = require('lodash/uniq')
 var compact = require('lodash/compact')
 
 var moment = require('moment')
@@ -76,7 +75,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 		return Promise.all(queries)
 		.then(compact)
-		.then(uniq)
 		.then(symbols =>
 		{
 			return symbols
