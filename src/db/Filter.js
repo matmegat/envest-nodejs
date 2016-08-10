@@ -196,6 +196,7 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 }
 
 
+var uniq = require('lodash/uniq')
 var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
@@ -210,6 +211,7 @@ Filter.by.symbols = function bySymbols ()
 	{
 		symbols = symbols.split(',')
 		symbols = [].concat(symbols)
+		symbols = uniq(symbols)
 		symbols = symbols.map(Symbl)
 
 		if (symbols.length > max_allowed_symbols_per_filter)
