@@ -128,8 +128,6 @@ var Feed = module.exports = function Feed (db)
 
 		var count_queryset = queryset.clone()
 
-		queryset.debug()
-
 		var paginator
 
 		if (options.paginator.page)
