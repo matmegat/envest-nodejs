@@ -105,12 +105,12 @@ module.exports = function Holdings (db, investor)
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	holdings.byInvestorId = function (investor_id, for_date)
+	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		var raw = knex.raw
 
-		// TODO table() trx
 		return knex(raw('portfolio AS P'))
+		.transacting(trx)
 		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		.where('investor_id', investor_id)
 		.where('amount', '>', 0)
@@ -140,7 +140,7 @@ module.exports = function Holdings (db, investor)
 
 			return r
 		})
-	}
+	})
 
 	// holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
 	holdings.byInvestorId(120)

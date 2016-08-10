@@ -1,4 +1,3 @@
-var knexed = require('../../../knexed')
 
 var _ = require('lodash')
 
@@ -12,8 +11,6 @@ var Err = require('../../../../Err')
 module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
-
-	var knex = db.knex
 
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
