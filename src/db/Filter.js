@@ -200,7 +200,7 @@ var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
 
-Filter.by.symbols = function bySymbols (column)
+Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
