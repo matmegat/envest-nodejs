@@ -18,10 +18,6 @@ get:
     in: query
     type: integer
     description: Page number
-  - name: symbol
-    in: query
-    type: string
-    description: Symbol to filter investors `TICKER[.EXCHANGE]`
   - name: symbols
     in: query
     type: string
