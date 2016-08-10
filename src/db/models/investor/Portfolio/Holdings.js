@@ -63,49 +63,8 @@ module.exports = function Holdings (db, investor)
 
 
 	/* set */
-	function set_holdings (trx, investor_id, holding_entries)
-	{
-		/* Expect holding_entries to be =
-		* [
-		*   {
-		*     symbol:    string,
-		*     amount:    integer,
-		*     buy_price: float
-		*   },
-		*
-		*   {},
-		* ]
-		* */
-		var holdings_upsert = upsert(
-			holdings.table(trx),
-			'id'
-		)
-
-		var where_clause = { investor_id: investor_id }
-
-		return Promise.all(_.map(holding_entries, (holding) =>
-		{
-			var data = _.pick(holding, 'symbol_exchange', 'symbol_ticker')
-
-			return holdings_upsert(_.extend({}, where_clause, data), holding)
-		}))
-	}
-
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
-		/* operation with validation procedure
-		* Expect holding_entries to be:
-		* [
-		*   {
-		*     symbol_exchange: string,
-		*     symbol_ticker: string,
-		*     buy_price: float,
-		*     amount: integer
-		*   },
-		*
-		*   {}
-		* ]
-		* */
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -117,7 +76,7 @@ module.exports = function Holdings (db, investor)
 				validate.empty(holding.symbol, `holdings[${i}].symbol`)
 
 				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount <= 0)
+				if (holding.amount < 0)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].amount` })
 				}
@@ -129,6 +88,7 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
+			// TODO resolveMany
 			return Promise.all(_.map(holding_entries, (holding) =>
 			{
 				return db.symbols.resolve(holding.symbol)
@@ -149,6 +109,23 @@ module.exports = function Holdings (db, investor)
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
+
+	function set_holdings (trx, investor_id, holding_entries)
+	{
+		var holdings_upsert = upsert(
+			holdings.table(trx),
+			'id'
+		)
+
+		var where_clause = { investor_id: investor_id }
+
+		return Promise.all(_.map(holding_entries, (holding) =>
+		{
+			var data = _.pick(holding, 'symbol_exchange', 'symbol_ticker')
+
+			return holdings_upsert(_.extend({}, where_clause, data), holding)
+		}))
+	}
 
 
 	function remove_symbol (trx, investor_id, symbol)
