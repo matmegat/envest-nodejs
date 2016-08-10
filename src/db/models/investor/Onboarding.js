@@ -457,7 +457,7 @@ var WrongHoldingsFormat = Err('wrong_holdings_format',
 
 function Holdings (investor_model, db)
 {
-	var decimal = validate.number.decimal(6)
+	var decimal = validate.number.decimal(10)
 
 	function vrow (row, i)
 	{
