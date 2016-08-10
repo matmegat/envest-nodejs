@@ -87,11 +87,7 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			/* TODO resolveMany */
-			return Promise.all(_.map(holding_entries, (holding) =>
-			{
-				return db.symbols.resolve(holding.symbol)
-			}))
+			return db.symbols.resolveMany(_.map(holding_entries, 'symbol'))
 		})
 		.then(symbols =>
 		{
