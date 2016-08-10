@@ -80,8 +80,8 @@ module.exports = function Portfolio (db, investor)
 						value: brokerage.cash_value
 						       * brokerage.multiplier
 						       + _.sumBy(portfolio_holdings, 'allocation'),
-						gain: _.sumBy(portfolio_holdings, 'gain')
-						      / portfolio_holdings.length
+						gain: _.sumBy(portfolio_holdings, 'gain') /
+						       portfolio_holdings.length
 					}
 				}
 			})
