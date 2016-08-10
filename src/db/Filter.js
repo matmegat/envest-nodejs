@@ -196,9 +196,14 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 }
 
 
+var uniq = require('lodash/uniq')
 var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
+
+var max_allowed_symbols_per_filter = 20
+var WrongFilter = Err('too_many_symbols_queried',
+	`Maximum of ${max_allowed_symbols_per_filter} allowed per filter`)
 
 Filter.by.symbols = function bySymbols ()
 {
@@ -206,7 +211,13 @@ Filter.by.symbols = function bySymbols ()
 	{
 		symbols = symbols.split(',')
 		symbols = [].concat(symbols)
+		symbols = uniq(symbols)
 		symbols = symbols.map(Symbl)
+
+		if (symbols.length > max_allowed_symbols_per_filter)
+		{
+			throw WrongFilter()
+		}
 
 		return queryset
 		.where(function ()
@@ -218,7 +229,7 @@ Filter.by.symbols = function bySymbols ()
 				p_symbol = pickBy(p_symbol)
 
 				var j_symbol = dump(p_symbol)
-				this.where(raw(`data->'symbol'`), '@>', j_symbol)
+				this.orWhere(raw(`data->'symbol'`), '@>', j_symbol)
 
 				var j_symbols = dump([ p_symbol ])
 				this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
