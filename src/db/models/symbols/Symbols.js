@@ -58,6 +58,23 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.resolveMany = (symbols_arr, soft_mode) =>
+	{
+		var queries = symbols_arr
+		.map(symbols.resolve.cache)
+
+		if (soft_mode)
+		{
+			queries = queries
+			.map(query =>
+			{
+				return query.catch(() => null)
+			})
+		}
+
+		return Promise.all(queries)
+	}
+
 	/* cache-first */
 	symbols.resolve.cache = (symbol) =>
 	{
