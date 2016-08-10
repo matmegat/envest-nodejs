@@ -195,6 +195,11 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 	}
 }
 
+
+var pick = require('lodash/pick')
+var pickBy = require('lodash/pickBy')
+var dump = JSON.stringify
+
 Filter.by.symbols = function bySymbols (column)
 {
 	return function (queryset, symbols)
@@ -203,31 +208,21 @@ Filter.by.symbols = function bySymbols (column)
 		symbols = [].concat(symbols)
 		symbols = symbols.map(Symbl)
 
-		return by_symbols(queryset, symbols)
-	}
-}
-
-
-var pick = require('lodash/pick')
-var pickBy = require('lodash/pickBy')
-var dump = JSON.stringify
-
-function by_symbols (queryset, symbols)
-{
-	return queryset
-	.where(function ()
-	{
-		symbols.forEach(symbol =>
+		return queryset
+		.where(function ()
 		{
-			var p_symbol
-			p_symbol = pick(symbol, 'ticker', 'exchange')
-			p_symbol = pickBy(p_symbol)
+			symbols.forEach(symbol =>
+			{
+				var p_symbol
+				p_symbol = pick(symbol, 'ticker', 'exchange')
+				p_symbol = pickBy(p_symbol)
 
-			var j_symbol = dump(p_symbol)
-			this.where(raw(`data->'symbol'`), '@>', j_symbol)
+				var j_symbol = dump(p_symbol)
+				this.where(raw(`data->'symbol'`), '@>', j_symbol)
 
-			var j_symbols = dump([ p_symbol ])
-			this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
+				var j_symbols = dump([ p_symbol ])
+				this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
+			})
 		})
-	})
+	}
 }
