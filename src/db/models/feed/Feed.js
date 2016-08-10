@@ -279,15 +279,7 @@ function transform_symbols (items, api)
 {
 	var symbols = Feed.symbolsInvolved(items)
 
-	var quieries = symbols
-	.map(api.resolve.cache)
-	.map(query =>
-	{
-		return query.catch(() => null)
-	})
-
-	return Promise.all(quieries)
-	.then(compact)
+	return api.resolveMany(symbols, true)
 	.then(symbols =>
 	{
 		return items.map(replace_symbol(symbols))
