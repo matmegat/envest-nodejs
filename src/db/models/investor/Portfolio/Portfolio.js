@@ -25,7 +25,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all([
 				holdings.byInvestorId(investor_id),
-				brokerage.byInvestorId(investor_id)
+				brokerage.byInvestorId(trx, investor_id)
 			])
 		})
 		.then((values) =>
@@ -170,7 +170,7 @@ module.exports = function Portfolio (db, investor)
 				throw WrongTradeDir({ dir: dir })
 			}
 
-			return brokerage.byInvestorId(investor_id)
+			return brokerage.byInvestorId(trx, investor_id)
 		})
 		.then(resl =>
 		{

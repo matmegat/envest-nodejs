@@ -25,9 +25,9 @@ module.exports = function Brokerage (db, investor)
 		.update(update_clause)
 	}
 
-	brokerage.byInvestorId = function (investor_id)
+	brokerage.byInvestorId = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return brokerage.table()
+		return brokerage.table(trx)
 		.select('cash_value', 'multiplier')
 		.where('investor_id', investor_id)
 		.then(one)
@@ -37,7 +37,7 @@ module.exports = function Brokerage (db, investor)
 
 			return r
 		})
-	}
+	})
 
 	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
 	{
