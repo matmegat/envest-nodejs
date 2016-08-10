@@ -280,6 +280,7 @@ function transform_symbols (items, api)
 	var symbols = Feed.symbolsInvolved(items)
 
 	return api.resolveMany(symbols, true)
+	.then(compact)
 	.then(symbols =>
 	{
 		return items.map(replace_symbol(symbols))
