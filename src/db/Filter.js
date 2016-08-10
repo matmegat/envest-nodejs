@@ -227,7 +227,7 @@ Filter.by.symbols = function bySymbols ()
 				p_symbol = pickBy(p_symbol)
 
 				var j_symbol = dump(p_symbol)
-				this.where(raw(`data->'symbol'`), '@>', j_symbol)
+				this.orWhere(raw(`data->'symbol'`), '@>', j_symbol)
 
 				var j_symbols = dump([ p_symbol ])
 				this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
