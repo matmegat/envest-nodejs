@@ -1,11 +1,10 @@
 
-var knexed = require('../../../knexed')
-var upsert = require('../../../upsert')
-
 var _ = require('lodash')
+var expect = require('chai').expect
+
+var knexed = require('../../../knexed')
 
 var validate = require('../../../validate')
-
 var Err = require('../../../../Err')
 
 module.exports = function Holdings (db, investor)
@@ -81,10 +80,10 @@ module.exports = function Holdings (db, investor)
 					throw InvalidAmount({ field: `holdings[${i}].amount` })
 				}
 
-				validate.number(holding.buy_price, `holdings[${i}].buy_price`)
-				if (holding.buy_price <= 0)
+				validate.number(holding.price, `holdings[${i}].price`)
+				if (holding.price <= 0)
 				{
-					throw InvalidAmount({ field: `holdings[${i}].buy_price` })
+					throw InvalidAmount({ field: `holdings[${i}].price` })
 				}
 			})
 
@@ -94,40 +93,47 @@ module.exports = function Holdings (db, investor)
 				return db.symbols.resolve(holding.symbol)
 			}))
 		})
-		.then((processed_symbols) =>
+		.then(symbols =>
 		{
-			processed_symbols.forEach((symbol, i) =>
+			return Promise.all(symbols.map((symbol, i) =>
 			{
-				holding_entries[i].symbol_exchange = symbol.exchange
-				holding_entries[i].symbol_ticker   = symbol.ticker
-				delete holding_entries[i].symbol
-			})
+				var holding = holding_entries[i]
+				var data = _.pick(holding, 'amount', 'price')
 
-			return set_holdings(trx, investor_id, holding_entries)
+				return put(trx, investor_id, symbol, data)
+			}))
 		})
 	})
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	function set_holdings (trx, investor_id, holding_entries)
+	function put (trx, investor_id, symbol, data)
 	{
-		var holdings_upsert = upsert(
-			holdings.table(trx),
-			'id'
-		)
+		expect(symbol).ok
+		expect(symbol.exchange).a('string')
+		expect(symbol.ticker).a('string')
 
-		var where_clause = { investor_id: investor_id }
+		expect(data).ok
+		expect(data.amount).a('number')
+		expect(data.price).a('number')
 
-		return Promise.all(_.map(holding_entries, (holding) =>
-		{
-			var data = _.pick(holding, 'symbol_exchange', 'symbol_ticker')
+		return table(trx)
+		.insert({
+			investor_id: investor_id,
 
-			return holdings_upsert(_.extend({}, where_clause, data), holding)
-		}))
+			symbol_exchange: symbol.exchange,
+			symbol_ticker: symbol.ticker,
+
+			// timestamp NOW() TODO backpost
+
+			amount: data.amount,
+			price:  data.price
+		})
 	}
 
 
+	// shit
 	function remove_symbol (trx, investor_id, symbol)
 	{
 		return holdings.table(trx)
