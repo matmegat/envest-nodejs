@@ -109,7 +109,7 @@ module.exports = function Xign (cfg, log)
 	{
 		expect(symbol).ok
 
-		return fundamentals(symbol)
+		return fund(symbol)
 		.then(data =>
 		{
 			return {
@@ -120,25 +120,46 @@ module.exports = function Xign (cfg, log)
 		})
 	}
 
-	var fundamentals = X.fundamentals = (symbol) =>
+	X.fundamentals = (symbol) =>
 	{
+		return fund(symbol, 'ext')
+		.then(data =>
+		{
+			return data.FundamentalsSets
+		})
+		.then(util.unwrap.first)
+	}
+
+	var t1 = 'MarketCapitalization,BookValue,CEO'
+	var t2 =
+	[
+		'MarketCapitalization',
+		'HighPriceLast52Weeks',
+		'LowPriceLast52Weeks',
+		'DividendYieldDaily'
+	].join(',')
+
+	function fund (symbol, ext)
+	{
+		var types = t1
+		if (ext)
+		{
+			types = t2
+		}
+
 		var uri = format(
 		{
-			protocol: 'https:',
+			protocol: 'https',
 			host: 'factsetfundamentals.xignite.com',
 
-			pathname: '/xFactSetFundamentals.json/GetFundamentals',
+			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
 
 			query:
 			{
 				IdentifierType: 'Symbol',
 				Identifiers: symbol,
 
-				AsOfDate: util.apidate(),
-
-				FundamentalTypes: 'MarketCapitalization,BookValue,CEO',
-				ReportType: 'Annual',
-				ExcludeRestated: 'false',
+				FundamentalTypes: types,
 				UpdatedSince: '',
 
 				_Token: token
@@ -176,44 +197,6 @@ module.exports = function Xign (cfg, log)
 
 		return request(uri)
 		.then(util.unwrap.data)
-	}
-
-	X.fundamentalsLast = (symbol) =>
-	{
-		var types = [
-			'MarketCapitalization',
-			'HighPriceLast52Weeks',
-			'LowPriceLast52Weeks',
-			'DividendYieldDaily'
-		]
-
-		var uri = format(
-		{
-			protocol: 'https',
-			host: 'factsetfundamentals.xignite.com',
-
-			pathname: '/xFactSetFundamentals.json/GetLatestFundamentals',
-
-			query:
-			{
-				IdentifierType: 'Symbol',
-				Identifiers: symbol,
-
-				FundamentalTypes: types.join(','),
-				UpdatedSince: '',
-
-				_Token: token
-			}
-		})
-
-		return request(uri)
-		.then(util.unwrap.data)
-		.then(util.unwrap.first)
-		.then(resl =>
-		{
-			return resl.FundamentalsSets
-		})
-		.then(util.unwrap.first)
 	}
 
 	X.lastTradeDate = (symbol) =>

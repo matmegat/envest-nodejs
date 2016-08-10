@@ -58,6 +58,23 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.resolveMany = (symbols_arr, soft_mode) =>
+	{
+		var queries = symbols_arr
+		.map(symbols.resolve.cache)
+
+		if (soft_mode)
+		{
+			queries = queries
+			.map(query =>
+			{
+				return query.catch(() => null)
+			})
+		}
+
+		return Promise.all(queries)
+	}
+
 	/* cache-first */
 	symbols.resolve.cache = (symbol) =>
 	{
@@ -160,11 +177,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 	function get_last_fundamentals (symbol)
 	{
-		var fundamentalsDefault = {
-			market_cap: {
-				value: null,
-				unit: null
-			},
+		var funds =
+		{
+			market_cap: null,
 			dividend: null,
 			one_year_low: null,
 			one_year_high: null
@@ -173,7 +188,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return xign.fundamentalsLast(symbol.toXign())
+			return xign.fundamentals(symbol.toXign())
 		})
 		.then(resl =>
 		{
@@ -206,19 +221,19 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				market_cap = null
 			}
 
-			fundamentalsDefault.market_cap = market_cap
-			fundamentalsDefault.dividend =
+			funds.market_cap = market_cap
+			funds.dividend =
 				Number(obj.DividendYieldDaily.value) || null
-			fundamentalsDefault.one_year_low =
+			funds.one_year_low =
 				Number(obj.LowPriceLast52Weeks.value) || null
-			fundamentalsDefault.one_year_high =
+			funds.one_year_high =
 				Number(obj.HighPriceLast52Weeks.value) || null
 
-			return fundamentalsDefault
+			return funds
 		})
 		.catch(() =>
 		{
-			return fundamentalsDefault
+			return funds
 		})
 	}
 

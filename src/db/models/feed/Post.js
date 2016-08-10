@@ -9,6 +9,8 @@ var Trade = require('./Trade')
 var Watchlist = require('./Watchlist')
 var Update = require('./Update')
 
+var pick = require('lodash/pick')
+
 module.exports = function Post (db)
 {
 	var post = {}
@@ -19,6 +21,8 @@ module.exports = function Post (db)
 	post.types.trade = Trade(db.investor.portfolio)
 	post.types.watchlist = Watchlist(db.watchlist)
 	post.types.update = Update()
+
+	var symbols = db.symbols
 
 	var knex = db.knex
 
@@ -35,9 +39,43 @@ module.exports = function Post (db)
 			throw WrongPostType({ type: type })
 		}
 
-		var post_type = post.types[type]
+		if (data.symbol)
+		{
+			return symbols.resolve(data.symbol)
+			.then(symbl =>
+			{
+				data.symbol = pick(symbl,
+				[
+					'ticker',
+					'exchange'
+				])
 
-		return post_type.set(trx, investor_id, type, date, data)
+				var post_type = post.types[type]
+
+				return post_type.set(trx, investor_id, type, date, data)
+			})
+		}
+
+		if (data.symbols)
+		{
+			return symbols.resolveMany(data.symbols)
+			.then(symbls =>
+			{
+				data.symbols = symbls
+				.map(item =>
+				{
+					return pick(item,
+					[
+						'ticker',
+						'exchange'
+					])
+				})
+
+				var post_type = post.types[type]
+
+				return post_type.set(trx, investor_id, type, date, data)
+			})
+		}
 	}
 
 	var InvestorPostDateErr =
@@ -63,11 +101,11 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.feed_model.create(trx, investor_id, type, date, data)
+				return post.add(trx, investor_id, type, date, data)
 			})
 			.then(() =>
 			{
-				return post.add(trx, investor_id, type, date, data)
+				return post.feed_model.create(trx, investor_id, type, date, data)
 			})
 			.then(() =>
 			{

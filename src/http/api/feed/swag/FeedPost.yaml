@@ -23,26 +23,34 @@ post:
           type: object
           description: Post properties
           properties:
-            dir: 
+            dir:
+              description: Type of trade operation
               type: string
-              description: Trade dirs - sold / bought
+              enum:
+              - sold
+              - bought
             symbol:
               type: string
               description: Symbol ticker.exchange
             price:
+              type: number
+              format: float
+              minimum: 0
+            amount:
               type: integer
-              description: Symbol price
-            amount: 
-              type: integer
-              description: Symbol amount
+              minimum: 0
             text:
               type: string
-              description: Trade description
             risk:
               type: string
-              description: Trade risk value
+              enum:
+              - low
+              - medium
+              - hign
             motivations:
-              type: string
+              type: array
+              items:
+                type: string
           required:
           - dir
           - symbol
@@ -54,19 +62,25 @@ post:
           type: object
           description: Post properties
           properties:
-            dir: 
+            dir:
+              description: Type of watchlist operation
               type: string
-              description: Trade dirs - added / removed
+              enum:
+              - added
+              - removed
             symbol:
               type: string
               description: Symbol ticker.exchange
             target_price:
-              type: integer
+              type: number
+              format: float
+              minimum: 0
             text:
               type: string
-              description: Watchlist description
-            motivations: 
-              type: string
+            motivations:
+              type: array
+              items:
+                type: string
           required:
           - dir
           - symbol
@@ -87,7 +101,9 @@ post:
               type: string
               description: Update description
             motivations:
-              type: string
+              type: array
+              items:
+                type: string
           required:
           - symbols
           - title

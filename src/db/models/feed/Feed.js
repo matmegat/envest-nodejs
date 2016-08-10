@@ -66,8 +66,7 @@ var Feed = module.exports = function Feed (db)
 		name: Filter.by.name('feed_items.investor_id'),
 		mindate: Filter.by.mindate('timestamp'),
 		maxdate: Filter.by.maxdate('timestamp'),
-		symbol: Filter.by.symbol(`data->'symbol'`),
-		symbols: Filter.by.symbols(`data->'symbols'`),
+		symbols: Filter.by.symbols(),
 	})
 
 	feed.NotFound = NotFound
@@ -279,14 +278,7 @@ function transform_symbols (items, api)
 {
 	var symbols = Feed.symbolsInvolved(items)
 
-	var quieries = symbols
-	.map(api.resolve.cache)
-	.map(query =>
-	{
-		return query.catch(() => null)
-	})
-
-	return Promise.all(quieries)
+	return api.resolveMany(symbols, true)
 	.then(compact)
 	.then(symbols =>
 	{
