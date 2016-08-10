@@ -16,6 +16,8 @@ var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
 var filter = require('lodash/filter')
+var curry = require('lodash/curry')
+var compact = require('lodash/compact')
 
 var moment = require('moment')
 
@@ -55,6 +57,23 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 				return symbol
 			})
+		})
+	}
+
+	symbols.resolveMany = (symbols_arr) =>
+	{
+		var queries = symbols_arr
+		.map(symbols.resolve)
+		.map(query =>
+		{
+			return query.catch(() => null)
+		})
+
+		return Promise.all(queries)
+		.then(compact)
+		.then(symbols =>
+		{
+			return symbols
 		})
 	}
 
