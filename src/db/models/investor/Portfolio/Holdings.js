@@ -18,6 +18,51 @@ module.exports = function Holdings (db, investor)
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
+
+	/* byInvestorId */
+	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		var raw = knex.raw
+
+		return knex(raw('portfolio AS P'))
+		.transacting(trx)
+		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
+		.where('investor_id', investor_id)
+		.where('amount', '>', 0)
+		.where('timestamp',
+			table().max('timestamp')
+			.where(
+			{
+				investor_id:     raw('P.investor_id'),
+				symbol_exchange: raw('P.symbol_exchange'),
+				symbol_ticker:   raw('P.symbol_ticker'),
+			})
+			.where(function ()
+			{
+				if (for_date)
+				{
+					this.where('timestamp', '<=', for_date)
+				}
+			})
+		)
+		.debug()
+		.then(r =>
+		{
+			r.forEach(it =>
+			{
+				it.price = Number(it.price)
+			})
+
+			return r
+		})
+	})
+
+	// holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
+	holdings.byInvestorId(120)
+	.then(console.info, console.error)
+
+
+	/* set */
 	function set_holdings (trx, investor_id, holding_entries)
 	{
 		/* Expect holding_entries to be =
@@ -105,46 +150,6 @@ module.exports = function Holdings (db, investor)
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
-	{
-		var raw = knex.raw
-
-		return knex(raw('portfolio AS P'))
-		.transacting(trx)
-		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
-		.where('investor_id', investor_id)
-		.where('amount', '>', 0)
-		.where('timestamp',
-			table().max('timestamp')
-			.where(
-			{
-				investor_id:     raw('P.investor_id'),
-				symbol_exchange: raw('P.symbol_exchange'),
-				symbol_ticker:   raw('P.symbol_ticker'),
-			})
-			.where(function ()
-			{
-				if (for_date)
-				{
-					this.where('timestamp', '<=', for_date)
-				}
-			})
-		)
-		.debug()
-		.then(r =>
-		{
-			r.forEach(it =>
-			{
-				it.price = Number(it.price)
-			})
-
-			return r
-		})
-	})
-
-	// holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03'))
-	holdings.byInvestorId(120)
-	.then(console.info, console.error)
 
 	function remove_symbol (trx, investor_id, symbol)
 	{
