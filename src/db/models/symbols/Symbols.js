@@ -60,14 +60,19 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.resolveMany = (symbols_arr) =>
+	symbols.resolveMany = (symbols_arr, soft_mode) =>
 	{
 		var queries = symbols_arr
 		.map(symbols.resolve)
-		.map(query =>
+
+		if (soft_mode)
 		{
-			return query.catch(() => null)
-		})
+			queries = queries
+			.map(query =>
+			{
+				return query.catch(() => null)
+			})
+		}
 
 		return Promise.all(queries)
 		.then(compact)
