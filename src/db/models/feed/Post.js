@@ -62,6 +62,14 @@ module.exports = function Post (db)
 			.then(symbls =>
 			{
 				data.symbols = symbls
+				.map(item =>
+				{
+					return pick(item,
+					[
+						'ticker',
+						'exchange'
+					])
+				})
 
 				var post_type = post.types[type]
 
