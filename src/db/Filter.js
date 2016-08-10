@@ -195,25 +195,12 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 	}
 }
 
-Filter.by.symbol = function by_symbol (column)
-{
-	return function (queryset, symbol)
-	{
-		symbol = Symbl(symbol)
 
-		return queryset
-		.where(function ()
-		{
-			this.where(raw(`${column}->>'ticker'`), symbol.ticker)
-			if (symbol.exchange)
-			{
-				this.where(raw(`${column}->>'exchange'`), symbol.exchange)
-			}
-		})
-	}
-}
+var pick = require('lodash/pick')
+var pickBy = require('lodash/pickBy')
+var dump = JSON.stringify
 
-Filter.by.symbols = function by_symbols (column)
+Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
@@ -224,30 +211,17 @@ Filter.by.symbols = function by_symbols (column)
 		return queryset
 		.where(function ()
 		{
-			var that = this
-
-			symbols.forEach((symbol) =>
+			symbols.forEach(symbol =>
 			{
-				that.orWhere(function ()
-				{
-					if (symbol.exchange)
-					{
-						this.where(
-							raw(column),
-							'@>',
-							`[{"ticker": "${symbol.ticker}",` +
-							` "exchange": "${symbol.exchange}"}]`
-						)
-					}
-					else
-					{
-						this.where(
-							raw(column),
-							'@>',
-							`[{"ticker": "${symbol.ticker}"}]`
-						)
-					}
-				})
+				var p_symbol
+				p_symbol = pick(symbol, 'ticker', 'exchange')
+				p_symbol = pickBy(p_symbol)
+
+				var j_symbol = dump(p_symbol)
+				this.where(raw(`data->'symbol'`), '@>', j_symbol)
+
+				var j_symbols = dump([ p_symbol ])
+				this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
 			})
 		})
 	}
