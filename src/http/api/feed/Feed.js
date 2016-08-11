@@ -91,6 +91,11 @@ module.exports = function Feed (db, http)
 		}
 	}
 
+	feed.express.get('/by-watchlist', (rq, rs) =>
+	{
+		toss(rs, feed.model.byWatchlist(rq.user.id))
+	})
+
 	feed.express.get('/:id', (rq, rs) =>
 	{
 		toss(rs, feed.model.byId(rq.params.id))

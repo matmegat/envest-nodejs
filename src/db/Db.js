@@ -66,14 +66,13 @@ module.exports = function name (app)
 	db.symbols = Symbols(app.cfg, app.log)
 
 	db.investor = Investor(db)
+	db.watchlist = Watchlist(db)
 	db.feed = Feed(db)
 
 	db.post = Post(db)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
-
-	db.watchlist = Watchlist(db)
 
 	return db
 }
