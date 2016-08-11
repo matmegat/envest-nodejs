@@ -1,5 +1,5 @@
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
 
 var Router = require('express').Router
 var toss = require('../../toss')
@@ -33,9 +33,9 @@ module.exports = function Feed (db, http)
 	{
 		var options = {}
 
-		options.filter = _.pick(rq.query, filters)
+		options.filter = pick(rq.query, filters)
 
-		options.paginator = _.pick(rq.query,
+		options.paginator = pick(rq.query,
 		[
 			'max_id',
 			'since_id',
@@ -47,7 +47,7 @@ module.exports = function Feed (db, http)
 
 	feed.express.get('/counts', (rq, rs) =>
 	{
-		var options = _.pick(rq.query, filters)
+		var options = pick(rq.query, filters)
 
 		toss(rs, feed.model.counts(options))
 	})
@@ -61,17 +61,14 @@ module.exports = function Feed (db, http)
 		{
 			var options = {}
 
-			options.paginator = _.pick(rq.query,
+			options.paginator = pick(rq.query,
 			[
 				'max_id',
 				'since_id',
 				'page'
 			])
 
-			options.filter = _.pick(rq.query,
-			[
-				'investor'
-			])
+			options.filter = pick(rq.query, 'investor')
 
 			options.filter.type = type
 
@@ -81,7 +78,7 @@ module.exports = function Feed (db, http)
 
 	feed.express.get('/by-watchlist', (rq, rs) =>
 	{
-		var options = { filter: _.pick(rq.query, 'type') }
+		var options = { filter: pick(rq.query, 'type') }
 
 		toss(rs, feed.model.byWatchlist(rq.user.id, options))
 	})
@@ -93,7 +90,7 @@ module.exports = function Feed (db, http)
 
 	feed.express.get('/:id/comments', (rq, rs) =>
 	{
-		var options = _.pick(rq.query,
+		var options = pick(rq.query,
 		[
 			'max_id',
 			'since_id',
@@ -106,7 +103,7 @@ module.exports = function Feed (db, http)
 
 	feed.express.post('/:id/comments', (rq, rs) =>
 	{
-		var comment_data = _.pick(rq.body, [ 'text' ])
+		var comment_data = pick(rq.body, 'text')
 		comment_data.feed_id = rq.params.id
 		comment_data.user_id = rq.user.id
 
