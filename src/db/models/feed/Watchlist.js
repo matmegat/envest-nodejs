@@ -39,6 +39,7 @@ function validate_watchlist (data)
 		'dir',
 		'symbol',
 		'text',
+		'target_price',
 		'motivations'
 	])
 
@@ -53,6 +54,10 @@ function validate_watchlist (data)
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
+
+		validate.require(data.target_price, 'target_price')
+		validate.empty(data.target_price, 'target_price')
+		validate.number.positive(data.target_price, 'target_price')
 
 		rs(data)
 	})
