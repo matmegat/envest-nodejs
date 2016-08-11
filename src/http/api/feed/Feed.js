@@ -14,25 +14,26 @@ module.exports = function Feed (db, http)
 	feed.express = Router()
 	feed.express.use(authRequired)
 
+	var filters =
+	[
+		'type',
+		'investors',
+		'investor',
+		'last_days',
+		'last_weeks',
+		'last_months',
+		'last_years',
+		'name',
+		'mindate',
+		'maxdate',
+		'symbols'
+	]
+
 	feed.express.get('/', (rq, rs) =>
 	{
 		var options = {}
 
-		options.filter = _.pick(rq.query,
-		[
-			'type',
-			'investors',
-			'investor',
-			'last_days',
-			'last_weeks',
-			'last_months',
-			'last_years',
-			'name',
-			'mindate',
-			'maxdate',
-			'symbol',
-			'symbols'
-		])
+		options.filter = _.pick(rq.query, filters)
 
 		options.paginator = _.pick(rq.query,
 		[
@@ -46,20 +47,7 @@ module.exports = function Feed (db, http)
 
 	feed.express.get('/counts', (rq, rs) =>
 	{
-		var options = _.pick(rq.query,
-		[
-			'investors',
-			'investor',
-			'last_days',
-			'last_weeks',
-			'last_months',
-			'last_years',
-			'name',
-			'mindate',
-			'maxdate',
-			'symbol',
-			'symbols'
-		])
+		var options = _.pick(rq.query, filters)
 
 		toss(rs, feed.model.counts(options))
 	})
