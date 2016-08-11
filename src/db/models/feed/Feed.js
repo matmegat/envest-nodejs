@@ -227,7 +227,7 @@ var Feed = module.exports = function Feed (db)
 		})
 	}
 
-	feed.byWatchlist = function (user_id)
+	feed.byWatchlist = function (user_id, options)
 	{
 		return watchlist.user.byId(user_id)
 		.then(map('symbol'))
@@ -236,8 +236,7 @@ var Feed = module.exports = function Feed (db)
 			symbols = invoke(symbols, 'toXign')
 			symbols = symbols.join(',')
 
-			var filter  = { symbols: symbols }
-			var options = { filter: filter }
+			options.filter.symbols = symbols
 
 			return feed.list(options, user_id)
 		})
