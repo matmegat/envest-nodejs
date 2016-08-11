@@ -77,7 +77,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			return table().insert(entry)
 			.then(() =>
 			{
-				return transform([ entry ])
+				return full_transform([ entry ])
 			})
 			.then(first)
 		})
@@ -128,6 +128,9 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			})
 		})
 	}
+
+	var flow = require('lodash/flow')
+	var full_transform = flow(transform, quotes)
 
 	model.remove = (owner_id, symbol) =>
 	{
