@@ -45,7 +45,6 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 	}
 
-	var limit_watchlist = 250
 
 	var LimitWatchlist = Err('limit_watchlist', 'Watchlist limited')
 
@@ -54,9 +53,9 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		return byId(owner_id)
 		.then((items) =>
 		{
-			if (items.length >= limit_watchlist)
+			if (items.length >= watchlist_limit)
 			{
-				throw LimitWatchlist({ limit: limit_watchlist })
+				throw LimitWatchlist({ limit: watchlist_limit })
 			}
 		})
 		.then(() =>
@@ -155,8 +154,10 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 }
 
 
-SymbolList.schema = {}
+var watchlist_limit = SymbolList.limit = 250
 
+
+SymbolList.schema = {}
 
 var Symbols = require('../symbols/Symbols')
 var expect  = require('chai').expect

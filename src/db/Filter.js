@@ -201,7 +201,8 @@ var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
 
-var max_allowed_symbols_per_filter = 250
+var max_allowed_symbols_per_filter = require('./models/watchlist/SymbolList').limit
+
 var WrongFilter = Err('too_many_symbols_queried',
 	`Maximum of ${max_allowed_symbols_per_filter} allowed per filter`)
 
