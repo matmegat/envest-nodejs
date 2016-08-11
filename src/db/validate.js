@@ -72,23 +72,6 @@ validate.number = function validate__number (field, name)
 }
 
 
-var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
-
-validate.length = function validate__length (max)
-{
-	return (field, name) =>
-	{
-		var actual = field.length
-
-		if (actual > max)
-		{
-			throw FieldLength({ field: name, actual: actual, max: max })
-		}
-		throw FieldType({ field: name, type: 'array' })
-	}
-}
-
-
 var isFinite = require('lodash/isFinite')
 
 validate.number = function validate__number (field, name)
@@ -145,7 +128,7 @@ validate.integer.positive = function validate__integer__positive (field, name)
 
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
-validate.length = function validate__length (max)
+validate.length = function validate__length (max, min)
 {
 	return (field, name) =>
 	{
@@ -154,6 +137,11 @@ validate.length = function validate__length (max)
 		if (actual > max)
 		{
 			throw FieldLength({ field: name, actual: actual, max: max })
+		}
+
+		if (min && actual < min)
+		{
+			throw FieldLength({ field: name, actual: actual, min: min })
 		}
 	}
 }

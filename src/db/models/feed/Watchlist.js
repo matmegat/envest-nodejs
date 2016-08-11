@@ -45,6 +45,7 @@ function validate_watchlist (data)
 
 	var watchlist_dirs = ['added', 'removed']
 	var validate_watchlist_dir = validate.collection(watchlist_dirs)
+	var validate_motivations_length = validate.length(3, 1)
 
 	return new Promise(rs =>
 	{
@@ -55,9 +56,13 @@ function validate_watchlist (data)
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
 
-		validate.require(data.target_price, 'target_price')
+		validate.required(data.target_price, 'target_price')
 		validate.empty(data.target_price, 'target_price')
 		validate.number.positive(data.target_price, 'target_price')
+
+		validate.required(data.motivations, 'motivations')
+		validate.array(data.motivations, 'motivations')
+		validate_motivations_length(data.motivations, 'motivations')
 
 		rs(data)
 	})

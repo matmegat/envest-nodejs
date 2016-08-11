@@ -32,6 +32,7 @@ function validate_trade (data)
 
 	var trade_dirs = ['bought', 'sold']
 	var validate_trade_dir = validate.collection(trade_dirs)
+	var validate_motivations_length = validate.length(3, 1)
 
 	return new Promise(rs =>
 	{
@@ -50,6 +51,10 @@ function validate_trade (data)
 
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
+
+		validate.required(data.motivations, 'motivations')
+		validate.array(data.motivations, 'motivations')
+		validate_motivations_length(data.motivations, 'motivations')
 
 		rs(data)
 	})
