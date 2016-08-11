@@ -32,6 +32,9 @@ paths:
   '/feed/updates':
     $ref: ../api/feed/swag/FeedByUpdate.yaml
 
+  '/feed/by-watchlist':
+    $ref: ../api/feed/swag/FeedByWatchlist.yaml
+
   '/feed/{feed_id}/comments':
     $ref: ../api/feed/swag/GetPostFeedComments.yaml
 

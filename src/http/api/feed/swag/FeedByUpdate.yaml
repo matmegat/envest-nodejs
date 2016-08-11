@@ -23,9 +23,9 @@ get:
     description: Investor Id
   responses:
     200:
-      description: Selected Feed
+      description: Feed
       schema:
-        $ref: ./FeedItem.yaml
+        $ref: ./Feed.yaml
     400:
       description: Handled Error
       schema:
