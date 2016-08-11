@@ -109,14 +109,12 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
 	{
-		return Promise.all(
+		toss(rs, Promise.all(
 		[
 			investors.model.all.byId(rq.params.id),
 			investors.model.portfolio.full(rq.params.id)
 		])
-		.then((response) => extend({}, response[0], response[1]))
-		.then(toss.ok(rs))
-		.catch(toss.err(rs))
+		.then((response) => extend({}, response[0], response[1])))
 	})
 
 	return investors
