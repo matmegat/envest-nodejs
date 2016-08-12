@@ -147,7 +147,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		.debug()
 
 		var paginator
-		if (options.paginator.page)
+		if (options.paginator && options.paginator.page)
 		{
 			paginator = paginator_booked
 		}
