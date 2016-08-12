@@ -22,6 +22,11 @@ var Symbl = module.exports = function Symbl (it)
 			throw WrongFormat({ reason: 'must_be_a_pair' })
 		}
 
+		if (! it[0])
+		{
+			throw WrongFormat({ reason: 'empty_ticker' })
+		}
+
 		var s = inst()
 
 		s.ticker   = it[0]
