@@ -153,7 +153,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			paginator = paginator_chunked
 		}
 
-		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
+		return paginator.paginate(queryset, options.paginator)
 		.then((investors) =>
 		{
 			var response =
