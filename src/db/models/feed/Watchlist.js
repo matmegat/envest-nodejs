@@ -20,14 +20,30 @@ module.exports = function Watchlist (db)
 				'target_price'
 			])
 
-			if (data.dir === 'added')
+			return db.symbols.resolve(data.symbol)
+			.then(symbl =>
 			{
-				return db.watchlist.investor.add(investor_id, symbol, additional)
-			}
-			else
+				data.symbol = pick(symbl,
+				[
+					'ticker',
+					'exchange'
+				])
+			})
+			.then(() =>
 			{
-				return db.watchlist.investor.remove(investor_id, symbol)
-			}
+				if (data.dir === 'added')
+				{
+					return db.watchlist.investor.add(investor_id, symbol, additional)
+				}
+				else
+				{
+					return db.watchlist.investor.remove(investor_id, symbol)
+				}
+			})
+			.then(() =>
+			{
+				return feed.create(trx, investor_id, type, date, data)
+			})
 		}
 	})
 }

@@ -5,14 +5,30 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-module.exports = function Trade (portfolio)
+module.exports = function Trade (portfolio, symbols, feed)
 {
 	return Type(
 	{
 		validate: validate_trade,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return portfolio.makeTrade(trx, investor_id, type, date, data)
+			return symbols.resolve(data.symbol)
+			.then(symbl =>
+			{
+				data.symbol = pick(symbl,
+				[
+					'ticker',
+					'exchange'
+				])
+			})
+			.then(() =>
+			{
+				return portfolio.makeTrade(trx, investor_id, type, date, data)
+			})
+			.then(() =>
+			{
+				return feed.create(trx, investor_id, type, date, data)
+			})
 		}
 	})
 }

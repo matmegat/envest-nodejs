@@ -5,14 +5,30 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-module.exports = function Update ()
+module.exports = function Update (symbols, feed)
 {
 	return Type(
 	{
 		validate: validate_update,
-		set: () =>
+		set: (trx, investor_id, type, date, data) =>
 		{
-			return
+			return symbols.resolveMany(data.symbols)
+			.then(symbls =>
+			{
+				data.symbols = symbls
+				.map(item =>
+				{
+					return pick(item,
+					[
+						'ticker',
+						'exchange'
+					])
+				})
+			})
+			.then(() =>
+			{
+				return feed.create(trx, investor_id, type, date, data)
+			})
 		}
 	})
 }
