@@ -65,12 +65,10 @@ module.exports = function (db, http)
 		{
 			if (so)
 			{
-				console.warn('all')
 				return investors.model.all
 			}
 			else
 			{
-				console.warn('public')
 				return investors.model.public
 			}
 		})

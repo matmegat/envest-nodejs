@@ -131,7 +131,6 @@ module.exports = function Meta (knexed_table, raw, options)
 		queryset
 		.select(fields)
 		.select(public_field)
-		.debug()
 
 		var paginator
 		if (options.paginator && options.paginator.page)
