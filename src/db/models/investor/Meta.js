@@ -18,9 +18,16 @@ module.exports = function Meta (knexed_table, raw, options)
 	expect(knexed_table, 'meta table relation').a('function')
 
 	options = _.extend({}, options)
+
 	var table = function (trx)
 	{
 		return knexed_table(trx).where(options)
+	}
+
+	var public_field
+	if (! options.is_public)
+	{
+		public_field = 'is_public'
 	}
 
 	var meta = {}
@@ -29,6 +36,7 @@ module.exports = function Meta (knexed_table, raw, options)
 	meta.WrongInvestorId = WrongInvestorId
 
 	var filter = Filter({
+		ids: Filter.by.ids('user_id'),
 		symbol: Filter.by.portfolio_symbol('investors.user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id')
 	})
@@ -54,26 +62,32 @@ module.exports = function Meta (knexed_table, raw, options)
 		.then(Err.falsy(NotFound))
 	}
 
+
+	var fields =
+	[
+		'users.id',
+		'users.first_name',
+		'users.last_name',
+		'users.pic',
+		'investors.profile_pic',
+		'investors.focus',
+		'investors.background',
+		'investors.historical_returns',
+		raw(`
+			(SELECT * FROM featured_investor
+			WHERE investor_id = users.id)
+			IS NOT NULL AS is_featured`
+		)
+	]
+
 	meta.byId = function (id, trx)
 	{
 		return meta.ensure(id, trx)
 		.then(() =>
 		{
 			return table(trx)
-			.select(
-				'users.id',
-				'users.first_name',
-				'users.last_name',
-				'investors.profession',
-				'users.pic',
-				'investors.profile_pic',
-				'investors.focus',
-				'investors.background',
-				'investors.historical_returns',
-				raw(`(select * from featured_investor
-					where investor_id = users.id)
-					is not null as is_featured`)
-			)
+			.select(fields)
+			.select(public_field)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
@@ -105,51 +119,21 @@ module.exports = function Meta (knexed_table, raw, options)
 		default_direction: 'asc'
 	})
 
-	meta.list = function (options, trx)
+	meta.list = function (options)
 	{
-		options = _.extend({}, options,
-		{
-			limit: 20,
-			column_name: 'investors.user_id'
-		})
-
-		var queryset = table(trx)
+		var queryset = table()
 		.innerJoin('users', 'investors.user_id', 'users.id')
-
-		/* begin of all where clauses */
-		if (options.where)
-		{
-			// TODO: validate options.where
-
-			// WHAT with this?
-			queryset.where(
-				options.where.column_name,
-				options.where.clause,
-				options.where.argument
-			)
-		}
 
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
-		/* end of all where clauses */
 
 		queryset
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			'investors.profile_pic',
-			'investors.focus',
-			'investors.historical_returns',
-			raw(`(select * from featured_investor
-				where investor_id = users.id)
-				is not null as is_featured`)
-		)
+		.select(fields)
+		.select(public_field)
 
 		var paginator
-		if (options.page)
+		if (options.paginator && options.paginator.page)
 		{
 			paginator = paginator_booked
 		}
@@ -158,7 +142,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			paginator = paginator_chunked
 		}
 
-		return paginator.paginate(queryset, _.omit(options, [ 'where' ]))
+		return paginator.paginate(queryset, options.paginator)
 		.then((investors) =>
 		{
 			var response =
@@ -194,7 +178,8 @@ module.exports = function Meta (knexed_table, raw, options)
 			'background',
 			'historical_returns',
 			'annual_return',
-			'is_featured'
+			'is_featured',
+			'is_public'
 		])
 	}
 
