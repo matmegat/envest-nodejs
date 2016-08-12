@@ -54,26 +54,31 @@ module.exports = function Meta (knexed_table, raw, options)
 		.then(Err.falsy(NotFound))
 	}
 
+
+	var fields =
+	[
+		'users.id',
+		'users.first_name',
+		'users.last_name',
+		'users.pic',
+		'investors.profile_pic',
+		'investors.focus',
+		'investors.background',
+		'investors.historical_returns',
+		raw(`
+			(SELECT * FROM featured_investor
+			WHERE investor_id = users.id)
+			IS NOT NULL AS is_featured`
+		)
+	]
+
 	meta.byId = function (id, trx)
 	{
 		return meta.ensure(id, trx)
 		.then(() =>
 		{
 			return table(trx)
-			.select(
-				'users.id',
-				'users.first_name',
-				'users.last_name',
-				'investors.profession',
-				'users.pic',
-				'investors.profile_pic',
-				'investors.focus',
-				'investors.background',
-				'investors.historical_returns',
-				raw(`(select * from featured_investor
-					where investor_id = users.id)
-					is not null as is_featured`)
-			)
+			.select(fields)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
@@ -135,18 +140,8 @@ module.exports = function Meta (knexed_table, raw, options)
 		/* end of all where clauses */
 
 		queryset
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			'investors.profile_pic',
-			'investors.focus',
-			'investors.historical_returns',
-			raw(`(select * from featured_investor
-				where investor_id = users.id)
-				is not null as is_featured`)
-		)
+		.select(fields)
+		.debug()
 
 		var paginator
 		if (options.page)
