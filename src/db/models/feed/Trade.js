@@ -56,6 +56,11 @@ function validate_trade (data)
 		validate.array(data.motivations, 'motivations')
 		validate_motivations_length(data.motivations, 'motivations')
 
+		data.motivations.forEach(el =>
+		{
+			validate.motivation(el)
+		})
+
 		rs(data)
 	})
 }

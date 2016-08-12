@@ -171,6 +171,16 @@ validate.collection = function validate__collection (collection)
 	}
 }
 
+validate.motivation = function validate__motivations (motivation)
+{
+	validate.required(motivation.id, 'motivation id')
+	validate.empty(motivation.id, 'motivation id')
+	validate.integer(motivation.id, 'motivation id')
+
+	validate.required(motivation.text, 'motivation text')
+	validate.empty(motivation.text, 'motivation text')
+}
+
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
 
