@@ -110,7 +110,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		default_direction: 'asc'
 	})
 
-	meta.list = function (options, trx)
+	meta.list = function (options)
 	{
 		options = _.extend({}, options,
 		{
@@ -118,7 +118,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			column_name: 'investors.user_id'
 		})
 
-		var queryset = table(trx)
+		var queryset = table()
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
 		/* begin of all where clauses */
