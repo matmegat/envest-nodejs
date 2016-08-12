@@ -185,21 +185,30 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
 
+		var shorts = symbols.filter(s => ! s.exchange)
+		var fulls  = symbols.filter(s =>   s.exchange)
+
 		return queryset
 		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
 		.where(function ()
 		{
-			this.where(
-				ticker_col,
-				'in',
-				map(symbols, 'ticker')
-			)
+			if (shorts.length)
+			{
+				this.where(
+					ticker_col,
+					'in',
+					map(shorts, 'ticker')
+				)
+			}
 
-			this.orWhere(
-				raw(ticker_col + ` || '.' || ` + exchange_col),
-				'in',
-				map(symbols, s => s.ticker + '.' + s.exchange)
-			)
+			if (fulls.length)
+			{
+				this.orWhere(
+					raw(ticker_col + ` || '.' || ` + exchange_col),
+					'in',
+					map(fulls, s => s.ticker + '.' + s.exchange)
+				)
+			}
 		})
 		.debug()
 	}
