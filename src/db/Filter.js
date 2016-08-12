@@ -1,6 +1,7 @@
 
 var raw = require('knex').raw
 
+var map = require('lodash/map')
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -172,8 +173,6 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 	}
 }
 
-
-var map = require('lodash/map')
 
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
