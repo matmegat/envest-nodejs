@@ -5,7 +5,7 @@ var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
-module.exports = function Watchlist (watchlist)
+module.exports = function Watchlist (db)
 {
 	return Type(
 	{
@@ -22,11 +22,11 @@ module.exports = function Watchlist (watchlist)
 
 			if (data.dir === 'added')
 			{
-				return watchlist.investor.add(investor_id, symbol, additional)
+				return db.watchlist.investor.add(investor_id, symbol, additional)
 			}
 			else
 			{
-				return watchlist.investor.remove(investor_id, symbol)
+				return db.watchlist.investor.remove(investor_id, symbol)
 			}
 		}
 	})
@@ -39,6 +39,7 @@ function validate_watchlist (data)
 		'dir',
 		'symbol',
 		'text',
+		'target_price',
 		'motivations'
 	])
 
@@ -53,6 +54,12 @@ function validate_watchlist (data)
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
+
+		validate.required(data.target_price, 'target_price')
+		validate.empty(data.target_price, 'target_price')
+		validate.number.positive(data.target_price, 'target_price')
+
+		validate.motivation(data.motivations)
 
 		rs(data)
 	})

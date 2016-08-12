@@ -23,8 +23,7 @@ function validate_update (data)
 	[
 		'symbols',
 		'title',
-		'text',
-		'motivations'
+		'text'
 	])
 
 	return new Promise(rs =>

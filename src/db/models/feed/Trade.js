@@ -51,6 +51,8 @@ function validate_trade (data)
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
 
+		validate.motivation(data.motivations)
+
 		rs(data)
 	})
 }
