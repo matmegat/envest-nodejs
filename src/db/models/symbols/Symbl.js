@@ -7,11 +7,6 @@ var Symbl = module.exports = function Symbl (it)
 		return it
 	}
 
-	if (it == false)
-	{
-		throw WrongFormat({ reason: 'unknown_format' })
-	}
-
 	if (typeof it === 'string')
 	{
 		it = it.split('.')
