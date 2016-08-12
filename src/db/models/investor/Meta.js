@@ -36,6 +36,7 @@ module.exports = function Meta (knexed_table, raw, options)
 	meta.WrongInvestorId = WrongInvestorId
 
 	var filter = Filter({
+		ids: Filter.by.ids('user_id'),
 		symbol: Filter.by.portfolio_symbol('investors.user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id')
 	})
@@ -123,23 +124,9 @@ module.exports = function Meta (knexed_table, raw, options)
 		var queryset = table()
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
-		/* begin of all where clauses */
-		if (options.where)
-		{
-			// TODO: validate options.where
-
-			// WHAT with this?
-			queryset.where(
-				options.where.column_name,
-				options.where.clause,
-				options.where.argument
-			)
-		}
-
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
-		/* end of all where clauses */
 
 		queryset
 		.select(fields)

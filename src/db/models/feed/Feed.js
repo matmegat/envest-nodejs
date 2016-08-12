@@ -197,13 +197,8 @@ var Feed = module.exports = function Feed (db)
 		.then((feed_items) =>
 		{
 			return investor.public.list(
-			{	// TODO: replace to Filter by ids
-				where:
-				{
-					column_name: 'user_id',
-					clause: 'in',
-					argument: _.map(feed_items, 'investor_id')
-				}
+			{
+				filter: { ids: _.map(feed_items, 'investor_id').join(',') }
 			})
 			.then((investors) =>
 			{
