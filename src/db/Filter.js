@@ -1,6 +1,7 @@
 
 var raw = require('knex').raw
 
+var map = require('lodash/map')
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -172,31 +173,45 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 	}
 }
 
+
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
-		var ticker_col = 'portfolio_symbols.symbol_ticker'
+		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
+
+		var shorts = symbols.filter(s => ! s.exchange)
+		var fulls  = symbols.filter(s =>   s.exchange)
 
 		return queryset
 		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
-		.whereIn(
-			raw(`${ticker_col} || '.' || ${exchange_col}`),
-			symbols.map(symbol =>
+		.where(function ()
+		{
+			if (shorts.length)
 			{
-				return `${symbol.ticker}.${symbol.exchange}`
-			})
-		)
+				this.where(
+					ticker_col,
+					'in',
+					map(shorts, 'ticker')
+				)
+			}
+
+			if (fulls.length)
+			{
+				this.orWhere(
+					raw(ticker_col + ` || '.' || ` + exchange_col),
+					'in',
+					map(fulls, s => s.ticker + '.' + s.exchange)
+				)
+			}
+		})
 	}
 }
 
 
-var uniq = require('lodash/uniq')
 var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
@@ -210,10 +225,7 @@ Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = uniq(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
 		if (symbols.length > max_allowed_symbols)
 		{
@@ -237,4 +249,17 @@ Filter.by.symbols = function bySymbols ()
 			})
 		})
 	}
+}
+
+
+var uniq = require('lodash/uniq')
+
+function symbol_split (symbols)
+{
+	symbols = symbols.split(',')
+	symbols = [].concat(symbols)
+	symbols = uniq(symbols)
+	symbols = symbols.map(Symbl)
+
+	return symbols
 }
