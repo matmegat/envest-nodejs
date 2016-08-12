@@ -115,7 +115,6 @@ module.exports = function Meta (knexed_table, raw, options)
 		options = _.extend({}, options,
 		{
 			limit: 20,
-			column_name: 'investors.user_id'
 		})
 
 		var queryset = table()
