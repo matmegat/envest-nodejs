@@ -70,7 +70,7 @@ Filter.by.ids = function (column)
 
 	return function by_ids (queryset, ids)
 	{
-		var ids = ids.split(',')
+		ids = ids.split(',')
 
 		val_ids(ids)
 
