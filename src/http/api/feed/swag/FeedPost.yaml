@@ -50,7 +50,13 @@ post:
             motivations:
               type: array
               items:
-                type: string
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
           required:
           - dir
           - symbol
@@ -81,7 +87,13 @@ post:
             motivations:
               type: array
               items:
-                type: string
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
           required:
           - dir
           - symbol
