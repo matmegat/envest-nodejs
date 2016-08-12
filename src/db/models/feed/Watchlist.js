@@ -12,22 +12,35 @@ module.exports = function Watchlist (db)
 		validate: validate_watchlist,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			var symbol = data.symbol
 			var additional = pick(data,
 			[
-				'text',
-				'motivations',
 				'target_price'
 			])
 
-			if (data.dir === 'added')
+			return db.symbols.resolve(data.symbol)
+			.then(symbl =>
 			{
-				return db.watchlist.investor.add(investor_id, symbol, additional)
-			}
-			else
+				data.symbol = pick(symbl,
+				[
+					'ticker',
+					'exchange'
+				])
+			})
+			.then(() =>
 			{
-				return db.watchlist.investor.remove(investor_id, symbol)
-			}
+				if (data.dir === 'added')
+				{
+					return db.watchlist.investor.add(investor_id, data.symbol, additional)
+				}
+				else
+				{
+					return db.watchlist.investor.remove(investor_id, data.symbol)
+				}
+			})
+			.then(() =>
+			{
+				return feed.create(trx, investor_id, type, date, data)
+			})
 		}
 	})
 }
@@ -51,6 +64,7 @@ function validate_watchlist (data)
 		validate_watchlist_dir(data.dir)
 
 		validate.required(data.text, 'text')
+		validate.empty(data.text, 'text')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')

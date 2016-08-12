@@ -15,14 +15,10 @@ module.exports = function Post (db)
 {
 	var post = {}
 
-	post.feed_model = db.feed
-
 	post.types = {}
-	post.types.trade = Trade(db.investor.portfolio)
+	post.types.trade = Trade(db.investor.portfolio, db.symbols, db.feed)
 	post.types.watchlist = Watchlist(db)
-	post.types.update = Update()
-
-	var symbols = db.symbols
+	post.types.update = Update(db.symbols, db.feed)
 
 	var knex = db.knex
 
@@ -38,44 +34,10 @@ module.exports = function Post (db)
 		{
 			throw WrongPostType({ type: type })
 		}
+		
+		var post_type = post.types[type]
 
-		if (data.symbol)
-		{
-			return symbols.resolve(data.symbol)
-			.then(symbl =>
-			{
-				data.symbol = pick(symbl,
-				[
-					'ticker',
-					'exchange'
-				])
-
-				var post_type = post.types[type]
-
-				return post_type.set(trx, investor_id, type, date, data)
-			})
-		}
-
-		if (data.symbols)
-		{
-			return symbols.resolveMany(data.symbols)
-			.then(symbls =>
-			{
-				data.symbols = symbls
-				.map(item =>
-				{
-					return pick(item,
-					[
-						'ticker',
-						'exchange'
-					])
-				})
-
-				var post_type = post.types[type]
-
-				return post_type.set(trx, investor_id, type, date, data)
-			})
-		}
+		return post_type.set(trx, investor_id, type, date, data)
 	}
 
 	var InvestorPostDateErr =
@@ -105,10 +67,6 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.feed_model.create(trx, investor_id, type, date, data)
-			})
-			.then(() =>
-			{
 				PostCreated(investor_id,
 				{
 					investor: [ ':user-id', investor_id ]
@@ -127,10 +85,6 @@ module.exports = function Post (db)
 			.then(() =>
 			{
 				return validate.date(date)
-			})
-			.then(() =>
-			{
-				return post.feed_model.create(trx, investor_id, type, date, data)
 			})
 			.then(() =>
 			{
