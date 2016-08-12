@@ -171,14 +171,23 @@ validate.collection = function validate__collection (collection)
 	}
 }
 
-validate.motivation = function validate__motivations (motivation)
-{
-	validate.required(motivation.id, 'motivation id')
-	validate.empty(motivation.id, 'motivation id')
-	validate.integer(motivation.id, 'motivation id')
+var validate_motivations_length = validate.length(3, 1)
 
-	validate.required(motivation.text, 'motivation text')
-	validate.empty(motivation.text, 'motivation text')
+validate.motivation = function validate__motivations (motivations)
+{
+	validate.required(motivations, 'motivations')
+	validate.array(motivations, 'motivations')
+	validate_motivations_length(motivations, 'motivations')
+
+	motivations.forEach(el =>
+	{
+		validate.required(el.id, 'motivation id')
+		validate.empty(el.id, 'motivation id')
+		validate.integer(el.id, 'motivation id')
+
+		validate.required(el.text, 'motivation text')
+		validate.empty(el.text, 'motivation text')
+	})
 }
 
 var XRegExp = require('xregexp')

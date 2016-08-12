@@ -60,14 +60,7 @@ function validate_watchlist (data)
 		validate.empty(data.target_price, 'target_price')
 		validate.number.positive(data.target_price, 'target_price')
 
-		validate.required(data.motivations, 'motivations')
-		validate.array(data.motivations, 'motivations')
-		validate_motivations_length(data.motivations, 'motivations')
-
-		data.motivations.forEach(el =>
-		{
-			validate.motivation(el)
-		})
+		validate.motivation(data.motivations)
 
 		rs(data)
 	})

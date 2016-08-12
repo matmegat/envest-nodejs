@@ -52,14 +52,7 @@ function validate_trade (data)
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
 
-		validate.required(data.motivations, 'motivations')
-		validate.array(data.motivations, 'motivations')
-		validate_motivations_length(data.motivations, 'motivations')
-
-		data.motivations.forEach(el =>
-		{
-			validate.motivation(el)
-		})
+		validate.motivation(data.motivations)
 
 		rs(data)
 	})
