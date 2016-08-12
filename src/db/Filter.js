@@ -133,7 +133,7 @@ function wrong_filter (name)
 {
 	return function ()
 	{
-		return WrongFilter( { name: name } )
+		return WrongFilter({ name: name })
 	}
 }
 
@@ -218,7 +218,7 @@ var dump = JSON.stringify
 
 var max_allowed_symbols = require('./models/watchlist/SymbolList').limit
 
-var WrongFilter = Err('too_many_symbols_queried',
+var TooMany = Err('too_many_symbols_queried',
 	`Maximum of ${max_allowed_symbols} allowed per filter`)
 
 Filter.by.symbols = function bySymbols ()
@@ -229,7 +229,7 @@ Filter.by.symbols = function bySymbols ()
 
 		if (symbols.length > max_allowed_symbols)
 		{
-			throw WrongFilter()
+			throw TooMany()
 		}
 
 		return queryset
