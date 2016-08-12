@@ -61,11 +61,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	symbols.resolveMany = (symbols_arr, soft_mode) =>
 	{
 		var queries = symbols_arr
-		.map(symbol =>
-		{
-			return Symbl.validate(symbol)
-			.then(symbols.resolve.cache)
-		})
+		.map(symbols.resolve.cache)
 
 		if (soft_mode)
 		{
