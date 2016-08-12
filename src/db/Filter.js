@@ -181,6 +181,11 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 	{
 		symbols = symbol_split(symbols)
 
+		if (! symbols.length)
+		{
+			return queryset.where(raw('FALSE'))
+		}
+
 		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
 
@@ -231,6 +236,11 @@ Filter.by.symbols = function bySymbols ()
 		if (symbols.length > max_allowed_symbols)
 		{
 			throw TooMany()
+		}
+
+		if (! symbols.length)
+		{
+			return queryset.where(raw('FALSE'))
 		}
 
 		return queryset
