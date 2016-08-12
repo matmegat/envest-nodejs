@@ -172,6 +172,9 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 	}
 }
 
+
+var map = require('lodash/map')
+
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
 	return function (queryset, symbols)
@@ -180,18 +183,26 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 		symbols = [].concat(symbols)
 		symbols = symbols.map(Symbl)
 
-		var ticker_col = 'portfolio_symbols.symbol_ticker'
+		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
 
 		return queryset
 		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
-		.whereIn(
-			raw(`${ticker_col} || '.' || ${exchange_col}`),
-			symbols.map(symbol =>
-			{
-				return `${symbol.ticker}.${symbol.exchange}`
-			})
-		)
+		.where(function ()
+		{
+			this.where(
+				ticker_col,
+				'in',
+				map(symbols, 'ticker')
+			)
+
+			this.orWhere(
+				raw(ticker_col + ` || '.' || ` + exchange_col),
+				'in',
+				map(symbols, s => s.ticker + '.' + s.exchange)
+			)
+		})
+		.debug()
 	}
 }
 
