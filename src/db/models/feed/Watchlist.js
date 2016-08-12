@@ -12,11 +12,8 @@ module.exports = function Watchlist (db)
 		validate: validate_watchlist,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			var symbol = data.symbol
 			var additional = pick(data,
 			[
-				'text',
-				'motivations',
 				'target_price'
 			])
 
@@ -33,11 +30,11 @@ module.exports = function Watchlist (db)
 			{
 				if (data.dir === 'added')
 				{
-					return db.watchlist.investor.add(investor_id, symbol, additional)
+					return db.watchlist.investor.add(investor_id, data.symbol, additional)
 				}
 				else
 				{
-					return db.watchlist.investor.remove(investor_id, symbol)
+					return db.watchlist.investor.remove(investor_id, data.symbol)
 				}
 			})
 			.then(() =>
