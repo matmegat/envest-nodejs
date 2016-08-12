@@ -15,6 +15,8 @@ module.exports = function (db, http)
 	investors.model = db.investor
 	investors.express = Router()
 
+	var admin = db.admin
+
 	// public routes
 	investors.express.get('/', (rq, rs) =>
 	{
@@ -33,13 +35,47 @@ module.exports = function (db, http)
 			'symbols'
 		])
 
-		toss(rs, investors.model.public.list(options))
+		toss(rs, choose_model(rq)
+		.then(model =>
+		{
+			return model.list(options)
+		}))
 	})
 
 	investors.express.get('/:id', (rq, rs) =>
 	{
-		toss(rs, investors.model.public.byId(rq.params.id))
+		toss(rs, choose_model(rq)
+		.then(model =>
+		{
+			return model.byId(rq.params.id)
+		}))
 	})
+
+	function choose_model (rq)
+	{
+		return Promise.resolve()
+		.then(() =>
+		{
+			if (rq.isAuthenticated())
+			{
+				return admin.is(rq.user.id)
+			}
+		})
+		.then(so =>
+		{
+			if (so)
+			{
+				console.warn('all')
+				return investors.model.all
+			}
+			else
+			{
+				console.warn('public')
+				return investors.model.public
+			}
+		})
+	}
+
 
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
