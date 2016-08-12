@@ -208,7 +208,6 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 				)
 			}
 		})
-		.debug()
 	}
 }
 
