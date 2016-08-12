@@ -178,9 +178,7 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
 		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
@@ -215,7 +213,6 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 }
 
 
-var uniq = require('lodash/uniq')
 var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
@@ -229,10 +226,7 @@ Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = uniq(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
 		if (symbols.length > max_allowed_symbols)
 		{
@@ -256,4 +250,17 @@ Filter.by.symbols = function bySymbols ()
 			})
 		})
 	}
+}
+
+
+var uniq = require('lodash/uniq')
+
+function symbol_split (symbols)
+{
+	symbols = symbols.split(',')
+	symbols = [].concat(symbols)
+	symbols = uniq(symbols)
+	symbols = symbols.map(Symbl)
+
+	return symbols
 }
