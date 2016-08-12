@@ -1,12 +1,11 @@
 
-var Router = require('express').Router
-var toss = require('../../toss')
-var authRequired = require('../../auth-required')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
 
-var compose = require('composable-middleware')
-var AccessRequired = require('../../access-required')
+var Router = require('express').Router
+
+var toss = require('../../toss')
+var authRequired = require('../../auth-required')
 
 module.exports = function (db, http)
 {
@@ -103,20 +102,6 @@ module.exports = function (db, http)
 	})
 
 	// admin required
-	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
-	{
-		var options = {}
-
-		options.paginator = pick(rq.query,
-		[
-			'max_id',
-			'since_id',
-			'page'
-		])
-
-		toss(rs, investors.model.all.list(options))
-	})
-
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
 		var data = extend({}, rq.body, { admin_id: rq.user.id })
@@ -134,21 +119,6 @@ module.exports = function (db, http)
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.featured.set(rq.body.investor_id))
-	})
-
-
-	// admin or owner required
-	var accessRequired =
-		compose(authRequired, AccessRequired(investors.model.all, db.admin))
-
-	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
-	{
-		toss(rs, Promise.all(
-		[
-			investors.model.all.byId(rq.params.id),
-			investors.model.portfolio.full(rq.params.id)
-		])
-		.then((response) => extend({}, response[0], response[1])))
 	})
 
 	return investors

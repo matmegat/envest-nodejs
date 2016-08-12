@@ -1,5 +1,8 @@
 get:
-  description: Get selected Investor
+  description:
+    Get selected Investor.
+    User can get only public Investor,
+    Admin can get all Investors.
   parameters:
   - name: investor_id
     in: path
