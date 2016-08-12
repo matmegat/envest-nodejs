@@ -14,8 +14,8 @@ module.exports = function (db, http)
 
 	investors.model = db.investor
 	investors.express = Router()
-	investors.express.use(authRequired)
 
+	// public routes
 	investors.express.get('/', (rq, rs) =>
 	{
 		var options = {}
@@ -36,36 +36,23 @@ module.exports = function (db, http)
 		toss(rs, investors.model.public.list(options))
 	})
 
-	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
-	{
-		var options = {}
-
-		options.paginator = pick(rq.query,
-		[
-			'max_id',
-			'since_id',
-			'page'
-		])
-
-		toss(rs, investors.model.all.list(options))
-	})
-
 	investors.express.get('/:id', (rq, rs) =>
 	{
 		toss(rs, investors.model.public.byId(rq.params.id))
 	})
 
-	investors.express.get('/:id/portfolio', (rq, rs) =>
+	// auth required
+	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
 		toss(rs, db.investor.portfolio.list(rq.params.id))
 	})
 
-	investors.express.get('/:id/chart', (rq, rs) =>
+	investors.express.get('/:id/chart', authRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.chart(rq.params.id))
 	})
 
-	investors.express.post('/:id/field', (rq, rs) =>
+	investors.express.post('/:id/field', authRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.params.id
@@ -81,28 +68,25 @@ module.exports = function (db, http)
 		))
 	})
 
-	/***************************************************************************
-	* Admin Routes
-	* *************************************************************************/
-	var accessRequired =
-		compose(authRequired, AccessRequired(investors.model.all, db.admin))
+	// admin required
+	investors.express.get('/admin', http.adminRequired, (rq, rs) =>
+	{
+		var options = {}
+
+		options.paginator = pick(rq.query,
+		[
+			'max_id',
+			'since_id',
+			'page'
+		])
+
+		toss(rs, investors.model.all.list(options))
+	})
 
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
 		var data = extend({}, rq.body, { admin_id: rq.user.id })
 		toss(rs, investors.model.create(data))
-	})
-
-	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
-	{
-		return Promise.all(
-		[
-			investors.model.all.byId(rq.params.id),
-			investors.model.portfolio.full(rq.params.id)
-		])
-		.then((response) => extend({}, response[0], response[1]))
-		.then(toss.ok(rs))
-		.catch(toss.err(rs))
 	})
 
 	investors.express.post('/:id/go-public', http.adminRequired, (rq, rs) =>
@@ -116,6 +100,23 @@ module.exports = function (db, http)
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.featured.set(rq.body.investor_id))
+	})
+
+
+	// admin or owner required
+	var accessRequired =
+		compose(authRequired, AccessRequired(investors.model.all, db.admin))
+
+	investors.express.get('/:id/admin', accessRequired, (rq, rs) =>
+	{
+		return Promise.all(
+		[
+			investors.model.all.byId(rq.params.id),
+			investors.model.portfolio.full(rq.params.id)
+		])
+		.then((response) => extend({}, response[0], response[1]))
+		.then(toss.ok(rs))
+		.catch(toss.err(rs))
 	})
 
 	return investors

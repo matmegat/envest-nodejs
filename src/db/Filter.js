@@ -1,6 +1,7 @@
 
 var raw = require('knex').raw
 
+var map = require('lodash/map')
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -172,83 +173,93 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 	}
 }
 
+
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
-		var ticker_col = 'portfolio_symbols.symbol_ticker'
+		var ticker_col   = 'portfolio_symbols.symbol_ticker'
 		var exchange_col = 'portfolio_symbols.symbol_exchange'
+
+		var shorts = symbols.filter(s => ! s.exchange)
+		var fulls  = symbols.filter(s =>   s.exchange)
 
 		return queryset
 		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
-		.whereIn(
-			raw(`${ticker_col} || '.' || ${exchange_col}`),
-			symbols.map(symbol =>
-			{
-				return `${symbol.ticker}.${symbol.exchange}`
-			})
-		)
-	}
-}
-
-Filter.by.symbol = function by_symbol (column)
-{
-	return function (queryset, symbol)
-	{
-		symbol = Symbl(symbol)
-
-		return queryset
 		.where(function ()
 		{
-			this.where(raw(`${column}->>'ticker'`), symbol.ticker)
-			if (symbol.exchange)
+			if (shorts.length)
 			{
-				this.where(raw(`${column}->>'exchange'`), symbol.exchange)
+				this.where(
+					ticker_col,
+					'in',
+					map(shorts, 'ticker')
+				)
+			}
+
+			if (fulls.length)
+			{
+				this.orWhere(
+					raw(ticker_col + ` || '.' || ` + exchange_col),
+					'in',
+					map(fulls, s => s.ticker + '.' + s.exchange)
+				)
 			}
 		})
 	}
 }
 
-Filter.by.symbols = function by_symbols (column)
+
+var pick = require('lodash/pick')
+var pickBy = require('lodash/pickBy')
+var dump = JSON.stringify
+
+var max_allowed_symbols = require('./models/watchlist/SymbolList').limit
+
+var WrongFilter = Err('too_many_symbols_queried',
+	`Maximum of ${max_allowed_symbols} allowed per filter`)
+
+Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
+
+		if (symbols.length > max_allowed_symbols)
+		{
+			throw WrongFilter()
+		}
 
 		return queryset
 		.where(function ()
 		{
-			var that = this
-
-			symbols.forEach((symbol) =>
+			symbols.forEach(symbol =>
 			{
-				that.orWhere(function ()
-				{
-					if (symbol.exchange)
-					{
-						this.where(
-							raw(column),
-							'@>',
-							`[{"ticker": "${symbol.ticker}",` +
-							` "exchange": "${symbol.exchange}"}]`
-						)
-					}
-					else
-					{
-						this.where(
-							raw(column),
-							'@>',
-							`[{"ticker": "${symbol.ticker}"}]`
-						)
-					}
-				})
+				var p_symbol
+				p_symbol = pick(symbol, 'ticker', 'exchange')
+				p_symbol = pickBy(p_symbol)
+
+				var j_symbol = dump(p_symbol)
+				this.orWhere(raw(`data->'symbol'`), '@>', j_symbol)
+
+				var j_symbols = dump([ p_symbol ])
+				this.orWhere(raw(`data->'symbols'`), '@>', j_symbols)
 			})
 		})
 	}
+}
+
+
+var uniq = require('lodash/uniq')
+
+function symbol_split (symbols)
+{
+	symbols = symbols.split(',')
+	symbols = [].concat(symbols)
+	symbols = uniq(symbols)
+	symbols = symbols.map(Symbl)
+
+	return symbols
 }
