@@ -71,6 +71,7 @@ Filter.by.ids = function (column)
 	return function by_ids (queryset, ids)
 	{
 		ids = ids.split(',')
+		ids[0] || (ids = [])
 
 		val_ids(ids)
 
@@ -257,7 +258,8 @@ var uniq = require('lodash/uniq')
 function symbol_split (symbols)
 {
 	symbols = symbols.split(',')
-	symbols = [].concat(symbols)
+	symbols[0] || (symbols = [])
+
 	symbols = uniq(symbols)
 	symbols = symbols.map(Symbl)
 
