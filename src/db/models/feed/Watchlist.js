@@ -45,7 +45,6 @@ function validate_watchlist (data)
 
 	var watchlist_dirs = ['added', 'removed']
 	var validate_watchlist_dir = validate.collection(watchlist_dirs)
-	var validate_motivations_length = validate.length(3, 1)
 
 	return new Promise(rs =>
 	{
