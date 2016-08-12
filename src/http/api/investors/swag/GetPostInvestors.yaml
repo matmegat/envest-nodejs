@@ -1,6 +1,8 @@
 get:
   description: |
-    Get list of investors sorted by `last_name`
+    Get list of investors sorted by `last_name`.
+    User will get only public Investors,
+    Admin will get all Investors.
   parameters:
   - name: max_id
     in: query
