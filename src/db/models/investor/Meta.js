@@ -18,9 +18,16 @@ module.exports = function Meta (knexed_table, raw, options)
 	expect(knexed_table, 'meta table relation').a('function')
 
 	options = _.extend({}, options)
+
 	var table = function (trx)
 	{
 		return knexed_table(trx).where(options)
+	}
+
+	var public_field
+	if (! options.is_public)
+	{
+		public_field = 'is_public'
 	}
 
 	var meta = {}
@@ -79,6 +86,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		{
 			return table(trx)
 			.select(fields)
+			.select(public_field)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
@@ -135,6 +143,7 @@ module.exports = function Meta (knexed_table, raw, options)
 
 		queryset
 		.select(fields)
+		.select(public_field)
 		.debug()
 
 		var paginator
@@ -183,7 +192,8 @@ module.exports = function Meta (knexed_table, raw, options)
 			'background',
 			'historical_returns',
 			'annual_return',
-			'is_featured'
+			'is_featured',
+			'is_public'
 		])
 	}
 
