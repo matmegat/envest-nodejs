@@ -36,6 +36,7 @@ function validate_trade (data)
 	return new Promise(rs =>
 	{
 		validate.required(data.text, 'text')
+		validate.empty(data.text, 'text')
 
 		validate_trade_dir(data.dir)
 

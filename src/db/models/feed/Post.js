@@ -39,43 +39,45 @@ module.exports = function Post (db)
 			throw WrongPostType({ type: type })
 		}
 
-		if (data.symbol)
+		return Promise.resolve()
+		.then(() =>
 		{
-			return symbols.resolve(data.symbol)
-			.then(symbl =>
+			if (data.symbol)
 			{
-				data.symbol = pick(symbl,
-				[
-					'ticker',
-					'exchange'
-				])
-
-				var post_type = post.types[type]
-
-				return post_type.set(trx, investor_id, type, date, data)
-			})
-		}
-
-		if (data.symbols)
-		{
-			return symbols.resolveMany(data.symbols)
-			.then(symbls =>
-			{
-				data.symbols = symbls
-				.map(item =>
+				return symbols.resolve(data.symbol)
+				.then(symbl =>
 				{
-					return pick(item,
+					data.symbol = pick(symbl,
 					[
 						'ticker',
 						'exchange'
 					])
 				})
+			}
 
-				var post_type = post.types[type]
+			if (data.symbols)
+			{
+				return symbols.resolveMany(data.symbols)
+				.then(symbls =>
+				{
+					data.symbols = symbls
+					.map(item =>
+					{
+						return pick(item,
+						[
+							'ticker',
+							'exchange'
+						])
+					})
+				})
+			}
+		})
+		.then(() =>
+		{
+			var post_type = post.types[type]
 
-				return post_type.set(trx, investor_id, type, date, data)
-			})
-		}
+			return post_type.set(trx, investor_id, type, date, data)
+		})
 	}
 
 	var InvestorPostDateErr =

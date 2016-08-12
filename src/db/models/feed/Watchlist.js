@@ -51,6 +51,7 @@ function validate_watchlist (data)
 		validate_watchlist_dir(data.dir)
 
 		validate.required(data.text, 'text')
+		validate.empty(data.text, 'text')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
