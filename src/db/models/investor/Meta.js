@@ -112,11 +112,6 @@ module.exports = function Meta (knexed_table, raw, options)
 
 	meta.list = function (options)
 	{
-		options = _.extend({}, options,
-		{
-			limit: 20,
-		})
-
 		var queryset = table()
 		.innerJoin('users', 'investors.user_id', 'users.id')
 
