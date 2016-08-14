@@ -30,7 +30,11 @@ module.exports = function Watchlist (db)
 			{
 				if (data.dir === 'added')
 				{
-					return db.watchlist.investor.add(investor_id, data.symbol, additional)
+					return db.watchlist.investor.add(
+						investor_id,
+						data.symbol,
+						additional
+					)
 				}
 				else
 				{
