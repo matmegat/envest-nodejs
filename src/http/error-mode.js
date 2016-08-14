@@ -5,7 +5,7 @@ module.exports = function (config, express)
 
 	express.set('env', mode)
 
-	console.info('Running app in `%s` mode', mode)
+	console.info('running app in `%s` mode', mode)
 }
 
 function Mode (config)

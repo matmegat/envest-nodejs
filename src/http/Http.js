@@ -83,8 +83,6 @@ module.exports = function Http (app)
 
 		route = '/api/' + route
 		http.express.use(route, subsystem.express)
-
-		console.info('API: mount %s at %s', name, route)
 	}
 
 	mount(Auth(app.db.auth, http.passport), 'auth', 'auth')
@@ -116,11 +114,15 @@ module.exports = function Http (app)
 		})
 		.then(() =>
 		{
-			console.info(`http at ${app.cfg.host}:${app.cfg.port}`)
+			console.info(`HTTP at ${app.cfg.host}:${app.cfg.port}`)
 		}),
 
 		app.swagger
 	])
+	.then(() =>
+	{
+		console.info('HTTP: ok')
+	})
 
 	return http
 }
