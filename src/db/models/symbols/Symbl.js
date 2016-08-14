@@ -1,5 +1,6 @@
+/* eslint-disable complexity */
+/* eslint-disable max-statements */
 
-// eslint-disable-next-line complexity
 var Symbl = module.exports = function Symbl (it)
 {
 	if (Symbl.is(it))
@@ -68,6 +69,7 @@ var Symbl = module.exports = function Symbl (it)
 
 	throw WrongFormat({ reason: 'unknown_format' })
 }
+/* eslint-enable */
 
 Symbl.is = (it) =>
 {
