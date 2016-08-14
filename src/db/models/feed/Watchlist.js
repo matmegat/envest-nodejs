@@ -39,7 +39,7 @@ module.exports = function Watchlist (db)
 			})
 			.then(() =>
 			{
-				return feed.create(trx, investor_id, type, date, data)
+				return db.feed.create(trx, investor_id, type, date, data)
 			})
 		}
 	})

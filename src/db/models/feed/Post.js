@@ -9,8 +9,6 @@ var Trade = require('./Trade')
 var Watchlist = require('./Watchlist')
 var Update = require('./Update')
 
-var pick = require('lodash/pick')
-
 module.exports = function Post (db)
 {
 	var post = {}
@@ -34,7 +32,7 @@ module.exports = function Post (db)
 		{
 			throw WrongPostType({ type: type })
 		}
-		
+
 		var post_type = post.types[type]
 
 		return post_type.set(trx, investor_id, type, date, data)
