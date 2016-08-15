@@ -15,6 +15,9 @@ var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var noop = require('lodash/noop')
+var invoke = require('lodash/invokeMap')
+
+var map = require('lodash/fp/map')
 
 // eslint-disable-next-line max-statements
 var Feed = module.exports = function Feed (db)
@@ -38,6 +41,9 @@ var Feed = module.exports = function Feed (db)
 
 	expect(db, 'Feed depends on Subscription').property('subscr')
 	var subscr = db.subscr
+
+	expect(db, 'Feed depends on Watchlist').property('watchlist')
+	var watchlist = db.watchlist
 
 	var paginators = {}
 
@@ -191,13 +197,8 @@ var Feed = module.exports = function Feed (db)
 		.then((feed_items) =>
 		{
 			return investor.public.list(
-			{	// TODO: replace to Filter by ids
-				where:
-				{
-					column_name: 'user_id',
-					clause: 'in',
-					argument: _.map(feed_items, 'investor_id')
-				}
+			{
+				filter: { ids: _.map(feed_items, 'investor_id').join(',') }
 			})
 			.then((investors) =>
 			{
@@ -218,6 +219,21 @@ var Feed = module.exports = function Feed (db)
 
 				return response
 			})
+		})
+	}
+
+	feed.byWatchlist = function (user_id, options)
+	{
+		return watchlist.user.byId(user_id)
+		.then(map('symbol'))
+		.then(symbols =>
+		{
+			symbols = invoke(symbols, 'toXign')
+			symbols = symbols.join(',')
+
+			options.filter.symbols = symbols
+
+			return feed.list(options, user_id)
 		})
 	}
 

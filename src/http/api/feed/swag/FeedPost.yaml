@@ -50,7 +50,13 @@ post:
             motivations:
               type: array
               items:
-                type: string
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
           required:
           - dir
           - symbol
@@ -58,6 +64,7 @@ post:
           - amount
           - text
           - risk
+          - motivations
         watchlist_data:
           type: object
           description: Post properties
@@ -80,11 +87,19 @@ post:
             motivations:
               type: array
               items:
-                type: string
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
           required:
           - dir
           - symbol
+          - target_price
           - text
+          - motivations
         update_data:
           type: object
           description: Post properties
@@ -100,10 +115,6 @@ post:
             text: 
               type: string
               description: Update description
-            motivations:
-              type: array
-              items:
-                type: string
           required:
           - symbols
           - title

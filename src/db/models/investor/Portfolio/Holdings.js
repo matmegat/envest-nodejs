@@ -154,14 +154,12 @@ module.exports = function Holdings (db, investor)
 
 	function add_symbol (trx, investor_id, symbol)
 	{
-		/* @todo: Check if symbol valid */
-
 		return holdings.table(trx)
 		.insert(
 		{
 			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker,
+			symbol_exchange: symbol.exchange,
+			symbol_ticker: symbol.ticker,
 			amount: symbol.amount,
 			buy_price: symbol.price
 		})

@@ -1,6 +1,7 @@
 
 var raw = require('knex').raw
 
+var map = require('lodash/map')
 var curry = require('lodash/curry')
 
 var moment = require('moment')
@@ -69,7 +70,8 @@ Filter.by.ids = function (column)
 
 	return function by_ids (queryset, ids)
 	{
-		var ids = ids.split(',')
+		ids = ids.split(',')
+		ids[0] || (ids = [])
 
 		val_ids(ids)
 
@@ -132,7 +134,7 @@ function wrong_filter (name)
 {
 	return function ()
 	{
-		return WrongFilter( { name: name } )
+		return WrongFilter({ name: name })
 	}
 }
 
@@ -172,51 +174,73 @@ Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
 	}
 }
 
+
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
+
+		if (! symbols.length)
+		{
+			return queryset.where(raw('FALSE'))
+		}
 
 		var ticker_col = 'portfolio_current.symbol_ticker'
 		var exchange_col = 'portfolio_current.symbol_exchange'
 
+		var shorts = symbols.filter(s => ! s.exchange)
+		var fulls  = symbols.filter(s =>   s.exchange)
+
 		return queryset
 		.innerJoin('portfolio_current', 'portfolio_current.investor_id', column)
-		.whereIn(
-			raw(`${ticker_col} || '.' || ${exchange_col}`),
-			symbols.map(symbol =>
+		.where(function ()
+		{
+			if (shorts.length)
 			{
-				return `${symbol.ticker}.${symbol.exchange}`
-			})
-		)
+				this.where(
+					ticker_col,
+					'in',
+					map(shorts, 'ticker')
+				)
+			}
+
+			if (fulls.length)
+			{
+				this.orWhere(
+					raw(ticker_col + ` || '.' || ` + exchange_col),
+					'in',
+					map(fulls, s => s.ticker + '.' + s.exchange)
+				)
+			}
+		})
 	}
 }
 
 
-var uniq = require('lodash/uniq')
 var pick = require('lodash/pick')
 var pickBy = require('lodash/pickBy')
 var dump = JSON.stringify
 
-var max_allowed_symbols_per_filter = 20
-var WrongFilter = Err('too_many_symbols_queried',
-	`Maximum of ${max_allowed_symbols_per_filter} allowed per filter`)
+var max_allowed_symbols = require('./models/watchlist/SymbolList').limit
+
+var TooMany = Err('too_many_symbols_queried',
+	`Maximum of ${max_allowed_symbols} allowed per filter`)
 
 Filter.by.symbols = function bySymbols ()
 {
 	return function (queryset, symbols)
 	{
-		symbols = symbols.split(',')
-		symbols = [].concat(symbols)
-		symbols = uniq(symbols)
-		symbols = symbols.map(Symbl)
+		symbols = symbol_split(symbols)
 
-		if (symbols.length > max_allowed_symbols_per_filter)
+		if (symbols.length > max_allowed_symbols)
 		{
-			throw WrongFilter()
+			throw TooMany()
+		}
+
+		if (! symbols.length)
+		{
+			return queryset.where(raw('FALSE'))
 		}
 
 		return queryset
@@ -236,4 +260,18 @@ Filter.by.symbols = function bySymbols ()
 			})
 		})
 	}
+}
+
+
+var uniq = require('lodash/uniq')
+
+function symbol_split (symbols)
+{
+	symbols = symbols.split(',')
+	symbols[0] || (symbols = [])
+
+	symbols = uniq(symbols)
+	symbols = symbols.map(Symbl)
+
+	return symbols
 }

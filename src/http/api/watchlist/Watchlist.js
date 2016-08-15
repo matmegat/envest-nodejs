@@ -17,7 +17,7 @@ module.exports = (watchlist, http) =>
 	{
 		var owner_id = rq.user.id
 
-		toss(rs, watchlist.user.byId(owner_id))
+		toss(rs, watchlist.user.byId.quotes(owner_id))
 	})
 
 	wl.express.put('/:symbol', (rq, rs) =>
@@ -42,7 +42,7 @@ module.exports = (watchlist, http) =>
 	{
 		var owner_id = rq.params.id
 
-		toss(rs, watchlist.investor.byId(owner_id))
+		toss(rs, watchlist.investor.byId.quotes(owner_id))
 	})
 
 	wl.express.get('/investor/', http.investorRequired,
@@ -50,7 +50,7 @@ module.exports = (watchlist, http) =>
 	{
 		var owner_id = rq.user.id
 
-		toss(rs, watchlist.investor.byId(owner_id))
+		toss(rs, watchlist.investor.byId.quotes(owner_id))
 	})
 
 	wl.express.put('/investor/:symbol', http.investorRequired,

@@ -1,5 +1,6 @@
+/* eslint-disable complexity */
+/* eslint-disable max-statements */
 
-// eslint-disable-next-line complexity
 var Symbl = module.exports = function Symbl (it)
 {
 	if (Symbl.is(it))
@@ -20,6 +21,11 @@ var Symbl = module.exports = function Symbl (it)
 		if ((L < 1) || (L > 2))
 		{
 			throw WrongFormat({ reason: 'must_be_a_pair' })
+		}
+
+		if (! it[0])
+		{
+			throw WrongFormat({ reason: 'empty_ticker' })
 		}
 
 		var s = inst()
@@ -63,6 +69,7 @@ var Symbl = module.exports = function Symbl (it)
 
 	throw WrongFormat({ reason: 'unknown_format' })
 }
+/* eslint-enable */
 
 Symbl.is = (it) =>
 {

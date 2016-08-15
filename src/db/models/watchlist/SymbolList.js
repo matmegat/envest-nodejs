@@ -4,8 +4,10 @@ var noop   = require('lodash/noop')
 var ends   = require('lodash/endsWith')
 var map    = require('lodash/map')
 var first  = require('lodash/head')
+var omit   = require('lodash/omit')
+var at     = require('lodash/at')
 
-var at = require('lodash/fp/at')
+var Symbl = require('../symbols/Symbl')
 
 var Err = require('../../../Err')
 var AlreadyThere = Err('symbol_already_there', 'Symbol already in this list')
@@ -27,6 +29,12 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		.then(transform)
 	}
 
+	model.byId.quotes = (owner_id) =>
+	{
+		return model.byId(owner_id)
+		.then(quotes)
+	}
+
 	function byId (owner_id)
 	{
 		return model.validateId(owner_id)
@@ -37,7 +45,6 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		})
 	}
 
-	var limit_watchlist = 250
 
 	var LimitWatchlist = Err('limit_watchlist', 'Watchlist limited')
 
@@ -46,9 +53,9 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 		return byId(owner_id)
 		.then((items) =>
 		{
-			if (items.length >= limit_watchlist)
+			if (items.length >= watchlist_limit)
 			{
-				throw LimitWatchlist({ limit: limit_watchlist })
+				throw LimitWatchlist({ limit: watchlist_limit })
 			}
 		})
 		.then(() =>
@@ -70,7 +77,7 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			return table().insert(entry)
 			.then(() =>
 			{
-				return transform([ entry ])
+				return full_transform([ entry ])
 			})
 			.then(first)
 		})
@@ -89,9 +96,20 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 	function transform (entries)
 	{
-		return symbols.quotes(
-			map(entries, at([ 'symbol_ticker', 'symbol_exchange' ]))
-		)
+		var s_pair = [ 'symbol_ticker', 'symbol_exchange' ]
+		return entries
+		.map(entry =>
+		{
+			var r = omit(entry, s_pair)
+			r.symbol = Symbl(at(entry, s_pair))
+
+			return r
+		})
+	}
+
+	function quotes (entries)
+	{
+		return symbols.quotes(map(entries, 'symbol'))
 		.then(quotes =>
 		{
 			return map(quotes, (r, i) =>
@@ -110,6 +128,9 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 			})
 		})
 	}
+
+	var flow = require('lodash/flow')
+	var full_transform = flow(transform, quotes)
 
 	model.remove = (owner_id, symbol) =>
 	{
@@ -136,8 +157,10 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 }
 
 
-SymbolList.schema = {}
+var watchlist_limit = SymbolList.limit = 250
 
+
+SymbolList.schema = {}
 
 var Symbols = require('../symbols/Symbols')
 var expect  = require('chai').expect

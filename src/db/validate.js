@@ -72,23 +72,6 @@ validate.number = function validate__number (field, name)
 }
 
 
-var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
-
-validate.length = function validate__length (max)
-{
-	return (field, name) =>
-	{
-		var actual = field.length
-
-		if (actual > max)
-		{
-			throw FieldLength({ field: name, actual: actual, max: max })
-		}
-		throw FieldType({ field: name, type: 'array' })
-	}
-}
-
-
 var isFinite = require('lodash/isFinite')
 
 validate.number = function validate__number (field, name)
@@ -145,7 +128,7 @@ validate.integer.positive = function validate__integer__positive (field, name)
 
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
-validate.length = function validate__length (max)
+validate.length = function validate__length (max, min)
 {
 	return (field, name) =>
 	{
@@ -154,6 +137,11 @@ validate.length = function validate__length (max)
 		if (actual > max)
 		{
 			throw FieldLength({ field: name, actual: actual, max: max })
+		}
+
+		if (min && actual < min)
+		{
+			throw FieldLength({ field: name, actual: actual, min: min })
 		}
 	}
 }
@@ -181,6 +169,25 @@ validate.collection = function validate__collection (collection)
 			throw NotIncluded({ possible_values: collection, item: item })
 		}
 	}
+}
+
+var validate_motivations_len = validate.length(3, 1)
+
+validate.motivation = function validate__motivations (motivations)
+{
+	validate.required(motivations, 'motivations')
+	validate.array(motivations, 'motivations')
+	validate_motivations_len(motivations, 'motivations')
+
+	motivations.forEach(el =>
+	{
+		validate.required(el.id, 'motivation id')
+		validate.empty(el.id, 'motivation id')
+		validate.integer(el.id, 'motivation id')
+
+		validate.required(el.text, 'motivation text')
+		validate.empty(el.text, 'motivation text')
+	})
 }
 
 var XRegExp = require('xregexp')
