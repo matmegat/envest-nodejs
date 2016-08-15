@@ -308,28 +308,19 @@ module.exports = function Holdings (db, investor)
 		var amount = data.amount
 		var price = data.price
 
-		return get_symbol(investor_id, symbol)
-		.then(symbl =>
+		return holdings.ensure(trx, symbol, investor_id)
+		.then(holding =>
 		{
-			if (! symbl)
-			{
-				throw NoSuchHolding({ symbol: symbol })
-			}
-
-			return symbl
-		})
-		.then(symbl =>
-		{
-			if (symbl.amount < amount)
+			if (holding.amount < amount)
 			{
 				throw NotEnoughAmount(
 				{
-					available_amount: symbl.amount,
+					available_amount: holding.amount,
 					sell_amount: amount
 				})
 			}
 
-			return sell_symbol(trx, investor_id, symbl, amount, price)
+			return sell_symbol(trx, investor_id, holding, amount, price)
 		})
 	}
 
