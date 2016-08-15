@@ -48,7 +48,7 @@ module.exports = function (db)
 	})
 
 	/* upload Investor's `post_pic` */
-	pic.uploadPostPic = upload_pic_model({
+	pic.uploadPostPic = upload({
 		max_size: 10 * 1024 * 1024
 	})
 
@@ -112,7 +112,7 @@ module.exports = function (db)
 		}
 	}
 
-	function upload_pic_model (validations)
+	function upload (validations)
 	{
 		return (file) =>
 		{
