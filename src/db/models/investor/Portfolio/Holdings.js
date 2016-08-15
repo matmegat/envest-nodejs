@@ -276,19 +276,19 @@ module.exports = function Holdings (db, investor)
 			throw NotEnoughMoney()
 		}
 
-		return get_symbol(investor_id, symbol)
-		.then(symbl =>
+		return holdings.symbolById(symbol, investor_id)
+		.then(holding =>
 		{
-			if (! symbl)
+			if (! holding)
 			{
-				symbl = symbol
-				symbl.amount = amount
-				symbl.price = price
+				holding = symbol
+				holding.amount = amount
+				holding.price = price
 
-				return add_symbol(trx, investor_id, symbl)
+				return add_symbol(trx, investor_id, holding)
 			}
 
-			return buy_symbol(trx, investor_id, symbl, amount, price)
+			return buy_symbol(trx, investor_id, holding, amount, price)
 		})
 		.then(() =>
 		{
