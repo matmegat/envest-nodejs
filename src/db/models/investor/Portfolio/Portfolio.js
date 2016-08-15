@@ -21,7 +21,7 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return Promise.all([
-				holdings.byInvestorId(investor_id),
+				holdings.byId(investor_id),
 				brokerage.byInvestorId(trx, investor_id)
 			])
 		})
@@ -92,7 +92,7 @@ module.exports = function Portfolio (db, investor)
 	{
 		return Promise.all([
 			brokerage.byInvestorId(investor_id),
-			holdings.byInvestorId(investor_id)
+			holdings.byId(investor_id)
 		])
 		.then((values) =>
 		{
@@ -191,7 +191,7 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return Promise.all([
-				holdings.byInvestorId(investor_id),
+				holdings.byId(investor_id),
 				brokerage.byInvestorId(investor_id)
 			])
 		})

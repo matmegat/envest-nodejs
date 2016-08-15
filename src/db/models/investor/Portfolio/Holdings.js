@@ -23,13 +23,13 @@ module.exports = function Holdings (db, investor)
 	var oneMaybe = db.helpers.oneMaybe
 
 
-	// byInvestorId
-	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
+	// byId
+	holdings.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return byId(trx, investor_id, for_date)
 	})
 
-	holdings.symbolByInvestorId = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
+	holdings.symbolById = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
 	{
 		return byId(trx, investor_id, for_date, function ()
 		{
@@ -78,13 +78,13 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	/* holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
-	holdings.byInvestorId(120)
+	/* holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
+	holdings.byId(120)
 	.then(console.info, console.error)
 
-	/* holdings.symbolByInvestorId(Symbl('GE.XNYS'), 120, new Date('2016-08-09 10:19:19.982-03')) //*/
-	/* holdings.symbolByInvestorId(Symbl('GE.XNYS'), 120) //*/
-	holdings.symbolByInvestorId(Symbl('TSLA.XNAS'), 120)
+	/* holdings.symbolById(Symbl('GE.XNYS'), 120, new Date('2016-08-09 10:19:19.982-03')) //*/
+	/* holdings.symbolById(Symbl('GE.XNYS'), 120) //*/
+	holdings.symbolById(Symbl('TSLA.XNAS'), 120)
 	.then(console.info.part('symbol'), console.error.part('symbol'))
 
 
