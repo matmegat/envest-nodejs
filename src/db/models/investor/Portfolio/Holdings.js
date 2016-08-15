@@ -238,10 +238,10 @@ module.exports = function Holdings (db, investor)
 
 	// buy, sell
 	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
-	var NotEnoughtAmount = Err('not_enought_amount_to_sell',
-		'Not Enought Amount To Sell')
-	var NotEnoughtMoney = Err('not_enought_money_to_buy',
-		'Not Enought Money To Buy')
+	var NotEnoughAmount = Err('not_enough_amount_to_sell',
+		'Not Enough Amount To Sell')
+	var NotEnoughMoney = Err('not_enough_money_to_buy',
+		'Not Enough Money To Buy')
 	var validate_positive = validate.number.positive
 
 	holdings.buy = function (trx, investor_id, symbol, data, cash)
@@ -255,7 +255,7 @@ module.exports = function Holdings (db, investor)
 
 		if (sum > cash)
 		{
-			throw NotEnoughtMoney()
+			throw NotEnoughMoney()
 		}
 
 		return get_symbol(investor_id, symbol)
@@ -300,7 +300,7 @@ module.exports = function Holdings (db, investor)
 		{
 			if (symbl.amount < amount)
 			{
-				throw NotEnoughtAmount(
+				throw NotEnoughAmount(
 				{
 					available_amount: symbl.amount,
 					sell_amount: amount
