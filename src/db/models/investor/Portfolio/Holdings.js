@@ -83,8 +83,8 @@ module.exports = function Holdings (db, investor)
 	.then(console.info, console.error)
 
 	/* holdings.symbolByInvestorId(Symbl('GE.XNYS'), 120, new Date('2016-08-09 10:19:19.982-03')) //*/
-	/* holdings.symbolByInvestorId(Symbl('GE.XNYS')) //*/
-	holdings.symbolByInvestorId(Symbl('TSLA.XNAS'))
+	/* holdings.symbolByInvestorId(Symbl('GE.XNYS'), 120) //*/
+	holdings.symbolByInvestorId(Symbl('TSLA.XNAS'), 120)
 	.then(console.info.part('symbol'), console.error.part('symbol'))
 
 
