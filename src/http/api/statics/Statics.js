@@ -66,7 +66,7 @@ module.exports = function Statics (rootpath, db, http)
 			statics.pic_model.updateProfile
 		)
 	)
-	
+
 
 	statics.express.post('/upload/post_pic', http.investorRequired,
 		uploader(
