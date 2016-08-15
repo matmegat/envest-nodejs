@@ -1,5 +1,8 @@
 
-var _ = require('lodash')
+var noop = require('lodash/noop')
+var map  = require('lodash/map')
+var pick = require('lodash/pick')
+
 var expect = require('chai').expect
 
 var knexed = require('../../../knexed')
@@ -21,7 +24,26 @@ module.exports = function Holdings (db, investor)
 	// byInvestorId
 	holdings.byInvestorId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
+		return byId(trx, investor_id, for_date)
+	})
+
+	holdings.symbolByInvestorId = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
+	{
+		return byId(trx, investor_id, for_date, function ()
+		{
+			this.where({
+				symbol_ticker:   'TSLA',
+				symbol_exchange: 'XNAS',
+			})
+		})
+		.then(oneMaybe)
+	})
+
+	function byId (trx, investor_id, for_date, aux)
+	{
 		var raw = knex.raw
+
+		aux || (aux = noop)
 
 		return knex(raw('portfolio AS P'))
 		.transacting(trx)
@@ -44,6 +66,7 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 		)
+		.where(aux)
 		.debug()
 		.then(r =>
 		{
@@ -54,12 +77,7 @@ module.exports = function Holdings (db, investor)
 
 			return r
 		})
-	})
-
-	holdings.symbolByInvestorId = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
-	{
-		return holdings.byInvestorId(trx, investor_id, for_date)
-	})
+	}
 
 	/* holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
 	holdings.byInvestorId(120)
@@ -95,14 +113,14 @@ module.exports = function Holdings (db, investor)
 				}
 			})
 
-			return db.symbols.resolveMany(_.map(holding_entries, 'symbol'))
+			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
 		})
 		.then(symbols =>
 		{
 			return Promise.all(symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
-				var data = _.pick(holding, 'amount', 'price')
+				var data = pick(holding, 'amount', 'price')
 
 				return put(trx, investor_id, symbol, data)
 			}))
