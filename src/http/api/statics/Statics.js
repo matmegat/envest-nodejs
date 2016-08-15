@@ -66,6 +66,14 @@ module.exports = function Statics (rootpath, db, http)
 			statics.pic_model.updateProfile
 		)
 	)
+	
+
+	statics.express.post('/upload/post_pic', http.investorRequired,
+		uploader(
+			multer().single('post_pic'),
+			statics.pic_model.uploadPostPic
+		)
+	)
 
 
 	var UploadError = Err('upload_error', 'Upload error')
