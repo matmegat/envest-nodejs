@@ -39,7 +39,8 @@ function validate_update (data)
 	[
 		'symbols',
 		'title',
-		'text'
+		'text',
+		'pic'
 	])
 
 	return new Promise(rs =>
@@ -53,6 +54,8 @@ function validate_update (data)
 		validate.required(data.symbols, 'symbols')
 		validate.empty(data.symbols, 'symbols')
 		validate.array(data.symbols, 'symbols')
+
+		validate.empty(data.pic, 'pic')
 
 		rs(data)
 	})
