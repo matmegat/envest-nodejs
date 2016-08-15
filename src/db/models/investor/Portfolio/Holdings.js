@@ -56,9 +56,17 @@ module.exports = function Holdings (db, investor)
 		})
 	})
 
+	holdings.symbolByInvestorId = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
+	{
+		return holdings.byInvestorId(trx, investor_id, for_date)
+	})
+
 	/* holdings.byInvestorId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
 	holdings.byInvestorId(120)
 	.then(console.info, console.error)
+
+	holdings.symbolByInvestorId('X', 120)
+	.then(console.info.part('symbol'), console.error.part('symbol'))
 
 
 	// set
