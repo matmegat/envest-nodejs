@@ -38,6 +38,7 @@ module.exports = function Holdings (db, investor)
 		.then(oneMaybe)
 	})
 
+
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
 
@@ -54,6 +55,7 @@ module.exports = function Holdings (db, investor)
 			return so
 		})
 	})
+
 
 	function byId (trx, investor_id, for_date, aux)
 	{
@@ -106,6 +108,9 @@ module.exports = function Holdings (db, investor)
 
 
 	// set
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
+
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -145,8 +150,6 @@ module.exports = function Holdings (db, investor)
 		})
 	})
 
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
 
 	function put (trx, investor_id, symbol, data)
 	{
@@ -254,12 +257,10 @@ module.exports = function Holdings (db, investor)
 	}
 
 	// buy, sell
-	var NotEnoughAmount = Err('not_enough_amount_to_sell',
-		'Not Enough Amount To Sell')
+	var validate_positive = validate.number.positive
+
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
-
-	var validate_positive = validate.number.positive
 
 	holdings.buy = function (trx, investor_id, symbol, data, cash)
 	{
@@ -294,6 +295,10 @@ module.exports = function Holdings (db, investor)
 			return -sum
 		})
 	}
+
+
+	var NotEnoughAmount = Err('not_enough_amount_to_sell',
+		'Not Enough Amount To Sell')
 
 	holdings.sell = function (trx, investor_id, symbol, data)
 	{
