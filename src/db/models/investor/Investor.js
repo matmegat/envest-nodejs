@@ -1,5 +1,6 @@
 
 var extend = require('lodash/extend')
+var wrap = require('lodash/wrap')
 
 var generate_code = require('../../../crypto-helpers').generate_code
 
@@ -55,6 +56,19 @@ module.exports = function Investor (db)
 
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor.all)
+
+	investor.all.byId = wrap(investor.all.byId, (byId, id, trx) =>
+	{
+		return byId(id, trx)
+		.then(r =>
+		{
+			return investor.portfolio.full(id)
+			.then(full =>
+			{
+				return extend(r, full)
+			})
+		})
+	})
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
