@@ -49,7 +49,11 @@ module.exports = function (db)
 
 	/* upload Investor's `post_pic` */
 	pic.uploadPostPic = upload({
-		max_size: 10 * 1024 * 1024
+		max_size: 10 * 1024 * 1024,
+		ratio: {
+			aspect_width: 1.1,
+			aspect_height: 2
+		}
 	})
 
 	var static = db.static
@@ -233,8 +237,8 @@ function validate_aspect (img, ratio)
 			}
 
 			var aspect_ratio =
-				round(ratio.aspect_width / ratio.aspect_height, 1)
-			var real_ratio = round(image.width() / image.height(), 1)
+				round(ratio.aspect_width / ratio.aspect_height, 2)
+			var real_ratio = round(image.width() / image.height(), 2)
 
 			if ( aspect_ratio !== real_ratio )
 			{
