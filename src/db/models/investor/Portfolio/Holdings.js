@@ -316,7 +316,8 @@ module.exports = function Holdings (db, investor)
 		validate_positive(data.price, 'price')
 
 		var amount = data.amount
-		var price = data.price
+		var price  = data.price
+		var sum    = amount * price
 
 		return holdings.ensure(trx, symbol, investor_id)
 		.then(holding =>
@@ -330,7 +331,19 @@ module.exports = function Holdings (db, investor)
 				})
 			}
 
-			return sell_symbol(trx, investor_id, holding, amount, price)
+			amount = amount - holding.amount
+
+			var data_put =
+			{
+				amount: amount,
+				price:  price
+			}
+
+			return put(trx, investor_id, symbol, data_put)
+		})
+		.then(() =>
+		{
+			return sum
 		})
 	}
 
