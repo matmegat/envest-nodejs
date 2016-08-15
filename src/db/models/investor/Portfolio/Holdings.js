@@ -276,8 +276,8 @@ module.exports = function Holdings (db, investor)
 		validate_positive(data.price, 'price')
 
 		var amount = data.amount
-		var price = data.price
-		var sum = amount * price
+		var price  = data.price
+		var sum    = amount * price
 
 		if (sum > cash)
 		{
@@ -287,16 +287,18 @@ module.exports = function Holdings (db, investor)
 		return holdings.symbolById(symbol, investor_id)
 		.then(holding =>
 		{
-			if (! holding)
+			if (holding)
 			{
-				holding = symbol
-				holding.amount = amount
-				holding.price = price
-
-				return add_symbol(trx, investor_id, holding)
+				amount = holding.amount + amount
 			}
 
-			return buy_symbol(trx, investor_id, holding, amount, price)
+			var data_put =
+			{
+				amount: amount,
+				price:  price
+			}
+
+			return put(trx, investor_id, symbol, data_put)
 		})
 		.then(() =>
 		{
