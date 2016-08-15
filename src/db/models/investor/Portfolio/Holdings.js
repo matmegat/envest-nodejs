@@ -237,11 +237,14 @@ module.exports = function Holdings (db, investor)
 	}
 
 	// buy, sell
-	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
+	var NoSuchHolding = Err('no_such_holding',
+		'Investor does not posess such holding')
+
 	var NotEnoughAmount = Err('not_enough_amount_to_sell',
 		'Not Enough Amount To Sell')
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
+
 	var validate_positive = validate.number.positive
 
 	holdings.buy = function (trx, investor_id, symbol, data, cash)
@@ -291,7 +294,7 @@ module.exports = function Holdings (db, investor)
 		{
 			if (! symbl)
 			{
-				throw SymbolNotFound({ symbol: symbol })
+				throw NoSuchHolding({ symbol: symbol })
 			}
 
 			return symbl
