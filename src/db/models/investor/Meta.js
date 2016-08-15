@@ -81,7 +81,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		)
 	]
 
-	meta.byId = function (id, trx)
+	var byId = meta.byId = function (id, trx)
 	{
 		return meta.ensure(id, trx)
 		.then(() =>
@@ -95,6 +95,8 @@ module.exports = function Meta (knexed_table, raw, options)
 		.then(helpers.oneMaybe)
 		.then(transform_investor)
 	}
+
+	meta.fullById = byId
 
 	var paging_table = function (trx)
 	{

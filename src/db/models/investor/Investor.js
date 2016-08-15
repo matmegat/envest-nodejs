@@ -57,7 +57,7 @@ module.exports = function Investor (db)
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor.all)
 
-	investor.all.byId = wrap(investor.all.byId, (byId, id, trx) =>
+	investor.all.fullById = wrap(investor.all.byId, (byId, id, trx) =>
 	{
 		return byId(id, trx)
 		.then(r =>
