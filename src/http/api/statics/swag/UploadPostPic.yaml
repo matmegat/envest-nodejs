@@ -1,0 +1,24 @@
+post:
+  description: Upload feed post picture
+  consumes:
+  - multipart/form-data
+  parameters:
+  - name: post_pic
+    in: formData
+    required: true
+    type: file
+    format: binary
+  responses:
+    200:
+      description: pic uploaded
+      schema:
+        type: object
+        properties:
+          hash:
+            type: string
+            description: uploaded pic hash
+    400:
+      description: if something went wrong
+
+  tags:
+  - static
