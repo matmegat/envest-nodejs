@@ -28,7 +28,8 @@ module.exports = function Holdings (db, investor)
 		return byId(trx, investor_id, for_date)
 	})
 
-	holdings.symbolById = knexed.transact(knex, (trx, symbol, investor_id, for_date) =>
+	holdings.symbolById = knexed.transact(knex,
+	(trx, symbol, investor_id, for_date) =>
 	{
 		return Symbl.validate(symbol)
 		.then(symbol =>
