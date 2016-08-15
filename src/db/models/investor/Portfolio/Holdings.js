@@ -10,6 +10,8 @@ var knexed = require('../../../knexed')
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
+var Symbl = require('../../symbols/Symbl')
+
 module.exports = function Holdings (db, investor)
 {
 	var holdings = {}
@@ -31,10 +33,7 @@ module.exports = function Holdings (db, investor)
 	{
 		return byId(trx, investor_id, for_date, function ()
 		{
-			this.where({
-				symbol_ticker:   'TSLA',
-				symbol_exchange: 'XNAS',
-			})
+			this.where(symbol.toDb())
 		})
 		.then(oneMaybe)
 	})
@@ -83,7 +82,7 @@ module.exports = function Holdings (db, investor)
 	holdings.byInvestorId(120)
 	.then(console.info, console.error)
 
-	holdings.symbolByInvestorId('X', 120)
+	holdings.symbolByInvestorId(Symbl('TSLA.XNAS'), 120)
 	.then(console.info.part('symbol'), console.error.part('symbol'))
 
 

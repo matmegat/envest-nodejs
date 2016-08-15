@@ -56,6 +56,14 @@ var Symbl = module.exports = function Symbl (it)
 			}
 		}
 
+		s.toDb = () =>
+		{
+			return {
+				symbol_ticker: s.ticker,
+				symbol_exchange: s.exchange
+			}
+		}
+
 		return s
 	}
 
