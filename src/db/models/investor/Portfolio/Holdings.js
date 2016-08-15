@@ -19,7 +19,6 @@ module.exports = function Holdings (db, investor)
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio')
 
-	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
 
@@ -184,86 +183,6 @@ module.exports = function Holdings (db, investor)
 	}
 
 
-	// shit
-	function remove_symbol (trx, investor_id, symbol)
-	{
-		return holdings.table(trx)
-		.where({
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.del()
-	}
-
-	function get_symbol (investor_id, symbol)
-	{
-		return holdings.table()
-		.where({
-			investor_id: investor_id,
-			symbol_exchange: symbol.exchange,
-			symbol_ticker: symbol.ticker
-		})
-		.then(oneMaybe)
-	}
-
-	function add_symbol (trx, investor_id, symbol)
-	{
-		return holdings.table(trx)
-		.insert(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.exchange,
-			symbol_ticker: symbol.ticker,
-			amount: symbol.amount,
-			buy_price: symbol.price
-		})
-	}
-
-	function buy_symbol (trx, investor_id, symbol, amount, price)
-	{
-		return holdings.table(trx)
-		.where(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.update(
-		{
-			amount: symbol.amount + amount,
-			buy_price: calculate_buy_price(
-				symbol.amount, symbol.buy_price, amount, price)
-		})
-	}
-
-	function sell_symbol (trx, investor_id, symbol, amount, price)
-	{
-		return holdings.table(trx)
-		.where(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.update(
-		{
-			amount: symbol.amount - amount,
-		}, 'amount')
-		.then(one)
-		.then(amount =>
-		{
-			if (amount === 0)
-			{
-				return remove_symbol(trx, investor_id, symbol)
-			}
-		})
-		.then(() =>
-		{
-			return amount * price
-		})
-	}
-
 	// buy, sell
 	var validate_positive = validate.number.positive
 
@@ -345,11 +264,6 @@ module.exports = function Holdings (db, investor)
 		{
 			return sum
 		})
-	}
-
-	function calculate_buy_price (amount_old, price_old, amount, price)
-	{
-		return (amount_old * price_old + amount * price) / (amount_old + amount)
 	}
 
 	return holdings
