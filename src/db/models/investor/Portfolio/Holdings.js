@@ -38,6 +38,23 @@ module.exports = function Holdings (db, investor)
 		.then(oneMaybe)
 	})
 
+	var NoSuchHolding = Err('no_such_holding',
+		'Investor does not posess such holding')
+
+	holdings.ensure = knexed.transact(knex, (trx, symbol, investor_id) =>
+	{
+		return holdings.symbolById(trx, symbol, investor_id)
+		.then(so =>
+		{
+			if (! so)
+			{
+				throw NoSuchHolding({ symbol: symbol })
+			}
+
+			return so
+		})
+	})
+
 	function byId (trx, investor_id, for_date, aux)
 	{
 		var raw = knex.raw
@@ -237,9 +254,6 @@ module.exports = function Holdings (db, investor)
 	}
 
 	// buy, sell
-	var NoSuchHolding = Err('no_such_holding',
-		'Investor does not posess such holding')
-
 	var NotEnoughAmount = Err('not_enough_amount_to_sell',
 		'Not Enough Amount To Sell')
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
