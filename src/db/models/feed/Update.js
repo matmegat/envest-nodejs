@@ -4,15 +4,16 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var Err = require('../../../Err')
 
-module.exports = function Update (symbols, feed)
+module.exports = function Update (db)
 {
 	return Type(
 	{
 		validate: validate_update,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return symbols.resolveMany(data.symbols)
+			return db.symbols.resolveMany(data.symbols)
 			.then(symbls =>
 			{
 				data.symbols = symbls
@@ -27,24 +28,24 @@ module.exports = function Update (symbols, feed)
 			})
 			.then(() =>
 			{
-				return feed.create(trx, investor_id, type, date, data)
+				return db.feed.create(trx, investor_id, type, date, data)
 			})
 		}
 	})
-}
 
-function validate_update (data)
-{
-	var data = pick(data,
-	[
-		'symbols',
-		'title',
-		'text',
-		'pic'
-	])
-
-	return new Promise(rs =>
+	function validate_update (data)
 	{
+		var PostPicNotFound = Err('post_pic_not_found',
+			'Post Pic Not Found')
+
+		var data = pick(data,
+		[
+			'symbols',
+			'title',
+			'text',
+			'pic'
+		])
+
 		validate.required(data.text, 'text')
 		validate.empty(data.text, 'text')
 
@@ -57,6 +58,24 @@ function validate_update (data)
 
 		validate.empty(data.pic, 'pic')
 
-		rs(data)
-	})
+		return Promise.resolve()
+		.then(() =>
+		{
+			if (data.pic)
+			{
+				return db.static.exists(data.pic)
+				.then(is_exists =>
+				{
+					if (! is_exists)
+					{
+						throw PostPicNotFound({ hash: data.pic })
+					}
+				})
+			}
+		})
+		.then(() =>
+		{
+			return data
+		})
+	}
 }
