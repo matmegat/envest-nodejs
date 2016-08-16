@@ -119,6 +119,9 @@ paths:
   '/static/upload/profile_pic':
     $ref: ../api/statics/swag/UploadProfilePic.yaml
 
+  '/static/upload/post_pic':
+    $ref: ../api/statics/swag/UploadPostPic.yaml
+
   '/users/current':
     $ref: ../api/users/swag/UserCurrent.yaml
 

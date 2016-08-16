@@ -4,15 +4,19 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var Err = require('../../../Err')
 
-module.exports = function Update (symbols, feed)
+var PostPicNotFound = Err('post_pic_not_found',
+	'No corresponding picture for this hash')
+
+module.exports = function Update (db)
 {
 	return Type(
 	{
 		validate: validate_update,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return symbols.resolveMany(data.symbols)
+			return db.symbols.resolveMany(data.symbols)
 			.then(symbls =>
 			{
 				data.symbols = symbls
@@ -27,33 +31,54 @@ module.exports = function Update (symbols, feed)
 			})
 			.then(() =>
 			{
-				return feed.create(trx, investor_id, type, date, data)
+				return db.feed.create(trx, investor_id, type, date, data)
 			})
 		}
 	})
-}
 
-function validate_update (data)
-{
-	var data = pick(data,
-	[
-		'symbols',
-		'title',
-		'text'
-	])
-
-	return new Promise(rs =>
+	function validate_update (data)
 	{
-		validate.required(data.text, 'text')
-		validate.empty(data.text, 'text')
+		var data = pick(data,
+		[
+			'symbols',
+			'title',
+			'text',
+			'pic'
+		])
 
-		validate.required(data.title, 'title')
-		validate.empty(data.title, 'title')
+		return new Promise(rs =>
+		{
+			validate.required(data.text, 'text')
+			validate.empty(data.text, 'text')
 
-		validate.required(data.symbols, 'symbols')
-		validate.empty(data.symbols, 'symbols')
-		validate.array(data.symbols, 'symbols')
+			validate.required(data.title, 'title')
+			validate.empty(data.title, 'title')
 
-		rs(data)
-	})
+			validate.required(data.symbols, 'symbols')
+			validate.empty(data.symbols, 'symbols')
+			validate.array(data.symbols, 'symbols')
+
+			validate.empty(data.pic, 'pic')
+
+			rs(data)
+		})
+		.then(data =>
+		{
+			if (data.pic)
+			{
+				return db.static.exists(data.pic)
+				.then(so =>
+				{
+					if (! so)
+					{
+						throw PostPicNotFound({ hash: data.pic })
+					}
+
+					return data
+				})
+			}
+
+			return data
+		})
+	}
 }

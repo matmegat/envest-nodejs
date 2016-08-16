@@ -115,6 +115,9 @@ post:
             text: 
               type: string
               description: Update description
+            pic:
+              type: string
+              description: Update post picture hash
           required:
           - symbols
           - title

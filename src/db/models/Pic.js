@@ -47,6 +47,14 @@ module.exports = function (db)
 		}
 	})
 
+	/* upload Investor's `post_pic` */
+	pic.uploadPostPic = upload({
+		max_size: 10 * 1024 * 1024,
+		ratio: {
+			aspect_width: 1.1,
+			aspect_height: 2
+		}
+	})
 
 	var static = db.static
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
@@ -108,6 +116,24 @@ module.exports = function (db)
 		}
 	}
 
+	function upload (validations)
+	{
+		return (file) =>
+		{
+			return validate_img(file, validations)
+			.then(() =>
+			{
+				return static.store(file)
+			})
+			.then(hash =>
+			{
+				return {
+					hash: hash
+				}
+			})
+		}
+	}
+
 	return pic
 }
 
@@ -119,7 +145,10 @@ function validate_img (img, settings)
 	return expect_file(img)
 	.then(() =>
 	{
-		return validate_size(img, max_size)
+		if (max_size)
+		{
+			return validate_size(img, max_size)
+		}
 	})
 	.then(() =>
 	{
@@ -127,7 +156,10 @@ function validate_img (img, settings)
 	})
 	.then(() =>
 	{
-		return validate_aspect(img, ratio)
+		if (ratio)
+		{
+			return validate_aspect(img, ratio)
+		}
 	})
 }
 
@@ -205,8 +237,8 @@ function validate_aspect (img, ratio)
 			}
 
 			var aspect_ratio =
-				round(ratio.aspect_width / ratio.aspect_height, 1)
-			var real_ratio = round(image.width() / image.height(), 1)
+				round(ratio.aspect_width / ratio.aspect_height, 2)
+			var real_ratio = round(image.width() / image.height(), 2)
 
 			if ( aspect_ratio !== real_ratio )
 			{
