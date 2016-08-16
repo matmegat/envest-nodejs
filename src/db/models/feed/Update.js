@@ -6,6 +6,9 @@ var pick = require('lodash/pick')
 var validate = require('../../validate')
 var Err = require('../../../Err')
 
+var PostPicNotFound = Err('post_pic_not_found',
+	'No corresponding picture for this hash')
+
 module.exports = function Update (db)
 {
 	return Type(
@@ -32,10 +35,6 @@ module.exports = function Update (db)
 			})
 		}
 	})
-
-
-	var PostPicNotFound = Err('post_pic_not_found',
-		'No corresponding picture for this hash')
 
 	function validate_update (data)
 	{
