@@ -4,7 +4,7 @@ var includes = require('lodash/includes')
 
 module.exports = function (cfg, express)
 {
-	if (cfg.env === 'dev' || cfg.env === 'test')
+	if (cfg.env !== 'prod')
 	{
 		var cors = cfg.cors
 		var allowed = cors.hosts.map(host =>
