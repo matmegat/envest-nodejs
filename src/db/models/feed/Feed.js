@@ -386,7 +386,7 @@ function mock_chart (item)
 	var type = event.type
 	var data = event.data
 
-	if (type !== 'trade')
+	if (type !== 'update')
 	{
 		return
 	}
