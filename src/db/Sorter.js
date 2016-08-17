@@ -1,7 +1,7 @@
 
 var extend = require('lodash/extend')
-
-var _ = require('lodash')
+var includes = require('lodash/includes')
+var find = require('lodash/find')
 
 var Err = require('../Err')
 
@@ -30,20 +30,33 @@ module.exports = function Sorter (sorter_options)
 			direction = sort[1]
 		}
 
-		var order_column = column ||
-		sorter_options.order_column
+		var dir = direction || sorter_options.default_direction
+		validate_dir(dir)
 
-		var default_dir  = direction ||
-		sorter_options.default_direction
+		var order_column = column || sorter_options.order_column
+		var order = pick_order(order_column, sorter_options.allowed_columns)
 
-		validate_dir(default_dir)
-		validate_order(order_column,
-		sorter_options.allowed_columns)
+		var column = order.column
+		var aux = order.aux
 
-		queryset.orderBy(order_column, default_dir)
+		if (aux)
+		{
+			aux = ' ' + aux
+		}
+		else
+		{
+			aux = ''
+		}
+
+		dir = ' ' + dir.toUpperCase()
+
+		var raw = column + aux + dir
+
+		queryset.orderByRaw(raw)
 
 		return queryset
 	}
+
 
 	var WrongDirection = Err('wrong_direction', 'Direction could be desc or asc')
 
@@ -56,14 +69,26 @@ module.exports = function Sorter (sorter_options)
 		}
 	}
 
+
 	var WrongOrderColumn = Err('wrong_order_column', 'Wrong order column')
 
-	function validate_order (order_column, allowed_columns)
+	function pick_order (order_column, allowed_columns)
 	{
-		if (! _.includes(allowed_columns, order_column))
+		var simple = includes(allowed_columns, order_column)
+
+		if (simple)
 		{
-			throw WrongOrderColumn()
+			return { column: order_column, aux: null }
 		}
+
+		var ext = find(allowed_columns, { column: order_column })
+
+		if (ext)
+		{
+			return { column: ext.column, aux: ext.aux }
+		}
+
+		throw WrongOrderColumn()
 	}
 
 	return sorter
