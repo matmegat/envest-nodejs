@@ -39,6 +39,17 @@ properties:
   is_featured:
     type: boolean
     description: Is featured Investor
+  gain:
+    type: object
+    title: InvestorGain
+    description: Investor's gains from year start and today
+    properties:
+      ytd:
+        type: number
+        description: YTD gain
+      today:
+        type: number
+        description: intraday gain
 required:
 - id
 - first_name
