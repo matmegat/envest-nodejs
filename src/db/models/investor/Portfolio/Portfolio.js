@@ -35,15 +35,15 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var portfolio_holdings = values[1]
 
-			portfolio_holdings.forEach((portfolio_holding) =>
+			portfolio_holdings.forEach(holding =>
 			{
-				portfolio_holding.allocation =
-					portfolio_holding.amount *
-					portfolio_holding.price *
+				holding.allocation =
+					holding.amount *
+					holding.price *
 					brokerage.multiplier
 			})
 
-			return db.symbols.quotes(portfolio_holdings.map((holding) =>
+			return db.symbols.quotes(portfolio_holdings.map(holding =>
 			{
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			}))
@@ -112,22 +112,22 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var portfolio_holdings = values[1]
 
-			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
+			portfolio_holdings = portfolio_holdings.map(holding =>
 			{
-				portfolio_holding.allocation =
-					portfolio_holding.amount *
-					portfolio_holding.price *
+				holding.allocation =
+					holding.amount *
+					holding.price *
 					brokerage.multiplier
 
-				portfolio_holding.symbol =
+				holding.symbol =
 				{
-					ticker: portfolio_holding.symbol_ticker,
-					exchange: portfolio_holding.symbol_exchange,
+					ticker: holding.symbol_ticker,
+					exchange: holding.symbol_exchange,
 					company: null
 				}
 
 				return _.omit(
-					portfolio_holding,
+					holding,
 					[ 'symbol_ticker', 'symbol_exchange' ]
 				)
 			})
