@@ -1,5 +1,6 @@
 
 var _ = require('lodash')
+var sumBy = require('lodash/sumBy')
 
 var knexed = require('../../../knexed')
 
@@ -83,8 +84,8 @@ module.exports = function Portfolio (db, investor)
 					{
 						value: brokerage.cash_value
 						       * brokerage.multiplier
-						       + _.sumBy(portfolio_holdings, 'allocation'),
-						gain: _.sumBy(portfolio_holdings, 'gain') /
+						       + sumBy(portfolio_holdings, 'allocation'),
+						gain: sumBy(portfolio_holdings, 'gain') /
 						       portfolio_holdings.length
 					}
 				}
@@ -107,18 +108,14 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var real_allocation = brokerage.cash_value
+			var cash = brokerage.cash_value
 
-			holdings.forEach((holding) =>
-			{
-				real_allocation += holding.amount * holding.price
-			})
-
-			var multiplier = index_amount_cap / real_allocation
+			var real_allocation = cash + sumBy(holdings, h => h.amount * h.price)
+			var multiplier = (index_amount_cap / real_allocation)
 
 			return brokerage.set(trx, investor_id,
 			{
-				cash_value: brokerage.cash_value,
+				cash_value: brokerage.cash,
 				multiplier: multiplier
 			})
 		})
