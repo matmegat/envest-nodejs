@@ -21,7 +21,7 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return Promise.all([
-				holdings.byId(investor_id),
+				holdings.byId(trx, investor_id),
 				brokerage.byInvestorId(trx, investor_id)
 			])
 		})
