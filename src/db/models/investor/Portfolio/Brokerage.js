@@ -53,6 +53,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			return set(trx, investor_id, data)
 		})
+		.then(() =>
+		{
+			return portfolio.recalculate(trx, investor_id)
+		})
 	})
 
 

@@ -121,14 +121,6 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
-	portfolio.setBrokerage = function (investor_id, amount)
-	{
-		return brokerage.set(investor_id, { cash_value: amount })
-		.then(() =>
-		{
-			return portfolio.recalculate(investor_id)
-		})
-	}
 
 	portfolio.initializeBrokerage = function (trx, investor_id)
 	{
