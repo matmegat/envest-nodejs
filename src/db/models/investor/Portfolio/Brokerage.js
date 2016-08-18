@@ -51,7 +51,7 @@ module.exports = function Brokerage (db, investor)
 				validate_multiplier(data.multiplier)
 			}
 
-			return set_brokerage(trx, investor_id, data)
+			return set(trx, investor_id, data)
 		})
 	})
 
@@ -68,14 +68,13 @@ module.exports = function Brokerage (db, investor)
 		}
 	}
 
-	function set_brokerage (trx, investor_id, data)
+	function set (trx, investor_id, data)
 	{
-		var where_clause  = { investor_id: investor_id }
-		var update_clause = _.pick(data, 'cash_value', 'multiplier')
+		data = _.pick(data, 'cash_value', 'multiplier')
 
 		return brokerage.table(trx)
-		.where(where_clause)
-		.update(update_clause)
+		.where('investor_id', investor_id)
+		.update(data)
 	}
 
 
@@ -108,7 +107,7 @@ module.exports = function Brokerage (db, investor)
 			}
 
 			data.cash_value = amount + brokerage.cash_value
-			return set_brokerage(trx, investor_id, data)
+			return set(trx, investor_id, data)
 		})
 	})
 
