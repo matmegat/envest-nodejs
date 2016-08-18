@@ -26,14 +26,14 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return Promise.all([
-				holdings.byId(trx, investor_id),
-				brokerage.byId(trx, investor_id)
+				brokerage.byId(trx, investor_id),
+				 holdings.byId(trx, investor_id)
 			])
 		})
 		.then((values) =>
 		{
-			var portfolio_holdings = values[0]
-			var brokerage = values[1]
+			var brokerage = values[0]
+			var portfolio_holdings = values[1]
 
 			portfolio_holdings.forEach((portfolio_holding) =>
 			{
@@ -93,6 +93,48 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.full = function (investor_id)
+	{
+		return investor.all.ensure(investor_id)
+		.then(() =>
+		{
+			return Promise.all([
+				brokerage.byId(investor_id),
+				 holdings.byId(investor_id)
+			])
+		})
+		.then((values) =>
+		{
+			var brokerage = values[0]
+			var portfolio_holdings = values[1]
+
+			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
+			{
+				portfolio_holding.allocation =
+					portfolio_holding.amount *
+					portfolio_holding.price *
+					brokerage.multiplier
+
+				portfolio_holding.symbol =
+				{
+					ticker: portfolio_holding.symbol_ticker,
+					exchange: portfolio_holding.symbol_exchange,
+					company: null
+				}
+
+				return _.omit(
+					portfolio_holding,
+					[ 'symbol_ticker', 'symbol_exchange' ]
+				)
+			})
+
+			return {
+				brokerage: brokerage,
+				holdings:  portfolio_holdings
+			}
+		})
+	}
+
 
 	var index_amount_cap = 1e5
 
@@ -133,6 +175,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
 	holdings.dirs = {}
@@ -169,48 +212,6 @@ module.exports = function Portfolio (db, investor)
 				operation: 'trade',
 				amount: sum
 			})
-		})
-	}
-
-	portfolio.full = function (investor_id)
-	{
-		return investor.all.ensure(investor_id)
-		.then(() =>
-		{
-			return Promise.all([
-				holdings.byId(investor_id),
-				brokerage.byId(investor_id)
-			])
-		})
-		.then((values) =>
-		{
-			var portfolio_holdings = values[0]
-			var brokerage = values[1]
-
-			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
-			{
-				portfolio_holding.allocation =
-					portfolio_holding.amount *
-					portfolio_holding.price *
-					brokerage.multiplier
-
-				portfolio_holding.symbol =
-				{
-					ticker: portfolio_holding.symbol_ticker,
-					exchange: portfolio_holding.symbol_exchange,
-					company: null
-				}
-
-				return _.omit(
-					portfolio_holding,
-					[ 'symbol_ticker', 'symbol_exchange' ]
-				)
-			})
-
-			return {
-				brokerage: brokerage,
-				holdings:  portfolio_holdings
-			}
 		})
 	}
 
