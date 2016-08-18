@@ -92,6 +92,9 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+
+	var index_amount_cap = 1e5
+
 	portfolio.recalculate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return Promise.all(
@@ -104,7 +107,6 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var indexed_amount  = 100000
 			var real_allocation = brokerage.cash_value
 
 			holdings.forEach((holding) =>
@@ -112,7 +114,7 @@ module.exports = function Portfolio (db, investor)
 				real_allocation += holding.amount * holding.price
 			})
 
-			var multiplier = indexed_amount / real_allocation
+			var multiplier = index_amount_cap / real_allocation
 
 			return brokerage.set(trx, investor_id,
 			{
@@ -140,14 +142,14 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.createBrokerage = function (trx, investor_id, amount)
+	portfolio.initializeBrokerage = function (trx, investor_id)
 	{
 		return brokerage.table(trx)
 		.insert(
 		{
 			investor_id: investor_id,
-			cash_value: amount,
-			multiplier: 1.0
+			cash_value:  index_amount_cap,
+			multiplier:  1.0
 		})
 	}
 
