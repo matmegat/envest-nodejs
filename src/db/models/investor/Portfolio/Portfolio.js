@@ -1,5 +1,6 @@
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
+var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 
@@ -72,7 +73,7 @@ module.exports = function Portfolio (db, investor)
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					return _.pick(holding,
+					return pick(holding,
 					[
 						'symbol',
 						'allocation',
@@ -133,10 +134,7 @@ module.exports = function Portfolio (db, investor)
 					company: null
 				}
 
-				return _.omit(
-					holding,
-					[ 'symbol_ticker', 'symbol_exchange' ]
-				)
+				return omit(holding, 'symbol_ticker', 'symbol_exchange')
 			})
 
 			return {
