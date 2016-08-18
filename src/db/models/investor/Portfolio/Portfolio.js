@@ -1,6 +1,8 @@
 
 var _ = require('lodash')
 
+var knexed = require('../../../knexed')
+
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
@@ -14,6 +16,8 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
+
+	var knex = db.knex
 
 	portfolio.list = function (investor_id, trx)
 	{
@@ -88,34 +92,35 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.recalculate = function (investor_id)
+	portfolio.recalculate = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return Promise.all([
-			brokerage.byId(investor_id),
-			holdings.byId(investor_id)
+		return Promise.all(
+		[
+			brokerage.byId(trx, investor_id),
+			 holdings.byId(trx, investor_id)
 		])
-		.then((values) =>
+		.then(values =>
 		{
-			var brokerage_entry = values[0]
-			var holding_entries = values[1]
+			var brokerage = values[0]
+			var holdings  = values[1]
 
-			var indexed_amount = 100000
-			var real_allocation = brokerage_entry.cash_value
+			var indexed_amount  = 100000
+			var real_allocation = brokerage.cash_value
 
-			holding_entries.forEach((holding) =>
+			holdings.forEach((holding) =>
 			{
 				real_allocation += holding.amount * holding.price
 			})
 
 			var multiplier = indexed_amount / real_allocation
 
-			return brokerage.set(investor_id,
+			return brokerage.set(trx, investor_id,
 			{
-				cash_value: brokerage_entry.cash_value,
+				cash_value: brokerage.cash_value,
 				multiplier: multiplier
 			})
 		})
-	}
+	})
 
 	portfolio.setHoldings = function (investor_id, holding_entries)
 	{
