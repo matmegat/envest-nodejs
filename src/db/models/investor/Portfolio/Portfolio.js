@@ -20,7 +20,7 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
-	portfolio.list = function (investor_id, trx)
+	portfolio.byId = function (investor_id, trx)
 	{
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
