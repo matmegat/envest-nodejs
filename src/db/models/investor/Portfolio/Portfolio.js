@@ -51,25 +51,29 @@ module.exports = function Portfolio (db, investor)
 			{
 				portfolio_holdings = quoted_symbols.map((quoted_symbol, i) =>
 				{
-					if (quoted_symbol === null)
+					var holding = portfolio_holdings[i]
+
+					if (quoted_symbol == null)
 					{
-						portfolio_holdings[i].symbol =
-						{
-							ticker: portfolio_holdings[i].symbol_ticker,
-							exchange: portfolio_holdings[i].symbol_exchange,
-							company: null
-						}
-						portfolio_holdings[i].gain = null
+						holding.symbol = Symbl(
+						[
+							holding.symbol_ticker,
+							holding.symbol_exchange
+						])
+						.toFull()
+
+						holding.gain = null
 					}
 					else
 					{
-						portfolio_holdings[i].symbol = quoted_symbol.symbol
-						portfolio_holdings[i].gain = /* calculated percentage */
-							( quoted_symbol.price /
-							portfolio_holdings[i].price - 1 ) * 100
+						holding.symbol = quoted_symbol.symbol
+
+						/* calculated percentage */
+						holding.gain
+						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					return _.pick(portfolio_holdings[i],
+					return _.pick(holding,
 					[
 						'symbol',
 						'allocation',
