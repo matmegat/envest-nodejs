@@ -33,25 +33,23 @@ module.exports = function Portfolio (db, investor)
 		.then((values) =>
 		{
 			var brokerage = values[0]
-			var portfolio_holdings = values[1]
+			var holdings  = values[1]
 
-			portfolio_holdings.forEach(holding =>
+			holdings.forEach(holding =>
 			{
-				holding.allocation =
-					holding.amount *
-					holding.price *
-					brokerage.multiplier
+				holding.allocation
+				 = holding.amount * holding.price * brokerage.multiplier
 			})
 
-			return db.symbols.quotes(portfolio_holdings.map(holding =>
+			return db.symbols.quotes(holdings.map(holding =>
 			{
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			}))
 			.then((quoted_symbols) =>
 			{
-				portfolio_holdings = quoted_symbols.map((quoted_symbol, i) =>
+				holdings = quoted_symbols.map((quoted_symbol, i) =>
 				{
-					var holding = portfolio_holdings[i]
+					var holding = holdings[i]
 
 					if (quoted_symbol == null)
 					{
@@ -82,15 +80,15 @@ module.exports = function Portfolio (db, investor)
 				})
 
 				return {
-					total: portfolio_holdings.length,
-					holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc'),
+					total: holdings.length,
+					holdings: _.orderBy(holdings, 'allocation', 'desc'),
 					full_portfolio:
 					{
 						value: brokerage.cash_value
 						       * brokerage.multiplier
-						       + sumBy(portfolio_holdings, 'allocation'),
-						gain: sumBy(portfolio_holdings, 'gain') /
-						       portfolio_holdings.length
+						       + sumBy(holdings, 'allocation'),
+						gain: sumBy(holdings, 'gain') /
+						       holdings.length
 					}
 				}
 			})
@@ -110,14 +108,12 @@ module.exports = function Portfolio (db, investor)
 		.then((values) =>
 		{
 			var brokerage = values[0]
-			var portfolio_holdings = values[1]
+			var holdings  = values[1]
 
-			portfolio_holdings = portfolio_holdings.map(holding =>
+			holdings = holdings.map(holding =>
 			{
-				holding.allocation =
-					holding.amount *
-					holding.price *
-					brokerage.multiplier
+				holding.allocation
+				 = holding.amount * holding.price * brokerage.multiplier
 
 				holding.symbol =
 				{
@@ -134,7 +130,7 @@ module.exports = function Portfolio (db, investor)
 
 			return {
 				brokerage: brokerage,
-				holdings:  portfolio_holdings
+				holdings:  holdings
 			}
 		})
 	}
