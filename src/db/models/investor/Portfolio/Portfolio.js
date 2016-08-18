@@ -1,6 +1,7 @@
 
 var _ = require('lodash')
 var sumBy = require('lodash/sumBy')
+var orderBy = require('lodash/orderBy')
 
 var knexed = require('../../../knexed')
 
@@ -79,16 +80,26 @@ module.exports = function Portfolio (db, investor)
 					])
 				})
 
+
+				var total = holdings.length
+
+				holdings = orderBy(holdings, 'allocation', 'desc')
+
+				/* full = cash + holdings */
+				var full_value
+				 = brokerage.cash_value * brokerage.multiplier
+				 + sumBy(holdings, 'allocation')
+
+				/* avg gain */
+				var gain = sumBy(holdings, 'gain') / total
+
 				return {
-					total: holdings.length,
-					holdings: _.orderBy(holdings, 'allocation', 'desc'),
+					total:    total,
+					holdings: holdings,
 					full_portfolio:
 					{
-						value: brokerage.cash_value
-						       * brokerage.multiplier
-						       + sumBy(holdings, 'allocation'),
-						gain: sumBy(holdings, 'gain') /
-						       holdings.length
+						value: full_value,
+						gain:  gain
 					}
 				}
 			})
