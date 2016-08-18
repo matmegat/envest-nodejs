@@ -7,10 +7,10 @@ var knexed = require('../../knexed')
 var Err = require('../../../Err')
 
 var expect = require('chai').expect
-
+var validate = require('../../validate')
 var curry = require('lodash/curry')
 
-module.exports = function NetvestSubsc (db, cfg)
+module.exports = function NetvestSubsc (db)
 {
 	var knex = db.knex
 
@@ -21,6 +21,8 @@ module.exports = function NetvestSubsc (db, cfg)
 	var OnlyOnceActivate = Err(
 	'only_once_activate',
 	'Subscription can be activated only once')
+
+	var noSubscription = Err('no_subscription', 'No Subscription')
 
 	var once_update = curry((type, user_id, subscr_table) =>
 	{
@@ -57,6 +59,7 @@ module.exports = function NetvestSubsc (db, cfg)
 		}
 	})
 
+	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.promo = PromoCode(db)
 
 	netvest_subscr.promo.activate = knexed.transact(knex, (trx, code, user_id) =>
@@ -84,21 +87,72 @@ module.exports = function NetvestSubsc (db, cfg)
 		})
 	})
 
-	var WrongToken = Err('wrong_subscr_token', 'Wrong subscription token')
-
 	netvest_subscr.buyActivation = function (option)
 	{
-		if (option.token === cfg.token)
+		return new Promise(rs =>
 		{
-			return netvest_subscr.activate(
-			option.user_id,
-			option.type,
-			option.days)
-		}
-		else
+			validate.required(option.user_id, 'user_id')
+			validate.required(option.plan, 'text')
+			validate.required(option.stripe_customer_id, 'text')
+			validate.required(option.stripe_subscriber_id, 'text')
+
+			return rs(option)
+		})
+		.then(option =>
 		{
-			throw WrongToken()
-		}
+			return netvest_subscr.table()
+			.insert(option, 'id')
+			.then(id =>
+			{
+				return id[0] > 0
+			})
+			.catch(err =>
+			{
+				throw err
+			})
+		})
+	}
+
+	netvest_subscr.getSubscription = (user_id) =>
+	{
+		return netvest_subscr.table()
+		.where(
+		{
+			user_id: user_id
+		})
+		.then(subscription =>
+		{
+			if (subscription.length > 0)
+			{
+				return subscription[0]
+			}
+			else
+			{
+				throw noSubscription()
+			}
+		})
+		.catch(err =>
+		{
+			throw err
+		})
+	}
+
+	netvest_subscr.cancelSubscription = (user_id) =>
+	{
+		return netvest_subscr.table()
+		.where(
+		{
+			user_id: user_id
+		})
+		.delete()
+		.then(result =>
+		{
+			return result
+		})
+		.catch(err =>
+		{
+			throw err
+		})
 	}
 
 	return netvest_subscr

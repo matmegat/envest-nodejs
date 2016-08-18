@@ -107,6 +107,9 @@
     "rootpath":
       "StreetStrider/rootpath#v1.4.0",
 
+    "stripe":
+      "^4.7",
+
     "swagger-parser":
       "^3.4.1",
 

@@ -102,7 +102,7 @@ module.exports = function Http (app)
 	mount(Password(app.db.user), 'password', 'password')
 	mount(Users(http, app.db.user), 'users', 'users')
 	mount(Watchlist(app.db.watchlist, http), 'watchlist', 'watchlist')
-	mount(Subscr(app.db.subscr), 'subscr', 'subscr')
+	mount(Subscr(app.db.subscr, app.cfg), 'subscr', 'subscr')
 	mount(Promo(http, app.db.subscr), 'promo', 'promo')
 	mount(Symbols(app.db.symbols), 'symbols', 'symbols')
 
