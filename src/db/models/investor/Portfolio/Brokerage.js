@@ -6,7 +6,7 @@ var _ = require('lodash')
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
-module.exports = function Brokerage (db, investor)
+module.exports = function Brokerage (db, investor, portfolio)
 {
 	var brokerage = {}
 

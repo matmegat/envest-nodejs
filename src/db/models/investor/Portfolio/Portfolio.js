@@ -15,8 +15,8 @@ module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
 
-	var brokerage = Brokerage(db, investor)
-	var holdings  = Holdings(db, investor)
+	var brokerage = Brokerage(db, investor, portfolio)
+	var holdings  = Holdings(db, investor, portfolio)
 
 	var knex = db.knex
 

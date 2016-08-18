@@ -12,7 +12,7 @@ var Err = require('../../../../Err')
 
 var Symbl = require('../../symbols/Symbl')
 
-module.exports = function Holdings (db, investor)
+module.exports = function Holdings (db, investor, portfolio)
 {
 	var holdings = {}
 
