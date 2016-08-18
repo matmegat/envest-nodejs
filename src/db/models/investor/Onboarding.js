@@ -513,7 +513,7 @@ function Holdings (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.setHoldings(investor_id, value)
+			return portfolio.holdings.set(investor_id, value)
 		}
 	})
 }
