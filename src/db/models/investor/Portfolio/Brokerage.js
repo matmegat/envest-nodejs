@@ -15,16 +15,8 @@ module.exports = function Brokerage (db, investor)
 
 	brokerage.table = knexed(knex, 'brokerage')
 
-	function set_brokerage (trx, investor_id, data)
-	{
-		var where_clause  = { investor_id: investor_id }
-		var update_clause = _.pick(data, 'cash_value', 'multiplier')
 
-		return brokerage.table(trx)
-		.where(where_clause)
-		.update(update_clause)
-	}
-
+	// byId
 	brokerage.byId = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return brokerage.table(trx)
@@ -39,6 +31,8 @@ module.exports = function Brokerage (db, investor)
 		})
 	})
 
+
+	// set
 	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -61,10 +55,10 @@ module.exports = function Brokerage (db, investor)
 		})
 	})
 
+
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	// eslint-disable-next-line id-length
 	function validate_multiplier (value)
 	{
 		validate.number(value, 'multiplier')
@@ -72,6 +66,16 @@ module.exports = function Brokerage (db, investor)
 		{
 			throw InvalidAmount({ field: 'multiplier' })
 		}
+	}
+
+	function set_brokerage (trx, investor_id, data)
+	{
+		var where_clause  = { investor_id: investor_id }
+		var update_clause = _.pick(data, 'cash_value', 'multiplier')
+
+		return brokerage.table(trx)
+		.where(where_clause)
+		.update(update_clause)
 	}
 
 
