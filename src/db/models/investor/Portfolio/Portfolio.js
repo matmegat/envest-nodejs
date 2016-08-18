@@ -22,7 +22,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all([
 				holdings.byId(trx, investor_id),
-				brokerage.byInvestorId(trx, investor_id)
+				brokerage.byId(trx, investor_id)
 			])
 		})
 		.then((values) =>
@@ -91,7 +91,7 @@ module.exports = function Portfolio (db, investor)
 	portfolio.recalculate = function (investor_id)
 	{
 		return Promise.all([
-			brokerage.byInvestorId(investor_id),
+			brokerage.byId(investor_id),
 			holdings.byId(investor_id)
 		])
 		.then((values) =>
@@ -167,7 +167,7 @@ module.exports = function Portfolio (db, investor)
 				throw WrongTradeDir({ dir: dir })
 			}
 
-			return brokerage.byInvestorId(trx, investor_id)
+			return brokerage.byId(trx, investor_id)
 		})
 		.then(resl =>
 		{
@@ -192,7 +192,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all([
 				holdings.byId(investor_id),
-				brokerage.byInvestorId(investor_id)
+				brokerage.byId(investor_id)
 			])
 		})
 		.then((values) =>
