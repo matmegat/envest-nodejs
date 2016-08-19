@@ -394,10 +394,10 @@ function mock_chart (item)
 	{
 		return
 	}
-	if (event.id % 2)
+	/*if (event.id % 2)
 	{
 		return
-	}
+	}*/
 
 	data.chart =
 	{
