@@ -54,12 +54,10 @@ module.exports = function Portfolio (db, investor)
 				{
 					if (quoted_symbol === null)
 					{
-						portfolio_holdings[i].symbol =
-						{
-							ticker: portfolio_holdings[i].symbol_ticker,
-							exchange: portfolio_holdings[i].symbol_exchange,
-							company: null
-						}
+						portfolio_holdings[i].symbol = Symbl([
+							portfolio_holdings[i].symbol_ticker,
+							portfolio_holdings[i].symbol_exchange
+						]).toFull()
 						portfolio_holdings[i].gain = null
 					}
 					else

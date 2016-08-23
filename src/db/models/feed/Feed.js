@@ -371,7 +371,7 @@ var pick_symbol = curry((symbols, item_s) =>
 
 	if (! symbol)
 	{
-		return item_s
+		return Symbl(item_s).toFull()
 	}
 
 	return symbol
