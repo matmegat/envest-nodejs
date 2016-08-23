@@ -1,6 +1,5 @@
 
 var extend = require('lodash/extend')
-var noop = require('lodash/noop')
 
 module.exports = function Type (options)
 {
@@ -31,6 +30,5 @@ function setter (type, set)
 		{
 			return set(trx, investor_id, feed_type, date, data)
 		})
-		.then(noop)
 	}
 }
