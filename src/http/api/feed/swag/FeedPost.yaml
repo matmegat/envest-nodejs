@@ -112,12 +112,14 @@ post:
             title:
               type: string
               description: Update title
-            text: 
+            text:
               type: string
               description: Update description
             pic:
               type: string
               description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
           required:
           - symbols
           - title
