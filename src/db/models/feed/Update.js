@@ -46,6 +46,8 @@ module.exports = function Update (db)
 			'pic'
 		])
 
+		var validate_symbols_length = validate.length(6, 1)
+
 		return new Promise(rs =>
 		{
 			validate.required(data.text, 'text')
@@ -57,6 +59,7 @@ module.exports = function Update (db)
 			validate.required(data.symbols, 'symbols')
 			validate.empty(data.symbols, 'symbols')
 			validate.array(data.symbols, 'symbols')
+			validate_symbols_length(data.symbols, 'symbols')
 
 			validate.empty(data.pic, 'pic')
 

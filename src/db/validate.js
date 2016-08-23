@@ -193,14 +193,14 @@ validate.motivation = function validate__motivations (motivations)
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
 
-var validateNameLength = validate.length(255)
+var validate_name_length = validate.length(255)
 
 validate.name = function validate__name (name, field_name)
 {
 	validate.required(name, field_name)
 	validate.empty(name, field_name)
 
-	validateNameLength(name, field_name)
+	validate_name_length(name, field_name)
 
 	/*
 	   Two words minimum, separated by space.
