@@ -9,7 +9,7 @@ CREATE TABLE portfolio
   timestamp TIMESTAMP NOT NULL,
 
   amount INTEGER NOT NULL,
-  price  DECIMAL(10, 2) NOT NULL,
+  price  DECIMAL(12, 2) NOT NULL,
 
   CONSTRAINT timed_portfolio_symbol_unique
     UNIQUE (investor_id, symbol_exchange, symbol_ticker, timestamp)
@@ -39,3 +39,17 @@ WHERE investor_id = 120
     -- AND timestamp <= NOW()
   );
 --
+
+CREATE TABLE brokerage
+(
+  investor_id INTEGER NOT NULL
+    REFERENCES investors(user_id),
+
+  timestamp TIMESTAMP NOT NULL,
+
+  cash DECIMAL(12, 2) NOT NULL,
+  multiplier REAL NOT NULL,
+
+  CONSTRAINT timed_brokerage_point_unique
+    UNIQUE (investor_id, timestamp)
+);

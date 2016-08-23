@@ -33,6 +33,26 @@ exports.up = (knex) =>
 	})
 	.then(() =>
 	{
+		return knex.schema.dropTableIfExists('brokerage')
+	})
+	.then(() =>
+	{
+		return knex.schema.createTable('brokerage', (table) =>
+		{
+			table.integer('investor_id').notNullable()
+			.references('investors.user_id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
+
+			table.timestamp('timestamp').notNullable()
+				.defaultTo(knex.fn.now())
+
+			table.decimal('cash', 12, 2).notNullable()
+			table.float('multiplier').notNullable()
+		})
+	})
+	.then(() =>
+	{
 		return knex.seed.run({ directory: './seeds/portfolio-history' })
 	})
 	.then(() =>
@@ -74,6 +94,9 @@ exports.down = (knex) =>
 	return knex.schema.raw('DROP VIEW portfolio_current')
 	.then(() =>
 	{
-		return knex.schema.dropTableIfExists('portfolio')
+		return Promise.all([
+			knex.schema.dropTableIfExists('portfolio'),
+			knex.schema.dropTableIfExists('brokerage')
+		])
 	})
 }
