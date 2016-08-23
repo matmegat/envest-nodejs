@@ -1,7 +1,9 @@
 
-var knexed = require('../../../knexed')
-
 var pick = require('lodash/pick')
+
+var expect = require('chai').expect
+
+var knexed = require('../../../knexed')
 
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
@@ -81,12 +83,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				throw InvalidAmount({ field: 'cash' })
 			}
 
-			if ('multiplier' in data)
-			{
-				validate_multiplier(data.multiplier)
-			}
-
-			return set(trx, investor_id, data)
+			return put(trx, investor_id, data)
 		})
 		.then(() =>
 		{
@@ -94,26 +91,26 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
-
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	function validate_multiplier (value)
-	{
-		validate.number(value, 'multiplier')
-		if (value <= 0)
-		{
-			throw InvalidAmount({ field: 'multiplier' })
-		}
-	}
 
-	function set (trx, investor_id, data)
+	function put (trx, investor_id, data)
 	{
-		data = pick(data, 'cash', 'multiplier')
+		expect(data).ok
+		expect(data.cash).a('number')
+
+		var cash = data.cash
 
 		return table(trx)
-		.where('investor_id', investor_id)
-		.update(data)
+		.insert({
+			investor_id: investor_id,
+
+			// timestamp NOW() TODO backpost
+
+			cash: cash,
+			multiplier: 1 // TODO
+		})
 	}
 
 
@@ -134,7 +131,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			return brokerage.byId(trx, investor_id)
 		})
-		.then((brokerage) =>
+		.then(brokerage =>
 		{
 			if (operation in valid_operations)
 			{
@@ -146,7 +143,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 
 			data.cash = amount + brokerage.cash
-			return set(trx, investor_id, data)
+
+			return put(trx, investor_id, data)
 		})
 	})
 

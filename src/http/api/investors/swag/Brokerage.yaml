@@ -5,9 +5,5 @@ properties:
   cash:
     type: number
     description: Real amount of brokerage value
-  multiplier:
-    type: number
-    description: Index that equilize full portfolio to 100.000
 required:
 - cash
-- multiplier
