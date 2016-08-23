@@ -17,7 +17,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	// byId
-	brokerage.byId = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		var raw = knex.raw
 
@@ -30,13 +30,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 			.where('investor_id', raw('B.investor_id'))
 			.where(function ()
 			{
-				//if (for_date)
+				if (for_date)
 				{
-					//this.where('timestamp', '<=', for_date)
+					this.where('timestamp', '<=', for_date)
 				}
 			})
 		)
 		.debug()
+		/* initializeBrokerage guarantees (take care for `for_date`): */
 		.then(one)
 		.then(r =>
 		{
@@ -46,7 +47,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
-	brokerage.byId(120)
+	brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
 	.then(console.info, console.error)
 
 
