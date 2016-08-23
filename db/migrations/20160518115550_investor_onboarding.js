@@ -7,6 +7,8 @@ exports.up = function (knex, Promise)
 	return Promise.resolve()
 	.then(() =>
 	{
+		return /* do not create this one in favor of brokerage-history */
+
 		return knex.schema.createTable('brokerage', (table) =>
 		{
 			table.integer('investor_id').primary()
@@ -43,8 +45,6 @@ exports.up = function (knex, Promise)
 			table.unique([ 'investor_id', 'symbol_exchange', 'symbol_ticker' ],
 				'portfolio_symbol_unique')
 		})
-
-		// NOTE: Investors Full Portfolio = Brokerage + Sum(Portfolio Symbols)
 	})
 	.then(() =>
 	{
