@@ -93,7 +93,6 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 		)
 		.where(aux)
-		.debug()
 		.then(r =>
 		{
 			r.forEach(it =>
@@ -105,14 +104,14 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
-	/* holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03')) //*/
-	holdings.byId(120)
-	.then(console.info, console.error)
+	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
+	// holdings.byId(120)
+	// .then(console.info, console.error)
 
-	/* holdings.symbolById('GE.XNYS', 120, new Date('2016-08-09 10:19:19.982-03')) //*/
-	/* holdings.symbolById('GE.XNYS', 120) //*/
-	holdings.symbolById('TSLA.XNAS', 120)
-	.then(console.info.part('symbol'), console.error.part('symbol'))
+	// holdings.symbolById('GE.XNYS', 120, new Date('2016-08-09 10:19:19.982-03'))
+	// holdings.symbolById('GE.XNYS', 120)
+	// holdings.symbolById('TSLA.XNAS', 120)
+	// .then(console.info.part('symbol'), console.error.part('symbol'))
 
 
 	// set
