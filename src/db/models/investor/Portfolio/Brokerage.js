@@ -13,15 +13,30 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var knex = db.knex
 	var one  = db.helpers.one
 
-	brokerage.table = knexed(knex, 'brokerage')
+	var table = knexed(knex, 'brokerage')
 
 
 	// byId
 	brokerage.byId = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return brokerage.table(trx)
+		var raw = knex.raw
+
+		return knex(raw('brokerage AS B'))
+		.transacting(trx)
 		.select('cash', 'multiplier')
 		.where('investor_id', investor_id)
+		.where('timestamp',
+			table().max('timestamp')
+			.where('investor_id', raw('B.investor_id'))
+			.where(function ()
+			{
+				//if (for_date)
+				{
+					//this.where('timestamp', '<=', for_date)
+				}
+			})
+		)
+		.debug()
 		.then(one)
 		.then(r =>
 		{
@@ -30,6 +45,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 			return r
 		})
 	})
+
+	brokerage.byId(120)
+	.then(console.info, console.error)
 
 
 	// set
@@ -76,7 +94,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	{
 		data = pick(data, 'cash', 'multiplier')
 
-		return brokerage.table(trx)
+		return table(trx)
 		.where('investor_id', investor_id)
 		.update(data)
 	}

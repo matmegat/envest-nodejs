@@ -53,3 +53,19 @@ CREATE TABLE brokerage
   CONSTRAINT timed_brokerage_point_unique
     UNIQUE (investor_id, timestamp)
 );
+
+--
+SELECT
+  cash,
+  multiplier
+
+FROM brokerage AS B
+
+WHERE investor_id = 120
+  AND timestamp =
+  (
+    SELECT MAX(timestamp) FROM brokerage
+    WHERE investor_id = B.investor_id
+    -- AND timestamp <= NOW()
+  );
+--
