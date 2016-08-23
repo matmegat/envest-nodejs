@@ -37,7 +37,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 			})
 		)
 		.debug()
-		/* initializeBrokerage guarantees (take care for `for_date`): */
+		.then(r =>
+		{
+			/* initializeBrokerage guarantees
+			   brokerage existence for dates
+			   from Investor Onboarding */
+			if (! r.length)
+			{
+				throw BrokerageDoesNotExist({ for_date: for_date })
+			}
+
+			return r
+		})
 		.then(one)
 		.then(r =>
 		{
@@ -47,7 +58,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
-	brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
+	var BrokerageDoesNotExist = Err('brokerage_not_exist_for_date',
+		 'Brokerage does not exist for this time point')
+
+	// brokerage.byId(120, new Date('2016-08-23 08:59:58.34+00'))
+	// brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
+	brokerage.byId(120)
 	.then(console.info, console.error)
 
 
