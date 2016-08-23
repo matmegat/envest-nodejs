@@ -15,3 +15,8 @@ allOf:
           type: string
         text:
           type: string
+        pic:
+          type: string
+          description: Uploaded Image hash
+        chart:
+          $ref: ./PostChartPayload.yaml
