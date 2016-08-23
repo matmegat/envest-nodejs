@@ -15,7 +15,7 @@ module.exports = function Subscr (subscr_model, cfg)
 		var stripe = require('stripe')(subscr.config.stripe.secret_key)
 		stripe.customers.create(
 			{ source: rq.body.stripe_token },
-			( err, customer ) =>
+			(err, customer) =>
 			{
 				if (err)
 				{
@@ -28,7 +28,7 @@ module.exports = function Subscr (subscr_model, cfg)
 						plan: rq.body.plan,
 						coupon: rq.body.coupon
 					},
-					( err, subscription ) =>
+					(err, subscription) =>
 					{
 						if (err)
 						{
@@ -59,11 +59,11 @@ module.exports = function Subscr (subscr_model, cfg)
 			var stripe = require('stripe')(subscr.config.stripe.secret_key)
 			stripe.subscriptions.retrieve(
 				subscription.stripe_subscriber_id,
-				( err, subscription_obj ) =>
+				(err, subscription_obj) =>
 				{
 					if (err)
 					{
-						toss.err(rs, err)
+						return toss.err(rs, err)
 					}
 
 					// this is to retreive full subscription object
@@ -72,10 +72,7 @@ module.exports = function Subscr (subscr_model, cfg)
 				}
 			)
 		})
-		.catch(err =>
-		{
-			toss(rs, err)
-		})
+		.catch(toss.err(rs))
 	})
 
 	subscr.express.post('/deactivate', (rq, rs) =>
@@ -86,12 +83,13 @@ module.exports = function Subscr (subscr_model, cfg)
 			var stripe = require('stripe')(subscr.config.stripe.secret_key)
 			stripe.subscriptions.del(
 				subscription.stripe_subscriber_id,
-				( err ) =>
+				(err) =>
 				{
 					if (err)
 					{
-						toss.err(rs, err)
+						return toss.err(rs, err)
 					}
+
 					subscr.model.cancelSubscription(rq.user.id)
 					.then(result =>
 					{
@@ -99,15 +97,13 @@ module.exports = function Subscr (subscr_model, cfg)
 						{
 							success: result === 1
 						}
+
 						toss(rs, res)
 					})
 				}
 			)
 		})
-		.catch(err =>
-		{
-			toss(rs, err)
-		})
+		.catch(toss.err(rs))
 	})
 
 	return subscr
