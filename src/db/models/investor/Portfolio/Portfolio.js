@@ -88,7 +88,7 @@ module.exports = function Portfolio (db, investor)
 
 				/* full = cash + holdings */
 				var full_value
-				 = brokerage.cash_value * brokerage.multiplier
+				 = brokerage.cash * brokerage.multiplier
 				 + sumBy(holdings, 'allocation')
 
 				/* avg gain */
@@ -159,14 +159,14 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var cash = brokerage.cash_value
+			var cash = brokerage.cash
 
 			var real_allocation = cash + sumBy(holdings, h => h.amount * h.price)
 			var multiplier = (index_amount_cap / real_allocation)
 
 			return brokerage.set(trx, investor_id,
 			{
-				cash_value: brokerage.cash,
+				cash: brokerage.cash,
 				multiplier: multiplier
 			})
 		})
@@ -179,8 +179,8 @@ module.exports = function Portfolio (db, investor)
 		.insert(
 		{
 			investor_id: investor_id,
-			cash_value:  index_amount_cap,
-			multiplier:  1.0
+			cash: index_amount_cap,
+			multiplier: 1.0
 		})
 	}
 
@@ -210,7 +210,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(resl =>
 		{
-			var cash = resl.cash_value
+			var cash = resl.cash
 
 			return holdings.dirs[dir](trx, investor_id, symbol, data, cash)
 		})

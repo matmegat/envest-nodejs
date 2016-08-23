@@ -407,7 +407,7 @@ function Brokerage (investor_model, db)
 		get: (queryset, investor_id) =>
 		{
 			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.brokerage.cash_value)
+			.then(full_portfolio => full_portfolio.brokerage.cash)
 			.then(Number)
 		},
 		validate: (value) =>
@@ -425,7 +425,7 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, { cash_value: value })
+			return portfolio.brokerage.set(investor_id, { cash: value })
 		},
 		verify: (value, investor_id) =>
 		{
@@ -436,7 +436,7 @@ function Brokerage (investor_model, db)
 				{
 					throw CannotGoPublic({ reason: 'Brokerage does not exist' })
 				}
-				if (! Number(portfolio.brokerage.cash_value) < 0)
+				if (! Number(portfolio.brokerage.cash) < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
 				}

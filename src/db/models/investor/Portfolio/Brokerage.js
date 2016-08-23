@@ -1,7 +1,7 @@
 
 var knexed = require('../../../knexed')
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
 
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
@@ -20,12 +20,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.byId = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return brokerage.table(trx)
-		.select('cash_value', 'multiplier')
+		.select('cash', 'multiplier')
 		.where('investor_id', investor_id)
 		.then(one)
 		.then(r =>
 		{
-			r.cash_value = Number(r.cash_value)
+			r.cash = Number(r.cash)
 
 			return r
 		})
@@ -39,11 +39,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(() =>
 		{
 			/* validate update keys */
-			validate.required(data.cash_value, 'cash_value')
-			validate.number(data.cash_value, 'cash_value')
-			if (data.cash_value < 0)
+			validate.required(data.cash, 'cash')
+			validate.number(data.cash, 'cash')
+			if (data.cash < 0)
 			{
-				throw InvalidAmount({ field: 'cash_value' })
+				throw InvalidAmount({ field: 'cash' })
 			}
 
 			if ('multiplier' in data)
@@ -74,7 +74,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	function set (trx, investor_id, data)
 	{
-		data = _.pick(data, 'cash_value', 'multiplier')
+		data = pick(data, 'cash', 'multiplier')
 
 		return brokerage.table(trx)
 		.where('investor_id', investor_id)
@@ -110,7 +110,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				throw InvalidOperation()
 			}
 
-			data.cash_value = amount + brokerage.cash_value
+			data.cash = amount + brokerage.cash
 			return set(trx, investor_id, data)
 		})
 	})
@@ -143,7 +143,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			throw InvalidAmount()
 		}
-		if (amount + brokerage.cash_value < 0)
+		if (amount + brokerage.cash < 0)
 		{
 			throw InvalidAmount(
 			{
