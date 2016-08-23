@@ -287,8 +287,6 @@ function transform_event (item)
 
 	delete item.type
 	delete item.data
-
-	mock_chart(item)
 }
 
 
