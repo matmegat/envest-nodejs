@@ -122,7 +122,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var holdings  = values[1]
 
-			var real_allocation = new_cash + sumBy(holdings, h => h.amount * h.price)
+			var real_allocation
+			 = new_cash
+			 + sumBy(holdings, h => h.amount * h.price)
+
 			var new_multiplier = (index_amount_cap / real_allocation)
 
 			if ((cash === new_cash) && (multiplier === new_multiplier))
