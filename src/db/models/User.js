@@ -20,6 +20,8 @@ var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
 
+var validateMany = require('../../id').validateMany
+
 var moment = require('moment')
 
 module.exports = function User (db, app)
@@ -291,6 +293,50 @@ module.exports = function User (db, app)
 		return user.byEmail(email, trx)
 		.then(Err.existent(EmailAlreadyExists))
 	}
+
+	var RemoveSelf = Err('remove_self', 'You cannot remove yourself')
+	var RemoveAdmin = Err('remove_admin', 'You cannot remove admins')
+
+	var includes = require('lodash/includes')
+	var union    = require('lodash/union')
+
+	user.remove = knexed.transact(knex, (trx, user_id, ids) =>
+	{
+		ids = ids.split(',')
+		ids[0] || (ids = [])
+
+		return new Promise(rs =>
+		{
+			validateMany(WrongUserId, ids)
+
+			if (includes(ids, user_id.toString()))
+			{
+				throw RemoveSelf()
+			}
+
+			return rs()
+		})
+		.then(() =>
+		{
+			return knex('admins')
+			.transacting(trx)
+			.whereNotIn('user_id', union(ids, [user_id]))
+			.orWhere(function()
+			{
+				this.where('user_id', user_id)
+				this.andWhere('can_intro', true)
+			})
+		})
+		.then(Err.emptish(RemoveAdmin))
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.whereIn('id', ids)
+			.del()
+		})
+		.then(Err.falsy(user.NotFound))
+		.then(noop)
+	})
 
 	user.byEmail = function (email, trx)
 	{
