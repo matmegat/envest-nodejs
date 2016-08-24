@@ -173,18 +173,6 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
-	portfolio.initializeBrokerage = function (trx, investor_id)
-	{
-		return brokerage.table(trx)
-		.insert(
-		{
-			investor_id: investor_id,
-			cash: index_amount_cap,
-			multiplier: 1.0
-		})
-	}
-
-
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
 	holdings.dirs = {}

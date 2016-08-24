@@ -41,7 +41,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.debug()
 		.then(r =>
 		{
-			/* initializeBrokerage guarantees
+			/* brokerage.init guarantees
 			   brokerage existence for dates
 			   from Investor Onboarding */
 			if (! r.length)
@@ -67,6 +67,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
 	brokerage.byId(120)
 	.then(console.info, console.error)
+
+
+	// init
+	var index_amount_cap = 1e5
+
+	brokerage.init = (trx, investor_id) =>
+	{
+		return table(trx)
+		.insert(
+		{
+			investor_id: investor_id,
+			cash: index_amount_cap,
+			multiplier: 1.0
+		})
+	}
 
 
 	// set

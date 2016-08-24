@@ -105,7 +105,7 @@ module.exports = function Investor (db)
 		.then(oneMaybe)
 		.then((investor_id) =>
 		{
-			return investor.portfolio.initializeBrokerage(trx, investor_id)
+			return investor.portfolio.brokerage.init(trx, investor_id)
 			.then(() =>
 			{
 				return investor.all.byId(investor_id, trx)
