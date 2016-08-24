@@ -428,12 +428,11 @@ function Brokerage (investor_model, db)
 		verify: (value, investor_id) =>
 		{
 			return db.investor.portfolio.brokerage.byId(investor_id)
+			.catch(Err.fromCode('brokerage_not_exist_for_date',
+				() => CannotGoPublic({ reason: 'Brokerage does not exist' })
+			))
 			.then(brokerage =>
 			{
-				if (! brokerage) /* TODO check it Maybe<Brokerage> */
-				{
-					throw CannotGoPublic({ reason: 'Brokerage does not exist' })
-				}
 				if (brokerage.cash < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
