@@ -52,20 +52,27 @@ module.exports = function Brokerage (db, investor, portfolio)
 			return r
 		})
 		.then(one)
-		.then(r =>
+		.then(it =>
 		{
-			r.cash = Number(r.cash)
+			it.cash = Number(it.cash)
 
-			return r
+			return it
 		})
 	})
 
 	var BrokerageDoesNotExist = Err('brokerage_not_exist_for_date',
 		 'Brokerage does not exist for this time point')
 
+	brokerage.cashById = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return brokerage.byId(trx, investor_id, for_date)
+		.then(it => it.cash)
+	})
+
 	// brokerage.byId(120, new Date('2016-08-23 08:59:58.34+00'))
 	// brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
 	brokerage.byId(120)
+	// brokerage.cashById(120)
 	.then(console.info, console.error)
 
 
@@ -149,8 +156,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return brokerage.byId(trx, investor_id)
-		.then(it => it.cash)
+		return brokerage.cashById(trx, investor_id)
 		.then(cash =>
 		{
 			// cash -> new_cash,

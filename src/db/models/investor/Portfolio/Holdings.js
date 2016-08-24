@@ -202,8 +202,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		var price  = data.price
 		var sum    = amount * price
 
-		return portfolio.brokerage.byId(trx, investor_id)
-		.then(it => it.cash)
+		return portfolio.brokerage.cashById(trx, investor_id)
 		.then(cash =>
 		{
 			if (sum > cash)
