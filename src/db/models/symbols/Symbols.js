@@ -15,7 +15,7 @@ var GetDataErr = Err(
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
-var filter = require('lodash/filter')
+var get = require('lodash/get')
 
 var moment = require('moment')
 
@@ -292,8 +292,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				today_points = values[1]
 			}
 
+			var utc_offset = get(today_points, '0.utcOffset', null)
+			today_points = today_points.map(point => omit(point, 'utcOffset'))
+
 			return [
-				{ period: 'today', points: today_points },
+				{ period: 'today', points: today_points, utcOffset: utc_offset },
 				{ period: 'y5', points: values[2] },
 			]
 		})

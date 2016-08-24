@@ -5,10 +5,6 @@ properties:
     type: string
     format: datetime
     description: ISO 8601 string. UTC time
-  utcOffset:
-    type: number
-    format: integer
-    description: UTC Offset to Exchange local time. Hours
   value:
     type: number
 required:
