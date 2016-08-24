@@ -1,5 +1,5 @@
 
-var pick = require('lodash/pick')
+var sumBy = require('lodash/sumBy')
 
 var expect = require('chai').expect
 
@@ -100,30 +100,62 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			return put(trx, investor_id, cash)
 		})
-		.then(() =>
-		{
-			return portfolio.recalculate(trx, investor_id)
-		})
 	})
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, cash)
+	function put (trx, investor_id, new_cash)
 	{
-		expect(cash).a('number')
+		expect(new_cash).a('number')
 
-		return table(trx)
-		.insert({
-			investor_id: investor_id,
+		return Promise.all(
+		[
+			brokerage.byId(trx, investor_id),
+			portfolio.holdings.byId(trx, investor_id)
+		])
+		.then(values =>
+		{
+			var cash = values[0].cash
+			var multiplier = values[0].multiplier
 
-			// timestamp NOW() TODO backpost
+			var holdings  = values[1]
 
-			cash: cash,
-			multiplier: 1 // TODO
+			var real_allocation = new_cash + sumBy(holdings, h => h.amount * h.price)
+			var new_multiplier = (index_amount_cap / real_allocation)
+
+			if ((cash === new_cash) && (multiplier === new_multiplier))
+			{
+				console.warn('CASH recalculate to the same values')
+				return
+			}
+
+			return table(trx)
+			.insert({
+				investor_id: investor_id,
+
+				// timestamp NOW() TODO backpost
+
+				cash: new_cash,
+				multiplier: new_multiplier
+			})
 		})
 	}
+
+
+	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return brokerage.byId(trx, investor_id)
+		.then(it => it.cash)
+		.then(cash =>
+		{
+			// cash -> new_cash,
+			// recalculate because of holdings changed
+
+			return put(trx, investor_id, cash)
+		})
+	})
 
 
 	brokerage.update = knexed.transact(knex, (trx, investor_id, data) =>

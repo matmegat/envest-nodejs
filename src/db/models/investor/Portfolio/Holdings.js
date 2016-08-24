@@ -157,7 +157,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 		.then(() =>
 		{
-			return portfolio.recalculate(trx, investor_id)
+			return portfolio.brokerage.recalculate(trx, investor_id)
 		})
 	})
 

@@ -4,8 +4,6 @@ var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 
-var knexed = require('../../../knexed')
-
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
@@ -19,8 +17,6 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
-
-	var knex = db.knex
 
 	portfolio.byId = function (investor_id, trx)
 	{
@@ -143,28 +139,6 @@ module.exports = function Portfolio (db, investor)
 			}
 		})
 	}
-
-
-	// var index_amount_cap = 1e5
-
-	portfolio.recalculate = knexed.transact(knex, (trx, investor_id) =>
-	{
-		return Promise.all(
-		[
-			brokerage.byId(trx, investor_id),
-			 holdings.byId(trx, investor_id)
-		])
-		.then(values =>
-		{
-			var cash = values[0].cash
-			// var holdings  = values[1]
-
-			// var real_allocation = cash + sumBy(holdings, h => h.amount * h.price)
-			// var multiplier = (index_amount_cap / real_allocation)
-
-			return brokerage.set(trx, investor_id, cash)
-		})
-	})
 
 
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
