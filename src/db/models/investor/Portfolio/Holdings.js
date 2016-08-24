@@ -2,6 +2,7 @@
 var noop = require('lodash/noop')
 var map  = require('lodash/map')
 var pick = require('lodash/pick')
+var extend = require('lodash/extend')
 
 var expect = require('chai').expect
 
@@ -172,18 +173,20 @@ module.exports = function Holdings (db, investor, portfolio)
 		expect(data.amount).a('number')
 		expect(data.price).a('number')
 
-		return table(trx)
-		.insert({
-			investor_id: investor_id,
+		data = pick(data,
+		[
+			'amount',
+			'price',
+			'timestamp'
+		])
 
-			symbol_exchange: symbol.exchange,
-			symbol_ticker: symbol.ticker,
+		var batch = extend(
+			{ investor_id: investor_id },
+			  symbol.toDb(),
+			  data
+		)
 
-			// timestamp NOW() TODO backpost
-
-			amount: data.amount,
-			price:  data.price
-		})
+		return table(trx).insert(batch)
 	}
 
 
@@ -202,7 +205,9 @@ module.exports = function Holdings (db, investor, portfolio)
 		var price  = data.price
 		var sum    = amount * price
 
-		return portfolio.brokerage.cashById(trx, investor_id)
+		var for_date = date
+
+		return portfolio.brokerage.cashById(trx, investor_id, for_date)
 		.then(cash =>
 		{
 			if (sum > cash)
@@ -212,7 +217,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 		.then(() =>
 		{
-			return holdings.symbolById(trx, symbol, investor_id)
+			return holdings.symbolById(trx, symbol, investor_id, for_date)
 		})
 		.then(holding =>
 		{
@@ -223,8 +228,9 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			var data_put =
 			{
-				amount: amount,
-				price:  price
+				amount:    amount,
+				price:     price,
+				timestamp: date
 			}
 
 			return put(trx, investor_id, symbol, data_put)
@@ -264,8 +270,9 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			var data_put =
 			{
-				amount: amount,
-				price:  price
+				amount:    amount,
+				price:     price,
+				timestamp: date
 			}
 
 			return put(trx, investor_id, symbol, data_put)
