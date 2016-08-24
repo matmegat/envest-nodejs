@@ -425,7 +425,7 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, { cash: value })
+			return portfolio.brokerage.set(investor_id, value)
 		},
 		verify: (value, investor_id) =>
 		{

@@ -85,20 +85,20 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	// set
-	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
+	brokerage.set = knexed.transact(knex, (trx, investor_id, cash) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			/* validate update keys */
-			validate.required(data.cash, 'cash')
-			validate.number(data.cash, 'cash')
-			if (data.cash < 0)
+			validate.required(cash, 'cash')
+			validate.number(cash, 'cash')
+			if (cash < 0)
 			{
 				throw InvalidAmount({ field: 'cash' })
 			}
 
-			return put(trx, investor_id, data)
+			return put(trx, investor_id, cash)
 		})
 		.then(() =>
 		{
@@ -110,12 +110,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, data)
+	function put (trx, investor_id, cash)
 	{
-		expect(data).ok
-		expect(data.cash).a('number')
-
-		var cash = data.cash
+		expect(cash).a('number')
 
 		return table(trx)
 		.insert({
@@ -157,9 +154,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 				throw InvalidOperation()
 			}
 
-			data.cash = amount + brokerage.cash
+			var cash = amount + brokerage.cash
 
-			return put(trx, investor_id, data)
+			return put(trx, investor_id, cash)
 		})
 	})
 
