@@ -162,7 +162,7 @@ module.exports = function Portfolio (db, investor)
 				throw WrongTradeDir({ dir: dir })
 			}
 
-			return holdings.dirs[dir](trx, investor_id, symbol, data)
+			return holdings.dirs[dir](trx, investor_id, symbol, date, data)
 		})
 		.then(sum =>
 		{
