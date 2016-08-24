@@ -436,11 +436,11 @@ function Brokerage (investor_model, db)
 				{
 					throw CannotGoPublic({ reason: 'Brokerage does not exist' })
 				}
-				if (! Number(portfolio.brokerage.cash) < 0)
+				if (portfolio.brokerage.cash < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
 				}
-				if (! portfolio.brokerage.multiplier < 0)
+				if (portfolio.brokerage.multiplier < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
 				}
