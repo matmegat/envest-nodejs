@@ -193,7 +193,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
 
-	holdings.buy = function (trx, investor_id, symbol, data, cash)
+	holdings.buy = function (trx, investor_id, symbol, data)
 	{
 		validate_positive(data.amount, 'amount')
 		validate_positive(data.price, 'price')
@@ -202,12 +202,19 @@ module.exports = function Holdings (db, investor, portfolio)
 		var price  = data.price
 		var sum    = amount * price
 
-		if (sum > cash)
+		return portfolio.brokerage.byId(trx, investor_id)
+		.then(it => it.cash)
+		.then(cash =>
 		{
-			throw NotEnoughMoney()
-		}
-
-		return holdings.symbolById(symbol, investor_id)
+			if (sum > cash)
+			{
+				throw NotEnoughMoney()
+			}
+		})
+		.then(() =>
+		{
+			return holdings.symbolById(trx, symbol, investor_id)
+		})
 		.then(holding =>
 		{
 			if (holding)
