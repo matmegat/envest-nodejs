@@ -5,8 +5,6 @@ var Err = require('../../../Err')
 
 var moment = require('moment')
 
-var noop = require('lodash/noop')
-
 var Trade = require('./Trade')
 var Watchlist = require('./Watchlist')
 var Update = require('./Update')
@@ -65,12 +63,12 @@ module.exports = function Post (db)
 			{
 				return post.add(trx, investor_id, type, date, data)
 			})
-			.then(noop)
-			.then(() =>
+			.then(post_id =>
 			{
 				PostCreated(investor_id,
 				{
-					investor: [ ':user-id', investor_id ]
+					investor: [ ':user-id', investor_id ],
+					post_id: post_id
 				})
 			})
 		})
