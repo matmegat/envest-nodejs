@@ -282,19 +282,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 		.then((values) =>
 		{
-			var by_date = (points, date) =>
-			{
-				return filter(points, (point) =>
-				{
-					return moment.utc(point.timestamp) >= date
-				})
-			}
-
-			var ytd = moment.utc().startOf('year')
-			var m1 = moment.utc().startOf('day').subtract(1, 'month')
-			var m6 = moment.utc().startOf('day').subtract(6, 'month')
-			var y1 = moment.utc().startOf('day').subtract(1, 'year')
-
 			var today_points = []
 			if (values[0].length)
 			{
@@ -307,10 +294,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 			return [
 				{ period: 'today', points: today_points },
-				{ period: 'ytd', points: by_date(values[2], ytd) },
-				{ period: 'm1', points: by_date(values[2], m1) },
-				{ period: 'm6', points: by_date(values[2], m6) },
-				{ period: 'y1', points: by_date(values[2], y1) },
 				{ period: 'y5', points: values[2] },
 			]
 		})
