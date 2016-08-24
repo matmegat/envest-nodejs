@@ -113,7 +113,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, new_cash)
+	function put (trx, investor_id, new_cash, timestamp)
 	{
 		expect(new_cash).a('number')
 
@@ -141,15 +141,20 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return
 			}
 
-			return table(trx)
-			.insert({
+			var batch =
+			{
 				investor_id: investor_id,
-
-				// timestamp NOW() TODO backpost
 
 				cash: new_cash,
 				multiplier: new_multiplier
-			})
+			}
+
+			if (timestamp)
+			{
+				batch.timestamp = timestamp
+			}
+
+			return table(trx).insert(batch)
 		})
 	}
 
@@ -167,7 +172,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	})
 
 
-	brokerage.update = knexed.transact(knex, (trx, investor_id, data) =>
+	brokerage.update = knexed.transact(knex, (trx, investor_id, date, data) =>
 	{
 		/* operation with validation procedure:
 		 * data =
@@ -178,11 +183,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 		 * */
 		var operation = data.operation
 		var amount = data.amount
+		var for_date = date
 
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.byId(trx, investor_id)
+			return brokerage.byId(trx, investor_id, for_date)
 		})
 		.then(brokerage =>
 		{
