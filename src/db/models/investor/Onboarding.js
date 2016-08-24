@@ -407,8 +407,7 @@ function Brokerage (investor_model, db)
 		get: (queryset, investor_id) =>
 		{
 			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.brokerage.cash)
-			.then(Number)
+			.then(portfolio => portfolio.brokerage.cash)
 		},
 		validate: (value) =>
 		{
