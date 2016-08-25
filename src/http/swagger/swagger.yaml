@@ -134,6 +134,9 @@ paths:
   '/users/change-name':
     $ref: ../api/users/swag/ChangeName.yaml
 
+  '/users/{ids}':
+    $ref: ../api/users/swag/UsersRemove.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 

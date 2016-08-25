@@ -1,0 +1,21 @@
+delete:
+  description: |
+    Remove users
+  parameters:
+  - name: ids
+    in: path
+    type: integer
+    description: Users ids [1,2,...n]
+    required: true
+
+  responses:
+    200:
+      description: Users successfull removed
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - users
