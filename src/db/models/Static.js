@@ -103,6 +103,13 @@ module.exports = function (rootpath)
 		})
 	}
 
+	static.exists = function (hash)
+	{
+		var path = path_by_hash(hash)
+
+		return exists(path)
+	}
+
 
 	function get_filename (id, type)
 	{

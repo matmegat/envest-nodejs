@@ -1,0 +1,13 @@
+type: object
+title: Chart Series Model
+description: As Is from GET /symbols/{symbol}/chart
+properties:
+  period:
+    type: string
+  points:
+    type: array
+    items:
+    - type: object
+required:
+- period
+- points

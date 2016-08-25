@@ -163,11 +163,11 @@ module.exports = function Meta (knexed_table, raw, options)
 
 	function transform_investor (investor)
 	{
-		investor.annual_return = _.sumBy(
-			investor.historical_returns,
-			'percentage'
-		) / investor.historical_returns.length
-		// FIXME: refactor annual return when it comes more complicated
+		investor.gain =
+		{
+			ytd:   _.random(1, 10),
+			today: _.random(1, 1000) / 100
+		}
 
 		return _.pick(investor,
 		[
@@ -180,7 +180,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			'focus',
 			'background',
 			'historical_returns',
-			'annual_return',
+			'gain',
 			'is_featured',
 			'is_public'
 		])

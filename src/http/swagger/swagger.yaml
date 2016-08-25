@@ -62,6 +62,9 @@ paths:
   '/admin/change-name':
     $ref: ../api/admin/swag/ChangeName.yaml
 
+  '/admin/post-as':
+    $ref: ../api/admin/swag/PostAs.yaml
+
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
 
@@ -118,6 +121,9 @@ paths:
 
   '/static/upload/profile_pic':
     $ref: ../api/statics/swag/UploadProfilePic.yaml
+
+  '/static/upload/post_pic':
+    $ref: ../api/statics/swag/UploadPostPic.yaml
 
   '/users/current':
     $ref: ../api/users/swag/UserCurrent.yaml
@@ -240,3 +246,6 @@ definitions:
 
   NotificationsItem:
     $ref: ../api/notifications/swag/NotificationItem.yaml
+
+  PostChartPayload:
+    $ref: ../api/feed/swag/PostChartPayload.yaml

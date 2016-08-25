@@ -1,5 +1,5 @@
 post:
-  description: Create post by investor
+  description: Create post by admin as an investor
   parameters:
   - name: payload
     description: |
@@ -12,6 +12,8 @@ post:
     schema:
       type: object
       properties:
+        target_user_id:
+          type: integer
         type:
           type: string
           description: Post type trade / watchlist / update
@@ -112,14 +114,12 @@ post:
             title:
               type: string
               description: Update title
-            text:
+            text: 
               type: string
               description: Update description
             pic:
               type: string
               description: Update post picture hash
-            chart:
-              $ref: ./PostChartPayload.yaml
           required:
           - symbols
           - title
@@ -135,4 +135,4 @@ post:
       schema:
         $ref: ../../../swagger/Error.yaml
   tags:
-  - feed
+  - admin

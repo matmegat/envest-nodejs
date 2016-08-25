@@ -5,6 +5,7 @@ var cookie_parser = require('cookie-parser')
 
 var compose = require('composable-middleware')
 var authRequired = require('./auth-required')
+var AdminOrOwnerRequired = require('./admin-or-user-required')
 var AdminRequired = require('./admin-required')
 var featureRequired = require('./feature-required')
 var investorRequired = require('./investor-required')
@@ -51,6 +52,12 @@ module.exports = function Http (app)
 	CrossOrigin(app.cfg, http.express)
 
 	ReqLog(app.log, http.express)
+
+	http.adminOrInvestorRequired =
+		compose(
+			authRequired,
+			AdminOrOwnerRequired(app.db.investor.all, app.db.admin)
+		)
 
 	http.adminRequired = compose(authRequired, AdminRequired(app.db.admin))
 	http.featureRequired = featureRequired(app.db.subscr)

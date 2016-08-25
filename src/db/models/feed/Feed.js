@@ -14,7 +14,6 @@ var Err = require('../../../Err')
 var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
-var noop = require('lodash/noop')
 var invoke = require('lodash/invokeMap')
 
 var map = require('lodash/fp/map')
@@ -25,6 +24,7 @@ var Feed = module.exports = function Feed (db)
 	var feed = {}
 
 	var knex = db.knex
+	var one = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 	var count = db.helpers.count
 
@@ -270,8 +270,8 @@ var Feed = module.exports = function Feed (db)
 			type: type,
 			timestamp: date,
 			data: data
-		})
-		.then(noop)
+		}, 'id')
+		.then(one)
 	}
 
 	return feed
@@ -369,7 +369,7 @@ var pick_symbol = curry((symbols, item_s) =>
 
 	if (! symbol)
 	{
-		return item_s
+		return Symbl(item_s).toFull()
 	}
 
 	return symbol

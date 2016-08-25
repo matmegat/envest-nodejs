@@ -496,7 +496,12 @@ module.exports = function User (db, app)
 	var sorter = Sorter(
 	{
 		order_column: 'last_name',
-		allowed_columns: [ 'last_name', 'first_name', 'email' ]
+		allowed_columns:
+		[
+			{ column: 'last_name',  aux: 'COLLATE "C"' },
+			{ column: 'first_name', aux: 'COLLATE "C"' },
+			'email'
+		]
 	})
 
 	user.byGroup = function (user_group, options)

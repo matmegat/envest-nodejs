@@ -16,7 +16,7 @@ module.exports = function Post (db)
 	post.types = {}
 	post.types.trade = Trade(db.investor.portfolio, db.symbols, db.feed)
 	post.types.watchlist = Watchlist(db)
-	post.types.update = Update(db.symbols, db.feed)
+	post.types.update = Update(db)
 
 	var knex = db.knex
 
@@ -63,11 +63,12 @@ module.exports = function Post (db)
 			{
 				return add(trx, investor_id, type, date, data)
 			})
-			.then(() =>
+			.then(post_id =>
 			{
 				PostCreated(investor_id,
 				{
-					investor: [ ':user-id', investor_id ]
+					investor: [ ':user-id', investor_id ],
+					post_id: post_id
 				})
 			})
 		})
@@ -88,11 +89,12 @@ module.exports = function Post (db)
 			{
 				return add(trx, investor_id, type, date, data)
 			})
-			.then(() =>
+			.then(post_id =>
 			{
 				PostCreated(investor_id,
 				{
-					admin: [ ':user-id', whom_id ]
+					admin: [ ':user-id', whom_id ],
+					post_id: post_id
 				})
 			})
 		})
