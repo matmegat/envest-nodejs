@@ -77,19 +77,18 @@ var Feed = module.exports = function Feed (db)
 
 	feed.NotFound = NotFound
 
-	feed.byId = function (id)
+	feed.byId = function (id, user_id)
 	{
+		var queryset = feed.feed_table()
+
 		return feed.validateFeedId(id)
-		.then(() =>
-		{
-			return feed.feed_table()
-			.where('id', id)
-		})
+		.then(() => update_queryset(queryset, user_id))
+		.then(() => queryset.where('id', id))
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
 		.then((feed_item) =>
 		{
-			return investor.public.byId(feed_item.investor_id)
+			return investor.all.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
 				feed_item.investor = _.pick(investor,
@@ -145,7 +144,8 @@ var Feed = module.exports = function Feed (db)
 			paginator = paginators.chunked
 		}
 
-		return subscr.isAble(user_id, 'multiple_investors')
+		return update_queryset(queryset, user_id)
+		.then(() => subscr.isAble(user_id, 'multiple_investors'))
 		.then((subscr_item) =>
 		{
 			if (! subscr_item)
@@ -221,6 +221,42 @@ var Feed = module.exports = function Feed (db)
 			})
 		})
 	}
+
+	function update_queryset (queryset, user_id)
+	{
+		return Promise.all(
+		[
+			db.admin.is(user_id),
+			db.investor.all.is(user_id)
+		])
+		.then(so =>
+		{
+			var is_admin = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return /* do not modify feed */
+			}
+
+			queryset
+			.innerJoin('investors', 'investors.user_id', 'feed_items.investor_id')
+
+			if (is_investor)
+			{
+				queryset.where(function ()
+				{	/* all investor post and all public posts */
+					this.where('investors.is_public', true)
+					this.orWhere('feed_items.investor_id', user_id)
+				})
+			}
+			else
+			{
+				queryset.where('investors.is_public', true)
+			}
+		})
+	}
+
 
 	feed.byWatchlist = function (user_id, options)
 	{
