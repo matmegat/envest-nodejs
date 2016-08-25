@@ -28,7 +28,7 @@ module.exports = function Post (db)
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
-	post.add = function (trx, investor_id, type, date, data)
+	post.add = function (trx, investor_id, type, date, data, post_id)
 	{
 		if (! (type in post.types))
 		{
@@ -37,13 +37,13 @@ module.exports = function Post (db)
 
 		var post_type = post.types[type]
 
-		return post_type.set(trx, investor_id, type, date, data)
+		return post_type.set(trx, investor_id, type, date, data, post_id)
 	}
 
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	post.create = function (investor_id, type, date, data)
+	post.create = function (investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -63,7 +63,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.add(trx, investor_id, type, date, data)
+				return post.add(trx, investor_id, type, date, data, post_id)
 			})
 			.then(noop)
 			.then(() =>
@@ -76,7 +76,7 @@ module.exports = function Post (db)
 		})
 	}
 
-	post.createAs = function (whom_id, investor_id, type, date, data)
+	post.createAs = function (whom_id, investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -89,7 +89,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.add(trx, investor_id, type, date, data)
+				return post.add(trx, investor_id, type, date, data, post_id)
 			})
 			.then(post_id =>
 			{

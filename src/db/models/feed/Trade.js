@@ -10,7 +10,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 	return Type(
 	{
 		validate: validate_trade,
-		set: (trx, investor_id, type, date, data) =>
+		set: (trx, investor_id, type, date, data, post_id) =>
 		{
 			return symbols.resolve(data.symbol)
 			.then(symbl =>
@@ -27,7 +27,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 			})
 			.then(() =>
 			{
-				return feed.create(trx, investor_id, type, date, data)
+				return feed.upsert(trx, investor_id, type, date, data, post_id)
 			})
 		}
 	})

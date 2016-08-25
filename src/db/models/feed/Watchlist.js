@@ -10,7 +10,7 @@ module.exports = function Watchlist (db)
 	return Type(
 	{
 		validate: validate_watchlist,
-		set: (trx, investor_id, type, date, data) =>
+		set: (trx, investor_id, type, date, data, post_id) =>
 		{
 			var additional = pick(data,
 			[
@@ -43,7 +43,7 @@ module.exports = function Watchlist (db)
 			})
 			.then(() =>
 			{
-				return db.feed.create(trx, investor_id, type, date, data)
+				return db.feed.upsert(trx, investor_id, type, date, data, post_id)
 			})
 		}
 	})

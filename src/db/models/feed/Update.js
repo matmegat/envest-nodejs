@@ -14,7 +14,7 @@ module.exports = function Update (db)
 	return Type(
 	{
 		validate: validate_update,
-		set: (trx, investor_id, type, date, data) =>
+		set: (trx, investor_id, type, date, data, post_id) =>
 		{
 			return db.symbols.resolveMany(data.symbols)
 			.then(symbls =>
@@ -31,7 +31,7 @@ module.exports = function Update (db)
 			})
 			.then(() =>
 			{
-				return db.feed.create(trx, investor_id, type, date, data)
+				return db.feed.upsert(trx, investor_id, type, date, data, post_id)
 			})
 		}
 	})

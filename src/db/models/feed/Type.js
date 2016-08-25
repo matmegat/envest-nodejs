@@ -23,12 +23,12 @@ function validator (func)
 
 function setter (type, set)
 {
-	return (trx, investor_id, feed_type, date, data) =>
+	return (trx, investor_id, feed_type, date, data, post_id) =>
 	{
 		return type.validate(data)
 		.then(data =>
 		{
-			return set(trx, investor_id, feed_type, date, data)
+			return set(trx, investor_id, feed_type, date, data, post_id)
 		})
 	}
 }

@@ -274,6 +274,31 @@ var Feed = module.exports = function Feed (db)
 		.then(one)
 	}
 
+	feed.update = function (trx, investor_id, type, date, data, post_id)
+	{
+		return feed.feed_table(trx)
+		.where('id', post_id)
+		.update({
+			investor_id: investor_id,
+			type: type,
+			timestamp: date,
+			data: data
+		}, 'id')
+		.then(one)
+	}
+
+	feed.upsert = function (trx, investor_id, type, date, data, post_id)
+	{
+		if (post_id)
+		{
+			return feed.update(trx, investor_id, type, date, data, post_id)
+		}
+		else
+		{
+			return feed.create(trx, investor_id, type, date, data)
+		}
+	}
+
 	return feed
 }
 
