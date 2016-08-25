@@ -298,7 +298,6 @@ module.exports = function User (db, app)
 	var RemoveAdmin = Err('remove_admin', 'You cannot remove admins')
 
 	var includes = require('lodash/includes')
-	var union    = require('lodash/union')
 
 	user.remove = knexed.transact(knex, (trx, user_id, ids) =>
 	{
@@ -309,7 +308,9 @@ module.exports = function User (db, app)
 		{
 			validateMany(WrongUserId, ids)
 
-			if (includes(ids, user_id.toString()))
+			ids = ids.map(Number)
+
+			if (includes(ids, user_id))
 			{
 				throw RemoveSelf()
 			}
@@ -318,16 +319,17 @@ module.exports = function User (db, app)
 		})
 		.then(() =>
 		{
-			return knex('admins')
-			.transacting(trx)
-			.whereNotIn('user_id', union(ids, [user_id]))
-			.orWhere(function()
-			{
-				this.where('user_id', user_id)
-				this.andWhere('can_intro', true)
-			})
+			return db.admin.byIds(ids)
 		})
-		.then(Err.emptish(RemoveAdmin))
+		.then((admins) =>
+		{
+			if (admins.length > 0)
+			{
+				return db.admin.byId(user_id)
+				.then(me => me.can_intro)
+				.then(Err.falsy(RemoveAdmin))
+			}
+		})
 		.then(() =>
 		{
 			return user.users_table(trx)

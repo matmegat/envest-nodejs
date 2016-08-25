@@ -27,7 +27,7 @@ module.exports = function Users (http, user_model)
 		var user_id = rq.user.id
 		var ids     = rq.params.ids
 
-		toss(rs, users.model.remove(rq.user.id, ids))
+		toss(rs, users.model.remove(user_id, ids))
 	})
 
 	users.express.post('/change-name', (rq, rs) =>
