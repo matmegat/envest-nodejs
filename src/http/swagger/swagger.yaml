@@ -246,3 +246,6 @@ definitions:
 
   NotificationsItem:
     $ref: ../api/notifications/swag/NotificationItem.yaml
+
+  PostChartPayload:
+    $ref: ../api/feed/swag/PostChartPayload.yaml
