@@ -145,10 +145,9 @@ var Feed = module.exports = function Feed (db)
 		}
 
 		return update_queryset(queryset, user_id)
-		.then(() => subscr.isAble(user_id, 'multiple_investors'))
-		.then((subscr_item) =>
+		.then((is_full_access) =>
 		{
-			if (! subscr_item)
+			if (! is_full_access)
 			{
 				return investor.featured.get()
 				.then((item) =>
@@ -236,7 +235,7 @@ var Feed = module.exports = function Feed (db)
 
 			if (is_admin)
 			{
-				return /* do not modify feed */
+				return true
 			}
 
 			queryset
@@ -249,11 +248,13 @@ var Feed = module.exports = function Feed (db)
 					this.where('investors.is_public', true)
 					this.orWhere('feed_items.investor_id', user_id)
 				})
+
+				return true
 			}
-			else
-			{
-				queryset.where('investors.is_public', true)
-			}
+
+			queryset.where('investors.is_public', true)
+
+			return subscr.isAble(user_id, 'multiple_investors')
 		})
 	}
 
