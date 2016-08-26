@@ -358,6 +358,11 @@ Feed.symbolsInvolved = (items) =>
 		{
 			return data.symbols
 		}
+
+		if (data.chart && data.chart.symbol)
+		{
+			return data.chart.symbol
+		}
 	})
 
 	symbols = flatten(symbols)
@@ -390,6 +395,10 @@ var replace_symbol = curry((symbols, item) =>
 	if (data.symbols)
 	{
 		data.symbols = data.symbols.map(pick)
+	}
+	if (data.chart && data.chart.symbol)
+	{
+		data.chart.symbol = pick(data.chart.symbol)
 	}
 
 	return item
