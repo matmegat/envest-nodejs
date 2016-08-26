@@ -66,7 +66,7 @@ module.exports = function Admin (db)
 		.then(oneMaybe)
 	}
 
-	admin.byIds = function (user_ids, trx)
+	admin.byIds = function (trx, user_ids)
 	{
 		return table(trx)
 		.whereIn('user_id', user_ids)

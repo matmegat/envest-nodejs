@@ -8,7 +8,7 @@ exports.up = function (knex, Promise)
 		{
 			table.integer('user_id').primary().unique().notNullable()
 			.references('users.id')
-			.onUpdate('cascade') /* user.id should never change */
+			.onUpdate('cascade')
 			.onDelete('cascade')
 
 			table.text('profile_pic').nullable()

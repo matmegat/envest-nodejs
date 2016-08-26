@@ -5,8 +5,8 @@ exports.up = function (knex)
 	{
 		table.integer('user_id').primary()
 			.references('users.id')
-			.onUpdate('cascade') /* user.id should never change */
-			.onDelete('cascade') /* we don't want to accidentally delete admin */
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 		table.integer('parent').nullable()
 			.references('admins.user_id')

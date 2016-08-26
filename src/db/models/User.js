@@ -319,13 +319,13 @@ module.exports = function User (db, app)
 		})
 		.then(() =>
 		{
-			return db.admin.byIds(ids)
+			return db.admin.byIds(trx, ids)
 		})
 		.then((admins) =>
 		{
 			if (admins.length > 0)
 			{
-				return db.admin.byId(user_id)
+				return db.admin.byId(user_id, trx)
 				.then(me => me.can_intro)
 				.then(Err.falsy(RemoveAdmin))
 			}
