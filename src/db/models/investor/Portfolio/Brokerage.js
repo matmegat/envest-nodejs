@@ -38,7 +38,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 				}
 			})
 		)
-		.debug()
 		.then(r =>
 		{
 			/* brokerage.init guarantees
@@ -69,11 +68,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(it => it.cash)
 	})
 
+	// TODO rm
 	// brokerage.byId(120, new Date('2016-08-23 08:59:58.34+00'))
 	// brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
-	brokerage.byId(120)
+	// brokerage.byId(120)
 	// brokerage.cashById(120)
-	.then(console.info, console.error)
+	// .then(console.info, console.error)
 
 
 	// init

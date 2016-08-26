@@ -105,6 +105,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
+	// TODO rm
 	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
 	// holdings.byId(120)
 	// .then(console.info, console.error)
