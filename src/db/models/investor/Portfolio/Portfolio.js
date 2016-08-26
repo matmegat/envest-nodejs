@@ -4,6 +4,8 @@ var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 
+var knexed = require('../../../knexed')
+
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
 
@@ -18,7 +20,9 @@ module.exports = function Portfolio (db, investor)
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
 
-	portfolio.byId = function (investor_id, trx)
+	var knex = db.knex
+
+	portfolio.byId = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
@@ -101,7 +105,7 @@ module.exports = function Portfolio (db, investor)
 				}
 			})
 		})
-	}
+	})
 
 	portfolio.full = function (investor_id)
 	{
