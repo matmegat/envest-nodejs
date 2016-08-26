@@ -175,7 +175,6 @@ var validate_motivations_len = validate.length(3, 1)
 
 validate.motivation = function validate__motivations (motivations)
 {
-	validate.required(motivations, 'motivations')
 	validate.array(motivations, 'motivations')
 	validate_motivations_len(motivations, 'motivations')
 

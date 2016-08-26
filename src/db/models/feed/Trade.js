@@ -2,6 +2,7 @@
 var Type = require('./Type')
 
 var pick = require('lodash/pick')
+var assign = require('lodash/assign')
 
 var validate = require('../../validate')
 
@@ -10,6 +11,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 	return Type(
 	{
 		validate: validate_trade,
+		validate_update: validate_trade_additionals,
 		set: (trx, investor_id, type, date, data, post_id) =>
 		{
 			return symbols.resolve(data.symbol)
@@ -29,7 +31,47 @@ module.exports = function Trade (portfolio, symbols, feed)
 			{
 				return feed.upsert(trx, investor_id, type, date, data, post_id)
 			})
+		},
+		update: (trx, investor_id, type, date, data, post_id) =>
+		{
+			return feed.getPost(post_id)
+			.then(item =>
+			{
+				data = assign(item.data, data)
+
+				return feed.upsert(trx, investor_id, type, date, data, post_id)
+			})
+		},
+		rollback: (post_id) =>
+		{
+			return feed.byId(post_id)
+			.then(res =>
+			{
+				console.log(res)
+			})
 		}
+	})
+}
+
+function validate_trade_additionals (data)
+{
+	var data = pick(data,
+	[
+		'text',
+		'risk',
+		'motivations'
+	])
+
+	return new Promise(rs =>
+	{
+		validate.empty(data.text, 'text')
+
+		validate.empty(data.risk, 'risk')
+
+		validate.empty(data.motivations, 'motivations')
+		validate.motivation(data.motivations)
+
+		rs(data)
 	})
 }
 
@@ -51,10 +93,10 @@ function validate_trade (data)
 
 	return new Promise(rs =>
 	{
+		validate_trade_dir(data.dir)
+
 		validate.required(data.text, 'text')
 		validate.empty(data.text, 'text')
-
-		validate_trade_dir(data.dir)
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
@@ -68,6 +110,8 @@ function validate_trade (data)
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
 
+		validate.required(data.motivations, 'motivations')
+		validate.empty(data.motivations, 'motivations')
 		validate.motivation(data.motivations)
 
 		rs(data)

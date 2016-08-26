@@ -28,7 +28,7 @@ module.exports = function Post (db)
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
-	post.add = function (trx, investor_id, type, date, data, post_id)
+	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
 		if (! (type in post.types))
 		{
@@ -37,7 +37,18 @@ module.exports = function Post (db)
 
 		var post_type = post.types[type]
 
-		return post_type.set(trx, investor_id, type, date, data, post_id)
+		return Promise.resolve()
+		.then(() =>
+		{
+			if (post_id)
+			{
+				return post_type.update(trx, investor_id, type, date, data, post_id)
+			}
+			else
+			{
+				return post_type.set(trx, investor_id, type, date, data)
+			}
+		})
 	}
 
 	var InvestorPostDateErr =
@@ -63,7 +74,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.add(trx, investor_id, type, date, data, post_id)
+				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
 			.then(noop)
 			.then(() =>
@@ -89,7 +100,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return post.add(trx, investor_id, type, date, data, post_id)
+				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
 			.then(post_id =>
 			{

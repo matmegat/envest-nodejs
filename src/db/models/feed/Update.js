@@ -14,27 +14,31 @@ module.exports = function Update (db)
 	return Type(
 	{
 		validate: validate_update,
-		set: (trx, investor_id, type, date, data, post_id) =>
-		{
-			return db.symbols.resolveMany(data.symbols)
-			.then(symbls =>
-			{
-				data.symbols = symbls
-				.map(item =>
-				{
-					return pick(item,
-					[
-						'ticker',
-						'exchange'
-					])
-				})
-			})
-			.then(() =>
-			{
-				return db.feed.upsert(trx, investor_id, type, date, data, post_id)
-			})
-		}
+		validate_update: validate_update,
+		set: upsert,
+		update: upsert
 	})
+
+	function upsert (trx, investor_id, type, date, data, post_id)
+	{
+		return db.symbols.resolveMany(data.symbols)
+		.then(symbls =>
+		{
+			data.symbols = symbls
+			.map(item =>
+			{
+				return pick(item,
+				[
+					'ticker',
+					'exchange'
+				])
+			})
+		})
+		.then(() =>
+		{
+			return db.feed.upsert(trx, investor_id, type, date, data, post_id)
+		})
+	}
 
 	function validate_update (data)
 	{

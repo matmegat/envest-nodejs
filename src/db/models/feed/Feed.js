@@ -262,7 +262,14 @@ var Feed = module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.create = function (trx, investor_id, type, date, data)
+	feed.getPost = function (id, trx)
+	{
+		return feed.feed_table(trx)
+		.where('id', id)
+		.then(one)
+	}
+
+	function create (trx, investor_id, type, date, data)
 	{
 		return feed.feed_table(trx)
 		.insert({
@@ -274,7 +281,7 @@ var Feed = module.exports = function Feed (db)
 		.then(one)
 	}
 
-	feed.update = function (trx, investor_id, type, date, data, post_id)
+	function update (trx, investor_id, type, date, data, post_id)
 	{
 		return feed.feed_table(trx)
 		.where('id', post_id)
@@ -287,15 +294,26 @@ var Feed = module.exports = function Feed (db)
 		.then(one)
 	}
 
+	feed.remove = function (investor_id, post_id, trx)
+	{
+		return feed.feed_table(trx)
+		.where({
+			'id': post_id,
+			'investor_id': investor_id
+		})
+		.del()
+		.then(_.noop)
+	}
+
 	feed.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
 		if (post_id)
 		{
-			return feed.update(trx, investor_id, type, date, data, post_id)
+			return update(trx, investor_id, type, date, data, post_id)
 		}
 		else
 		{
-			return feed.create(trx, investor_id, type, date, data)
+			return create(trx, investor_id, type, date, data)
 		}
 	}
 

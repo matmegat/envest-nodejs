@@ -10,6 +10,7 @@ module.exports = function Watchlist (db)
 	return Type(
 	{
 		validate: validate_watchlist,
+		validate_update: validate_watchlist_additionals,
 		set: (trx, investor_id, type, date, data, post_id) =>
 		{
 			var additional = pick(data,
@@ -45,40 +46,70 @@ module.exports = function Watchlist (db)
 			{
 				return db.feed.upsert(trx, investor_id, type, date, data, post_id)
 			})
+		},
+		update: (trx, investor_id, type, date, data, post_id) =>
+		{
+			return feed.getPost(post_id)
+			.then(item =>
+			{
+				data = assign(item.data, data)
+
+				return feed.upsert(trx, investor_id, type, date, data, post_id)
+			})
 		}
 	})
-}
 
-function validate_watchlist (data)
-{
-	var data = pick(data,
-	[
-		'dir',
-		'symbol',
-		'text',
-		'target_price',
-		'motivations'
-	])
-
-	var watchlist_dirs = ['added', 'removed']
-	var validate_watchlist_dir = validate.collection(watchlist_dirs)
-
-	return new Promise(rs =>
+	function validate_watchlist_additionals (data)
 	{
-		validate_watchlist_dir(data.dir)
+		var data = pick(data,
+		[
+			'text',
+			'motivations'
+		])
 
-		validate.required(data.text, 'text')
-		validate.empty(data.text, 'text')
+		return new Promise(rs =>
+		{
+			validate.empty(data.text, 'text')
 
-		validate.required(data.symbol, 'symbol')
-		validate.empty(data.symbol, 'symbol')
+			validate.empty(data.motivations, 'motivations')
+			validate.motivation(data.motivations)
 
-		validate.required(data.target_price, 'target_price')
-		validate.empty(data.target_price, 'target_price')
-		validate.number.positive(data.target_price, 'target_price')
+			rs(data)
+		})
+	}
 
-		validate.motivation(data.motivations)
+	function validate_watchlist (data)
+	{
+		var data = pick(data,
+		[
+			'dir',
+			'symbol',
+			'text',
+			'target_price',
+			'motivations'
+		])
 
-		rs(data)
-	})
+		var watchlist_dirs = ['added', 'removed']
+		var validate_watchlist_dir = validate.collection(watchlist_dirs)
+
+		return new Promise(rs =>
+		{
+			validate_watchlist_dir(data.dir)
+
+			validate.required(data.text, 'text')
+			validate.empty(data.text, 'text')
+
+			validate.required(data.symbol, 'symbol')
+			validate.empty(data.symbol, 'symbol')
+
+			validate.required(data.target_price, 'target_price')
+			validate.empty(data.target_price, 'target_price')
+			validate.number.positive(data.target_price, 'target_price')
+
+			validate.required(data.motivations, 'motivations')
+			validate.motivation(data.motivations)
+
+			rs(data)
+		})
+	}
 }
