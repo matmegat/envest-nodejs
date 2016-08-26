@@ -22,6 +22,14 @@ module.exports = function Users (http, user_model)
 	users.express.get('/', http.adminRequired, by_group('users'))
 	users.express.get('/admins', http.adminRequired, by_group('admins'))
 
+	users.express.delete('/:ids', http.adminRequired, (rq, rs) =>
+	{
+		var user_id = rq.user.id
+		var ids     = rq.params.ids
+
+		toss(rs, users.model.remove(user_id, ids))
+	})
+
 	users.express.post('/change-name', (rq, rs) =>
 	{
 		var target_user_id = rq.user.id
