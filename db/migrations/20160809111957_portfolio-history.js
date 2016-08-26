@@ -49,6 +49,13 @@ exports.up = (knex) =>
 
 			table.decimal('cash', 12, 2).notNullable()
 			table.float('multiplier').notNullable()
+
+			table.primary(
+			[
+				'investor_id',
+				'timestamp'
+			]
+			, 'timed_brokerage_point_unique')
 		})
 	})
 	.then(() =>
