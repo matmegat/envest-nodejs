@@ -62,6 +62,7 @@ module.exports = function Investor (db)
 		return byId(id, trx)
 		.then(r =>
 		{
+			/* this info accessible for admin only */
 			return investor.portfolio.full(id)
 			.then(full =>
 			{
@@ -171,8 +172,8 @@ module.exports = function Investor (db)
 
 	investor.chart = function (id)
 	{
+		// TODO chart
 		return investor.all.ensure(id)
-		//.then(() => investor.portfolio.full(id))
 		.then(() =>
 		{
 			return [
