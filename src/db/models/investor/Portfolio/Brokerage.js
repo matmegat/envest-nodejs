@@ -21,23 +21,27 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// byId
 	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		var raw = knex.raw
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			var raw = knex.raw
 
-		return knex(raw('brokerage AS B'))
-		.transacting(trx)
-		.select('cash', 'multiplier')
-		.where('investor_id', investor_id)
-		.where('timestamp',
-			table().max('timestamp')
-			.where('investor_id', raw('B.investor_id'))
-			.where(function ()
-			{
-				if (for_date)
+			return knex(raw('brokerage AS B'))
+			.transacting(trx)
+			.select('cash', 'multiplier')
+			.where('investor_id', investor_id)
+			.where('timestamp',
+				table().max('timestamp')
+				.where('investor_id', raw('B.investor_id'))
+				.where(function ()
 				{
-					this.where('timestamp', '<=', for_date)
-				}
-			})
-		)
+					if (for_date)
+					{
+						this.where('timestamp', '<=', for_date)
+					}
+				})
+			)
+		})
 		.then(r =>
 		{
 			/* brokerage.init guarantees
