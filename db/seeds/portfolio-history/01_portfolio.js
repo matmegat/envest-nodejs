@@ -15,6 +15,7 @@ exports.seed = (knex) =>
 		var id = user.id
 
 		/* eslint-disable max-len */
+		/* eslint-disable space-infix-ops */
 		return insert(id,
 		[
 
@@ -27,6 +28,7 @@ exports.seed = (knex) =>
 
 		])
 		/* eslint-enable max-len */
+		/* eslint-enable space-infix-ops */
 	})
 
 

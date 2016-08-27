@@ -18,6 +18,7 @@ exports.seed = (knex) =>
 		var id = user.id
 
 		/* eslint-disable max-len */
+		/* eslint-disable space-infix-ops */
 		return insert(id,
 		[
 			{ timestamp: prev_init, cash: CASH },
@@ -29,6 +30,7 @@ exports.seed = (knex) =>
 			{ timestamp: now+day(1)+s(1), cash: 97580+130+1200 }
 		])
 		/* eslint-enable max-len */
+		/* eslint-enable space-infix-ops */
 	})
 
 
