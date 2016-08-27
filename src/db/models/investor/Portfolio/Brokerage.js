@@ -187,12 +187,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 		 * */
 		var operation = data.operation
 		var amount = data.amount
-		var for_date = date
 
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.byId(trx, investor_id, for_date)
+			return brokerage.byId(trx, investor_id, date)
 		})
 		.then(brokerage =>
 		{
@@ -207,7 +206,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var cash = amount + brokerage.cash
 
-			return put(trx, investor_id, cash)
+			return put(trx, investor_id, cash, date)
 		})
 	})
 
