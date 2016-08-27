@@ -3,12 +3,12 @@ var extend = Object.assign
 
 exports.seed = (knex) =>
 {
-	var hr = (hr) => hr * 1000 * 60 * 60
+	var day = (day) => day * 1000 * 60 * 60 * 24
 	var s = (s) => s * 1000
 
 	var now  = +new Date('Sat Aug 27 2016 20:05:58 +03')
-	var prev = now - hr(1)
-	var prev_init = prev - hr(1)
+	var prev = now - day(1)
+	var prev_init = prev - day(1)
 
 	var CASH = 100000
 
@@ -25,8 +25,8 @@ exports.seed = (knex) =>
 			{ timestamp: prev+s(1), cash: CASH-100-120 },
 			{ timestamp: now,       cash: 99580 },
 			{ timestamp: now+s(1),  cash: 97580 },
-			{ timestamp: now+s(2),  cash: 97580+130 },
-			{ timestamp: now+s(3),  cash: 97580+130+1200 }
+			{ timestamp: now+day(1), cash: 97580+130 },
+			{ timestamp: now+day(1)+s(1), cash: 97580+130+1200 }
 		])
 		/* eslint-enable max-len */
 	})
