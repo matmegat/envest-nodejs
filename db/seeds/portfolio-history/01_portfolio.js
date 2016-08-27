@@ -6,6 +6,8 @@ exports.seed = (knex) =>
 	var now  = +new Date
 	var prev = now - 1000 * 60 * 60
 
+	var s = (s) => s * 1000
+
 	return get('david.philips@investor.com')
 	.then(user =>
 	{
@@ -14,11 +16,13 @@ exports.seed = (knex) =>
 		/* eslint-disable max-len */
 		return insert(id,
 		[
-			{ symbol_exchange: 'XNAS', symbol_ticker: 'TSLA', amount: 1, price: 100,  timestamp: prev   },
-			{ symbol_exchange: 'XNYS', symbol_ticker: 'GE',   amount: 1, price: 120,  timestamp: prev+1 },
-			{ symbol_exchange: 'XNAS', symbol_ticker: 'TSLA', amount: 2, price: 100,  timestamp: now    },
-			{ symbol_exchange: 'XNAS', symbol_ticker: 'AAPL', amount: 1, price: 1000, timestamp: now+1  },
-			{ symbol_exchange: 'XNYS', symbol_ticker: 'GE',   amount: 0, price: 130,  timestamp: now+2  },
+
+{ symbol_exchange: 'XNAS', symbol_ticker: 'TSLA', amount: 1, price: 100,  timestamp: prev      },
+{ symbol_exchange: 'XNYS', symbol_ticker: 'GE',   amount: 1, price: 120,  timestamp: prev+s(1) },
+{ symbol_exchange: 'XNAS', symbol_ticker: 'TSLA', amount: 2, price: 100,  timestamp: now       },
+{ symbol_exchange: 'XNAS', symbol_ticker: 'AAPL', amount: 1, price: 1000, timestamp: now+s(1)  },
+{ symbol_exchange: 'XNYS', symbol_ticker: 'GE',   amount: 0, price: 130,  timestamp: now+s(2)  },
+
 		])
 		/* eslint-enable max-len */
 	})
