@@ -23,9 +23,10 @@ exports.seed = (knex) =>
 			{ timestamp: prev_init, cash: CASH },
 			{ timestamp: prev,      cash: CASH-100 },
 			{ timestamp: prev+s(1), cash: CASH-100-120 },
-			{ timestamp: now,       cash: 99680 },
-			{ timestamp: now+s(1),  cash: 98680 },
-			{ timestamp: now+s(2),  cash: 98680+130 }
+			{ timestamp: now,       cash: 99580 },
+			{ timestamp: now+s(1),  cash: 97580 },
+			{ timestamp: now+s(2),  cash: 97580+130 },
+			{ timestamp: now+s(3),  cash: 97580+130+1200 }
 		])
 		/* eslint-enable max-len */
 	})
