@@ -159,8 +159,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 
 			return table(trx).insert(batch)
+			.catch(Err.fromDb('timed_brokerage_point_unique', DuplicateBrokerageEntry))
 		})
 	}
+
+	var DuplicateBrokerageEntry = Err('brokerage_duplicate',
+		'There can be only one Brokerage entry per timestamp for Investor')
 
 
 	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
