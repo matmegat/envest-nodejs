@@ -69,3 +69,19 @@ WHERE investor_id = 120
     -- AND timestamp <= NOW()
   );
 --
+
+-- grid
+SELECT
+  timestamp,
+  date_trunc('day', timestamp) + INTERVAL '1 day' as day,
+  -- CAST(date_trunc('day', timestamp) as DATE) as day,
+  symbol_exchange,
+  symbol_ticker,
+  amount,
+  price
+
+FROM
+  portfolio
+
+WHERE
+  investor_id = 120;

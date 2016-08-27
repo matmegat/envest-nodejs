@@ -20,6 +20,8 @@ module.exports = function Holdings (db, investor, portfolio)
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio')
 
+	var raw = knex.raw
+
 	var oneMaybe = db.helpers.oneMaybe
 
 
@@ -68,8 +70,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	function byId (trx, investor_id, for_date, aux)
 	{
-		var raw = knex.raw
-
 		aux || (aux = noop)
 
 		return knex(raw('portfolio AS P'))
@@ -104,6 +104,28 @@ module.exports = function Holdings (db, investor, portfolio)
 			return r
 		})
 	}
+
+	// grid
+	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return table(trx)
+		.select(
+			'timestamp',
+			raw(`date_trunc('day', timestamp) + INTERVAL '1 day' as day`),
+			'symbol_exchange',
+			'symbol_ticker',
+			'amount',
+			'price'
+		)
+		.where('investor_id', investor_id)
+		.then(rows =>
+		{
+			return rows
+		})
+	})
+
+	holdings.grid(120)
+	.then(console.log, console.error)
 
 	// TODO rm
 	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
