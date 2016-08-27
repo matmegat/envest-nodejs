@@ -64,6 +64,8 @@ var Symbl = module.exports = function Symbl (it)
 			}
 		}
 
+		s.inspect = inspect
+
 		return s
 	}
 
@@ -78,6 +80,12 @@ var Symbl = module.exports = function Symbl (it)
 	throw WrongFormat({ reason: 'unknown_format' })
 }
 /* eslint-enable */
+
+function inspect ()
+{
+	return '{' + this.toXign() + '}'
+}
+
 
 Symbl.is = (it) =>
 {
