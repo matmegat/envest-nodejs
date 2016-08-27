@@ -3,8 +3,14 @@ var extend = Object.assign
 
 exports.seed = (knex) =>
 {
-	var now  = +new Date
-	var prev = now - 1000 * 60 * 60
+	var hr = (hr) => hr * 1000 * 60 * 60
+	var s = (s) => s * 1000
+
+	var now  = +new Date('Sat Aug 27 2016 20:05:58 +03')
+	var prev = now - hr(1)
+	var prev_init = prev - hr(1)
+
+	var CASH = 100000
 
 	return get('david.philips@investor.com')
 	.then(user =>
@@ -14,8 +20,12 @@ exports.seed = (knex) =>
 		/* eslint-disable max-len */
 		return insert(id,
 		[
-			{ timestamp: prev, cash: 10000, multiplier: 1 },
-			{ timestamp: now,  cash: 11000, multiplier: 1 }
+			{ timestamp: prev_init, cash: CASH, multiplier: 1 },
+			{ timestamp: prev, cash: CASH-100, multiplier: 1 },
+			{ timestamp: prev+s(1), cash: CASH-100-120, multiplier: 1 },
+			{ timestamp: now, cash: 99680, multiplier: 1 },
+			{ timestamp: now+s(1), cash: 98680, multiplier: 1 },
+			{ timestamp: now+s(2), cash: 98680+130, multiplier: 1 }
 		])
 		/* eslint-enable max-len */
 	})

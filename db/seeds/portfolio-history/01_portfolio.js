@@ -3,10 +3,11 @@ var extend = Object.assign
 
 exports.seed = (knex) =>
 {
-	var now  = +new Date
-	var prev = now - 1000 * 60 * 60
-
+	var hr = (hr) => hr * 1000 * 60 * 60
 	var s = (s) => s * 1000
+
+	var now  = +new Date('Sat Aug 27 2016 20:05:58 +03')
+	var prev = now - hr(1)
 
 	return get('david.philips@investor.com')
 	.then(user =>
