@@ -125,11 +125,13 @@ module.exports = function Holdings (db, investor, portfolio)
 		.where('investor_id', investor_id)
 		.then(set =>
 		{
+			var involved = new Set
+
 			set = groupBy(set, it => it.day.toISOString())
 
 			set = mapValues(set, day =>
 			{
-				return day.map(entry =>
+				day = day.map(entry =>
 				{
 					var s = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
 
@@ -137,8 +139,12 @@ module.exports = function Holdings (db, investor, portfolio)
 
 					entry.symbol = s
 
+					involved.add(s.toXign())
+
 					return entry
 				})
+
+				return day
 			})
 
 			return set
