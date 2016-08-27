@@ -133,13 +133,17 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				day = day.map(entry =>
 				{
-					var s = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
+					var symbol
+					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
 
 					entry = omit(entry, 'symbol_ticker', 'symbol_exchange')
 
-					entry.symbol = s
+					entry.symbol = symbol
 
-					involved.add(s.toXign())
+					if (entry.amount)
+					{
+						involved.add(symbol.toXign())
+					}
 
 					return entry
 				})
