@@ -20,12 +20,12 @@ exports.seed = (knex) =>
 		/* eslint-disable max-len */
 		return insert(id,
 		[
-			{ timestamp: prev_init, cash: CASH, multiplier: 1 },
-			{ timestamp: prev, cash: CASH-100, multiplier: 1 },
-			{ timestamp: prev+s(1), cash: CASH-100-120, multiplier: 1 },
-			{ timestamp: now, cash: 99680, multiplier: 1 },
-			{ timestamp: now+s(1), cash: 98680, multiplier: 1 },
-			{ timestamp: now+s(2), cash: 98680+130, multiplier: 1 }
+			{ timestamp: prev_init, cash: CASH },
+			{ timestamp: prev,      cash: CASH-100 },
+			{ timestamp: prev+s(1), cash: CASH-100-120 },
+			{ timestamp: now,       cash: 99680 },
+			{ timestamp: now+s(1),  cash: 98680 },
+			{ timestamp: now+s(2),  cash: 98680+130 }
 		])
 		/* eslint-enable max-len */
 	})
@@ -41,7 +41,11 @@ exports.seed = (knex) =>
 	{
 		entries = entries.map(entry =>
 		{
-			return extend({}, entry,
+			return extend(
+			{
+				multiplier: 1,
+			},
+			entry,
 			{
 				investor_id:     id,
 				timestamp:   new Date(entry.timestamp)
