@@ -3,7 +3,6 @@ var noop = require('lodash/noop')
 var map  = require('lodash/map')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
-var groupBy = require('lodash/groupBy')
 
 var expect = require('chai').expect
 
@@ -106,6 +105,11 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
+
+	var groupBy = require('lodash/groupBy')
+	var mapValues = require('lodash/mapValues')
+	var omit = require('lodash/omit')
+
 	// grid
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
@@ -122,6 +126,21 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(set =>
 		{
 			set = groupBy(set, it => it.day.toISOString())
+
+			set = mapValues(set, day =>
+			{
+				return day.map(entry =>
+				{
+					var s = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
+
+					entry = omit(entry, 'symbol_ticker', 'symbol_exchange')
+
+					entry.symbol = s
+
+					return entry
+				})
+			})
+
 			return set
 		})
 	})
