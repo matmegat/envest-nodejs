@@ -188,7 +188,11 @@ module.exports = function Holdings (db, investor, portfolio)
 		)
 
 		return table(trx).insert(batch)
+		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
+
+	var DuplicateHoldingEntry = Err('holding_duplicate',
+		'There can be only one Holding entry per timestamp for Investor')
 
 
 	// buy, sell
