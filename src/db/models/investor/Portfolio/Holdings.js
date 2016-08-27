@@ -3,6 +3,7 @@ var noop = require('lodash/noop')
 var map  = require('lodash/map')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
+var groupBy = require('lodash/groupBy')
 
 var expect = require('chai').expect
 
@@ -118,9 +119,10 @@ module.exports = function Holdings (db, investor, portfolio)
 			'price'
 		)
 		.where('investor_id', investor_id)
-		.then(rows =>
+		.then(set =>
 		{
-			return rows
+			set = groupBy(set, it => it.day.toISOString())
+			return set
 		})
 	})
 
