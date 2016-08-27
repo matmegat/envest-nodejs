@@ -22,14 +22,8 @@ exports.up = (knex) =>
 		table.decimal('price', 12, 2)
 			.notNullable()
 
-		table.primary(
-		[
-			'investor_id',
-			'symbol_exchange',
-			'symbol_ticker',
-			'timestamp'
-		]
-		, 'timed_portfolio_symbol_unique')
+		table.primary([ 'investor_id', 'timestamp' ]
+			, 'timed_portfolio_point_unique')
 	})
 	.then(() =>
 	{
@@ -50,12 +44,8 @@ exports.up = (knex) =>
 			table.decimal('cash', 12, 2).notNullable()
 			table.float('multiplier').notNullable()
 
-			table.primary(
-			[
-				'investor_id',
-				'timestamp'
-			]
-			, 'timed_brokerage_point_unique')
+			table.primary([ 'investor_id', 'timestamp' ]
+				, 'timed_brokerage_point_unique')
 		})
 	})
 	.then(() =>
