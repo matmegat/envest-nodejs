@@ -171,6 +171,8 @@ module.exports = function Holdings (db, investor, portfolio)
 				return day
 			})
 
+			grid.involved = Array.from(involved)
+
 			var dates = keys(datadays)
 			.map(it => new Date(it))
 			.map(Number)
@@ -178,8 +180,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			grid.daterange = over([ min, max ])(dates)
 			.map(it => new Date(it))
 
-			// console.log('Involved', involved)
-			// console.log('Datadays', datadays)
+			grid.datadays = datadays
 
 			running = null
 
