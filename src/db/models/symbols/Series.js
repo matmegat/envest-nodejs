@@ -62,11 +62,7 @@ module.exports = function Series (token)
 		})
 	}
 
-	// series.intraday = () => {}
-	// or
-	// series.series.intraday = () => {}
-
-	series.bars = (symbol, start_date, end_date) =>
+	series.series.intraday = (symbol, start_date, end_date) =>
 	{
 		var precision = 'Minutes'
 		var period = 5
