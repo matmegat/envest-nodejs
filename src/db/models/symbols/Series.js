@@ -16,7 +16,7 @@ module.exports = function Series (token)
 
 	expect(token).a('string')
 
-	series.series = (symbol, end_date, resolution, periods) =>
+	series.series = (symbol, end_date, periods) =>
 	{
 		end_date = util.apidate(end_date)
 
@@ -35,7 +35,7 @@ module.exports = function Series (token)
 				AdjustmentMethod: 'SplitOnly',
 
 				EndDate: end_date,
-				PeriodType: resolution,
+				PeriodType: 'Day',
 				Periods: periods,
 
 				_Token: token

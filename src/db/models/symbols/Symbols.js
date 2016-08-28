@@ -272,7 +272,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				xign.series(
 					symbol.toXign(),
 					today(),
-					'Day',
 					today().diff(
 						today().subtract(5, 'years'),
 						'days'
