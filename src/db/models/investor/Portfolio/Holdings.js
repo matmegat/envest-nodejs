@@ -160,15 +160,11 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				day = values(running)
 
-				console.log(day)
-				console.log('--------')
-
 				return day
 			})
 
 
 			console.log('Involved', involved)
-			console.log('Days', datadays)
 
 			running = null
 
@@ -177,7 +173,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 	holdings.grid(120)
-	.then(console.log, console.error)
+	.then(console.log.part('Days'), console.error)
 
 	// TODO rm
 	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
