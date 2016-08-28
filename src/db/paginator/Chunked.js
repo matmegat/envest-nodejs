@@ -65,9 +65,7 @@ module.exports = function Paginator__Chunked (paginator_options)
 					this.where(real_order_column, current_chunk)
 					this.where(order_column, sign, current_id)
 
-					var real_sign = real_order_sign(default_dir, since_id, max_id)
-
-					this.orWhere(real_order_column, real_sign, current_chunk)
+					this.orWhere(real_order_column, sign, current_chunk)
 				})
 			}
 
@@ -101,23 +99,6 @@ module.exports = function Paginator__Chunked (paginator_options)
 	}
 
 	function order_sign (direction, since_id)
-	{
-		var sign = '<='
-
-		if (direction === 'asc')
-		{
-			sign = '>='
-		}
-
-		if (since_id)
-		{
-			sign = invert(sign)
-		}
-
-		return sign
-	}
-
-	function real_order_sign (direction, since_id)
 	{
 		var sign = '<'
 

@@ -35,7 +35,7 @@ module.exports = function Paginator__Ordered (paginator_options)
 		}
 		if (max_id)
 		{
-			queryset.where(order_column, '<=', max_id)
+			queryset.where(order_column, '<', max_id)
 		}
 
 		if (since_id)

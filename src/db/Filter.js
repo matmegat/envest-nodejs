@@ -153,27 +153,8 @@ Filter.by.name = function by_name (when_column)
 	}
 }
 
+
 var Symbl = require('./models/symbols/Symbl')
-
-Filter.by.portfolio_symbol = function by_portfolio_symbol (column)
-{
-	return function (queryset, symbol)
-	{
-		symbol = Symbl(symbol)
-
-		return queryset
-		.innerJoin('portfolio_current', 'portfolio_current.investor_id', column)
-		.where(function ()
-		{
-			this.where('portfolio_current.symbol_ticker', symbol.ticker)
-			if (symbol.exchange)
-			{
-				this.where('portfolio_current.symbol_exchange', symbol.exchange)
-			}
-		})
-	}
-}
-
 
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 {

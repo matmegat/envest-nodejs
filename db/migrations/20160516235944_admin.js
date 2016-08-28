@@ -5,13 +5,13 @@ exports.up = function (knex)
 	{
 		table.integer('user_id').primary()
 			.references('users.id')
-			.onUpdate('restrict') /* user.id should never change */
-			.onDelete('restrict') /* we don't want to accidentally delete admin */
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 		table.integer('parent').nullable()
 			.references('admins.user_id')
-			.onUpdate('restrict')
-			.onDelete('restrict')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 			.comment('another admin who introduced this admin')
 
 		table.boolean('can_intro').notNullable().default(false)
