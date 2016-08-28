@@ -109,6 +109,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	var groupBy = require('lodash/groupBy')
 	var mapValues = require('lodash/mapValues')
 	var omit = require('lodash/omit')
+	var values = require('lodash/values')
 
 	// grid
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
@@ -132,7 +133,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			set = mapValues(set, day =>
 			{
-				day = day.map(entry =>
+				day.forEach(entry =>
 				{
 					var symbol
 					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
@@ -153,9 +154,12 @@ module.exports = function Holdings (db, investor, portfolio)
 					{
 						delete running[xsymbol]
 					}
-
-					return entry
 				})
+
+				day = values(running)
+
+				console.log(day)
+				console.log('--------')
 
 				return day
 			})
