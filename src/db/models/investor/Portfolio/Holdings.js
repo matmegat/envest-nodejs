@@ -109,11 +109,19 @@ module.exports = function Holdings (db, investor, portfolio)
 	var groupBy = require('lodash/groupBy')
 	var mapValues = require('lodash/mapValues')
 	var omit = require('lodash/omit')
+
 	var values = require('lodash/values')
+	var keys = require('lodash/keys')
+
+	var over = require('lodash/over')
+	var min = require('lodash/min')
+	var max = require('lodash/max')
 
 	// grid
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
+		var grid = {}
+
 		return table(trx)
 		.select(
 			'timestamp',
@@ -163,17 +171,24 @@ module.exports = function Holdings (db, investor, portfolio)
 				return day
 			})
 
+			var dates = keys(datadays)
+			.map(it => new Date(it))
+			.map(Number)
 
-			console.log('Involved', involved)
+			grid.daterange = over([ min, max ])(dates)
+			.map(it => new Date(it))
+
+			// console.log('Involved', involved)
+			// console.log('Datadays', datadays)
 
 			running = null
 
-			return datadays
+			return grid
 		})
 	})
 
 	holdings.grid(120)
-	.then(console.log.part('Days'), console.error)
+	.then(console.log, console.error)
 
 	// TODO rm
 	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
