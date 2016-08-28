@@ -261,7 +261,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 			return Promise.all(
 			[
-				xign.bars(
+				xign.series.intraday(
 					symbol.toXign(),
 					today(),
 					today().endOf('day')
@@ -314,7 +314,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				return []
 			}
 
-			return xign.bars(
+			return xign.series.intraday(
 				symbol.toXign(),
 				date.startOf('day'),
 				date.clone().endOf('day')
