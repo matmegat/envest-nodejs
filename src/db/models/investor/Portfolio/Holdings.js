@@ -174,11 +174,11 @@ module.exports = function Holdings (db, investor, portfolio)
 			grid.involved = Array.from(involved)
 
 			var dates = keys(datadays)
-			.map(it => new Date(it))
+			.map(toDate)
 			.map(Number)
 
 			grid.daterange = over([ min, max ])(dates)
-			.map(it => new Date(it))
+			.map(toDate)
 
 			grid.datadays = datadays
 
@@ -186,6 +186,11 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			return grid
 		})
+
+		function toDate (it)
+		{
+			return new Date(it)
+		}
 	})
 
 	holdings.grid(120)
