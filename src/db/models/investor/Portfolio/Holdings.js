@@ -126,6 +126,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(set =>
 		{
 			var involved = new Set
+			var running  = {}
 
 			set = groupBy(set, it => it.day.toISOString())
 
@@ -140,9 +141,17 @@ module.exports = function Holdings (db, investor, portfolio)
 
 					entry.symbol = symbol
 
+					var xsymbol = symbol.toXign()
+
 					if (entry.amount)
 					{
-						involved.add(symbol.toXign())
+						involved.add(xsymbol)
+
+						running[xsymbol] = entry
+					}
+					else
+					{
+						delete running[xsymbol]
 					}
 
 					return entry
