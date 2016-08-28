@@ -135,6 +135,8 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				day.forEach(entry =>
 				{
+					entry.price = Number(entry.price)
+
 					var symbol
 					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
 
