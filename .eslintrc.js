@@ -11,6 +11,7 @@ module.exports =
 	rules:
 	{
 		'no-unused-expressions': 0,
-		 complexity: [ 1, 7 ]
+		 complexity:  [ 1, 7 ],
+		'max-params': [ 1, 5 ]
 	}
 }
