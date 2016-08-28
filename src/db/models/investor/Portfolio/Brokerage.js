@@ -80,6 +80,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// .then(console.info, console.error)
 
 
+	// grid
+	brokerage.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return {}
+	})
+
+
 	// init
 	var index_amount_cap = 1e5
 

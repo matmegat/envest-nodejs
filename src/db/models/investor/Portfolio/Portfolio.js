@@ -145,6 +145,33 @@ module.exports = function Portfolio (db, investor)
 	}
 
 
+	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return Promise.all(
+			[
+				holdings.grid(trx, investor_id),
+				brokerage.grid(trx, investor_id)
+			])
+		})
+		.then(grids =>
+		{
+			var grid = {}
+
+			grid.holdings  = grids[0]
+			grid.brokerage = grids[1]
+
+			return grid
+		})
+	})
+
+	// TODO rm
+	portfolio.grid(120)
+	.then(console.log, console.error)
+
+
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
 	holdings.dirs = {}
