@@ -124,14 +124,14 @@ module.exports = function Holdings (db, investor, portfolio)
 			'price'
 		)
 		.where('investor_id', investor_id)
-		.then(set =>
+		.then(datadays =>
 		{
 			var involved = new Set
 			var running  = {}
 
-			set = groupBy(set, it => it.day.toISOString())
+			datadays = groupBy(datadays, it => it.day.toISOString())
 
-			set = mapValues(set, day =>
+			datadays = mapValues(datadays, day =>
 			{
 				day.forEach(entry =>
 				{
@@ -166,7 +166,13 @@ module.exports = function Holdings (db, investor, portfolio)
 				return day
 			})
 
-			return set
+
+			console.log('Involved', involved)
+			console.log('Days', datadays)
+
+			running = null
+
+			return datadays
 		})
 	})
 
