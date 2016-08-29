@@ -34,7 +34,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
 		{
-			return feed.byIdRaw(post_id)
+			return feed.postByInvestor(post_id)
 			.then(item =>
 			{
 				return assign({}, item.data, data)
