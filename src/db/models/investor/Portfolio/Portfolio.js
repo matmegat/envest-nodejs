@@ -310,6 +310,7 @@ module.exports = function Portfolio (db, investor)
 	{
 		series = series[symbol]
 
+		/* ISO dates are sortable */
 		var entry = findLast(series, tick => tick.timestamp <= day)
 
 		if (entry)
@@ -318,7 +319,12 @@ module.exports = function Portfolio (db, investor)
 		}
 		else
 		{
-			throw TypeError('series_error')
+			console.warn(
+				'XIGN error, no data for Investor Chart {%s, %s}',
+				symbol, day
+			)
+
+			return 0
 		}
 	}
 
