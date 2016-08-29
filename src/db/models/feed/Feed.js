@@ -294,7 +294,7 @@ var Feed = module.exports = function Feed (db)
 		.then(one)
 	}
 
-	feed.remove = function (investor_id, post_id, trx)
+	feed.remove = function (trx, investor_id, post_id)
 	{
 		return feed.feed_table(trx)
 		.where({

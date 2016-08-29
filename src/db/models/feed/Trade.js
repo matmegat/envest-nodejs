@@ -45,7 +45,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 			return feed.byId(post_id)
 			.then(res =>
 			{
-				console.log(res)
+				
 			})
 		}
 	})

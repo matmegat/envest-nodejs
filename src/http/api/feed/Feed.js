@@ -136,7 +136,7 @@ module.exports = function Feed (db, http)
 		var investor_id = rq.user.id
 		var post_id = rq.body.post_id
 
-		toss(rs, feed.model.remove(investor_id, post_id))
+		toss(rs, feed.model.remove(null, investor_id, post_id))
 	})
 
 	return feed

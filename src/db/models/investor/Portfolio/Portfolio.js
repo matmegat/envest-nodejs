@@ -20,7 +20,6 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = Brokerage(db, investor)
 	var holdings  = Holdings(db, investor)
-	var feed = db.feed
 
 	portfolio.list = function (investor_id, trx)
 	{
@@ -189,16 +188,6 @@ module.exports = function Portfolio (db, investor)
 				operation: 'trade',
 				amount: sum
 			})
-		})
-	}
-
-	portfolio.rollbackTrade = function (trx, investor_id, post_id)
-	{
-		return feed.byId(post_id)
-		.then(res =>
-		{
-			console.log(res)
-			return res
 		})
 	}
 
