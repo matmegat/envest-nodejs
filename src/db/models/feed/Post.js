@@ -183,8 +183,6 @@ module.exports = function Post (db)
 
 	var PostIdRequired =
 		Err('post_id_required', 'Post Id Required')
-	var PostTypeRestricted =
-		Err('post_type_change_restricted', 'Post Type Change Restricted')
 
 	function validate_update_fields (post_id)
 	{

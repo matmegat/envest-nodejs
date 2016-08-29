@@ -50,7 +50,7 @@ module.exports = function Watchlist (db)
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
 		{
-			return feed.postByInvestor(trx, post_id, investor_id)
+			return db.feed.postByInvestor(trx, post_id, investor_id)
 			.then(item =>
 			{
 				return assign({}, item.data, data)

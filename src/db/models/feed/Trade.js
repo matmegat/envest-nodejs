@@ -40,7 +40,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 				return assign({}, item.data, data)
 			})
 		},
-		remove: (trx, post) =>
+		remove: () =>
 		{
 			// var reverted_dirs =
 			// {
