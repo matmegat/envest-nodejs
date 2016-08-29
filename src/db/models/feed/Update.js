@@ -33,10 +33,8 @@ module.exports = function Update (db)
 					'exchange'
 				])
 			})
-		})
-		.then(() =>
-		{
-			return db.feed.upsert(trx, investor_id, type, date, data, post_id)
+
+			return data
 		})
 	}
 

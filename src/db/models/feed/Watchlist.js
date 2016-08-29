@@ -44,7 +44,7 @@ module.exports = function Watchlist (db)
 			})
 			.then(() =>
 			{
-				return db.feed.upsert(trx, investor_id, type, date, data)
+				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
@@ -52,9 +52,7 @@ module.exports = function Watchlist (db)
 			return feed.byIdRaw(post_id)
 			.then(item =>
 			{
-				data = assign(item.data, data)
-
-				return feed.upsert(trx, investor_id, type, date, data, post_id)
+				return assign(item.data, data)
 			})
 		}
 	})

@@ -29,7 +29,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 			})
 			.then(() =>
 			{
-				return feed.upsert(trx, investor_id, type, date, data)
+				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
@@ -37,9 +37,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 			return feed.byIdRaw(post_id)
 			.then(item =>
 			{
-				data = assign(item.data, data)
-
-				return feed.upsert(trx, investor_id, type, date, data, post_id)
+				return assign(item.data, data)
 			})
 		},
 		rollback: (post_id) =>
@@ -69,7 +67,7 @@ function validate_trade_additionals (data)
 		validate.empty(data.risk, 'risk')
 
 		validate.empty(data.motivations, 'motivations')
-		validate.motivation(data.motivations)
+		data.motivations && validate.motivation(data.motivations)
 
 		rs(data)
 	})
