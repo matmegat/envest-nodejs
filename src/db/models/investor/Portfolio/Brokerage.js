@@ -207,7 +207,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 
 			return table(trx).insert(batch)
-			.catch(Err.fromDb('timed_brokerage_point_unique', DuplicateBrokerageEntry))
+			.catch(Err.fromDb(
+				'timed_brokerage_point_unique',
+				DuplicateBrokerageEntry
+			))
 		})
 	}
 
