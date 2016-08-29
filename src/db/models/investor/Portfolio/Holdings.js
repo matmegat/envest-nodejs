@@ -118,8 +118,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
-		var grid = {}
-
 		return table(trx)
 		.select(
 			'timestamp',
@@ -133,6 +131,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		.orderBy('timestamp')
 		.then(datadays =>
 		{
+			var grid = {}
+
 			var involved = new Set
 			var running  = {}
 
