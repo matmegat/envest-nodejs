@@ -20,6 +20,9 @@ paths:
   '/feed/post':
     $ref: ../api/feed/swag/FeedPost.yaml
 
+  '/feed/post/update':
+    $ref: ../api/feed/swag/FeedPostUpdate.yaml
+
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
