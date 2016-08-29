@@ -4,6 +4,7 @@ var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 var forOwn = require('lodash/forOwn')
+var round = require('lodash/round')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -221,6 +222,8 @@ module.exports = function Portfolio (db, investor)
 						})
 					}
 
+					total = round(total, 3)
+
 					compiled.push([ iso, total ])
 				})
 
@@ -286,7 +289,6 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	// var find = require('lodash/find')
 	var findLast = require('lodash/findLast')
 
 	function find_brokerage (brokerage, date)
