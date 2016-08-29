@@ -3,6 +3,7 @@ var pick = require('lodash/pick')
 var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
+var forOwn = require('lodash/forOwn')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -199,14 +200,20 @@ module.exports = function Portfolio (db, investor)
 
 					var sum = current_brokerage.cash * current_brokerage.multiplier
 
-					var current_holding
+					var current_holdings
 					 = find_holding_day(grid.holdings.datadays, iso)
 
-					if (current_holding)
+					if (current_holdings)
 					{
-						// iter symbols
+						forOwn(current_holdings, holding =>
+						{
+							var price
+							 = find_series_value(superseries, holding.symbol, iso)
+
+							console.warn(holding, iso)
+							console.warn(price)
+						})
 					}
-					console.log(current_holding)
 
 					compiled.push(sum) // TODO
 				})
@@ -219,7 +226,7 @@ module.exports = function Portfolio (db, investor)
 	})
 
 	// TODO rm
-	// portfolio.grid(120).catch(console.error)
+	portfolio.grid(120).catch(console.error)
 
 	function max_range (range1, range2)
 	{
@@ -284,6 +291,22 @@ module.exports = function Portfolio (db, investor)
 		else
 		{
 			return null // NO trades at all
+		}
+	}
+
+	function find_series_value (series, symbol, day)
+	{
+		series = series[symbol]
+
+		var entry = findLast(series, tick => tick.timestamp <= day)
+
+		if (entry)
+		{
+			return entry.value
+		}
+		else
+		{
+			throw TypeError('series_error')
 		}
 	}
 
