@@ -7,6 +7,8 @@ var orderBy = require('lodash/orderBy')
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
 
+var expect = require('chai').expect
+
 var knexed = require('../../../knexed')
 
 var Brokerage = require('./Brokerage')
@@ -22,6 +24,9 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
+
+	expect(db, 'Portfolio depends on Series').property('symbols')
+	var symbols = db.symbols
 
 	var knex = db.knex
 
@@ -170,6 +175,9 @@ module.exports = function Portfolio (db, investor)
 				grid.holdings.daterange,
 				grid.brokerage.daterange
 			)
+
+			symbols.seriesForPortfolio('TSLA.XNAS', range)
+			.then(console.info, console.error)
 
 			return grid
 		})
