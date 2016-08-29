@@ -103,7 +103,8 @@ function useFacebookToken (auth, user)
 			first_name: profile.name.givenName,
 			last_name: profile.name.familyName,
 			facebook_id: profile.id,
-			token: accessToken
+			token: accessToken,
+			is_manual: ! profile.emails[0].value && req.body.email
 		}
 
 		user.byFB(user_data)
