@@ -72,11 +72,10 @@ function validate_trade_additionals (data)
 	{
 		validate.forbidden(data_restricted)
 
-		data_update.text && validate.empty(data_update.text, 'text')
+		validate.empty(data_update.text, 'text')
 
-		data_update.risk && validate.empty(data_update.risk, 'risk')
+		validate.empty(data_update.risk, 'risk')
 
-		data_update.motivations && validate.empty(data_update.motivations, 'motivations')
 		data_update.motivations && validate.motivation(data_update.motivations)
 
 		rs(data_update)

@@ -50,15 +50,18 @@ module.exports = function Update (db)
 
 		return new Promise(rs =>
 		{
-			data.text && validate.empty(data.text, 'text')
+			validate.empty(data.text, 'text')
 
-			data.title && validate.empty(data.title, 'title')
+			validate.empty(data.title, 'title')
 
-			data.symbols && validate.empty(data.symbols, 'symbols')
-			data.symbols && validate.array(data.symbols, 'symbols')
-			data.symbols && validate_symbols_length(data.symbols, 'symbols')
+			if (data.symbols)
+			{
+				validate.empty(data.symbols, 'symbols')
+				validate.array(data.symbols, 'symbols')
+				validate_symbols_length(data.symbols, 'symbols')
+			}
 
-			data.pic && validate.empty(data.pic, 'pic')
+			validate.empty(data.pic, 'pic')
 
 			rs(data)
 		})
