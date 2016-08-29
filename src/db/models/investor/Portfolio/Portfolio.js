@@ -30,9 +30,10 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
-	portfolio.byId = knexed.transact(knex,
-	(trx, investor_id, extended = false) =>
+	portfolio.byId = knexed.transact(knex, (trx, investor_id, extended) =>
 	{
+		extended = Boolean(extended)
+
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -45,12 +46,6 @@ module.exports = function Portfolio (db, investor)
 		{
 			var brokerage = values[0]
 			var holdings  = values[1]
-
-			holdings.forEach(holding =>
-			{
-				holding.allocation
-				 = holding.amount * holding.price * brokerage.multiplier
-			})
 
 			return db.symbols.quotes(holdings.map(holding =>
 			{
@@ -71,11 +66,17 @@ module.exports = function Portfolio (db, investor)
 						])
 						.toFull()
 
+						holding.allocation =
+							holding.amount * holding.price * brokerage.multiplier
+
 						holding.gain = null
 					}
 					else
 					{
 						holding.symbol = quoted_symbol.symbol
+
+						holding.allocation =
+							holding.amount * quoted_symbol.price * brokerage.multiplier
 
 						/* calculated percentage */
 						holding.gain
