@@ -107,7 +107,8 @@ module.exports = function Holdings (db, investor, portfolio)
 
 
 	var groupBy = require('lodash/groupBy')
-	var mapValues = require('lodash/mapValues')
+	var orderBy = require('lodash/orderBy')
+	var toPairs = require('lodash/toPairs')
 
 	var values = require('lodash/values')
 	var keys = require('lodash/keys')
@@ -139,8 +140,14 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			datadays = groupBy(datadays, it => it.day.toISOString())
 
-			datadays = mapValues(datadays, day =>
+			datadays = toPairs(datadays)
+
+			datadays = orderBy(datadays, '0')
+
+			datadays = datadays.map(pair =>
 			{
+				var day = pair[1]
+
 				day.forEach(entry =>
 				{
 					var symbol
@@ -170,7 +177,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				day = values(running)
 
-				return day
+				return [ pair[0], day ]
 			})
 
 			grid.involved = Array.from(involved)
