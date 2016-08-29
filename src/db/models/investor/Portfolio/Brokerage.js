@@ -115,10 +115,16 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return [ pair[0], day ]
 			})
 
+			/* expect Brokerage datadays to be not empty.
+			   This means that if Investor is Onboarded
+			   there's always at least one entry in Brokerage.
+			 */
+			expect(datadays).not.empty
+
 			grid.daterange =
 			[
-				first(datadays)[0] || null,
-				last(datadays)[0]  || null
+				first(datadays)[0],
+				 last(datadays)[0]
 			]
 
 			grid.datadays = datadays
