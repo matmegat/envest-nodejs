@@ -177,6 +177,8 @@ module.exports = function Portfolio (db, investor)
 				grid.holdings.daterange
 			)
 
+			range = range_from(range, moment())
+
 			return grid_series(grid.holdings.involved, range)
 			.then(superseries =>
 			{
@@ -250,6 +252,17 @@ module.exports = function Portfolio (db, investor)
 
 		return new MRange(start, end)
 	}
+
+	function range_from (range, end)
+	{
+		end = moment(end)
+		var start = moment(end).subtract(2, 'years')
+
+		start = moment.max(range.start, start)
+
+		return new MRange(start, end)
+	}
+
 
 	function grid_series (involved, range)
 	{
