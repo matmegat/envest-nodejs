@@ -59,6 +59,29 @@ module.exports = function Post (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
+	var PostIdRequired =
+		Err('post_id_required', 'Post Id Required')
+
+	post.update = function (investor_id, type, date, data, post_id)
+	{
+		if (! post_id)
+		{
+			throw PostIdRequired()
+		}
+
+		return post.create(investor_id, type, date, data, post_id)
+	}
+
+	post.updateAs = function (whom_id, investor_id, type, date, data, post_id)
+	{
+		if (! post_id)
+		{
+			throw PostIdRequired()
+		}
+
+		return post.createAs(whom_id, investor_id, type, date, data, post_id)
+	}
+
 	post.create = function (investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)

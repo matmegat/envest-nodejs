@@ -130,7 +130,7 @@ module.exports = function Feed (db, http)
 		var data = rq.body.data
 		var date = rq.body.date
 
-		toss(rs, feed.post.create(investor_id, type, date, data, post_id))
+		toss(rs, feed.post.update(investor_id, type, date, data, post_id))
 	})
 
 	feed.express.post('/post-as', http.adminRequired, (rq, rs) =>
@@ -165,7 +165,7 @@ module.exports = function Feed (db, http)
 		.then(() =>
 		{
 			toss(rs,
-				feed.post.createAs(whom_id, target_user_id, type, date, data, post_id))
+				feed.post.updateAs(whom_id, target_user_id, type, date, data, post_id))
 		})
 		.catch(toss.err(rs))
 	})
