@@ -195,28 +195,33 @@ module.exports = function Portfolio (db, investor)
 					var iso = it.toISOString()
 					console.info(iso)
 
-					var current_brokerage
+					var c_brokerage
 					 = find_brokerage(grid.brokerage.datadays, iso)
 
-					var sum = current_brokerage.cash * current_brokerage.multiplier
+					var total = c_brokerage.cash * c_brokerage.multiplier
 
-					var current_holdings
+					var c_holdings
 					 = find_holding_day(grid.holdings.datadays, iso)
 
-					if (current_holdings)
+					if (c_holdings)
 					{
-						forOwn(current_holdings, holding =>
+						forOwn(c_holdings, holding =>
 						{
 							var price
 							 = find_series_value(superseries, holding.symbol, iso)
 
-							console.warn(holding, iso)
-							console.warn(price)
+							var wealth
+							 = price * holding.amount * c_brokerage.multiplier
+
+							total += wealth
 						})
 					}
 
-					compiled.push(sum) // TODO
+					compiled.push([ iso, total ])
 				})
+
+				console.log(compiled)
+				return compiled
 			})
 			.then(() =>
 			{
