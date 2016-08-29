@@ -191,14 +191,22 @@ module.exports = function Portfolio (db, investor)
 
 				range.by('days', it =>
 				{
-					console.info(it.toISOString())
+					var iso = it.toISOString()
+					console.info(iso)
 
 					var current_brokerage
-					 = find_brokerage(grid.brokerage.datadays, it.toISOString())
+					 = find_brokerage(grid.brokerage.datadays, iso)
 
 					var sum = current_brokerage.cash * current_brokerage.multiplier
 
-					console.info('sum', sum)
+					var current_holding
+					 = find_holding_day(grid.holdings.datadays, iso)
+
+					if (current_holding)
+					{
+						// iter symbols
+					}
+					console.log(current_holding)
 				})
 			})
 			.then(() =>
@@ -259,6 +267,21 @@ module.exports = function Portfolio (db, investor)
 		else
 		{
 			throw TypeError('brokerage_error')
+		}
+	}
+
+	function find_holding_day (holdings, date)
+	{
+		/* ISO dates are sortable */
+		var entry = findLast(holdings, entry => entry[0] <= date)
+
+		if (entry)
+		{
+			return entry[1]
+		}
+		else
+		{
+			return null // NO trades at all
 		}
 	}
 
