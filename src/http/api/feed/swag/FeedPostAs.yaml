@@ -135,4 +135,4 @@ post:
       schema:
         $ref: ../../../swagger/Error.yaml
   tags:
-  - admin
+  - feed

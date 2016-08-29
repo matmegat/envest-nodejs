@@ -10,8 +10,6 @@ module.exports = function (db, http, admin)
 
 	var express = ctrl.express = Router()
 
-	var post_model = db.post
-	var investor_model = db.investor
 	var user_model = db.user
 
 	express.use(http.adminRequired)
@@ -22,23 +20,6 @@ module.exports = function (db, http, admin)
 		var target_user_id = rq.body.target_user_id
 
 		toss(rs, admin.intro(target_user_id, by_user_id))
-	})
-
-	express.post('/post-as', (rq, rs) =>
-	{
-		var whom_id = rq.user.id
-		var target_user_id = rq.body.target_user_id
-		var type = rq.body.type
-		var date = rq.body.date
-		var data = rq.body.data
-
-		return investor_model.all.ensure(target_user_id)
-		.then(() =>
-		{
-			toss(rs,
-				post_model.createAs(whom_id, target_user_id, type, date, data))
-		})
-		.catch(toss.err(rs))
 	})
 
 	express.post('/change-name', (rq, rs) =>

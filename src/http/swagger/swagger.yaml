@@ -23,6 +23,12 @@ paths:
   '/feed/post/update':
     $ref: ../api/feed/swag/FeedPostUpdate.yaml
 
+  '/feed/post-as':
+    $ref: ../api/feed/swag/FeedPostAs.yaml
+
+  '/feed/post-as/update':
+    $ref: ../api/feed/swag/FeedPostUpdateAs.yaml
+
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 
@@ -64,9 +70,6 @@ paths:
 
   '/admin/change-name':
     $ref: ../api/admin/swag/ChangeName.yaml
-
-  '/admin/post-as':
-    $ref: ../api/admin/swag/PostAs.yaml
 
   '/comments':
     $ref: ../api/comments/swag/GetPostComments.yaml
