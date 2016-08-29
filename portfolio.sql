@@ -84,4 +84,7 @@ FROM
   portfolio
 
 WHERE
-  investor_id = 120;
+  investor_id = 120
+
+ORDER BY
+  timestamp;

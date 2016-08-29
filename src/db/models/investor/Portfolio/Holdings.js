@@ -132,6 +132,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			'price'
 		)
 		.where('investor_id', investor_id)
+		.orderBy('timestamp')
 		.then(datadays =>
 		{
 			var involved = new Set
