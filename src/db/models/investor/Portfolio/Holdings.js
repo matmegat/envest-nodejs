@@ -192,16 +192,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	// TODO rm
-	// holdings.byId(120, new Date('2016-08-09 09:17:03.636867-03'))
-	// holdings.byId(120)
-	// .then(console.info, console.error)
-
-	// holdings.symbolById('GE.XNYS', 120, new Date('2016-08-09 10:19:19.982-03'))
-	// holdings.symbolById('GE.XNYS', 120)
-	// holdings.symbolById('TSLA.XNAS', 120)
-	// .then(console.info.part('symbol'), console.error.part('symbol'))
-
 
 	// set
 	var InvalidAmount = Err('invalid_portfolio_amount',
