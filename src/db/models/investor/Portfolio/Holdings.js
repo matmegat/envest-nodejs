@@ -108,7 +108,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	var groupBy = require('lodash/groupBy')
 	var mapValues = require('lodash/mapValues')
-	var omit = require('lodash/omit')
 
 	var values = require('lodash/values')
 	var keys = require('lodash/keys')
@@ -144,14 +143,16 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				day.forEach(entry =>
 				{
-					entry.price = Number(entry.price)
-
 					var symbol
 					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
 
-					entry = omit(entry, 'symbol_ticker', 'symbol_exchange')
+					entry =
+					{
+						symbol: symbol,
+						price:  Number(entry.price),
+						amount: entry.amount
+					}
 
-					entry.symbol = symbol
 
 					var xsymbol = symbol.toXign()
 
