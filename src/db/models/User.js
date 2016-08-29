@@ -407,11 +407,12 @@ module.exports = function User (db, app)
 		.then(() =>
 		{
 			return user.users_table(trx)
-			.insert({
-				first_name: data.first_name,
-				last_name: data.last_name,
-				email: data.email
-			}
+			.insert(pick(data,
+			[
+				'first_name',
+				'last_name',
+				'email'
+			])
 			, 'id')
 		})
 		.then(one)
