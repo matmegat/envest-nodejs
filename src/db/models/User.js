@@ -402,7 +402,7 @@ module.exports = function User (db, app)
 
 	user.createFacebook = knexed.transact(knex, (trx, data) =>
 	{
-		return user.byEmail(email, trx)
+		return user.byEmail(data.email, trx)
 		.then(Err.existent(EmailAlreadyExists))
 		.then(() =>
 		{
