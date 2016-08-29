@@ -169,7 +169,15 @@ module.exports = function Portfolio (db, investor)
 
 	// TODO rm
 	portfolio.grid(120)
-	.then(console.log, console.error)
+	.then(it =>
+	{
+		console.dir(it)
+		console.log('--- holdings:')
+		console.dir(it.holdings.datadays, 3)
+		console.log('--- brokerage:')
+		console.dir(it.brokerage.datadays)
+	}
+	, console.error)
 
 
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
