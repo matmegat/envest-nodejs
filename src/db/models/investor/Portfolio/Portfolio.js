@@ -30,7 +30,8 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
-	portfolio.byId = knexed.transact(knex, (trx, investor_id) =>
+	portfolio.byId = knexed.transact(knex,
+	(trx, investor_id, extended = false) =>
 	{
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
@@ -81,12 +82,19 @@ module.exports = function Portfolio (db, investor)
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					return pick(holding,
+					var resp = pick(holding,
 					[
 						'symbol',
 						'allocation',
 						'gain'
 					])
+
+					if (! extended)
+					{
+						resp = pick(resp, 'symbol', 'allocation', 'gain')
+					}
+
+					return resp
 				})
 
 
@@ -102,7 +110,8 @@ module.exports = function Portfolio (db, investor)
 				/* avg gain */
 				var gain = sumBy(holdings, 'gain') / total
 
-				return {
+				var resp =
+				{
 					total:    total,
 					holdings: holdings,
 					full_portfolio:
@@ -111,6 +120,13 @@ module.exports = function Portfolio (db, investor)
 						gain:  gain
 					}
 				}
+
+				if (! extended)
+				{
+					resp = pick(resp, 'total', 'holdings', 'full_portfolio')
+				}
+
+				return resp
 			})
 		})
 	})
