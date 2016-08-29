@@ -176,8 +176,8 @@ module.exports = function Portfolio (db, investor)
 				grid.brokerage.daterange
 			)
 
-			symbols.seriesForPortfolio('TSLA.XNAS', range)
-			.then(console.info, console.error)
+			grid_series(grid.holdings.involved, range)
+			.then(it => console.dir(it, 3), console.error)
 
 			return grid
 		})
@@ -204,6 +204,25 @@ module.exports = function Portfolio (db, investor)
 		var end   = moment.max(range1.end, range2.end)
 
 		return new MRange(start, end)
+	}
+
+	function grid_series (involved, range)
+	{
+		var queries = involved.map(
+			symbol => symbols.seriesForPortfolio(symbol, range)
+		)
+
+		return Promise.all(queries)
+		.then(batch =>
+		{
+			return batch.map((b, i) =>
+			{
+				return {
+					symbol: involved[i],
+					series: b
+				}
+			})
+		})
 	}
 
 
