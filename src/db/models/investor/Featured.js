@@ -28,6 +28,14 @@ module.exports = function Featured (db, investor)
 
 	var InvestorNotFound = investor.NotFound
 
+	featured.is = function (investor_id)
+	{
+		return featured.table()
+		.where('investor_id', investor_id)
+		.then(oneMaybe)
+		.then(Boolean)
+	}
+
 	featured.set = function (investor_id)
 	{
 		var data = { investor_id: investor_id }
