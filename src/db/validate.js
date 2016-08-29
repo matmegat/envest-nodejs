@@ -173,13 +173,13 @@ validate.collection = function validate__collection (collection)
 	}
 }
 
-var Forbidden = Err('item_forbidden', 'Item forbidden')
+var Forbidden = Err('items_forbidden', 'Items Forbidden')
 
 validate.forbidden = function validate__forbidden (object)
 {
 	if (! isEmpty(object))
 	{
-		throw Forbidden({ properties: keys(object) })
+		throw Forbidden({ items: keys(object) })
 	}
 }
 
