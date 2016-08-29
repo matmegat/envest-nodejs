@@ -106,6 +106,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	}
 
 
+	// grid
 	var groupBy = require('lodash/groupBy')
 	var orderBy = require('lodash/orderBy')
 	var toPairs = require('lodash/toPairs')
@@ -117,7 +118,6 @@ module.exports = function Holdings (db, investor, portfolio)
 	var min = require('lodash/min')
 	var max = require('lodash/max')
 
-	// grid
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
 		var grid = {}
@@ -139,9 +139,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			var running  = {}
 
 			datadays = groupBy(datadays, it => it.day.toISOString())
-
 			datadays = toPairs(datadays)
-
 			datadays = orderBy(datadays, '0')
 
 			datadays = datadays.map(pair =>
