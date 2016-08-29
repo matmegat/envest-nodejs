@@ -83,6 +83,9 @@
     "moment":
       "^2.13",
 
+    "moment-range":
+      "^2.2",
+
     "axios":
       "^0.11",
 

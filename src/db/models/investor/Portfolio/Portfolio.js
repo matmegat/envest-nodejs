@@ -4,6 +4,9 @@ var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 
+var moment = require('moment')
+var MRange = require('moment-range/lib/moment-range')
+
 var knexed = require('../../../knexed')
 
 var Brokerage = require('./Brokerage')
@@ -163,6 +166,11 @@ module.exports = function Portfolio (db, investor)
 			grid.holdings  = grids[0]
 			grid.brokerage = grids[1]
 
+			var range = max_range(
+				grid.holdings.daterange,
+				grid.brokerage.daterange
+			)
+
 			return grid
 		})
 	})
@@ -178,6 +186,17 @@ module.exports = function Portfolio (db, investor)
 		console.dir(it.brokerage.datadays)
 	}
 	, console.error)
+
+	function max_range (range1, range2)
+	{
+		range1 = new MRange(range1)
+		range2 = new MRange(range2)
+
+		var start = moment.min(range1.start, range2.start)
+		var end   = moment.max(range1.end, range2.end)
+
+		return new MRange(start, end)
+	}
 
 
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
