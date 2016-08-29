@@ -25,6 +25,7 @@ module.exports = function Post (db)
 	var Emitter = db.notifications.Emitter
 
 	var PostCreated = Emitter('post_created')
+	var PostUpdated = Emitter('post_updated')
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
@@ -106,13 +107,24 @@ module.exports = function Post (db)
 			{
 				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
-			.then(post_id =>
+			.then(created_post_id =>
 			{
-				PostCreated(investor_id,
+				if (post_id)
 				{
-					admin: [ ':user-id', whom_id ],
-					post_id: post_id
-				})
+					PostUpdated(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: created_post_id
+					})
+				}
+				else
+				{
+					PostCreated(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: created_post_id
+					})
+				}
 			})
 		})
 	}
