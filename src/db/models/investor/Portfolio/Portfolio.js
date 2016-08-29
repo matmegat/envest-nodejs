@@ -173,8 +173,8 @@ module.exports = function Portfolio (db, investor)
 			grid.brokerage = grids[1]
 
 			var range = max_range(
-				grid.holdings.daterange,
-				grid.brokerage.daterange
+				grid.brokerage.daterange,
+				grid.holdings.daterange
 			)
 
 			return grid_series(grid.holdings.involved, range)
@@ -231,13 +231,22 @@ module.exports = function Portfolio (db, investor)
 	portfolio.grid(120)
 	.then(console.dir, console.error)
 
-	function max_range (range1, range2)
+	function max_range (brokerage, holdings)
 	{
-		range1 = new MRange(range1)
-		range2 = new MRange(range2)
+		brokerage = new MRange(brokerage)
 
-		var start = moment.min(range1.start, range2.start)
-		var end   = moment.max(range1.end, range2.end)
+		if (holdings)
+		{
+			holdings = new MRange(holdings)
+		}
+
+		var start = brokerage.start
+		var end   = brokerage.end
+
+		if (holdings && holdings.end.isValid())
+		{
+			end = moment.max(brokerage.end, holdings.end)
+		}
 
 		return new MRange(start, end)
 	}

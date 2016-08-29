@@ -178,11 +178,21 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			grid.involved = Array.from(involved)
 
-			grid.daterange =
-			[
-				first(datadays)[0] || null,
-				last(datadays)[0]  || null
-			]
+			/* Can be empty if no Trades in
+			   corresponding period of time.
+			 */
+			if (datadays.length)
+			{
+				grid.daterange =
+				[
+					first(datadays)[0],
+					 last(datadays)[0]
+				]
+			}
+			else
+			{
+				grid.daterange = null
+			}
 
 			grid.datadays = datadays
 
