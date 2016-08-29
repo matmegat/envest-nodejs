@@ -179,6 +179,11 @@ module.exports = function Portfolio (db, investor)
 			return grid_series(grid.holdings.involved, range)
 			.then(superseries =>
 			{
+				console.dir(grid)
+				console.log('--- holdings:')
+				console.dir(grid.holdings.datadays, 3)
+				console.log('--- brokerage:')
+				console.dir(grid.brokerage.datadays)
 				console.log('--- series:')
 				console.dir(superseries, 3)
 
@@ -195,16 +200,7 @@ module.exports = function Portfolio (db, investor)
 	})
 
 	// TODO rm
-	portfolio.grid(120)
-	.then(it =>
-	{
-		console.dir(it)
-		console.log('--- holdings:')
-		console.dir(it.holdings.datadays, 3)
-		console.log('--- brokerage:')
-		console.dir(it.brokerage.datadays)
-	}
-	, console.error)
+	portfolio.grid(120).catch(console.error)
 
 	function max_range (range1, range2)
 	{
