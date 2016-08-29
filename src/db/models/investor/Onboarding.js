@@ -558,8 +558,8 @@ function StartDate (investor)
 	})
 }
 
-var CannotSetPrivate = Err('cant_set_private',
-	`Can't set Investor to private`)
+var CannotSetPrivate = Err('cannot_set_private',
+	`Cannot set Investor to private`)
 
 function IsPublic (investor)
 {
@@ -578,21 +578,17 @@ function IsPublic (investor)
 
 			return value
 		},
-		set: (value, queryset) =>
+		set: (value, queryset, investor_id) =>
 		{
-			var cloned_queryset = queryset.clone()
-			return investor.featured.table()
-			.where('investor_id', cloned_queryset.select('user_id'))
-			.then(featured_queryset =>
+			return investor.featured.is(investor_id)
+			.then(so =>
 			{
-				if (featured_queryset.length)
+				if (so)
 				{
 					throw CannotSetPrivate({ reason: 'Investor is featured' })
 				}
-			})
-			.then(() =>
-			{
-				return queryset.update('is_public', false)
+
+				return queryset.update('is_public', value)
 			})
 		}
 	})
