@@ -290,8 +290,6 @@ var Feed = module.exports = function Feed (db)
 		return feed.feed_table(trx)
 		.where('id', post_id)
 		.update({
-			investor_id: investor_id,
-			type: type,
 			timestamp: date,
 			data: data
 		}, 'id')

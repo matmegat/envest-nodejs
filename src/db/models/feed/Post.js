@@ -62,14 +62,14 @@ module.exports = function Post (db)
 
 	post.update = function (investor_id, type, date, data, post_id)
 	{
-		validate_update_fields(post_id, type)
+		validate_update_fields(post_id)
 
 		return post.create(investor_id, type, date, data, post_id)
 	}
 
 	post.updateAs = function (whom_id, investor_id, type, date, data, post_id)
 	{
-		validate_update_fields(post_id, type)
+		validate_update_fields(post_id)
 
 		return post.createAs(whom_id, investor_id, type, date, data, post_id)
 	}
@@ -186,16 +186,11 @@ module.exports = function Post (db)
 	var PostTypeRestricted =
 		Err('post_type_change_restricted', 'Post Type Change Restricted')
 
-	function validate_update_fields (post_id, type)
+	function validate_update_fields (post_id)
 	{
 		if (! post_id)
 		{
 			throw PostIdRequired()
-		}
-
-		if (type)
-		{
-			throw PostTypeRestricted()
 		}
 	}
 
