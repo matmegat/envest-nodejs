@@ -62,11 +62,11 @@ function validate_trade_additionals (data)
 
 	return new Promise(rs =>
 	{
-		validate.empty(data.text, 'text')
+		data.text && validate.empty(data.text, 'text')
 
-		validate.empty(data.risk, 'risk')
+		data.risk && validate.empty(data.risk, 'risk')
 
-		validate.empty(data.motivations, 'motivations')
+		data.motivations && validate.empty(data.motivations, 'motivations')
 		data.motivations && validate.motivation(data.motivations)
 
 		rs(data)

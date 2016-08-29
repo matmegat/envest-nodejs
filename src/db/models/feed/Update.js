@@ -14,7 +14,7 @@ module.exports = function Update (db)
 	return Type(
 	{
 		validate: validate_update,
-		validate_update: validate_update,
+		validate_update: validate_update_additionals,
 		set: upsert,
 		update: upsert
 	})
@@ -36,6 +36,33 @@ module.exports = function Update (db)
 
 			return data
 		})
+	}
+
+	function validate_update_additionals (data)
+	{
+		var data = pick(data,
+		[
+			'symbols',
+			'title',
+			'text',
+			'pic'
+		])
+
+		return new Promise(rs =>
+		{
+			data.text && validate.empty(data.text, 'text')
+
+			data.title && validate.empty(data.title, 'title')
+
+			data.symbols && validate.empty(data.symbols, 'symbols')
+			data.symbols && validate.array(data.symbols, 'symbols')
+			data.symbols && validate_symbols_length(data.symbols, 'symbols')
+
+			data.pic && validate.empty(data.pic, 'pic')
+
+			rs(data)
+		})
+		.then(validate_pic_exists)
 	}
 
 	function validate_update (data)
@@ -67,23 +94,25 @@ module.exports = function Update (db)
 
 			rs(data)
 		})
-		.then(data =>
+		.then(validate_pic_exists)
+	}
+
+	function validate_pic_exists (data)
+	{
+		if (data.pic)
 		{
-			if (data.pic)
+			return db.static.exists(data.pic)
+			.then(so =>
 			{
-				return db.static.exists(data.pic)
-				.then(so =>
+				if (! so)
 				{
-					if (! so)
-					{
-						throw PostPicNotFound({ hash: data.pic })
-					}
+					throw PostPicNotFound({ hash: data.pic })
+				}
 
-					return data
-				})
-			}
+				return data
+			})
+		}
 
-			return data
-		})
+		return data
 	}
 }

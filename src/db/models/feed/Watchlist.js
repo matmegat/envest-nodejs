@@ -67,10 +67,10 @@ module.exports = function Watchlist (db)
 
 		return new Promise(rs =>
 		{
-			validate.empty(data.text, 'text')
+			data.text && validate.empty(data.text, 'text')
 
-			validate.empty(data.motivations, 'motivations')
-			validate.motivation(data.motivations)
+			data.motivations && validate.empty(data.motivations, 'motivations')
+			data.motivations && validate.motivation(data.motivations)
 
 			rs(data)
 		})
