@@ -88,3 +88,20 @@ WHERE
 
 ORDER BY
   timestamp;
+
+
+SELECT
+  timestamp,
+  date_trunc('day', timestamp) + INTERVAL '1 day' as day,
+  cash,
+  multiplier
+
+FROM
+  brokerage
+
+WHERE
+  investor_id = 120
+
+ORDER BY
+  timestamp;
+--

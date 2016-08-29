@@ -17,6 +17,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	var table = knexed(knex, 'brokerage')
 
+	var raw = knex.raw
+
 
 	// byId
 	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
@@ -24,8 +26,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			var raw = knex.raw
-
 			return knex(raw('brokerage AS B'))
 			.transacting(trx)
 			.select('cash', 'multiplier')
@@ -83,7 +83,19 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// grid
 	brokerage.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return {}
+		return table(trx)
+		.select(
+			'timestamp',
+			raw(`date_trunc('day', timestamp) + INTERVAL '1 day' as day`),
+			'cash',
+			'multiplier'
+		)
+		.where('investor_id', investor_id)
+		.orderBy('timestamp')
+		.then(datadays =>
+		{
+			return datadays
+		})
 	})
 
 
