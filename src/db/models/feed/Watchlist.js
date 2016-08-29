@@ -52,7 +52,7 @@ module.exports = function Watchlist (db)
 			return feed.byIdRaw(post_id)
 			.then(item =>
 			{
-				return assign(item.data, data)
+				return assign({}, item.data, data)
 			})
 		}
 	})

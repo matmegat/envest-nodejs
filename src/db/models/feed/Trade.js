@@ -37,7 +37,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 			return feed.byIdRaw(post_id)
 			.then(item =>
 			{
-				return assign(item.data, data)
+				return assign({}, item.data, data)
 			})
 		},
 		rollback: (post_id) =>
