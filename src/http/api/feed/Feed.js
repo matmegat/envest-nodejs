@@ -11,6 +11,8 @@ module.exports = function Feed (db, http)
 
 	feed.model = db.feed
 	feed.post = db.post
+	feed.investor = db.investor
+
 	feed.express = Router()
 	feed.express.use(authRequired)
 
@@ -118,6 +120,73 @@ module.exports = function Feed (db, http)
 		var date = rq.body.date
 
 		toss(rs, feed.post.create(investor_id, type, date, data))
+	})
+
+	feed.express.post('/post/update', http.investorRequired, (rq, rs) =>
+	{
+		var investor_id = rq.user.id
+		var post_id = rq.body.post_id
+		var type = rq.body.type
+		var data = rq.body.data
+		var date = rq.body.date
+
+		toss(rs, feed.post.update(investor_id, type, date, data, post_id))
+	})
+
+	feed.express.post('/post-as', http.adminRequired, (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+
+		var type = rq.body.type
+		var date = rq.body.date
+		var data = rq.body.data
+
+		return feed.investor.all.ensure(target_user_id)
+		.then(() =>
+		{
+			toss(rs,
+				feed.post.createAs(whom_id, target_user_id, type, date, data))
+		})
+		.catch(toss.err(rs))
+	})
+
+	feed.express.post('/post-as/update', http.adminRequired, (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+		var post_id = rq.body.post_id
+
+		var type = rq.body.type
+		var data = rq.body.data
+		var date = rq.body.date
+
+		return feed.investor.all.ensure(target_user_id)
+		.then(() =>
+		{
+			toss(rs,
+				feed.post.updateAs(
+					whom_id, target_user_id, type, date, data, post_id
+				))
+		})
+		.catch(toss.err(rs))
+	})
+
+	feed.express.delete('/post/delete', http.investorRequired, (rq, rs) =>
+	{
+		var investor_id = rq.user.id
+		var post_id = rq.body.post_id
+
+		toss(rs, feed.post.remove(investor_id, post_id))
+	})
+
+	feed.express.delete('/post-as/delete', http.adminRequired, (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+		var post_id = rq.body.post_id
+
+		toss(rs, feed.post.remove(target_user_id, post_id, whom_id))
 	})
 
 	return feed

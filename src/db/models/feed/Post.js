@@ -23,10 +23,12 @@ module.exports = function Post (db)
 	var Emitter = db.notifications.Emitter
 
 	var PostCreated = Emitter('post_created')
+	var PostUpdated = Emitter('post_updated')
+	var PostDeleted = Emitter('post_deleted')
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
-	function add (trx, investor_id, type, date, data)
+	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
 		if (! (type in post.types))
 		{
@@ -35,13 +37,42 @@ module.exports = function Post (db)
 
 		var post_type = post.types[type]
 
-		return post_type.set(trx, investor_id, type, date, data)
+		return Promise.resolve()
+		.then(() =>
+		{
+			if (post_id)
+			{
+				return post_type.update(trx, investor_id, type, date, data, post_id)
+			}
+			else
+			{
+				return post_type.set(trx, investor_id, type, date, data)
+			}
+		})
+		.then(data =>
+		{
+			return db.feed.upsert(trx, investor_id, type, date, data, post_id)
+		})
 	}
 
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	post.create = function (investor_id, type, date, data)
+	post.update = function (investor_id, type, date, data, post_id)
+	{
+		validate_update_fields(post_id)
+
+		return post.create(investor_id, type, date, data, post_id)
+	}
+
+	post.updateAs = function (whom_id, investor_id, type, date, data, post_id)
+	{
+		validate_update_fields(post_id)
+
+		return post.createAs(whom_id, investor_id, type, date, data, post_id)
+	}
+
+	post.create = function (investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -61,7 +92,7 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return add(trx, investor_id, type, date, data)
+				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
 			.then(post_id =>
 			{
@@ -74,7 +105,7 @@ module.exports = function Post (db)
 		})
 	}
 
-	post.createAs = function (whom_id, investor_id, type, date, data)
+	post.createAs = function (whom_id, investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -87,17 +118,76 @@ module.exports = function Post (db)
 			})
 			.then(() =>
 			{
-				return add(trx, investor_id, type, date, data)
+				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
-			.then(post_id =>
+			.then(created_post_id =>
 			{
-				PostCreated(investor_id,
+				if (post_id)
 				{
-					admin: [ ':user-id', whom_id ],
-					post_id: post_id
-				})
+					PostUpdated(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: created_post_id
+					})
+				}
+				else
+				{
+					PostCreated(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: created_post_id
+					})
+				}
 			})
 		})
+	}
+
+	var PostToDeleteNotFound =
+		Err('post_to_delete_not_found', 'Post To Delete Not Found')
+
+	post.remove = function (investor_id, post_id, whom_id)
+	{
+		return knex.transaction(function (trx)
+		{
+			return db.feed.postByInvestor(trx, post_id, investor_id)
+			.then(res =>
+			{
+				if (! res)
+				{
+					throw PostToDeleteNotFound()
+				}
+
+				var post_type = post.types[res.type]
+
+				return post_type.remove(trx, res)
+			})
+			.then(() =>
+			{
+				return db.feed.remove(trx, investor_id, post_id)
+			})
+			.then(() =>
+			{
+				if (whom_id)
+				{
+					PostDeleted(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: post_id
+					})
+				}
+			})
+		})
+	}
+
+	var PostIdRequired =
+		Err('post_id_required', 'Post Id Required')
+
+	function validate_update_fields (post_id)
+	{
+		if (! post_id)
+		{
+			throw PostIdRequired()
+		}
 	}
 
 	return post
