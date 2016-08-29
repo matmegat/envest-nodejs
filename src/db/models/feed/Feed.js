@@ -77,19 +77,18 @@ var Feed = module.exports = function Feed (db)
 
 	feed.NotFound = NotFound
 
-	feed.byId = function (id)
+	feed.byId = function (id, user_id)
 	{
+		var queryset = feed.feed_table()
+
 		return feed.validateFeedId(id)
-		.then(() =>
-		{
-			return feed.feed_table()
-			.where('id', id)
-		})
+		.then(() => update_queryset(queryset, user_id))
+		.then(() => queryset.where('id', id))
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
 		.then((feed_item) =>
 		{
-			return investor.public.byId(feed_item.investor_id)
+			return investor.all.byId(feed_item.investor_id)
 			.then((investor) =>
 			{
 				feed_item.investor = _.pick(investor,
@@ -145,10 +144,10 @@ var Feed = module.exports = function Feed (db)
 			paginator = paginators.chunked
 		}
 
-		return subscr.isAble(user_id, 'multiple_investors')
-		.then((subscr_item) =>
+		return update_queryset(queryset, user_id)
+		.then((is_full_access) =>
 		{
-			if (! subscr_item)
+			if (! is_full_access)
 			{
 				return investor.featured.get()
 				.then((item) =>
@@ -157,14 +156,12 @@ var Feed = module.exports = function Feed (db)
 					.where('investor_id', item.investor_id)
 
 					count_queryset = queryset.clone()
-
-					queryset = sorter.sort(queryset)
 				})
 			}
-			else
-			{
-				queryset = sorter.sort(queryset)
-			}
+		})
+		.then(() =>
+		{
+			queryset = sorter.sort(queryset)
 		})
 		.then(() =>
 		{
@@ -221,6 +218,44 @@ var Feed = module.exports = function Feed (db)
 			})
 		})
 	}
+
+	function update_queryset (queryset, user_id)
+	{
+		return Promise.all(
+		[
+			db.admin.is(user_id),
+			db.investor.all.is(user_id)
+		])
+		.then(so =>
+		{
+			var is_admin = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return true
+			}
+
+			queryset
+			.innerJoin('investors', 'investors.user_id', 'feed_items.investor_id')
+
+			if (is_investor)
+			{
+				queryset.where(function ()
+				{	/* all investor post and all public posts */
+					this.where('investors.is_public', true)
+					this.orWhere('feed_items.investor_id', user_id)
+				})
+
+				return true
+			}
+
+			queryset.where('investors.is_public', true)
+
+			return subscr.isAble(user_id, 'multiple_investors')
+		})
+	}
+
 
 	feed.byWatchlist = function (user_id, options)
 	{
@@ -332,8 +367,6 @@ function transform_event (item)
 
 	delete item.type
 	delete item.data
-
-	mock_chart(item)
 }
 
 
@@ -370,6 +403,11 @@ Feed.symbolsInvolved = (items) =>
 		{
 			return data.symbols
 		}
+
+		if (data.chart && data.chart.symbol)
+		{
+			return data.chart.symbol
+		}
 	})
 
 	symbols = flatten(symbols)
@@ -403,6 +441,10 @@ var replace_symbol = curry((symbols, item) =>
 	{
 		data.symbols = data.symbols.map(pick)
 	}
+	if (data.chart && data.chart.symbol)
+	{
+		data.chart.symbol = pick(data.chart.symbol)
+	}
 
 	return item
 })
@@ -416,53 +458,8 @@ var pick_symbol = curry((symbols, item_s) =>
 
 	if (! symbol)
 	{
-		return item_s
+		return Symbl(item_s).toFull()
 	}
 
 	return symbol
 })
-
-
-// @@TODO implement, rm mock
-function mock_chart (item)
-{
-	var event = item.event
-
-	var type = event.type
-	var data = event.data
-
-	if (type !== 'update')
-	{
-		return
-	}
-	if (data.pic)
-	{
-		return
-	}
-	/*if (event.id % 2)
-	{
-		return
-	}*/
-
-	data.chart =
-	{
-		symbol:
-		{
-			full: 'TSLA.XNAS',
-			ticker: 'TSLA',
-			exchange: 'XNAS',
-			company: 'Tesla Motors, Inc.'
-		},
-
-		// guarantee present `graph_as`
-		// for now `graph_as` = `timestamp`
-		// but can be changed in later requirements
-		graph_as: item.timestamp,
-		series: null
-	}
-
-	// eslint-disable-next-line
-	data.chart.series = { period: 'today', points: [{"timestamp":"2016-08-15T13:30:00Z","utcOffset":-4,"value":108.76},{"timestamp":"2016-08-15T13:35:00Z","utcOffset":-4,"value":108.78},{"timestamp":"2016-08-15T13:40:00Z","utcOffset":-4,"value":108.87},{"timestamp":"2016-08-15T13:45:00Z","utcOffset":-4,"value":108.99},{"timestamp":"2016-08-15T13:50:00Z","utcOffset":-4,"value":109.075},{"timestamp":"2016-08-15T13:55:00Z","utcOffset":-4,"value":108.95},{"timestamp":"2016-08-15T14:00:00Z","utcOffset":-4,"value":109.03},{"timestamp":"2016-08-15T14:05:00Z","utcOffset":-4,"value":109.05},{"timestamp":"2016-08-15T14:10:00Z","utcOffset":-4,"value":109.105},{"timestamp":"2016-08-15T14:15:00Z","utcOffset":-4,"value":109.21},{"timestamp":"2016-08-15T14:20:00Z","utcOffset":-4,"value":109.321},{"timestamp":"2016-08-15T14:25:00Z","utcOffset":-4,"value":109.32},{"timestamp":"2016-08-15T14:30:00Z","utcOffset":-4,"value":109.335},{"timestamp":"2016-08-15T14:35:00Z","utcOffset":-4,"value":109.31},{"timestamp":"2016-08-15T14:40:00Z","utcOffset":-4,"value":109.32},{"timestamp":"2016-08-15T14:45:00Z","utcOffset":-4,"value":109.255},{"timestamp":"2016-08-15T14:50:00Z","utcOffset":-4,"value":109.25},{"timestamp":"2016-08-15T14:55:00Z","utcOffset":-4,"value":109.275},{"timestamp":"2016-08-15T15:00:00Z","utcOffset":-4,"value":109.25},{"timestamp":"2016-08-15T15:05:00Z","utcOffset":-4,"value":109.233},{"timestamp":"2016-08-15T15:10:00Z","utcOffset":-4,"value":109.3},{"timestamp":"2016-08-15T15:15:00Z","utcOffset":-4,"value":109.405},{"timestamp":"2016-08-15T15:20:00Z","utcOffset":-4,"value":109.46},{"timestamp":"2016-08-15T15:25:00Z","utcOffset":-4,"value":109.515},{"timestamp":"2016-08-15T15:30:00Z","utcOffset":-4,"value":109.47},{"timestamp":"2016-08-15T15:35:00Z","utcOffset":-4,"value":109.468},{"timestamp":"2016-08-15T15:40:00Z","utcOffset":-4,"value":109.475},{"timestamp":"2016-08-15T15:45:00Z","utcOffset":-4,"value":109.366},{"timestamp":"2016-08-15T15:50:00Z","utcOffset":-4,"value":109.33},{"timestamp":"2016-08-15T15:55:00Z","utcOffset":-4,"value":109.319},{"timestamp":"2016-08-15T16:00:00Z","utcOffset":-4,"value":109.344},{"timestamp":"2016-08-15T16:05:00Z","utcOffset":-4,"value":109.359},{"timestamp":"2016-08-15T16:10:00Z","utcOffset":-4,"value":109.32},{"timestamp":"2016-08-15T16:15:00Z","utcOffset":-4,"value":109.31},{"timestamp":"2016-08-15T16:20:00Z","utcOffset":-4,"value":109.37},{"timestamp":"2016-08-15T16:25:00Z","utcOffset":-4,"value":109.36},{"timestamp":"2016-08-15T16:30:00Z","utcOffset":-4,"value":109.405},{"timestamp":"2016-08-15T16:35:00Z","utcOffset":-4,"value":109.38},{"timestamp":"2016-08-15T16:40:00Z","utcOffset":-4,"value":109.39},{"timestamp":"2016-08-15T16:45:00Z","utcOffset":-4,"value":109.36},{"timestamp":"2016-08-15T16:50:00Z","utcOffset":-4,"value":109.33},{"timestamp":"2016-08-15T16:55:00Z","utcOffset":-4,"value":109.385},{"timestamp":"2016-08-15T17:00:00Z","utcOffset":-4,"value":109.383},{"timestamp":"2016-08-15T17:05:00Z","utcOffset":-4,"value":109.311},{"timestamp":"2016-08-15T17:10:00Z","utcOffset":-4,"value":109.324},{"timestamp":"2016-08-15T17:15:00Z","utcOffset":-4,"value":109.35},{"timestamp":"2016-08-15T17:20:00Z","utcOffset":-4,"value":109.312},{"timestamp":"2016-08-15T17:25:00Z","utcOffset":-4,"value":109.303},{"timestamp":"2016-08-15T17:30:00Z","utcOffset":-4,"value":109.22},{"timestamp":"2016-08-15T17:35:00Z","utcOffset":-4,"value":109.28},{"timestamp":"2016-08-15T17:40:00Z","utcOffset":-4,"value":109.31},{"timestamp":"2016-08-15T17:45:00Z","utcOffset":-4,"value":109.29},{"timestamp":"2016-08-15T17:50:00Z","utcOffset":-4,"value":109.27},{"timestamp":"2016-08-15T17:55:00Z","utcOffset":-4,"value":109.275},{"timestamp":"2016-08-15T18:00:00Z","utcOffset":-4,"value":109.29},{"timestamp":"2016-08-15T18:05:00Z","utcOffset":-4,"value":109.305},{"timestamp":"2016-08-15T18:10:00Z","utcOffset":-4,"value":109.265},{"timestamp":"2016-08-15T18:15:00Z","utcOffset":-4,"value":109.245},{"timestamp":"2016-08-15T18:20:00Z","utcOffset":-4,"value":109.275},{"timestamp":"2016-08-15T18:25:00Z","utcOffset":-4,"value":109.275},{"timestamp":"2016-08-15T18:30:00Z","utcOffset":-4,"value":109.286},{"timestamp":"2016-08-15T18:35:00Z","utcOffset":-4,"value":109.315},{"timestamp":"2016-08-15T18:40:00Z","utcOffset":-4,"value":109.315},{"timestamp":"2016-08-15T18:45:00Z","utcOffset":-4,"value":109.37},{"timestamp":"2016-08-15T18:50:00Z","utcOffset":-4,"value":109.405},{"timestamp":"2016-08-15T18:55:00Z","utcOffset":-4,"value":109.38},{"timestamp":"2016-08-15T19:00:00Z","utcOffset":-4,"value":109.355},{"timestamp":"2016-08-15T19:05:00Z","utcOffset":-4,"value":109.355},{"timestamp":"2016-08-15T19:10:00Z","utcOffset":-4,"value":109.343},{"timestamp":"2016-08-15T19:15:00Z","utcOffset":-4,"value":109.4},{"timestamp":"2016-08-15T19:20:00Z","utcOffset":-4,"value":109.345},{"timestamp":"2016-08-15T19:25:00Z","utcOffset":-4,"value":109.443},{"timestamp":"2016-08-15T19:30:00Z","utcOffset":-4,"value":109.43},{"timestamp":"2016-08-15T19:35:00Z","utcOffset":-4,"value":109.455},{"timestamp":"2016-08-15T19:40:00Z","utcOffset":-4,"value":109.51},{"timestamp":"2016-08-15T19:45:00Z","utcOffset":-4,"value":109.485},{"timestamp":"2016-08-15T19:50:00Z","utcOffset":-4,"value":109.509},{"timestamp":"2016-08-15T19:55:00Z","utcOffset":-4,"value":109.51},{"timestamp":"2016-08-15T20:00:00Z","utcOffset":-4,"value":109.51},{"timestamp":"2016-08-15T20:15:00Z","utcOffset":-4,"value":109.48}] }
-
-	return
-}

@@ -8,8 +8,8 @@ exports.up = function (knex, Promise)
 		{
 			table.integer('user_id').primary().unique().notNullable()
 			.references('users.id')
-			.onUpdate('restrict') /* user.id should never change */
-			.onDelete('restrict')
+			.onUpdate('cascade')
+			.onDelete('cascade')
 
 			table.text('profile_pic').nullable()
 			table.string('profession').defaultTo('')

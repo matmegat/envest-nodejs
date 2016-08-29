@@ -22,6 +22,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.brokerage = Brokerage(investor, db)
 	onb.fields.holdings = Holdings(investor, db)
 	onb.fields.start_date = StartDate(investor)
+	onb.fields.is_public = IsPublic(investor)
 
 	expect(db, 'Onboarding depends on Admin').property('admin')
 	var admin = db.admin
@@ -553,6 +554,42 @@ function StartDate (investor)
 		set: (value, queryset) =>
 		{
 			return queryset.update({ start_date: value })
+		}
+	})
+}
+
+var CannotSetPrivate = Err('cannot_set_private',
+	`Cannot set Investor to private`)
+
+function IsPublic (investor)
+{
+	return Field(investor,
+	{
+		get: (queryset) =>
+		{
+			return queryset
+			.select('is_public')
+			.then(one)
+			.then(rs => rs.is_public)
+		},
+		validate: (value) =>
+		{
+			validate.boolean.false(value, 'is_public')
+
+			return value
+		},
+		set: (value, queryset, investor_id) =>
+		{
+			return investor.featured.is(investor_id)
+			.then(so =>
+			{
+				if (so)
+				{
+					throw CannotSetPrivate({ reason: 'Investor is featured' })
+				}
+
+				return queryset.update('is_public', value)
+			})
 		}
 	})
 }

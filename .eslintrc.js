@@ -1,11 +1,17 @@
 
 module.exports =
 {
-	"extends": "./node_modules/js-outlander/outlander.eslint.js",
+	extends: './node_modules/js-outlander/outlander.eslint.js',
 
-	"rules":
+	env:
 	{
-		"no-unused-expressions": 0,
-		 complexity: [ 1, 7 ]
+		es6: true
+	},
+
+	rules:
+	{
+		'no-unused-expressions': 0,
+		 complexity:  [ 1, 7 ],
+		'max-params': [ 1, 5 ]
 	}
 }

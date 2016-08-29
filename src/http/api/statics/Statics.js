@@ -68,7 +68,7 @@ module.exports = function Statics (rootpath, db, http)
 	)
 
 
-	statics.express.post('/upload/post_pic', http.investorRequired,
+	statics.express.post('/upload/post_pic', http.adminOrInvestorRequired,
 		uploader(
 			multer().single('post_pic'),
 			statics.pic_model.uploadPostPic

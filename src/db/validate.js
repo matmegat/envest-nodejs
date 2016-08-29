@@ -128,6 +128,35 @@ validate.integer.positive = function validate__integer__positive (field, name)
 }
 
 
+var isBoolean = require('lodash/isBoolean')
+
+validate.boolean = function validate__boolean (field, name)
+{
+	if (! isBoolean(field))
+	{
+		throw FieldType({ field: name, type: 'boolean' })
+	}
+}
+
+validate.boolean.true = function validate__boolean (field, name)
+{
+	validate.boolean(field, name)
+	if (field !== true)
+	{
+		throw FieldType({ field: name, type: 'boolean/true' })
+	}
+}
+
+validate.boolean.false = function validate__boolean (field, name)
+{
+	validate.boolean(field, name)
+	if (field !== false)
+	{
+		throw FieldType({ field: name, type: 'boolean/false' })
+	}
+}
+
+
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
 validate.length = function validate__length (max, min)

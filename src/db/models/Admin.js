@@ -66,6 +66,12 @@ module.exports = function Admin (db)
 		.then(oneMaybe)
 	}
 
+	admin.byIds = function (trx, user_ids)
+	{
+		return table(trx)
+		.whereIn('user_id', user_ids)
+	}
+
 	admin.intro = knexed.transact(knex, (trx, target_user_id, by_user_id) =>
 	{
 		by_user_id || (by_user_id = null)

@@ -37,7 +37,6 @@ module.exports = function Meta (knexed_table, raw, options)
 
 	var filter = Filter({
 		ids: Filter.by.ids('user_id'),
-		symbol: Filter.by.portfolio_symbol('investors.user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id')
 	})
 
