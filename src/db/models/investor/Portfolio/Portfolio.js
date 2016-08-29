@@ -187,9 +187,18 @@ module.exports = function Portfolio (db, investor)
 				console.log('--- series:')
 				console.dir(superseries, 3)
 
+				var compiled = []
+
 				range.by('days', it =>
 				{
 					console.info(it.toISOString())
+
+					var current_brokerage
+					 = find_brokerage(grid.brokerage.datadays, it.toISOString())
+
+					var sum = current_brokerage.cash * current_brokerage.multiplier
+
+					console.info('sum', sum)
 				})
 			})
 			.then(() =>
@@ -233,6 +242,24 @@ module.exports = function Portfolio (db, investor)
 
 			return r
 		})
+	}
+
+	// var find = require('lodash/find')
+	var findLast = require('lodash/findLast')
+
+	function find_brokerage (brokerage, date)
+	{
+		/* ISO dates are sortable */
+		var entry = findLast(brokerage, entry => entry[0] <= date)
+
+		if (entry)
+		{
+			return entry[1]
+		}
+		else
+		{
+			throw TypeError('brokerage_error')
+		}
 	}
 
 
