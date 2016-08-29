@@ -56,6 +56,16 @@ var Symbl = module.exports = function Symbl (it)
 			}
 		}
 
+		s.toDb = () =>
+		{
+			return {
+				symbol_ticker: s.ticker,
+				symbol_exchange: s.exchange
+			}
+		}
+
+		s.inspect = inspect
+
 		return s
 	}
 
@@ -70,6 +80,12 @@ var Symbl = module.exports = function Symbl (it)
 	throw WrongFormat({ reason: 'unknown_format' })
 }
 /* eslint-enable */
+
+function inspect ()
+{
+	return '{' + this.toXign() + '}'
+}
+
 
 Symbl.is = (it) =>
 {

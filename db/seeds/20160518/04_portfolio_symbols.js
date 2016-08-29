@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 
 var random = require('lodash/random')
 var sample = require('lodash/sampleSize')
@@ -7,6 +8,8 @@ var symbols = require('../_symbols')
 
 exports.seed = function (knex)
 {
+	return /* do not create this one in favor of portfolio-history */
+
 	return knex('portfolio_symbols').del()
 	.then(() =>
 	{

@@ -167,14 +167,14 @@ Filter.by.portfolio_symbols = function by_portfolio_symbols (column)
 			return queryset.where(raw('FALSE'))
 		}
 
-		var ticker_col   = 'portfolio_symbols.symbol_ticker'
-		var exchange_col = 'portfolio_symbols.symbol_exchange'
+		var ticker_col = 'portfolio_current.symbol_ticker'
+		var exchange_col = 'portfolio_current.symbol_exchange'
 
 		var shorts = symbols.filter(s => ! s.exchange)
 		var fulls  = symbols.filter(s =>   s.exchange)
 
 		return queryset
-		.innerJoin('portfolio_symbols', 'portfolio_symbols.investor_id', column)
+		.innerJoin('portfolio_current', 'portfolio_current.investor_id', column)
 		.where(function ()
 		{
 			if (shorts.length)

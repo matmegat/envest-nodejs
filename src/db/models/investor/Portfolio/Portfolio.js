@@ -1,6 +1,17 @@
-var knexed = require('../../../knexed')
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
+var omit = require('lodash/omit')
+var sumBy = require('lodash/sumBy')
+var orderBy = require('lodash/orderBy')
+var forOwn = require('lodash/forOwn')
+var round = require('lodash/round')
+
+var moment = require('moment')
+var MRange = require('moment-range/lib/moment-range')
+
+var expect = require('chai').expect
+
+var knexed = require('../../../knexed')
 
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
@@ -13,62 +24,66 @@ module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
 
-	var knex    = db.knex
-	// var helpers = db.helpers
+	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
+	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
 
-	portfolio.holdings_table = knexed(knex, 'portfolio_symbols')
+	expect(db, 'Portfolio depends on Series').property('symbols')
+	var symbols = db.symbols
 
-	var brokerage = Brokerage(db, investor)
-	var holdings  = Holdings(db, investor)
+	var knex = db.knex
 
-	portfolio.list = function (investor_id, trx)
+	portfolio.byId = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return Promise.all([
-				holdings.byInvestorId(investor_id),
-				brokerage.byInvestorId(investor_id)
+				brokerage.byId(trx, investor_id),
+				 holdings.byId(trx, investor_id)
 			])
 		})
 		.then((values) =>
 		{
-			var portfolio_holdings = values[0]
-			var brokerage = values[1]
+			var brokerage = values[0]
+			var holdings  = values[1]
 
-			portfolio_holdings.forEach((portfolio_holding) =>
+			holdings.forEach(holding =>
 			{
-				portfolio_holding.allocation =
-					portfolio_holding.amount *
-					portfolio_holding.buy_price *
-					brokerage.multiplier
+				holding.allocation
+				 = holding.amount * holding.price * brokerage.multiplier
 			})
 
-			return db.symbols.quotes(portfolio_holdings.map((holding) =>
+			return db.symbols.quotes(holdings.map(holding =>
 			{
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			}))
 			.then((quoted_symbols) =>
 			{
-				portfolio_holdings = quoted_symbols.map((quoted_symbol, i) =>
+				holdings = quoted_symbols.map((quoted_symbol, i) =>
 				{
-					if (quoted_symbol === null)
+					var holding = holdings[i]
+
+					if (quoted_symbol == null)
 					{
-						portfolio_holdings[i].symbol = Symbl([
-							portfolio_holdings[i].symbol_ticker,
-							portfolio_holdings[i].symbol_exchange
-						]).toFull()
-						portfolio_holdings[i].gain = null
+						holding.symbol = Symbl(
+						[
+							holding.symbol_ticker,
+							holding.symbol_exchange
+						])
+						.toFull()
+
+						holding.gain = null
 					}
 					else
 					{
-						portfolio_holdings[i].symbol = quoted_symbol.symbol
-						portfolio_holdings[i].gain = /* calculated percentage */
-							( quoted_symbol.price /
-							portfolio_holdings[i].buy_price - 1 ) * 100
+						holding.symbol = quoted_symbol.symbol
+
+						/* calculated percentage */
+						holding.gain
+						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					return _.pick(portfolio_holdings[i],
+					return pick(holding,
 					[
 						'symbol',
 						'allocation',
@@ -76,79 +91,258 @@ module.exports = function Portfolio (db, investor)
 					])
 				})
 
+
+				var total = holdings.length
+
+				holdings = orderBy(holdings, 'allocation', 'desc')
+
+				/* full = cash + holdings */
+				var full_value
+				 = brokerage.cash * brokerage.multiplier
+				 + sumBy(holdings, 'allocation')
+
+				/* avg gain */
+				var gain = sumBy(holdings, 'gain') / total
+
 				return {
-					total: portfolio_holdings.length,
-					holdings: _.orderBy(portfolio_holdings, 'allocation', 'desc'),
+					total:    total,
+					holdings: holdings,
 					full_portfolio:
 					{
-						value: brokerage.cash_value
-						       * brokerage.multiplier
-						       + _.sumBy(portfolio_holdings, 'allocation'),
-						gain: _.sumBy(portfolio_holdings, 'gain')
-						      / portfolio_holdings.length
+						value: full_value,
+						gain:  gain
 					}
 				}
 			})
 		})
-	}
+	})
 
-	portfolio.recalculate = function (investor_id)
+	portfolio.full = function (investor_id)
 	{
-		return Promise.all([
-			brokerage.byInvestorId(investor_id),
-			holdings.byInvestorId(investor_id)
-		])
+		return investor.all.ensure(investor_id)
+		.then(() =>
+		{
+			return Promise.all([
+				brokerage.byId(investor_id),
+				 holdings.byId(investor_id)
+			])
+		})
 		.then((values) =>
 		{
-			var brokerage_entry = values[0]
-			var holding_entries = values[1]
+			var brokerage = values[0]
+			var holdings  = values[1]
 
-			var indexed_amount = 100000
-			var real_allocation = Number(brokerage_entry.cash_value)
-
-			holding_entries.forEach((holding) =>
+			holdings = holdings.map(holding =>
 			{
-				real_allocation += holding.amount * holding.buy_price
+				holding.allocation
+				 = holding.amount * holding.price * brokerage.multiplier
+
+				holding.symbol =
+				{
+					ticker: holding.symbol_ticker,
+					exchange: holding.symbol_exchange,
+					company: null
+				}
+
+				return omit(holding, 'symbol_ticker', 'symbol_exchange')
 			})
 
-			var multiplier = indexed_amount / real_allocation
+			return {
+				brokerage: brokerage,
+				holdings:  holdings
+			}
+		})
+	}
 
-			return brokerage.set(investor_id,
+
+	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return Promise.all(
+			[
+				holdings.grid(trx, investor_id),
+				brokerage.grid(trx, investor_id)
+			])
+		})
+		.then(grids =>
+		{
+			var grid = {}
+
+			grid.holdings  = grids[0]
+			grid.brokerage = grids[1]
+
+			var range = max_range(
+				grid.brokerage.daterange,
+				grid.holdings.daterange
+			)
+
+			range = range_from(range, moment())
+
+			return grid_series(grid.holdings.involved, range)
+			.then(superseries =>
 			{
-				cash_value: Number(brokerage_entry.cash_value),
-				multiplier: multiplier
+				if (0)
+				{
+					console.dir(grid)
+					console.log('--- holdings:')
+					console.dir(grid.holdings.datadays, 3)
+					console.log('--- brokerage:')
+					console.dir(grid.brokerage.datadays)
+					console.log('--- series:')
+					console.dir(superseries, 3)
+				}
+
+				var compiled = []
+
+				range.by('days', it =>
+				{
+					var iso = it.toISOString()
+
+					var c_brokerage
+					 = find_brokerage(grid.brokerage.datadays, iso)
+
+					var total = c_brokerage.cash * c_brokerage.multiplier
+
+					var c_holdings
+					 = find_holding_day(grid.holdings.datadays, iso)
+
+					if (c_holdings)
+					{
+						forOwn(c_holdings, holding =>
+						{
+							var price
+							 = find_series_value(superseries, holding.symbol, iso)
+
+							var wealth
+							 = price * holding.amount * c_brokerage.multiplier
+
+							total += wealth
+						})
+					}
+
+					total = round(total, 3)
+
+					compiled.push([ iso, total ])
+				})
+
+				return compiled
 			})
 		})
+	})
+
+	// TODO rm
+	// portfolio.grid(120)
+	// .then(console.dir, console.error)
+
+	function max_range (brokerage, holdings)
+	{
+		brokerage = new MRange(brokerage)
+
+		if (holdings)
+		{
+			holdings = new MRange(holdings)
+		}
+
+		var start = brokerage.start
+		var end   = brokerage.end
+
+		if (holdings && holdings.end.isValid())
+		{
+			end = moment.max(brokerage.end, holdings.end)
+		}
+
+		return new MRange(start, end)
 	}
 
-	portfolio.setHoldings = function (investor_id, holding_entries)
+	function range_from (range, end)
 	{
-		return holdings.set(investor_id, holding_entries)
-		.then(() =>
+		end = moment(end)
+		var start = moment(end).subtract(2, 'years')
+
+		start = moment.max(range.start, start)
+
+		return new MRange(start, end)
+	}
+
+
+	function grid_series (involved, range)
+	{
+		var queries = involved.map(
+			symbol => symbols.seriesForPortfolio(symbol, range)
+		)
+
+		return Promise.all(queries)
+		.then(batch =>
 		{
-			return portfolio.recalculate(investor_id)
+			var r = {}
+
+			batch.forEach((data, i) =>
+			{
+				var symbol = involved[i]
+
+				r[symbol] = data
+			})
+
+			return r
 		})
 	}
 
-	portfolio.setBrokerage = function (investor_id, amount)
+	var findLast = require('lodash/findLast')
+
+	function find_brokerage (brokerage, date)
 	{
-		return brokerage.set(investor_id, { cash_value: amount })
-		.then(() =>
+		/* ISO dates are sortable */
+		var entry = findLast(brokerage, entry => entry[0] <= date)
+
+		if (entry)
 		{
-			return portfolio.recalculate(investor_id)
-		})
+			return entry[1]
+		}
+		else
+		{
+			throw TypeError('brokerage_error')
+		}
 	}
 
-	portfolio.createBrokerage = function (trx, investor_id, amount)
+	function find_holding_day (holdings, date)
 	{
-		return brokerage.table(trx)
-		.insert(
+		/* ISO dates are sortable */
+		var entry = findLast(holdings, entry => entry[0] <= date)
+
+		if (entry)
 		{
-			investor_id: investor_id,
-			cash_value: amount,
-			multiplier: 1.0
-		})
+			return entry[1]
+		}
+		else
+		{
+			return null // NO trades at all
+		}
 	}
+
+	function find_series_value (series, symbol, day)
+	{
+		series = series[symbol]
+
+		/* ISO dates are sortable */
+		var entry = findLast(series, tick => tick.timestamp <= day)
+
+		if (entry)
+		{
+			return entry.value
+		}
+		else
+		{
+			console.warn(
+				'XIGN error, no data for Investor Chart {%s, %s}',
+				symbol, day
+			)
+
+			return 0
+		}
+	}
+
 
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
@@ -171,65 +365,15 @@ module.exports = function Portfolio (db, investor)
 				throw WrongTradeDir({ dir: dir })
 			}
 
-			return brokerage.byInvestorId(investor_id)
-		})
-		.then(resl =>
-		{
-			var cash = resl.cash_value
-
-			return holdings.dirs[dir](trx, investor_id, symbol, data, cash)
+			return holdings.dirs[dir](trx, investor_id, symbol, date, data)
 		})
 		.then(sum =>
 		{
-			return brokerage.update(trx, investor_id,
+			return brokerage.update(trx, investor_id, date,
 			{
 				operation: 'trade',
 				amount: sum
 			})
-		})
-	}
-
-	portfolio.full = function (investor_id)
-	{
-		return investor.all.ensure(investor_id)
-		.then(() =>
-		{
-			return Promise.all([
-				holdings.byInvestorId(investor_id),
-				brokerage.byInvestorId(investor_id)
-			])
-		})
-		.then((values) =>
-		{
-			var portfolio_holdings = values[0]
-			var brokerage = values[1]
-
-			portfolio_holdings = portfolio_holdings.map((portfolio_holding) =>
-			{
-				portfolio_holding.buy_price = Number(portfolio_holding.buy_price)
-
-				portfolio_holding.allocation =
-					portfolio_holding.amount *
-					portfolio_holding.buy_price *
-					brokerage.multiplier
-
-				portfolio_holding.symbol =
-				{
-					ticker: portfolio_holding.symbol_ticker,
-					exchange: portfolio_holding.symbol_exchange,
-					company: null
-				}
-
-				return _.omit(
-					portfolio_holding,
-					[ 'symbol_ticker', 'symbol_exchange' ]
-				)
-			})
-
-			return {
-				brokerage: brokerage,
-				holdings:  portfolio_holdings
-			}
 		})
 	}
 

@@ -1,75 +1,243 @@
 
-var knexed = require('../../../knexed')
+var sumBy = require('lodash/sumBy')
 
-var _ = require('lodash')
+var expect = require('chai').expect
+
+var knexed = require('../../../knexed')
 
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
-module.exports = function Brokerage (db, investor)
+module.exports = function Brokerage (db, investor, portfolio)
 {
 	var brokerage = {}
 
-	var knex    = db.knex
-	var helpers = db.helpers
+	var knex = db.knex
+	var one  = db.helpers.one
 
-	brokerage.table = knexed(knex, 'brokerage')
+	var table = knexed(knex, 'brokerage')
 
-	function set_brokerage (trx, investor_id, data)
+	var raw = knex.raw
+
+
+	// byId
+	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		var where_clause  = { investor_id: investor_id }
-		var update_clause = _.pick(data, 'cash_value', 'multiplier')
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return knex(raw('brokerage AS B'))
+			.transacting(trx)
+			.select('cash', 'multiplier')
+			.where('investor_id', investor_id)
+			.where('timestamp',
+				table().max('timestamp')
+				.where('investor_id', raw('B.investor_id'))
+				.where(function ()
+				{
+					if (for_date)
+					{
+						this.where('timestamp', '<=', for_date)
+					}
+				})
+			)
+		})
+		.then(r =>
+		{
+			/* brokerage.init guarantees
+			   brokerage existence for dates
+			   from Investor Onboarding */
+			if (! r.length)
+			{
+				throw BrokerageDoesNotExist({ for_date: for_date })
+			}
 
-		return brokerage.table(trx)
-		.where(where_clause)
-		.update(update_clause)
-	}
+			return r
+		})
+		.then(one)
+		.then(it =>
+		{
+			it.cash = Number(it.cash)
 
-	brokerage.byInvestorId = function (investor_id)
+			return it
+		})
+	})
+
+	var BrokerageDoesNotExist = Err('brokerage_not_exist_for_date',
+		 'Brokerage does not exist for this time point')
+
+	brokerage.cashById = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		return brokerage.table()
-		.select(['cash_value', 'multiplier'])
+		return brokerage.byId(trx, investor_id, for_date)
+		.then(it => it.cash)
+	})
+
+
+	// grid
+	var groupBy = require('lodash/groupBy')
+	var orderBy = require('lodash/orderBy')
+	var toPairs = require('lodash/toPairs')
+
+	var first = require('lodash/head')
+	var last  = require('lodash/last')
+
+	brokerage.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return table(trx)
+		.select(
+			'timestamp',
+			raw(`date_trunc('day', timestamp) + INTERVAL '1 day' as day`),
+			'cash',
+			'multiplier'
+		)
 		.where('investor_id', investor_id)
-		.then(db.helpers.one)
+		.orderBy('timestamp')
+		.then(datadays =>
+		{
+			var grid = {}
+
+			datadays = groupBy(datadays, it => it.day.toISOString())
+			datadays = toPairs(datadays)
+			datadays = orderBy(datadays, '0')
+
+			datadays = datadays.map(pair =>
+			{
+				var day = pair[1]
+
+				day = last(day)
+
+				day =
+				{
+					cash: Number(day.cash),
+					multiplier: day.multiplier
+				}
+
+				return [ pair[0], day ]
+			})
+
+			/* expect Brokerage datadays to be not empty.
+			   This means that if Investor is Onboarded
+			   there's always at least one entry in Brokerage.
+			 */
+			expect(datadays).not.empty
+
+			grid.daterange =
+			[
+				first(datadays)[0],
+				 last(datadays)[0]
+			]
+
+			grid.datadays = datadays
+
+			return grid
+		})
+	})
+
+
+	// init
+	var index_amount_cap = 1e5
+
+	brokerage.init = (trx, investor_id) =>
+	{
+		return table(trx)
+		.insert(
+		{
+			investor_id: investor_id,
+			cash: index_amount_cap,
+			multiplier: 1.0
+		})
 	}
 
-	brokerage.set = knexed.transact(knex, (trx, investor_id, data) =>
+
+	// set
+	brokerage.set = knexed.transact(knex, (trx, investor_id, cash) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			/* validate update keys */
-			validate.required(data.cash_value, 'cash_value')
-			validate.number(data.cash_value, 'cash_value')
-			if (data.cash_value < 0)
+			validate.required(cash, 'cash')
+			validate.number(cash, 'cash')
+			if (cash < 0)
 			{
-				throw InvalidAmount({ field: 'cash_value' })
+				throw InvalidAmount({ field: 'cash' })
 			}
 
-			if ('multiplier' in data)
-			{
-				validate_multiplier(data.multiplier)
-			}
-
-			return set_brokerage(trx, investor_id, data)
+			return put(trx, investor_id, cash)
 		})
 	})
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
 
-	// eslint-disable-next-line id-length
-	function validate_multiplier (value)
+
+	function put (trx, investor_id, new_cash, timestamp)
 	{
-		validate.number(value, 'multiplier')
-		if (value <= 0)
+		expect(new_cash).a('number')
+
+		return Promise.all(
+		[
+			brokerage.byId(trx, investor_id),
+			portfolio.holdings.byId(trx, investor_id)
+		])
+		.then(values =>
 		{
-			throw InvalidAmount({ field: 'multiplier' })
-		}
+			var cash = values[0].cash
+			var multiplier = values[0].multiplier
+
+			var holdings  = values[1]
+
+			var real_allocation
+			 = new_cash
+			 + sumBy(holdings, h => h.amount * h.price)
+
+			var new_multiplier = (index_amount_cap / real_allocation)
+
+			if ((cash === new_cash) && (multiplier === new_multiplier))
+			{
+				console.warn('CASH recalculate to the same values')
+				return
+			}
+
+			var batch =
+			{
+				investor_id: investor_id,
+
+				cash: new_cash,
+				multiplier: new_multiplier
+			}
+
+			if (timestamp)
+			{
+				batch.timestamp = timestamp
+			}
+
+			return table(trx).insert(batch)
+			.catch(Err.fromDb(
+				'timed_brokerage_point_unique',
+				DuplicateBrokerageEntry
+			))
+		})
 	}
 
+	var DuplicateBrokerageEntry = Err('brokerage_duplicate',
+		'There can be only one Brokerage entry per timestamp for Investor')
 
-	brokerage.update = knexed.transact(knex, (trx, investor_id, data) =>
+
+	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return brokerage.cashById(trx, investor_id)
+		.then(cash =>
+		{
+			// cash -> new_cash,
+			// recalculate because of holdings changed
+
+			return put(trx, investor_id, cash)
+		})
+	})
+
+
+	brokerage.update = knexed.transact(knex, (trx, investor_id, date, data) =>
 	{
 		/* operation with validation procedure:
 		 * data =
@@ -84,11 +252,9 @@ module.exports = function Brokerage (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return brokerage.table(trx)
-			.where('investor_id', investor_id)
-			.then(helpers.one)
+			return brokerage.byId(trx, investor_id, date)
 		})
-		.then((brokerage) =>
+		.then(brokerage =>
 		{
 			if (operation in valid_operations)
 			{
@@ -99,8 +265,9 @@ module.exports = function Brokerage (db, investor)
 				throw InvalidOperation()
 			}
 
-			data.cash_value = amount + Number(brokerage.cash_value)
-			return set_brokerage(trx, investor_id, data)
+			var cash = amount + brokerage.cash
+
+			return put(trx, investor_id, cash, date)
 		})
 	})
 
@@ -132,7 +299,7 @@ module.exports = function Brokerage (db, investor)
 		{
 			throw InvalidAmount()
 		}
-		if (amount + Number(brokerage.cash_value) < 0)
+		if (amount + brokerage.cash < 0)
 		{
 			throw InvalidAmount(
 			{

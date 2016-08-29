@@ -77,7 +77,7 @@ module.exports = function (db, http)
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
-		toss(rs, db.investor.portfolio.list(rq.params.id))
+		toss(rs, db.investor.portfolio.byId(rq.params.id))
 	})
 
 	investors.express.get('/:id/chart', authRequired, (rq, rs) =>

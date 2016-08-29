@@ -5,7 +5,7 @@ properties:
     type: number
     format: integer
     description: Amount of Symbols owned by Investor
-  buy_price:
+  price:
     type: number
     description: Calculated buy price
   allocation:
@@ -16,6 +16,6 @@ properties:
     $ref: ../../../swagger/Symbol.yaml
 required:
 - amount
-- buy_price
+- price
 - allocation
 - symbol
