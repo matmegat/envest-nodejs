@@ -406,17 +406,10 @@ module.exports = function User (db, app)
 		.insert({
 			first_name: data.first_name,
 			last_name: data.last_name,
-			email: null
+			email: data.email
 		}
 		, 'id')
 		.then(one)
-		.then(id =>
-		{
-			return user.emailConfirm(
-			trx,
-			id,
-			data.email)
-		})
 		.then(id =>
 		{
 			return createFacebookUser({
@@ -430,6 +423,7 @@ module.exports = function User (db, app)
 		})
 		.then(result =>
 		{
+			console.log(result)
 			return result.id
 		})
 	})
