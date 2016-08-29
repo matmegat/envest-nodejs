@@ -46,6 +46,7 @@ module.exports = function Series (token)
 		.then(transform_series)
 	}
 
+	/* Adjust = All */
 	series.seriesRange = (symbol, start_date, end_date) =>
 	{
 		start_date = util.apidate(start_date)
@@ -63,7 +64,7 @@ module.exports = function Series (token)
 				IdentifierType: 'Symbol',
 				Identifier: symbol,
 
-				AdjustmentMethod: 'SplitOnly',
+				AdjustmentMethod: 'All',
 
 				StartDate: start_date,
 				EndDate: end_date,
