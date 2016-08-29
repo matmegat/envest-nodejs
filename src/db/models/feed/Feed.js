@@ -298,8 +298,8 @@ var Feed = module.exports = function Feed (db)
 	{
 		return feed.feed_table(trx)
 		.where({
-			'id': post_id,
-			'investor_id': investor_id
+			id: post_id,
+			investor_id: investor_id
 		})
 		.del()
 		.then(_.noop)

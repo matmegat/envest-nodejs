@@ -11,15 +11,17 @@ var PostPicNotFound = Err('post_pic_not_found',
 
 module.exports = function Update (db)
 {
+	var validate_symbols_length = validate.length(6, 1)
+
 	return Type(
 	{
 		validate: validate_update,
-		validate_update: validate_update_additionals,
+		validate_update: validate_update_adds,
 		set: upsert,
 		update: upsert
 	})
 
-	function upsert (trx, investor_id, type, date, data, post_id)
+	function upsert (trx, investor_id, type, date, data)
 	{
 		return db.symbols.resolveMany(data.symbols)
 		.then(symbls =>
@@ -38,7 +40,8 @@ module.exports = function Update (db)
 		})
 	}
 
-	function validate_update_additionals (data)
+
+	function validate_update_adds (data)
 	{
 		var data = pick(data,
 		[
@@ -77,8 +80,6 @@ module.exports = function Update (db)
 			'text',
 			'pic'
 		])
-
-		var validate_symbols_length = validate.length(6, 1)
 
 		return new Promise(rs =>
 		{

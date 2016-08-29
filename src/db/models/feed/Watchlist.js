@@ -2,6 +2,7 @@
 var Type = require('./Type')
 
 var pick = require('lodash/pick')
+var assign = require('lodash/assign')
 
 var validate = require('../../validate')
 
@@ -10,7 +11,7 @@ module.exports = function Watchlist (db)
 	return Type(
 	{
 		validate: validate_watchlist,
-		validate_update: validate_watchlist_additionals,
+		validate_update: validate_watchlist_adds,
 		set: (trx, investor_id, type, date, data) =>
 		{
 			var additional = pick(data,
@@ -49,7 +50,7 @@ module.exports = function Watchlist (db)
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
 		{
-			return feed.byIdRaw(post_id)
+			return db.feed.byIdRaw(post_id)
 			.then(item =>
 			{
 				return assign({}, item.data, data)
@@ -57,7 +58,7 @@ module.exports = function Watchlist (db)
 		}
 	})
 
-	function validate_watchlist_additionals (data)
+	function validate_watchlist_adds (data)
 	{
 		var data_update = pick(data,
 		[

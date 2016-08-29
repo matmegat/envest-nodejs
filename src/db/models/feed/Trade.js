@@ -11,7 +11,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 	return Type(
 	{
 		validate: validate_trade,
-		validate_update: validate_trade_additionals,
+		validate_update: validate_trade_adds,
 		set: (trx, investor_id, type, date, data) =>
 		{
 			return symbols.resolve(data.symbol)
@@ -42,16 +42,16 @@ module.exports = function Trade (portfolio, symbols, feed)
 		},
 		rollback: (post_id) =>
 		{
-			return feed.byId(post_id)
+			return feed.byIdRaw(post_id)
 			.then(res =>
 			{
-				
+				return res
 			})
 		}
 	})
 }
 
-function validate_trade_additionals (data)
+function validate_trade_adds (data)
 {
 	var data_update = pick(data,
 	[
