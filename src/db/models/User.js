@@ -402,13 +402,18 @@ module.exports = function User (db, app)
 
 	user.createFacebook = knexed.transact(knex, (trx, data) =>
 	{
-		return user.users_table(trx)
-		.insert({
-			first_name: data.first_name,
-			last_name: data.last_name,
-			email: data.email
-		}
-		, 'id')
+		return user.byEmail(email, trx)
+		.then(Err.existent(EmailAlreadyExists))
+		.then(() =>
+		{
+			return user.users_table(trx)
+			.insert({
+				first_name: data.first_name,
+				last_name: data.last_name,
+				email: data.email
+			}
+			, 'id')
+		})
 		.then(one)
 		.then(id =>
 		{
