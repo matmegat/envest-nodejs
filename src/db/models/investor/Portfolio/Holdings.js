@@ -112,11 +112,9 @@ module.exports = function Holdings (db, investor, portfolio)
 	var toPairs = require('lodash/toPairs')
 
 	var values = require('lodash/values')
-	var keys = require('lodash/keys')
 
-	var over = require('lodash/over')
-	var min = require('lodash/min')
-	var max = require('lodash/max')
+	var first = require('lodash/head')
+	var last  = require('lodash/last')
 
 	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
@@ -180,11 +178,11 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			grid.involved = Array.from(involved)
 
-			var dates = keys(datadays)
-			.map(toDate)
-			.map(Number)
-
-			grid.daterange = over([ min, max ])(dates)
+			grid.daterange =
+			[
+				first(datadays)[0] || null,
+				last(datadays)[0]  || null
+			]
 			.map(toDate)
 
 			grid.datadays = datadays
