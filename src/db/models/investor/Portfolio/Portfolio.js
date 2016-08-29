@@ -179,6 +179,9 @@ module.exports = function Portfolio (db, investor)
 			return grid_series(grid.holdings.involved, range)
 			.then(superseries =>
 			{
+				console.log('--- series:')
+				console.dir(superseries, 3)
+
 				range.by('days', it =>
 				{
 					console.info(it.toISOString())
@@ -188,9 +191,6 @@ module.exports = function Portfolio (db, investor)
 			{
 				return grid
 			})
-
-			//.then(it => console.dir(it, 3), console.error)
-			// iterate
 		})
 	})
 
@@ -226,13 +226,16 @@ module.exports = function Portfolio (db, investor)
 		return Promise.all(queries)
 		.then(batch =>
 		{
-			return batch.map((b, i) =>
+			var r = {}
+
+			batch.forEach((data, i) =>
 			{
-				return {
-					symbol: involved[i],
-					series: b
-				}
+				var symbol = involved[i]
+
+				r[symbol] = data
 			})
+
+			return r
 		})
 	}
 
