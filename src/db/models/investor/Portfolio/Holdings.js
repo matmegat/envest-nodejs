@@ -183,7 +183,6 @@ module.exports = function Holdings (db, investor, portfolio)
 				first(datadays)[0] || null,
 				last(datadays)[0]  || null
 			]
-			.map(toDate)
 
 			grid.datadays = datadays
 
@@ -191,11 +190,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			return grid
 		})
-
-		function toDate (it)
-		{
-			return new Date(it)
-		}
 	})
 
 	// TODO rm
