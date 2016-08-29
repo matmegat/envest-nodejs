@@ -207,6 +207,8 @@ module.exports = function Portfolio (db, investor)
 						// iter symbols
 					}
 					console.log(current_holding)
+
+					compiled.push(sum) // TODO
 				})
 			})
 			.then(() =>
@@ -217,7 +219,7 @@ module.exports = function Portfolio (db, investor)
 	})
 
 	// TODO rm
-	portfolio.grid(120).catch(console.error)
+	// portfolio.grid(120).catch(console.error)
 
 	function max_range (range1, range2)
 	{
