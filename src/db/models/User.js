@@ -412,11 +412,10 @@ module.exports = function User (db, app)
 		.then(one)
 		.then(id =>
 		{
-			return user.newEmailUpdate(trx,
-			{
-				user_id: id,
-				new_email: data.email
-			})
+			return user.emailConfirm(
+			trx,
+			id,
+			data.email)
 		})
 		.then(id =>
 		{
