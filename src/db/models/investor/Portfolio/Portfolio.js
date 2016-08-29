@@ -176,10 +176,21 @@ module.exports = function Portfolio (db, investor)
 				grid.brokerage.daterange
 			)
 
-			grid_series(grid.holdings.involved, range)
-			.then(it => console.dir(it, 3), console.error)
+			return grid_series(grid.holdings.involved, range)
+			.then(superseries =>
+			{
+				range.by('days', it =>
+				{
+					console.info(it.toISOString())
+				})
+			})
+			.then(() =>
+			{
+				return grid
+			})
 
-			return grid
+			//.then(it => console.dir(it, 3), console.error)
+			// iterate
 		})
 	})
 
