@@ -26,6 +26,7 @@ module.exports = function Post (db)
 
 	var PostCreated = Emitter('post_created')
 	var PostUpdated = Emitter('post_updated')
+	var PostDeleted = Emitter('post_deleted')
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
@@ -137,6 +138,43 @@ module.exports = function Post (db)
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: created_post_id
+					})
+				}
+			})
+		})
+	}
+
+	var PostToDeleteNotFound =
+		Err('post_to_delete_not_found', 'Post To Delete Not Found')
+
+	post.remove = function (investor_id, post_id, whom_id)
+	{
+		return knex.transaction(function (trx)
+		{
+			return db.feed.postByInvestor(trx, post_id, investor_id)
+			.then(res =>
+			{
+				if (! res)
+				{
+					throw PostToDeleteNotFound()
+				}
+
+				var post_type = post.types[res.type]
+
+				return post_type.remove(trx, res)
+			})
+			.then(() =>
+			{
+				return db.feed.remove(trx, investor_id, post_id)
+			})
+			.then(() =>
+			{
+				if (whom_id)
+				{
+					PostDeleted(investor_id,
+					{
+						admin: [ ':user-id', whom_id ],
+						post_id: post_id
 					})
 				}
 			})

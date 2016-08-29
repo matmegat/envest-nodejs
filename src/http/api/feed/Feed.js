@@ -165,17 +165,28 @@ module.exports = function Feed (db, http)
 		.then(() =>
 		{
 			toss(rs,
-				feed.post.updateAs(whom_id, target_user_id, type, date, data, post_id))
+				feed.post.updateAs(
+					whom_id, target_user_id, type, date, data, post_id
+				))
 		})
 		.catch(toss.err(rs))
 	})
 
-	feed.express.delete('/post', http.investorRequired, (rq, rs) =>
+	feed.express.delete('/post/delete', http.investorRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
 		var post_id = rq.body.post_id
 
-		toss(rs, feed.model.remove(null, investor_id, post_id))
+		toss(rs, feed.post.remove(investor_id, post_id))
+	})
+
+	feed.express.delete('/post-as/delete', http.adminRequired, (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var target_user_id = rq.body.target_user_id
+		var post_id = rq.body.post_id
+
+		toss(rs, feed.post.remove(target_user_id, post_id, whom_id))
 	})
 
 	return feed

@@ -18,7 +18,11 @@ module.exports = function Update (db)
 		validate: validate_update,
 		validate_update: validate_update_adds,
 		set: upsert,
-		update: upsert
+		update: upsert,
+		remove: () =>
+		{
+			return
+		}
 	})
 
 	function upsert (trx, investor_id, type, date, data)

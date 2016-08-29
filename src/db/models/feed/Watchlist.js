@@ -55,6 +55,10 @@ module.exports = function Watchlist (db)
 			{
 				return assign({}, item.data, data)
 			})
+		},
+		remove: () =>
+		{
+			return
 		}
 	})
 

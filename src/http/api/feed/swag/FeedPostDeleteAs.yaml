@@ -1,0 +1,28 @@
+delete:
+  description: Delete post by admin as investor
+  parameters:
+  - name: payload
+    description: |
+      JSON payload to delete post.
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        post_id:
+          type: integer
+          description: Post id to delete
+        target_user_id:
+          type: integer
+      required:
+      - post_id
+      - target_user_id
+  responses:
+    200:
+      description: Posting success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

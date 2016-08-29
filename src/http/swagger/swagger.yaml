@@ -29,6 +29,12 @@ paths:
   '/feed/post-as/update':
     $ref: ../api/feed/swag/FeedPostUpdateAs.yaml
 
+  '/feed/post/delete':
+    $ref: ../api/feed/swag/FeedPostDelete.yaml
+
+  '/feed/post-as/delete':
+    $ref: ../api/feed/swag/FeedPostDeleteAs.yaml
+
   '/feed/{feed_id}':
     $ref: ../api/feed/swag/FeedById.yaml
 

@@ -262,11 +262,15 @@ var Feed = module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.byIdRaw = function (id, trx)
+	feed.postByInvestor = function (trx, id, investor_id)
 	{
 		return feed.feed_table(trx)
-		.where('id', id)
-		.then(one)
+		.where(
+		{
+			investor_id: investor_id,
+			id: id
+		})
+		.then(oneMaybe)
 	}
 
 	function create (trx, investor_id, type, date, data)
