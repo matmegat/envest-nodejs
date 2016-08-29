@@ -53,23 +53,33 @@ module.exports = function Trade (portfolio, symbols, feed)
 
 function validate_trade_additionals (data)
 {
-	var data = pick(data,
+	var data_update = pick(data,
 	[
 		'text',
 		'risk',
 		'motivations'
 	])
 
+	var data_restricted = pick(data,
+	[
+		'dir',
+		'symbol',
+		'price',
+		'amount'
+	])
+
 	return new Promise(rs =>
 	{
-		data.text && validate.empty(data.text, 'text')
+		validate.forbidden(data_restricted)
 
-		data.risk && validate.empty(data.risk, 'risk')
+		data_update.text && validate.empty(data_update.text, 'text')
 
-		data.motivations && validate.empty(data.motivations, 'motivations')
-		data.motivations && validate.motivation(data.motivations)
+		data_update.risk && validate.empty(data_update.risk, 'risk')
 
-		rs(data)
+		data_update.motivations && validate.empty(data_update.motivations, 'motivations')
+		data_update.motivations && validate.motivation(data_update.motivations)
+
+		rs(data_update)
 	})
 }
 

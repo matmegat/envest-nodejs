@@ -3,6 +3,8 @@ var Err = require('../Err')
 var moment = require('moment')
 
 var includes = require('lodash/includes')
+var isEmpty = require('lodash/isEmpty')
+var keys = require('lodash/keys')
 var moment = require('moment')
 
 var validate = module.exports = {}
@@ -168,6 +170,16 @@ validate.collection = function validate__collection (collection)
 		{
 			throw NotIncluded({ possible_values: collection, item: item })
 		}
+	}
+}
+
+var Forbidden = Err('item_forbidden', 'Item forbidden')
+
+validate.forbidden = function validate__forbidden (object)
+{
+	if (! isEmpty(object))
+	{
+		throw Forbidden({ properties: keys(object) })
 	}
 }
 
