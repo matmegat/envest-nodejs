@@ -59,25 +59,16 @@ module.exports = function Post (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	var PostIdRequired =
-		Err('post_id_required', 'Post Id Required')
-
 	post.update = function (investor_id, type, date, data, post_id)
 	{
-		if (! post_id)
-		{
-			throw PostIdRequired()
-		}
+		validate_update_fields(post_id, type)
 
 		return post.create(investor_id, type, date, data, post_id)
 	}
 
 	post.updateAs = function (whom_id, investor_id, type, date, data, post_id)
 	{
-		if (! post_id)
-		{
-			throw PostIdRequired()
-		}
+		validate_update_fields(post_id, type)
 
 		return post.createAs(whom_id, investor_id, type, date, data, post_id)
 	}
@@ -150,6 +141,24 @@ module.exports = function Post (db)
 				}
 			})
 		})
+	}
+
+	var PostIdRequired =
+		Err('post_id_required', 'Post Id Required')
+	var PostTypeRestricted =
+		Err('post_type_change_restricted', 'Post Type Change Restricted')
+
+	function validate_update_fields (post_id, type)
+	{
+		if (! post_id)
+		{
+			throw PostIdRequired()
+		}
+
+		if (type)
+		{
+			throw PostTypeRestricted()
+		}
 	}
 
 	return post
