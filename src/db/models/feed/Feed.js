@@ -262,7 +262,7 @@ var Feed = module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
-	feed.getPost = function (id, trx)
+	feed.byIdRaw = function (id, trx)
 	{
 		return feed.feed_table(trx)
 		.where('id', id)

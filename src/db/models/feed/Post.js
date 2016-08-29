@@ -49,6 +49,10 @@ module.exports = function Post (db)
 				return post_type.set(trx, investor_id, type, date, data)
 			}
 		})
+		.then(data =>
+		{
+			return feed.upsert(trx, investor_id, type, date, data, post_id)
+		})
 	}
 
 	var InvestorPostDateErr =

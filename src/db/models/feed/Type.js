@@ -8,7 +8,7 @@ module.exports = function Type (options)
 	var type = {}
 
 	type.validate = validator(options.validate)
-	type.validate_update = validator_update(options.validate_update)
+	type.validate_update = validator(options.validate_update)
 	type.set = setter(type, options.set)
 	type.update = updater(type, options.update)
 
@@ -16,14 +16,6 @@ module.exports = function Type (options)
 }
 
 function validator (func)
-{
-	return (data) =>
-	{
-		return new Promise(rs => rs(func(data)))
-	}
-}
-
-function validator_update (func)
 {
 	return (data) =>
 	{

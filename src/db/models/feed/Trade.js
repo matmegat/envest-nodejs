@@ -12,7 +12,7 @@ module.exports = function Trade (portfolio, symbols, feed)
 	{
 		validate: validate_trade,
 		validate_update: validate_trade_additionals,
-		set: (trx, investor_id, type, date, data, post_id) =>
+		set: (trx, investor_id, type, date, data) =>
 		{
 			return symbols.resolve(data.symbol)
 			.then(symbl =>
@@ -29,12 +29,12 @@ module.exports = function Trade (portfolio, symbols, feed)
 			})
 			.then(() =>
 			{
-				return feed.upsert(trx, investor_id, type, date, data, post_id)
+				return feed.upsert(trx, investor_id, type, date, data)
 			})
 		},
 		update: (trx, investor_id, type, date, data, post_id) =>
 		{
-			return feed.getPost(post_id)
+			return feed.byIdRaw(post_id)
 			.then(item =>
 			{
 				data = assign(item.data, data)
