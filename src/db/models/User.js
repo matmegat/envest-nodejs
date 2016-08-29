@@ -423,7 +423,6 @@ module.exports = function User (db, app)
 		})
 		.then(result =>
 		{
-			console.log(result)
 			return result.id
 		})
 	})
