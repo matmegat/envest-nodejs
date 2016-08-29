@@ -85,8 +85,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var orderBy = require('lodash/orderBy')
 	var toPairs = require('lodash/toPairs')
 
-	var pick = require('lodash/pick')
-
 	var first = require('lodash/head')
 	var last  = require('lodash/last')
 
@@ -114,7 +112,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 				var day = pair[1]
 
 				day = last(day)
-				day = pick(day, 'cash', 'multiplier')
+
+				day =
+				{
+					cash: Number(day.cash),
+					multiplier: day.multiplier
+				}
 
 				return [ pair[0], day ]
 			})
