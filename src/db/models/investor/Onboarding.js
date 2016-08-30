@@ -501,6 +501,9 @@ function Holdings (investor_model, db)
 		{
 			throw WrongHoldingsFormat({ field: `holdings[${i}].price` })
 		}
+
+		validate.required(row.date, `holdings[${i}].date`)
+		validate.date(row.date, `holdings[${i}].date`)
 	}
 
 
