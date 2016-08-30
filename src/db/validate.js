@@ -3,6 +3,8 @@ var Err = require('../Err')
 var moment = require('moment')
 
 var includes = require('lodash/includes')
+var isEmpty = require('lodash/isEmpty')
+var keys = require('lodash/keys')
 var moment = require('moment')
 
 var validate = module.exports = {}
@@ -126,6 +128,35 @@ validate.integer.positive = function validate__integer__positive (field, name)
 }
 
 
+var isBoolean = require('lodash/isBoolean')
+
+validate.boolean = function validate__boolean (field, name)
+{
+	if (! isBoolean(field))
+	{
+		throw FieldType({ field: name, type: 'boolean' })
+	}
+}
+
+validate.boolean.true = function validate__boolean (field, name)
+{
+	validate.boolean(field, name)
+	if (field !== true)
+	{
+		throw FieldType({ field: name, type: 'boolean/true' })
+	}
+}
+
+validate.boolean.false = function validate__boolean (field, name)
+{
+	validate.boolean(field, name)
+	if (field !== false)
+	{
+		throw FieldType({ field: name, type: 'boolean/false' })
+	}
+}
+
+
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
 validate.length = function validate__length (max, min)
@@ -171,11 +202,20 @@ validate.collection = function validate__collection (collection)
 	}
 }
 
+var Forbidden = Err('items_forbidden', 'Items Forbidden')
+
+validate.forbidden = function validate__forbidden (object)
+{
+	if (! isEmpty(object))
+	{
+		throw Forbidden({ items: keys(object) })
+	}
+}
+
 var validate_motivations_len = validate.length(3, 1)
 
 validate.motivation = function validate__motivations (motivations)
 {
-	validate.required(motivations, 'motivations')
 	validate.array(motivations, 'motivations')
 	validate_motivations_len(motivations, 'motivations')
 

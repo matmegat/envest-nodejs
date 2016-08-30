@@ -72,20 +72,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(it => it.cash)
 	})
 
-	// TODO rm
-	// brokerage.byId(120, new Date('2016-08-23 08:59:58.34+00'))
-	// brokerage.byId(120, new Date('2016-08-23 08:59:59.34+00'))
-	// brokerage.byId(120)
-	// brokerage.cashById(120)
-	// .then(console.info, console.error)
-
 
 	// grid
 	var groupBy = require('lodash/groupBy')
 	var orderBy = require('lodash/orderBy')
 	var toPairs = require('lodash/toPairs')
-
-	var pick = require('lodash/pick')
 
 	var first = require('lodash/head')
 	var last  = require('lodash/last')
@@ -114,15 +105,26 @@ module.exports = function Brokerage (db, investor, portfolio)
 				var day = pair[1]
 
 				day = last(day)
-				day = pick(day, 'cash', 'multiplier')
+
+				day =
+				{
+					cash: Number(day.cash),
+					multiplier: day.multiplier
+				}
 
 				return [ pair[0], day ]
 			})
 
+			/* expect Brokerage datadays to be not empty.
+			   This means that if Investor is Onboarded
+			   there's always at least one entry in Brokerage.
+			 */
+			expect(datadays).not.empty
+
 			grid.daterange =
 			[
-				first(datadays)[0] || null,
-				last(datadays)[0]  || null
+				first(datadays)[0],
+				 last(datadays)[0]
 			]
 
 			grid.datadays = datadays
@@ -211,7 +213,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 
 			return table(trx).insert(batch)
-			.catch(Err.fromDb('timed_brokerage_point_unique', DuplicateBrokerageEntry))
+			.catch(Err.fromDb(
+				'timed_brokerage_point_unique',
+				DuplicateBrokerageEntry
+			))
 		})
 	}
 

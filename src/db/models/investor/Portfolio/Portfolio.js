@@ -3,6 +3,8 @@ var pick = require('lodash/pick')
 var omit = require('lodash/omit')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
+var forOwn = require('lodash/forOwn')
+var round = require('lodash/round')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -189,46 +191,98 @@ module.exports = function Portfolio (db, investor)
 			grid.brokerage = grids[1]
 
 			var range = max_range(
-				grid.holdings.daterange,
-				grid.brokerage.daterange
+				grid.brokerage.daterange,
+				grid.holdings.daterange
 			)
+
+			range = range_from(range, moment())
 
 			return grid_series(grid.holdings.involved, range)
 			.then(superseries =>
 			{
-				console.dir(grid)
-				console.log('--- holdings:')
-				console.dir(grid.holdings.datadays, 3)
-				console.log('--- brokerage:')
-				console.dir(grid.brokerage.datadays)
-				console.log('--- series:')
-				console.dir(superseries, 3)
+				if (0)
+				{
+					console.dir(grid)
+					console.log('--- holdings:')
+					console.dir(grid.holdings.datadays, 3)
+					console.log('--- brokerage:')
+					console.dir(grid.brokerage.datadays)
+					console.log('--- series:')
+					console.dir(superseries, 3)
+				}
+
+				var compiled = []
 
 				range.by('days', it =>
 				{
-					console.info(it.toISOString())
+					var iso = it.toISOString()
+
+					var c_brokerage
+					 = find_brokerage(grid.brokerage.datadays, iso)
+
+					var total = c_brokerage.cash * c_brokerage.multiplier
+
+					var c_holdings
+					 = find_holding_day(grid.holdings.datadays, iso)
+
+					if (c_holdings)
+					{
+						forOwn(c_holdings, holding =>
+						{
+							var price
+							 = find_series_value(superseries, holding.symbol, iso)
+
+							var wealth
+							 = price * holding.amount * c_brokerage.multiplier
+
+							total += wealth
+						})
+					}
+
+					total = round(total, 3)
+
+					compiled.push([ iso, total ])
 				})
-			})
-			.then(() =>
-			{
-				return grid
+
+				return compiled
 			})
 		})
 	})
 
 	// TODO rm
-	portfolio.grid(120).catch(console.error)
+	// portfolio.grid(120)
+	// .then(console.dir, console.error)
 
-	function max_range (range1, range2)
+	function max_range (brokerage, holdings)
 	{
-		range1 = new MRange(range1)
-		range2 = new MRange(range2)
+		brokerage = new MRange(brokerage)
 
-		var start = moment.min(range1.start, range2.start)
-		var end   = moment.max(range1.end, range2.end)
+		if (holdings)
+		{
+			holdings = new MRange(holdings)
+		}
+
+		var start = brokerage.start
+		var end   = brokerage.end
+
+		if (holdings && holdings.end.isValid())
+		{
+			end = moment.max(brokerage.end, holdings.end)
+		}
 
 		return new MRange(start, end)
 	}
+
+	function range_from (range, end)
+	{
+		end = moment(end)
+		var start = moment(end).subtract(2, 'years')
+
+		start = moment.max(range.start, start)
+
+		return new MRange(start, end)
+	}
+
 
 	function grid_series (involved, range)
 	{
@@ -250,6 +304,60 @@ module.exports = function Portfolio (db, investor)
 
 			return r
 		})
+	}
+
+	var findLast = require('lodash/findLast')
+
+	function find_brokerage (brokerage, date)
+	{
+		/* ISO dates are sortable */
+		var entry = findLast(brokerage, entry => entry[0] <= date)
+
+		if (entry)
+		{
+			return entry[1]
+		}
+		else
+		{
+			throw TypeError('brokerage_error')
+		}
+	}
+
+	function find_holding_day (holdings, date)
+	{
+		/* ISO dates are sortable */
+		var entry = findLast(holdings, entry => entry[0] <= date)
+
+		if (entry)
+		{
+			return entry[1]
+		}
+		else
+		{
+			return null // NO trades at all
+		}
+	}
+
+	function find_series_value (series, symbol, day)
+	{
+		series = series[symbol]
+
+		/* ISO dates are sortable */
+		var entry = findLast(series, tick => tick.timestamp <= day)
+
+		if (entry)
+		{
+			return entry.value
+		}
+		else
+		{
+			console.warn(
+				'XIGN error, no data for Investor Chart {%s, %s}',
+				symbol, day
+			)
+
+			return 0
+		}
 	}
 
 
