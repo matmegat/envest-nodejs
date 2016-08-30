@@ -224,7 +224,7 @@ module.exports = function Portfolio (db, investor)
 
 					total = round(total, 3)
 
-					compiled.push([ iso, total ])
+					compiled.push([ moment(iso).utc().format(), total ])
 				})
 
 				return compiled
