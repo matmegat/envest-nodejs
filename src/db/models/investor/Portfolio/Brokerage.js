@@ -137,16 +137,22 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
-	brokerage.init = (trx, investor_id) =>
+	brokerage.init = knexed.transact(knex,
+	(trx, investor_id, amount, timestamp) =>
 	{
+		amount = amount || index_amount_cap
+
+		var multiplier = index_amount_cap / amount
+
 		return table(trx)
 		.insert(
 		{
 			investor_id: investor_id,
-			cash: index_amount_cap,
-			multiplier: 1.0
+			cash: amount,
+			timestamp: timestamp,
+			multiplier: multiplier
 		})
-	}
+	})
 
 
 	// set

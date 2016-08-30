@@ -435,7 +435,22 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, value.amount, value.date)
+			return portfolio.brokerage.byId(investor_id) // without any date
+			.then(() =>
+			{
+				return portfolio
+				.brokerage
+				.set(investor_id, value.amount, value.date)
+			},
+			(err) =>
+			{
+				if (err.code  === 'brokerage_not_exist_for_date')
+				{
+					return portfolio
+					.brokerage
+					.init(investor_id, value.amount, value.date)
+				}
+			})
 		},
 		verify: (value, investor_id) =>
 		{
