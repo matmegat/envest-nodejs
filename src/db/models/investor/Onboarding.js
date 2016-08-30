@@ -412,12 +412,6 @@ function Brokerage (investor_model, db)
 		},
 		validate: (value) =>
 		{
-			decimal(value, 'brokerage')
-
-			if (value < 0)
-			{
-				throw WrongBrokerageFormat({ field: 'brokerage' })
-			}
 			validate.required(value.amount, 'brokerage.amount')
 			validate.required(value.date, 'brokerage.date')
 
@@ -441,7 +435,7 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, value)
+			return portfolio.brokerage.set(investor_id, value.amount, value.date)
 		},
 		verify: (value, investor_id) =>
 		{
