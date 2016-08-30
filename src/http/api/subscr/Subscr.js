@@ -2,19 +2,23 @@
 var Router = require('express').Router
 var toss = require('../../toss')
 
-module.exports = function Subscr (subscr_model, cfg)
+module.exports = function Subscr (subscr_model)
 {
 	var subscr = {}
 
 	subscr.model = subscr_model
 	subscr.express = Router()
-	subscr.config = cfg
 
 	subscr.express.post('/activate', (rq, rs) =>
 	{
-		var stripe = require('stripe')(subscr.config.stripe.secret_key)
-		stripe.customers.create(
-			{ source: rq.body.stripe_token },
+		var trial_end = 1473014984 // this should be set with actual value
+		subscr.model.stripe.customers.create(
+			{
+				source: rq.body.stripe_token,
+				plan: rq.body.plan,
+				coupon: rq.body.coupon,
+				trial_end: trial_end
+			},
 			(err, customer) =>
 			{
 				if (err)
@@ -22,31 +26,16 @@ module.exports = function Subscr (subscr_model, cfg)
 					return toss.err(rs, err)
 				}
 
-				stripe.subscriptions.create(
-					{
-						customer: customer.id,
-						plan: rq.body.plan,
-						coupon: rq.body.coupon
-					},
-					(err, subscription) =>
-					{
-						if (err)
-						{
-							return toss.err(rs, err)
-						}
+				var subscription = customer.subscriptions.data[0]
+				var subscription_data =
+				{
+					user_id: rq.user.id,
+					type: rq.body.plan,
+					stripe_customer_id: customer.id,
+					stripe_subscriber_id: subscription.id
+				}
 
-						var subscription_data =
-						{
-							user_id: rq.user.id,
-							plan: rq.body.plan,
-							type: 'some type?',
-							stripe_customer_id: customer.id,
-							stripe_subscriber_id: subscription.id
-						}
-
-						toss(rs, subscr.model.buyActivation(subscription_data))
-					}
-				)
+				toss(rs, subscr.model.addSubscription(subscription_data))
 			}
 		)
 	})
@@ -56,8 +45,7 @@ module.exports = function Subscr (subscr_model, cfg)
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
 		{
-			var stripe = require('stripe')(subscr.config.stripe.secret_key)
-			stripe.subscriptions.retrieve(
+			subscr.model.stripe.subscriptions.retrieve(
 				subscription.stripe_subscriber_id,
 				(err, subscription_obj) =>
 				{
@@ -80,8 +68,7 @@ module.exports = function Subscr (subscr_model, cfg)
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
 		{
-			var stripe = require('stripe')(subscr.config.stripe.secret_key)
-			stripe.subscriptions.del(
+			subscr.model.stripe.subscriptions.del(
 				subscription.stripe_subscriber_id,
 				(err) =>
 				{
@@ -90,16 +77,7 @@ module.exports = function Subscr (subscr_model, cfg)
 						return toss.err(rs, err)
 					}
 
-					subscr.model.cancelSubscription(rq.user.id)
-					.then(result =>
-					{
-						var res =
-						{
-							success: result === 1
-						}
-
-						toss(rs, res)
-					})
+					toss(rs, subscr.model.cancelSubscription(rq.user.id))
 				}
 			)
 		})
