@@ -354,12 +354,30 @@ module.exports = function Portfolio (db, investor)
 	holdings.dirs.bought = holdings.buy
 	holdings.dirs.sold = holdings.sell
 
+	var PostDateErr =
+		Err('can_not_post_before_existing_posts', 'Can Not Post Before Existing Posts')
+
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
 		var dir = data.dir
 		var symbol = {}
 
-		return Symbl.validate(data.symbol)
+		return Promise.all(
+		[
+			holdings.checkDateAvail(trx, investor_id, date),
+			brokerage.checkDateAvail(trx, investor_id, date)
+		])
+		.then(so =>
+		{
+			if (so[0] || so[1])
+			{
+				throw PostDateErr()
+			}
+		})
+		.then(() =>
+		{
+			return Symbl.validate(data.symbol)
+		})
 		.then(symbl =>
 		{
 			symbol = symbl

@@ -72,6 +72,22 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(it => it.cash)
 	})
 
+	brokerage.checkDateAvail =
+		knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+			.andWhere('timestamp', '>', for_date)
+		})
+		.then(res =>
+		{
+			return !!res.length
+		})
+	})
+
 
 	// grid
 	var groupBy = require('lodash/groupBy')
