@@ -224,7 +224,7 @@ module.exports = function Portfolio (db, investor)
 
 					total = round(total, 3)
 
-					compiled.push([ iso, total ])
+					compiled.push([ moment(iso).utc().format(), total ])
 				})
 
 				return compiled
@@ -326,7 +326,11 @@ module.exports = function Portfolio (db, investor)
 		series = series[symbol]
 
 		/* ISO dates are sortable */
-		var entry = findLast(series, tick => tick.timestamp <= day)
+		var entry = findLast(series, tick =>
+		{
+			var ts = moment(tick.timestamp).toISOString()
+			return ts <= day
+		})
 
 		if (entry)
 		{
