@@ -1,66 +1,214 @@
 
-var knexed = require('../../../knexed')
-var upsert = require('../../../upsert')
+var noop = require('lodash/noop')
+var map  = require('lodash/map')
+var pick = require('lodash/pick')
+var extend = require('lodash/extend')
 
-var _ = require('lodash')
+var expect = require('chai').expect
+
+var knexed = require('../../../knexed')
 
 var validate = require('../../../validate')
-
 var Err = require('../../../../Err')
 
-module.exports = function Holdings (db, investor)
+var Symbl = require('../../symbols/Symbl')
+
+module.exports = function Holdings (db, investor, portfolio)
 {
 	var holdings = {}
 
 	var knex = db.knex
+	var table = knexed(knex, 'portfolio')
+
+	var raw = knex.raw
+
 	var oneMaybe = db.helpers.oneMaybe
-	var one = db.helpers.one
 
-	holdings.table = knexed(knex, 'portfolio_symbols')
 
-	function set_holdings (trx, investor_id, holding_entries)
+	// byId
+	holdings.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		/* Expect holding_entries to be =
-		* [
-		*   {
-		*     symbol:    string,
-		*     amount:    integer,
-		*     buy_price: float
-		*   },
-		*
-		*   {},
-		* ]
-		* */
-		var holdings_upsert = upsert(
-			holdings.table(trx),
-			'id'
-		)
+		return byId(trx, investor_id, for_date)
+	})
 
-		var where_clause = { investor_id: investor_id }
-
-		return Promise.all(_.map(holding_entries, (holding) =>
+	holdings.symbolById = knexed.transact(knex,
+	(trx, symbol, investor_id, for_date) =>
+	{
+		return Symbl.validate(symbol)
+		.then(symbol =>
 		{
-			var data = _.pick(holding, 'symbol_exchange', 'symbol_ticker')
+			return byId(trx, investor_id, for_date, function ()
+			{
+				this.where(symbol.toDb())
+			})
+		})
+		.then(oneMaybe)
+	})
 
-			return holdings_upsert(_.extend({}, where_clause, data), holding)
-		}))
+
+	var NoSuchHolding = Err('no_such_holding',
+		'Investor does not posess such holding')
+
+	holdings.ensure = knexed.transact(knex, (trx, symbol, investor_id) =>
+	{
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return holdings.symbolById(trx, symbol, investor_id)
+		})
+		.then(so =>
+		{
+			if (! so)
+			{
+				throw NoSuchHolding({ symbol: symbol })
+			}
+
+			return so
+		})
+	})
+
+
+	function byId (trx, investor_id, for_date, aux)
+	{
+		aux || (aux = noop)
+
+		return knex(raw('portfolio AS P'))
+		.transacting(trx)
+		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
+		.where('investor_id', investor_id)
+		.where('amount', '>', 0)
+		.where('timestamp',
+			table().max('timestamp')
+			.where(
+			{
+				investor_id:     raw('P.investor_id'),
+				symbol_exchange: raw('P.symbol_exchange'),
+				symbol_ticker:   raw('P.symbol_ticker'),
+			})
+			.where(function ()
+			{
+				if (for_date)
+				{
+					this.where('timestamp', '<=', for_date)
+				}
+			})
+		)
+		.where(aux)
+		.then(r =>
+		{
+			r.forEach(it =>
+			{
+				it.price = Number(it.price)
+			})
+
+			return r
+		})
 	}
+
+
+	// grid
+	var groupBy = require('lodash/groupBy')
+	var orderBy = require('lodash/orderBy')
+	var toPairs = require('lodash/toPairs')
+
+	var values = require('lodash/values')
+
+	var first = require('lodash/head')
+	var last  = require('lodash/last')
+
+	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return table(trx)
+		.select(
+			'timestamp',
+			raw(`date_trunc('day', timestamp) + INTERVAL '1 day' as day`),
+			'symbol_exchange',
+			'symbol_ticker',
+			'amount',
+			'price'
+		)
+		.where('investor_id', investor_id)
+		.orderBy('timestamp')
+		.then(datadays =>
+		{
+			var grid = {}
+
+			var involved = new Set
+			var running  = {}
+
+			datadays = groupBy(datadays, it => it.day.toISOString())
+			datadays = toPairs(datadays)
+			datadays = orderBy(datadays, '0')
+
+			datadays = datadays.map(pair =>
+			{
+				var day = pair[1]
+
+				day.forEach(entry =>
+				{
+					var symbol
+					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
+
+					entry =
+					{
+						symbol: symbol,
+						price:  Number(entry.price),
+						amount: entry.amount
+					}
+
+
+					var xsymbol = symbol.toXign()
+
+					if (entry.amount)
+					{
+						involved.add(xsymbol)
+
+						running[xsymbol] = entry
+					}
+					else
+					{
+						delete running[xsymbol]
+					}
+				})
+
+				day = values(running)
+
+				return [ pair[0], day ]
+			})
+
+			grid.involved = Array.from(involved)
+
+			/* Can be empty if no Trades in
+			   corresponding period of time.
+			 */
+			if (datadays.length)
+			{
+				grid.daterange =
+				[
+					first(datadays)[0],
+					 last(datadays)[0]
+				]
+			}
+			else
+			{
+				grid.daterange = null
+			}
+
+			grid.datadays = datadays
+
+			running = null
+
+			return grid
+		})
+	})
+
+
+	// set
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
-		/* operation with validation procedure
-		* Expect holding_entries to be:
-		* [
-		*   {
-		*     symbol_exchange: string,
-		*     symbol_ticker: string,
-		*     buy_price: float,
-		*     amount: integer
-		*   },
-		*
-		*   {}
-		* ]
-		* */
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -72,159 +220,112 @@ module.exports = function Holdings (db, investor)
 				validate.empty(holding.symbol, `holdings[${i}].symbol`)
 
 				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount <= 0)
+				if (holding.amount < 0)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].amount` })
 				}
 
-				validate.number(holding.buy_price, `holdings[${i}].buy_price`)
-				if (holding.buy_price <= 0)
+				validate.number(holding.price, `holdings[${i}].price`)
+				if (holding.price <= 0)
 				{
-					throw InvalidAmount({ field: `holdings[${i}].buy_price` })
+					throw InvalidAmount({ field: `holdings[${i}].price` })
 				}
 			})
 
-			return Promise.all(_.map(holding_entries, (holding) =>
+			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+		})
+		.then(symbols =>
+		{
+			return Promise.all(symbols.map((symbol, i) =>
 			{
-				return db.symbols.resolve(holding.symbol)
+				var holding = holding_entries[i]
+				var data = pick(holding, 'amount', 'price')
+
+				return put(trx, investor_id, symbol, data)
 			}))
-		})
-		.then((processed_symbols) =>
-		{
-			processed_symbols.forEach((symbol, i) =>
-			{
-				holding_entries[i].symbol_exchange = symbol.exchange
-				holding_entries[i].symbol_ticker   = symbol.ticker
-				delete holding_entries[i].symbol
-			})
-
-			return set_holdings(trx, investor_id, holding_entries)
-		})
-	})
-
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
-
-	holdings.byInvestorId = function (investor_id)
-	{
-		return holdings.table()
-		.select(['amount', 'buy_price', 'symbol_ticker', 'symbol_exchange'])
-		.where('investor_id', investor_id)
-	}
-
-	function remove_symbol (trx, investor_id, symbol)
-	{
-		return holdings.table(trx)
-		.where({
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.del()
-	}
-
-	function get_symbol (investor_id, symbol)
-	{
-		return holdings.table()
-		.where({
-			investor_id: investor_id,
-			symbol_exchange: symbol.exchange,
-			symbol_ticker: symbol.ticker
-		})
-		.then(oneMaybe)
-	}
-
-	function add_symbol (trx, investor_id, symbol)
-	{
-		return holdings.table(trx)
-		.insert(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.exchange,
-			symbol_ticker: symbol.ticker,
-			amount: symbol.amount,
-			buy_price: symbol.price
-		})
-	}
-
-	function buy_symbol (trx, investor_id, symbol, amount, price)
-	{
-		return holdings.table(trx)
-		.where(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.update(
-		{
-			amount: symbol.amount + amount,
-			buy_price: calculate_buy_price(
-				symbol.amount, symbol.buy_price, amount, price)
-		})
-	}
-
-	function sell_symbol (trx, investor_id, symbol, amount, price)
-	{
-		return holdings.table(trx)
-		.where(
-		{
-			investor_id: investor_id,
-			symbol_exchange: symbol.symbol_exchange,
-			symbol_ticker: symbol.symbol_ticker
-		})
-		.update(
-		{
-			amount: symbol.amount - amount,
-		}, 'amount')
-		.then(one)
-		.then(amount =>
-		{
-			if (amount === 0)
-			{
-				return remove_symbol(trx, investor_id, symbol)
-			}
 		})
 		.then(() =>
 		{
-			return amount * price
+			return portfolio.brokerage.recalculate(trx, investor_id)
 		})
+	})
+
+
+	function put (trx, investor_id, symbol, data)
+	{
+		expect(symbol).ok
+		expect(symbol.exchange).a('string')
+		expect(symbol.ticker).a('string')
+
+		expect(data).ok
+		expect(data.amount).a('number')
+		expect(data.price).a('number')
+
+		data = pick(data,
+		[
+			'amount',
+			'price',
+			'timestamp'
+		])
+
+		var batch = extend(
+			{ investor_id: investor_id },
+			  symbol.toDb(),
+			  data
+		)
+
+		return table(trx).insert(batch)
+		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
-	var SymbolNotFound = Err('symbol_not_found', 'Symbol Not Found')
-	var NotEnoughtAmount = Err('not_enought_amount_to_sell',
-		'Not Enought Amount To Sell')
-	var NotEnoughtMoney = Err('not_enought_money_to_buy',
-		'Not Enought Money To Buy')
+	var DuplicateHoldingEntry = Err('holding_duplicate',
+		'There can be only one Holding entry per timestamp for Investor')
+
+
+	// buy, sell
 	var validate_positive = validate.number.positive
 
-	holdings.buy = function (trx, investor_id, symbol, data, cash)
+	var NotEnoughMoney = Err('not_enough_money_to_buy',
+		'Not Enough Money To Buy')
+
+	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
 		validate_positive(data.price, 'price')
 
 		var amount = data.amount
-		var price = data.price
-		var sum = amount * price
+		var price  = data.price
+		var sum    = amount * price
 
-		if (sum > cash)
-		{
-			throw NotEnoughtMoney()
-		}
+		var for_date = date
 
-		return get_symbol(investor_id, symbol)
-		.then(symbl =>
+		return portfolio.brokerage.cashById(trx, investor_id, for_date)
+		.then(cash =>
 		{
-			if (! symbl)
+			if (sum > cash)
 			{
-				symbl = symbol
-				symbl.amount = amount
-				symbl.price = price
-
-				return add_symbol(trx, investor_id, symbl)
+				throw NotEnoughMoney()
+			}
+		})
+		.then(() =>
+		{
+			return holdings.symbolById(trx, symbol, investor_id, for_date)
+		})
+		.then(holding =>
+		{
+			if (holding)
+			{
+				amount = holding.amount + amount
 			}
 
-			return buy_symbol(trx, investor_id, symbl, amount, price)
+			var data_put =
+			{
+				amount:    amount,
+				price:     price,
+				timestamp: date
+			}
+
+			return put(trx, investor_id, symbol, data_put)
 		})
 		.then(() =>
 		{
@@ -232,42 +333,46 @@ module.exports = function Holdings (db, investor)
 		})
 	}
 
-	holdings.sell = function (trx, investor_id, symbol, data)
+
+	var NotEnoughAmount = Err('not_enough_amount_to_sell',
+		'Not Enough Amount To Sell')
+
+	holdings.sell = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
 		validate_positive(data.price, 'price')
 
 		var amount = data.amount
-		var price = data.price
+		var price  = data.price
+		var sum    = amount * price
 
-		return get_symbol(investor_id, symbol)
-		.then(symbl =>
+		return holdings.ensure(trx, symbol, investor_id)
+		.then(holding =>
 		{
-			if (! symbl)
+			if (holding.amount < amount)
 			{
-				throw SymbolNotFound({ symbol: symbol })
-			}
-
-			return symbl
-		})
-		.then(symbl =>
-		{
-			if (symbl.amount < amount)
-			{
-				throw NotEnoughtAmount(
+				throw NotEnoughAmount(
 				{
-					available_amount: symbl.amount,
+					available_amount: holding.amount,
 					sell_amount: amount
 				})
 			}
 
-			return sell_symbol(trx, investor_id, symbl, amount, price)
-		})
-	}
+			amount = amount - holding.amount
 
-	function calculate_buy_price (amount_old, price_old, amount, price)
-	{
-		return (amount_old * price_old + amount * price) / (amount_old + amount)
+			var data_put =
+			{
+				amount:    amount,
+				price:     price,
+				timestamp: date
+			}
+
+			return put(trx, investor_id, symbol, data_put)
+		})
+		.then(() =>
+		{
+			return sum
+		})
 	}
 
 	return holdings

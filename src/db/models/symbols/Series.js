@@ -42,25 +42,59 @@ module.exports = function Series (token)
 			}
 		})
 
+		return request(uri)
+		.then(transform_series)
+	}
+
+	/* Adjust = All */
+	series.seriesRange = (symbol, start_date, end_date) =>
+	{
+		start_date = util.apidate(start_date)
+		end_date   = util.apidate(end_date)
+
+		var uri = format(
+		{
+			protocol: 'https:',
+			host: 'www.xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotesRange',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifier: symbol,
+
+				AdjustmentMethod: 'All',
+
+				StartDate: start_date,
+				EndDate: end_date,
+
+				_Token: token
+			}
+		})
 
 		return request(uri)
-		.then(util.unwrap.data)
-		.then(it =>
-		{
-			var quotes = orderBy(it.GlobalQuotes, (quote) =>
-			{
-				return new Date(quote.Date)
-			})
+		.then(transform_series)
+	}
 
-			return quotes.map((quote) =>
-			{
-				return {
-					timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
-					value:     quote.LastClose
-				}
-			})
+	function transform_series (data)
+	{
+		data = util.unwrap.data(data)
+
+		var quotes = orderBy(data.GlobalQuotes, (quote) =>
+		{
+			return new Date(quote.Date)
+		})
+
+		return quotes.map((quote) =>
+		{
+			return {
+				timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
+				value:     quote.LastClose
+			}
 		})
 	}
+
 
 	series.series.intraday = (symbol, start_date, end_date) =>
 	{

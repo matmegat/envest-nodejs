@@ -1,6 +1,9 @@
+/* eslint-disable no-unreachable */
 
 exports.seed = function (knex)
 {
+	return /* do not create this one in favor of brokerage-history */
+
 	return knex('brokerage').del()
 	.then(() =>
 	{

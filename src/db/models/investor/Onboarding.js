@@ -407,9 +407,7 @@ function Brokerage (investor_model, db)
 	{
 		get: (queryset, investor_id) =>
 		{
-			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.brokerage.cash_value)
-			.then(Number)
+			return db.investor.portfolio.brokerage.cashById(investor_id)
 		},
 		validate: (value) =>
 		{
@@ -426,22 +424,21 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.setBrokerage(investor_id, value)
+			return portfolio.brokerage.set(investor_id, value)
 		},
 		verify: (value, investor_id) =>
 		{
-			return db.investor.portfolio.full(investor_id)
-			.then((portfolio) =>
+			return db.investor.portfolio.brokerage.byId(investor_id)
+			.catch(Err.fromCode('brokerage_not_exist_for_date',
+				() => CannotGoPublic({ reason: 'Brokerage does not exist' })
+			))
+			.then(brokerage =>
 			{
-				if (! portfolio.brokerage)
-				{
-					throw CannotGoPublic({ reason: 'Brokerage does not exist' })
-				}
-				if (! Number(portfolio.brokerage.cash_value) < 0)
+				if (brokerage.cash < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
 				}
-				if (! portfolio.brokerage.multiplier < 0)
+				if (brokerage.multiplier < 0)
 				{
 					throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
 				}
@@ -458,7 +455,7 @@ var WrongHoldingsFormat = Err('wrong_holdings_format',
 
 function Holdings (investor_model, db)
 {
-	var decimal = validate.number.decimal(6)
+	var decimal = validate.number.decimal(10)
 
 	function vrow (row, i)
 	{
@@ -468,15 +465,15 @@ function Holdings (investor_model, db)
 		validate.empty(row.symbol, `holdings[${i}].symbol`)
 
 		validate.number(row.amount, `holdings[${i}].amount`)
-		if (row.amount <= 0)
+		if (row.amount < 0)
 		{
 			throw WrongHoldingsFormat({ field: `holdings[${i}].amount` })
 		}
 
-		decimal(row.buy_price, `holdings[${i}].buy_price`)
-		if (row.buy_price <= 0)
+		decimal(row.price, `holdings[${i}].price`)
+		if (row.price <= 0)
 		{
-			throw WrongHoldingsFormat({ field: `holdings[${i}].buy_price` })
+			throw WrongHoldingsFormat({ field: `holdings[${i}].price` })
 		}
 	}
 
@@ -514,7 +511,7 @@ function Holdings (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.setHoldings(investor_id, value)
+			return portfolio.holdings.set(investor_id, value)
 		}
 	})
 }

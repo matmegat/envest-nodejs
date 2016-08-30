@@ -321,6 +321,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+	symbols.seriesForPortfolio = (symbol, range) =>
+	{
+		return xign.seriesRange(symbol, range.start, range.end)
+	}
+
 	return symbols
 }
 
