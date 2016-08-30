@@ -85,11 +85,10 @@ module.exports = function Portfolio (db, investor)
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					var resp = pick(holding,
+					var resp = omit(holding,
 					[
-						'symbol',
-						'allocation',
-						'gain'
+						'symbol_ticker',
+						'symbol_exchange'
 					])
 
 					if (! extended)
@@ -115,8 +114,9 @@ module.exports = function Portfolio (db, investor)
 
 				var resp =
 				{
-					total:    total,
-					holdings: holdings,
+					total:     total,
+					holdings:  holdings,
+					brokerage: brokerage,
 					full_portfolio:
 					{
 						value: full_value,
