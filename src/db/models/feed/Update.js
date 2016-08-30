@@ -204,5 +204,7 @@ module.exports = function Update (db)
 				return data
 			})
 		}
+
+		return data
 	}
 }
