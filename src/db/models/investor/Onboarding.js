@@ -17,6 +17,7 @@ module.exports = function Onboarding (db, investor)
 
 	onb.fields.profession = Profession(investor)
 	onb.fields.focus = Focus(investor)
+	onb.fields.education = Education(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
@@ -245,6 +246,40 @@ function Focus (investor)
 	})
 }
 
+var validateEduLength = validate.length(3)
+// eslint-disable-next-line id-length
+var validateEduItemLength = validate.length(250)
+
+function Education (investor)
+{
+	return Field(investor,
+	{
+		get: (queryset) =>
+		{
+			return queryset
+			.select('education')
+			.then(one)
+			.then(rs => rs.education)
+		},
+		validate: (value) =>
+		{
+			validate.array(value, 'education')
+			validateEduLength(value, 'education')
+			/* validate each element of array */
+			value.forEach((education_item, i) =>
+			{
+				validate.string(education_item, `education[${i}]`)
+				validate.empty(education_item, `education[${i}]`)
+				validateEduItemLength(education_item, `education[${i}]`)
+			})
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ education: JSON.stringify(value) })
+		}
+	})
+}
 
 var validateBackLength = validate.length(3000)
 
