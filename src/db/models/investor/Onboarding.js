@@ -8,6 +8,7 @@ var CannotGoPublic = Err('cannot_go_public',
 var validate = require('../../validate')
 
 var _ = require('lodash')
+var moment = require('moment')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -417,6 +418,22 @@ function Brokerage (investor_model, db)
 			{
 				throw WrongBrokerageFormat({ field: 'brokerage' })
 			}
+			validate.required(value.amount, 'brokerage.amount')
+			validate.required(value.date, 'brokerage.date')
+
+			decimal(value.amount, 'brokerage.amount')
+
+			if (value.amount < 0)
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage.amount' })
+			}
+
+			validate.date(value.date, 'brokerage.date')
+
+			if (moment.utc(value.date) > moment.utc())
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage.date' })
+			}
 
 			return value
 		},
@@ -517,7 +534,6 @@ function Holdings (investor_model, db)
 }
 
 
-var moment = require('moment')
 var WrongStartDateFormat = Err('wrong_start_date_format',
 	'Wrong start_date format. Not ISO-8601')
 
