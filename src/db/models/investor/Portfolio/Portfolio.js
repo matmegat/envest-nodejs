@@ -364,12 +364,12 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			holdings.checkDateAvail(trx, investor_id, date),
-			brokerage.checkDateAvail(trx, investor_id, date)
+			holdings.isDateAvail(trx, investor_id, date),
+			brokerage.isDateAvail(trx, investor_id, date)
 		])
 		.then(so =>
 		{
-			if (so[0] || so[1])
+			if (!so[0] || !so[1])
 			{
 				throw PostDateErr()
 			}

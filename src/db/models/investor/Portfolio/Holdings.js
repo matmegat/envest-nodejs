@@ -67,7 +67,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	holdings.checkDateAvail =
+	holdings.isDateAvail =
 		knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -79,7 +79,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 		.then(res =>
 		{
-			return !!res.length
+			return !res.length
 		})
 	})
 
