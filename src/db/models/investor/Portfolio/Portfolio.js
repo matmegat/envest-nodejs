@@ -36,7 +36,18 @@ module.exports = function Portfolio (db, investor)
 	{
 		extended = Boolean(extended)
 
-		return investor.public.ensure(investor_id, trx)
+		return new Promise(rs =>
+		{
+			if (extended)
+			{
+				return rs(investor.public)
+			}
+			else
+			{
+				return rs(investor.all)
+			}
+		})
+		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
 			return Promise.all([
