@@ -202,6 +202,19 @@ validate.collection = function validate__collection (collection)
 	}
 }
 
+var find = require('lodash/find')
+
+validate.obj_collection = function validate__obj_collection (collection)
+{
+	return function (item)
+	{
+		if (! find(collection, item))
+		{
+			throw NotIncluded({ possible_values: collection, item: item })
+		}
+	}
+}
+
 var Forbidden = Err('items_forbidden', 'Items Forbidden')
 
 validate.forbidden = function validate__forbidden (object)
@@ -213,6 +226,8 @@ validate.forbidden = function validate__forbidden (object)
 }
 
 var validate_motivations_len = validate.length(3, 1)
+var motivations_list = require('./models/Motivations')()
+var validate_motivation_item = validate.obj_collection(motivations_list)
 
 validate.motivation = function validate__motivations (motivations)
 {
@@ -227,6 +242,8 @@ validate.motivation = function validate__motivations (motivations)
 
 		validate.required(el.text, 'motivation text')
 		validate.empty(el.text, 'motivation text')
+
+		validate_motivation_item(el)
 	})
 }
 

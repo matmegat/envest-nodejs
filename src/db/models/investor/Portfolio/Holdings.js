@@ -69,6 +69,22 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
+	holdings.isDateAvail =
+		knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+			.andWhere('timestamp', '>', for_date)
+		})
+		.then(res =>
+		{
+			return ! res.length
+		})
+	})
+
 
 	function byId (trx, investor_id, for_date, aux)
 	{
