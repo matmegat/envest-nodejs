@@ -327,6 +327,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (holding)
 			{
+				price = ( holding.amount * holding.price + amount * price )
+				        / ( holding.amount + amount )
 				amount = holding.amount + amount
 			}
 
@@ -375,7 +377,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			var data_put =
 			{
 				amount:    amount,
-				price:     price,
+				price:     holding.price,
 				timestamp: date
 			}
 
