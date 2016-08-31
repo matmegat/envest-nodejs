@@ -36,7 +36,8 @@ module.exports = function Featured (db, investor)
 		.then(Boolean)
 	}
 
-	var InvestorIsNotPublic = Err('investor_is_not_public', 'No public investor cannot be featured.')
+	var InvestorIsNotPublic = Err('investor_is_not_public',
+		'No public investor cannot be featured.')
 
 	featured.set = knexed.transact(knex, (trx, investor_id) =>
 	{
