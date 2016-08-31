@@ -137,20 +137,32 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
-	brokerage.init = knexed.transact(knex,
+	brokerage.init_or_set = knexed.transact(knex,
 	(trx, investor_id, amount, timestamp) =>
 	{
-		amount = amount || index_amount_cap
-
-		var multiplier = index_amount_cap / amount
-
-		return table(trx)
-		.insert(
+		return brokerage.byId(investor_id)
+		.then(() => brokerage.set(trx, investor_id, amount, timestamp),
+		(err) =>
 		{
-			investor_id: investor_id,
-			cash: amount,
-			timestamp: timestamp,
-			multiplier: multiplier
+			if (err.code  === 'brokerage_not_exist_for_date')
+			{
+				amount = amount || index_amount_cap
+
+				var multiplier = index_amount_cap / amount
+
+				return table(trx)
+				.insert(
+				{
+					investor_id: investor_id,
+					cash: amount,
+					timestamp: timestamp,
+					multiplier: multiplier
+				})
+			}
+			else
+			{
+				throw err
+			}
 		})
 	})
 
