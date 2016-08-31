@@ -36,11 +36,21 @@ module.exports = function Featured (db, investor)
 		.then(Boolean)
 	}
 
+	var InvestorIsNotPublic = Err('investor_is_not_public', 'No public investor cannot be featured.')
+
 	featured.set = function (investor_id)
 	{
 		var data = { investor_id: investor_id }
 
 		return validateId(WrongInvestorId, investor_id)
+		.then(() =>
+		{
+			return investor.table()
+			.where('user_id', investor_id)
+			.where('is_public', false)
+			.then(oneMaybe)
+		})
+		.then(Err.existent(InvestorIsNotPublic))
 		.then(() =>
 		{
 			return featured.table()
