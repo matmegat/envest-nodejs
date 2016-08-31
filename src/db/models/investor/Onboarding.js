@@ -504,6 +504,10 @@ function Holdings (investor_model, db)
 
 		validate.required(row.date, `holdings[${i}].date`)
 		validate.date(row.date, `holdings[${i}].date`)
+		if (moment.utc(row.date) > moment.utc())
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+		}
 	}
 
 
