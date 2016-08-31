@@ -13,6 +13,8 @@ var Err = require('../../../../Err')
 
 var Symbl = require('../../symbols/Symbl')
 
+var moment = require('moment')
+
 module.exports = function Holdings (db, investor, portfolio)
 {
 	var holdings = {}
@@ -222,6 +224,8 @@ module.exports = function Holdings (db, investor, portfolio)
 	// set
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
+	var InvalidHoldingDate = Err('invalid_portfolio_date',
+		'Invalid date value for Portfolio Holdings')
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
@@ -246,10 +250,18 @@ module.exports = function Holdings (db, investor, portfolio)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].price` })
 				}
+
+				validate.required(holding.date, `holdings[${i}].date`)
+				validate.date(holding.date, `holdings[${i}].date`)
+				if (moment.utc(holding.date) > moment.utc())
+				{
+					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
+				}
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
 		})
+		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
 			return Promise.all(symbols.map((symbol, i) =>
@@ -331,6 +343,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (holding)
 			{
+				price = ( holding.amount * holding.price + amount * price )
+				        / ( holding.amount + amount )
 				amount = holding.amount + amount
 			}
 
@@ -379,7 +393,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			var data_put =
 			{
 				amount:    amount,
-				price:     price,
+				price:     holding.price,
 				timestamp: date
 			}
 

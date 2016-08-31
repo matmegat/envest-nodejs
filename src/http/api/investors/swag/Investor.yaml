@@ -24,6 +24,11 @@ properties:
     items:
     - type: string
     description: Array of strings. Up to 3 elements
+  education:
+    type: array
+    items:
+    - type: string
+    description: Array of strings. Up to 3 elements
   background:
     type: string
     description: Investor's background
@@ -55,5 +60,6 @@ required:
 - first_name
 - last_name
 - focus
+- education
 - annual_return
 - historical_returns
