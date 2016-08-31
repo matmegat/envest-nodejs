@@ -20,6 +20,9 @@ post:
           type: object
           description: Post properties
           properties:
+            post_id:
+              type: integer
+              description: Post id to delete
             text:
               type: string
             risk:
