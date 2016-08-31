@@ -71,6 +71,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		'investors.profile_pic',
 		'investors.profession',
 		'investors.focus',
+		'investors.education',
 		'investors.background',
 		'investors.historical_returns',
 		raw(`
@@ -177,6 +178,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			'profile_pic',
 			'profession',
 			'focus',
+			'education',
 			'background',
 			'historical_returns',
 			'gain',
