@@ -56,14 +56,10 @@ module.exports = function Update (db)
 								'exchange'
 							])
 						})
-
-						return data
 					})
 				}
-
-				return data
 			})
-			.then(data =>
+			.then(() =>
 			{
 				return db.feed.postByInvestor(trx, post_id, investor_id)
 			})
