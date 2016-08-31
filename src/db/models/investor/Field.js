@@ -29,9 +29,9 @@ function validator (validate)
 		validate = same
 	}
 
-	return (value) =>
+	return (value, investor_id) =>
 	{
-		return new Promise(rs => rs(validate(value)))
+		return new Promise(rs => rs(validate(value, investor_id)))
 		.then(value =>
 		{
 			/* to capture validator not returning */
