@@ -14,6 +14,9 @@ delete:
           description: Post id to delete
         target_user_id:
           type: integer
+        soft_mode:
+          type: boolean
+          description: If need to remove trade post without trade revert
       required:
       - post_id
       - target_user_id

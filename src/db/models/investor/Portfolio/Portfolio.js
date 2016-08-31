@@ -355,8 +355,8 @@ module.exports = function Portfolio (db, investor)
 	holdings.dirs.sold = holdings.sell
 
 	var PostDateErr =
-		Err('can_not_post_before_existing_posts',
-			'Can Not Post Before Existing Posts')
+		Err('there_is_more_recent_state',
+			'There Is More Recent State')
 
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
@@ -386,6 +386,11 @@ module.exports = function Portfolio (db, investor)
 			if (! (dir in holdings.dirs))
 			{
 				throw WrongTradeDir({ dir: dir })
+			}
+
+			if (data.is_delete)
+			{
+				date = moment()
 			}
 
 			return holdings.dirs[dir](trx, investor_id, symbol, date, data)

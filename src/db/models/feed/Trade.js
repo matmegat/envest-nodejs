@@ -49,9 +49,10 @@ module.exports = function Trade (portfolio, symbols, feed)
 			}
 
 			post.data.dir = reverted_dirs[post.data.dir]
+			post.data.is_delete = true
 
 			return portfolio.makeTrade(
-				trx, post.investor_id, post.type, post.date, post.data)
+				trx, post.investor_id, post.type, post.timestamp, post.data)
 		}
 	})
 }
