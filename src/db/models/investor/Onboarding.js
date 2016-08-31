@@ -8,6 +8,7 @@ var CannotGoPublic = Err('cannot_go_public',
 var validate = require('../../validate')
 
 var _ = require('lodash')
+var moment = require('moment')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -446,11 +447,21 @@ function Brokerage (investor_model, db)
 		},
 		validate: (value) =>
 		{
-			decimal(value, 'brokerage')
+			validate.required(value.amount, 'brokerage.amount')
+			validate.required(value.date, 'brokerage.date')
 
-			if (value < 0)
+			decimal(value.amount, 'brokerage.amount')
+
+			if (value.amount < 0)
 			{
-				throw WrongBrokerageFormat({ field: 'brokerage' })
+				throw WrongBrokerageFormat({ field: 'brokerage.amount' })
+			}
+
+			validate.date(value.date, 'brokerage.date')
+
+			if (moment.utc(value.date) > moment.utc())
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage.date' })
 			}
 
 			return value
@@ -459,7 +470,8 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, value)
+			return portfolio.brokerage
+			.init_or_set(investor_id, value.amount, value.date)
 		},
 		verify: (value, investor_id) =>
 		{
@@ -510,6 +522,13 @@ function Holdings (investor_model, db)
 		{
 			throw WrongHoldingsFormat({ field: `holdings[${i}].price` })
 		}
+
+		validate.required(row.date, `holdings[${i}].date`)
+		validate.date(row.date, `holdings[${i}].date`)
+		if (moment.utc(row.date) > moment.utc())
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+		}
 	}
 
 
@@ -520,7 +539,7 @@ function Holdings (investor_model, db)
 			return db.investor.portfolio.full(investor_id)
 			.then(full_portfolio => full_portfolio.holdings)
 		},
-		validate: (value) =>
+		validate: (value, investor_id) =>
 		{
 			try
 			{
@@ -540,7 +559,22 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return value
+			return db.investor.portfolio.brokerage.grid(investor_id)
+			.then(grid => grid.daterange[0])
+			.then((min_date) =>
+			{
+				min_date = moment.utc(min_date)
+
+				value.forEach((row, i) =>
+				{
+					if (moment.utc(row.date) < min_date)
+					{
+						throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+					}
+				})
+
+				return value
+			})
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{
@@ -552,7 +586,6 @@ function Holdings (investor_model, db)
 }
 
 
-var moment = require('moment')
 var WrongStartDateFormat = Err('wrong_start_date_format',
 	'Wrong start_date format. Not ISO-8601')
 

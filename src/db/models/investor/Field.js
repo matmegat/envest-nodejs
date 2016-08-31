@@ -29,9 +29,9 @@ function validator (validate)
 		validate = same
 	}
 
-	return (value) =>
+	return (value, investor_id) =>
 	{
-		return new Promise(rs => rs(validate(value)))
+		return new Promise(rs => rs(validate(value, investor_id)))
 		.then(value =>
 		{
 			/* to capture validator not returning */
@@ -57,7 +57,7 @@ function setter (field, set)
 		return field.investor.all.ensure(investor_id)
 		.then(() =>
 		{
-			return field.validate(value)
+			return field.validate(value, investor_id)
 		})
 		.then(value =>
 		{

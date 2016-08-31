@@ -137,20 +137,38 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
-	brokerage.init = (trx, investor_id) =>
+	brokerage.init_or_set = knexed.transact(knex,
+	(trx, investor_id, amount, timestamp) =>
 	{
-		return table(trx)
-		.insert(
+		return brokerage.byId(investor_id)
+		.then(() => brokerage.set(trx, investor_id, amount, timestamp),
+		(err) =>
 		{
-			investor_id: investor_id,
-			cash: index_amount_cap,
-			multiplier: 1.0
+			if (err.code  === 'brokerage_not_exist_for_date')
+			{
+				amount = amount || index_amount_cap
+
+				var multiplier = index_amount_cap / amount
+
+				return table(trx)
+				.insert(
+				{
+					investor_id: investor_id,
+					cash: amount,
+					timestamp: timestamp,
+					multiplier: multiplier
+				})
+			}
+			else
+			{
+				throw err
+			}
 		})
-	}
+	})
 
 
 	// set
-	brokerage.set = knexed.transact(knex, (trx, investor_id, cash) =>
+	brokerage.set = knexed.transact(knex, (trx, investor_id, cash, timestamp) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -158,12 +176,16 @@ module.exports = function Brokerage (db, investor, portfolio)
 			/* validate update keys */
 			validate.required(cash, 'cash')
 			validate.number(cash, 'cash')
+
 			if (cash < 0)
 			{
 				throw InvalidAmount({ field: 'cash' })
 			}
 
-			return put(trx, investor_id, cash)
+			validate.required(timestamp, 'timestamp')
+			validate.date(timestamp, 'timestamp')
+
+			return put(trx, investor_id, cash, timestamp)
 		})
 	})
 
