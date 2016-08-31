@@ -358,11 +358,8 @@ module.exports = function Portfolio (db, investor)
 		Err('there_is_more_recent_state',
 			'There Is More Recent State')
 
-	portfolio.makeTrade = function (trx, investor_id, type, date, data)
+	portfolio.isDateAvail = function (trx, investor_id, date)
 	{
-		var dir = data.dir
-		var symbol = {}
-
 		return Promise.all(
 		[
 			holdings.isDateAvail(trx, investor_id, date),
@@ -370,13 +367,23 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(so =>
 		{
-			if (! so[0] || ! so[1])
+			return so[0] && so[1]
+		})
+	}
+
+	portfolio.makeTrade = function (trx, investor_id, type, date, data)
+	{
+		var dir = data.dir
+		var symbol = {}
+
+		return portfolio.isDateAvail(trx, investor_id, date)
+		.then(is_avail =>
+		{
+			if (! is_avail)
 			{
 				throw PostDateErr()
 			}
-		})
-		.then(() =>
-		{
+
 			return Symbl.validate(data.symbol)
 		})
 		.then(symbl =>
