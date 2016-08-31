@@ -355,7 +355,8 @@ module.exports = function Portfolio (db, investor)
 	holdings.dirs.sold = holdings.sell
 
 	var PostDateErr =
-		Err('can_not_post_before_existing_posts', 'Can Not Post Before Existing Posts')
+		Err('can_not_post_before_existing_posts',
+			'Can Not Post Before Existing Posts')
 
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
@@ -369,7 +370,7 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(so =>
 		{
-			if (!so[0] || !so[1])
+			if (! so[0] || ! so[1])
 			{
 				throw PostDateErr()
 			}

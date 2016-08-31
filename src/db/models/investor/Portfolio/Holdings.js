@@ -79,7 +79,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 		.then(res =>
 		{
-			return !res.length
+			return ! res.length
 		})
 	})
 

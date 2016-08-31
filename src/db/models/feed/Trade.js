@@ -40,19 +40,18 @@ module.exports = function Trade (portfolio, symbols, feed)
 				return assign({}, item.data, data)
 			})
 		},
-		remove: () =>
+		remove: (trx, post) =>
 		{
-			// var reverted_dirs =
-			// {
-			// 	bought: 'sold',
-			// 	sold: 'bought'
-			// }
+			var reverted_dirs =
+			{
+				bought: 'sold',
+				sold: 'bought'
+			}
 
-			// post.data.dir = reverted_dirs[post.data.dir]
+			post.data.dir = reverted_dirs[post.data.dir]
 
-			// return portfolio.makeTrade(
-			// 	trx, post.investor_id, post.type, post.date, post.data)
-			return
+			return portfolio.makeTrade(
+				trx, post.investor_id, post.type, post.date, post.data)
 		}
 	})
 }

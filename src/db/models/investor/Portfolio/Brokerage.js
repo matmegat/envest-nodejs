@@ -84,7 +84,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(res =>
 		{
-			return !res.length
+			return ! res.length
 		})
 	})
 
