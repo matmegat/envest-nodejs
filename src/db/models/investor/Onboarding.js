@@ -518,7 +518,7 @@ function Holdings (investor_model, db)
 			return db.investor.portfolio.full(investor_id)
 			.then(full_portfolio => full_portfolio.holdings)
 		},
-		validate: (value) =>
+		validate: (value, investor_id) =>
 		{
 			try
 			{
@@ -538,7 +538,22 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return value
+			return db.investor.portfolio.brokerage.grid(investor_id)
+			.then(grid => grid.daterange[0])
+			.then((min_date) =>
+			{
+				min_date = moment.utc(min_date)
+
+				value.forEach((row, i) =>
+				{
+					if (moment.utc(row.date) < min_date)
+					{
+						throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+					}
+				})
+
+				return value
+			})
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{

@@ -57,7 +57,7 @@ function setter (field, set)
 		return field.investor.all.ensure(investor_id)
 		.then(() =>
 		{
-			return field.validate(value)
+			return field.validate(value, investor_id)
 		})
 		.then(value =>
 		{
