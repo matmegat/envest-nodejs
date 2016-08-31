@@ -31,12 +31,6 @@ module.exports = function Investor (db)
 
 	investor.table = knexed(knex, 'investors')
 
-	investor.table_public = (trx) =>
-	{
-		return investor.table(trx)
-		.where('is_public', true)
-	}
-
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
 
@@ -55,7 +49,7 @@ module.exports = function Investor (db)
 	investor.public = Meta(investor.table, raw, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
-	investor.featured = Featured(db, investor.all)
+	investor.featured = Featured(db, investor)
 
 	investor.all.fullById = wrap(investor.all.byId, (byId, id, trx) =>
 	{
