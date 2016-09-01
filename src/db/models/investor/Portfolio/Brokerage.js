@@ -175,7 +175,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var index_amount_cap = 1e5
 
 	var NotActualBrokerage = Err('not_actual_brokerage',
-		'More actual brokerage already exists')
+		'More actual brokerage already exist')
 
 	brokerage.initOrSet = knexed.transact(knex,
 	(trx, investor_id, amount, timestamp) =>
