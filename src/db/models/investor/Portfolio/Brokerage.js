@@ -233,6 +233,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 			else
 			{
+				// TODO .quotes ?
+				// rewrite to `put` ?
 				return portfolio.holdings.byId(trx, investor_id)
 				.then(holdings =>
 				{
@@ -305,6 +307,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			 = new_cash
 			 + sumBy(holdings, h => h.amount * h.price)
 
+			// index_amount_cap ? TODO
 			var new_multiplier = (index_amount_cap / real_allocation)
 
 			if ((cash === new_cash) && (multiplier === new_multiplier))

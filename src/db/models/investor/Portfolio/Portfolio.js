@@ -69,6 +69,8 @@ module.exports = function Portfolio (db, investor)
 				{
 					var holding = holdings[i]
 
+					/* TODO */
+					/* soft-mode? holdings.byId.quotes */
 					if (quoted_symbol == null)
 					{
 						holding.symbol = Symbl(
@@ -85,6 +87,7 @@ module.exports = function Portfolio (db, investor)
 						holding.symbol = quoted_symbol.symbol
 
 						/* calculated percentage */
+						/* TODO maybe wrong gain */
 						holding.gain
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
@@ -140,6 +143,7 @@ module.exports = function Portfolio (db, investor)
 
 			holdings = holdings.map(holding =>
 			{
+				/* TODO rm */
 				holding.allocation
 				 = holding.amount * holding.price * brokerage.multiplier
 
