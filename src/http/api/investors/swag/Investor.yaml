@@ -32,9 +32,6 @@ properties:
   background:
     type: string
     description: Investor's background
-  annual_return:
-    type: number
-    description: Investor's 5 year annual return in percentage
   historical_returns:
     $ref: ./HistoricalReturns.yaml
   holdings:
@@ -61,5 +58,4 @@ required:
 - last_name
 - focus
 - education
-- annual_return
 - historical_returns
