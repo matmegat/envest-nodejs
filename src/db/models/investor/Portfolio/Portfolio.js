@@ -5,6 +5,7 @@ var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
+var mapValues = require('lodash/mapValues')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -199,20 +200,35 @@ module.exports = function Portfolio (db, investor)
 				grid.holdings.daterange
 			)
 
-			range = range_from(range, moment())
+			range = range_from(range, moment(), resolution)
 
 			return grid_series(grid.holdings.involved, range, resolution)
 			.then(superseries =>
 			{
-				if (0)
+				if (1)
 				{
 					console.dir(grid)
 					console.log('--- holdings:')
 					console.dir(grid.holdings.datadays, 3)
 					console.log('--- brokerage:')
 					console.dir(grid.brokerage.datadays)
+					console.log('--- range:')
+					console.log(range.start.format(), range.end.format())
+
 					console.log('--- series:')
-					console.dir(superseries, 3)
+					if (resolution === 'day')
+					{
+						console.dir(superseries, 3)
+					}
+					else
+					{
+						var intrs = mapValues(superseries, v =>
+						({
+							all:  v.length,
+							last: v.slice(-5)
+						}))
+						console.dir(intrs, 3)
+					}
 				}
 
 				var compiled = []
@@ -254,8 +270,8 @@ module.exports = function Portfolio (db, investor)
 	}
 
 	// TODO rm
-	// portfolio.grid(120)
-	// .then(console.dir, console.error)
+	portfolio.grid(120)
+	.then(console.dir, console.error)
 
 	function max_range (brokerage, holdings)
 	{
@@ -277,10 +293,20 @@ module.exports = function Portfolio (db, investor)
 		return new MRange(start, end)
 	}
 
-	function range_from (range, end)
+	function range_from (range, end, resolution)
 	{
 		end = moment(end)
-		var start = moment(end).subtract(2, 'years')
+
+		if (resolution === 'day')
+		{
+			var start = moment(end).subtract(2, 'years')
+		}
+		else
+		{
+			var start = moment(end)
+			.endOf('day')
+			.subtract(5 + 1, 'days')
+		}
 
 		start = moment.max(range.start, start)
 
