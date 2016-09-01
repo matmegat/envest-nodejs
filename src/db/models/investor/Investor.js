@@ -31,12 +31,6 @@ module.exports = function Investor (db)
 
 	investor.table = knexed(knex, 'investors')
 
-	investor.table_public = (trx) =>
-	{
-		return investor.table(trx)
-		.where('is_public', true)
-	}
-
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
 
@@ -55,7 +49,7 @@ module.exports = function Investor (db)
 	investor.public = Meta(investor.table, raw, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
-	investor.featured = Featured(db, investor.all)
+	investor.featured = Featured(db, investor)
 
 	investor.all.fullById = wrap(investor.all.byId, (byId, id, trx) =>
 	{
@@ -104,14 +98,7 @@ module.exports = function Investor (db)
 			.catch(Err.fromDb('investors_pkey', AlreadyExists))
 		})
 		.then(oneMaybe)
-		.then((investor_id) =>
-		{
-			return investor.portfolio.brokerage.init(trx, investor_id)
-			.then(() =>
-			{
-				return investor.all.byId(investor_id, trx)
-			})
-		})
+		.then((investor_id) => investor.all.byId(investor_id, trx))
 		.then((investor_entry) =>
 		{
 			var investor_id = investor_entry.id

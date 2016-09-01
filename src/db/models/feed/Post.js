@@ -145,7 +145,7 @@ module.exports = function Post (db)
 	var PostToDeleteNotFound =
 		Err('post_to_delete_not_found', 'Post To Delete Not Found')
 
-	post.remove = function (investor_id, post_id, whom_id)
+	post.remove = function (investor_id, post_id, whom_id, soft_mode)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -157,9 +157,12 @@ module.exports = function Post (db)
 					throw PostToDeleteNotFound()
 				}
 
-				var post_type = post.types[res.type]
+				if (! soft_mode)
+				{
+					var post_type = post.types[res.type]
 
-				return post_type.remove(trx, res)
+					return post_type.remove(trx, res)
+				}
 			})
 			.then(() =>
 			{

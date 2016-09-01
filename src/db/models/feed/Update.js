@@ -1,7 +1,7 @@
 
 var Type = require('./Type')
 
-var pick = require('lodash/pick')
+var _ = require('lodash')
 
 var validate = require('../../validate')
 var Err = require('../../../Err')
@@ -19,37 +19,64 @@ module.exports = function Update (db)
 	{
 		validate: validate_update,
 		validate_update: validate_update_adds,
-		set: upsert,
-		update: upsert,
+		set: (trx, investor_id, type, date, data) =>
+		{
+			return db.symbols.resolveMany(data.symbols)
+			.then(symbls =>
+			{
+				data.symbols = symbls
+				.map(item =>
+				{
+					return _.pick(item,
+					[
+						'ticker',
+						'exchange'
+					])
+				})
+
+				return data
+			})
+		},
+		update: (trx, investor_id, type, date, data, post_id) =>
+		{
+			return Promise.resolve()
+			.then(() =>
+			{
+				if (data.symbols)
+				{
+					return db.symbols.resolveMany(data.symbols)
+					.then(symbls =>
+					{
+						data.symbols = symbls
+						.map(item =>
+						{
+							return _.pick(item,
+							[
+								'ticker',
+								'exchange'
+							])
+						})
+					})
+				}
+			})
+			.then(() =>
+			{
+				return db.feed.postByInvestor(trx, post_id, investor_id)
+			})
+			.then(item =>
+			{
+				return _.assign({}, item.data, data)
+			})
+		},
 		remove: () =>
 		{
 			return
 		}
 	})
 
-	function upsert (trx, investor_id, type, date, data)
-	{
-		return db.symbols.resolveMany(data.symbols)
-		.then(symbls =>
-		{
-			data.symbols = symbls
-			.map(item =>
-			{
-				return pick(item,
-				[
-					'ticker',
-					'exchange'
-				])
-			})
-
-			return data
-		})
-	}
-
-
 	function validate_update_adds (data)
 	{
-		var data = pick(data,
+		var data = _.pick(data,
 		[
 			'symbols',
 			'title',
@@ -57,6 +84,8 @@ module.exports = function Update (db)
 			'pic',
 			'chart'
 		])
+
+		data = _.omitBy(data, _.isNil)
 
 		return new Promise(rs =>
 		{
@@ -80,7 +109,7 @@ module.exports = function Update (db)
 
 	function validate_update (data)
 	{
-		var data = pick(data,
+		var data = _.pick(data,
 		[
 			'symbols',
 			'title',
@@ -204,5 +233,7 @@ module.exports = function Update (db)
 				return data
 			})
 		}
+
+		return data
 	}
 }

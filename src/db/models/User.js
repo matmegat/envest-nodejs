@@ -402,21 +402,39 @@ module.exports = function User (db, app)
 
 	user.createFacebook = knexed.transact(knex, (trx, data) =>
 	{
-		return user.users_table(trx)
-		.insert({
-			first_name: data.first_name,
-			last_name: data.last_name,
-			email: null
-		}
-		, 'id')
+		return ensureEmailNotExists(data.email, trx)
+		.then(() =>
+		{
+			var user_data = pick(data,
+			[
+				'first_name',
+				'last_name',
+				'email'
+			])
+
+			if (data.is_manual)
+			{
+				user_data.email = null
+			}
+
+			return user.users_table(trx)
+			.insert(user_data, 'id')
+		})
 		.then(one)
 		.then(id =>
 		{
-			return user.newEmailUpdate(trx,
+			if (data.is_manual)
 			{
-				user_id: id,
-				new_email: data.email
-			})
+				return user.newEmailUpdate(trx,
+				{
+					user_id: id,
+					new_email: data.email
+				})
+			}
+			else
+			{
+				return id
+			}
 		})
 		.then(id =>
 		{
