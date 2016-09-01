@@ -176,7 +176,7 @@ module.exports = function Portfolio (db, investor)
 
 	function grid (trx, investor_id)
 	{
-		var resolution = 'day'
+		var resolution = 'intraday'
 
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -201,7 +201,7 @@ module.exports = function Portfolio (db, investor)
 
 			range = range_from(range, moment())
 
-			return grid_series(grid.holdings.involved, range)
+			return grid_series(grid.holdings.involved, range, resolution)
 			.then(superseries =>
 			{
 				if (0)
@@ -288,11 +288,21 @@ module.exports = function Portfolio (db, investor)
 	}
 
 
-	function grid_series (involved, range)
+	function grid_series (involved, range, resolution)
 	{
-		var queries = involved.map(
-			symbol => symbols.seriesForPortfolio(symbol, range)
-		)
+		if (resolution === 'day')
+		{
+			var queries = involved.map(
+				symbol => symbols.seriesForPortfolio(symbol, range)
+			)
+		}
+		else
+		{
+			var queries = involved.map(
+				symbol => symbols.seriesForPortfolio
+					.intraday(symbol, range)
+			)
+		}
 
 		return Promise.all(queries)
 		.then(batch =>
