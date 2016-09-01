@@ -307,7 +307,10 @@ module.exports = function Portfolio (db, investor)
 				}
 			})
 
-			grid.utc_offset = utc_offset
+			if (utc_offset)
+			{
+				grid.utc_offset = utc_offset
+			}
 
 			return grid
 		})
