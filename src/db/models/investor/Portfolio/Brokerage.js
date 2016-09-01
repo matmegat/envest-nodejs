@@ -8,12 +8,15 @@ var knexed = require('../../../knexed')
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
+var moment = require('moment')
+
 module.exports = function Brokerage (db, investor, portfolio)
 {
 	var brokerage = {}
 
 	var knex = db.knex
 	var one  = db.helpers.one
+	var oneMaybe  = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
 
@@ -86,6 +89,17 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			return ! res.length
 		})
+	})
+
+	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+		})
+		.then(res => res.length)
 	})
 
 
@@ -162,31 +176,86 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
-	brokerage.init_or_set = knexed.transact(knex,
+	var NotActualBrokerage = Err('not_actual_brokerage',
+		'More actual brokerage already exists')
+
+	brokerage.initOrSet = knexed.transact(knex,
 	(trx, investor_id, amount, timestamp) =>
 	{
-		return brokerage.byId(investor_id)
-		.then(() => brokerage.set(trx, investor_id, amount, timestamp),
-		(err) =>
+		var init_brokerage = () =>
 		{
-			if (err.code  === 'brokerage_not_exist_for_date')
+			amount = amount || index_amount_cap
+
+			var multiplier = index_amount_cap / amount
+
+			return table(trx)
+			.insert(
 			{
-				amount = amount || index_amount_cap
+				investor_id: investor_id,
+				cash: amount,
+				timestamp: timestamp,
+				multiplier: multiplier
+			})
+		}
 
-				var multiplier = index_amount_cap / amount
+		var exact_date = () =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+			.where('timestamp', timestamp)
+			.then(oneMaybe)
+			.then(Boolean)
+		}
 
-				return table(trx)
-				.insert(
-				{
-					investor_id: investor_id,
-					cash: amount,
-					timestamp: timestamp,
-					multiplier: multiplier
-				})
+		return Promise.all(
+		[
+			brokerage.isExist(trx, investor_id),
+			exact_date(),
+			brokerage.isDateAvail(trx, investor_id, timestamp)
+		])
+		.then(so =>
+		{
+			var is_exist = so[0]
+			var is_exact = so[1]
+			var is_avail = so[2]
+
+			if (! is_exist)
+			{
+				return init_brokerage()
+			}
+
+			if (! is_avail)
+			{
+				throw NotActualBrokerage()
+			}
+
+			if (! is_exact)
+			{
+				return brokerage.set(trx, investor_id, amount, timestamp)
 			}
 			else
 			{
-				throw err
+				return portfolio.holdings.byId(trx, investor_id)
+				.then(holdings =>
+				{
+					var real_allocation
+						= amount
+						+ sumBy(holdings, h => h.amount * h.price)
+
+					var multiplier = (index_amount_cap / real_allocation)
+
+					return table(trx)
+					.where(
+					{
+						investor_id: investor_id,
+						timestamp: timestamp
+					})
+					.update(
+					{
+						cash: amount,
+						multiplier: multiplier
+					})
+				})
 			}
 		})
 	})

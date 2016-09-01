@@ -266,6 +266,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				{
 					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
 				}
+				holding.timestamp = holding.date
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
@@ -276,7 +277,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			return Promise.all(symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
-				var data = pick(holding, 'amount', 'price')
+				var data = pick(holding, 'amount', 'price', 'timestamp')
 
 				return put(trx, investor_id, symbol, data)
 			}))
