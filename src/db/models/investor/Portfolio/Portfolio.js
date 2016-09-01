@@ -238,8 +238,8 @@ module.exports = function Portfolio (db, investor)
 
 				var compiled = []
 
-				grid_iterator(range, resolution, it =>
 				// range.by('days', it =>
+				grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
 
@@ -398,7 +398,17 @@ module.exports = function Portfolio (db, investor)
 		}
 		else
 		{
-			return range.by('m', fn)
+			// return range.by('m', fn)
+
+			// optimize to interval 5m instead of 1m:
+			var next = moment(range.start)
+
+			while (next <= range.end)
+			{
+				fn(next)
+
+				next.add(5, 'minutes')
+			}
 		}
 	}
 
