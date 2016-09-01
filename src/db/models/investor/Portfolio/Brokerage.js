@@ -293,15 +293,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		return Promise.all(
 		[
-			brokerage.byId(trx, investor_id),
-			portfolio.holdings.byId.quotes(trx, investor_id),
+			brokerage.byId(trx, investor_id, timestamp),
+			portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
 		])
 		.then(values =>
 		{
 			var cash = values[0].cash
 			var multiplier = values[0].multiplier
 
-			var holdings  = values[1]
+			var holdings = values[1]
 
 			var real_allocation
 			 = new_cash
@@ -340,9 +340,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'There can be only one Brokerage entry per timestamp for Investor')
 
 
-	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.recalculate = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
-		return brokerage.cashById(trx, investor_id)
+		return brokerage.cashById(trx, investor_id, timestamp)
 		.then(cash =>
 		{
 			// cash -> new_cash,
