@@ -1,10 +1,16 @@
 
 var pick = require('lodash/pick')
 var omit = require('lodash/omit')
+var get = require('lodash/get')
+var values = require('lodash/values')
+var any = require('lodash/some')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
+var mapValues = require('lodash/mapValues')
+var findLast = require('lodash/findLast')
+var min = require('lodash/min')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -157,13 +163,35 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
+		return Promise.all(
+		[
+			grid(trx, investor_id, 'day'),
+			grid(trx, investor_id, 'intraday')
+		])
+		.then(points =>
+		{
+			var y2 = points[0]
+			var intraday = points[1]
+
+			var utc_offset = intraday.utc_offset
+			delete intraday.utc_offset
+
+			return [
+				{ period: 'y2', points: y2 },
+				{ period: 'today', utc_offset: utc_offset, points: intraday }
+			]
+		})
+	})
+
+	function grid (trx, investor_id, resolution)
+	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return Promise.all(
 			[
-				holdings.grid(trx, investor_id),
-				brokerage.grid(trx, investor_id)
+				holdings.grid(trx, investor_id, resolution),
+				brokerage.grid(trx, investor_id, resolution)
 			])
 		})
 		.then(grids =>
@@ -178,11 +206,13 @@ module.exports = function Portfolio (db, investor)
 				grid.holdings.daterange
 			)
 
-			range = range_from(range, moment())
+			range = range_from(range, moment(), resolution)
 
-			return grid_series(grid.holdings.involved, range)
+			return grid_series(grid.holdings.involved, range, resolution)
 			.then(superseries =>
 			{
+				range = range_correct_day(range, superseries, resolution)
+
 				if (0)
 				{
 					console.dir(grid)
@@ -190,13 +220,29 @@ module.exports = function Portfolio (db, investor)
 					console.dir(grid.holdings.datadays, 3)
 					console.log('--- brokerage:')
 					console.dir(grid.brokerage.datadays)
+					console.log('--- range:')
+					console.log(range.start.format(), range.end.format())
+
 					console.log('--- series:')
-					console.dir(superseries, 3)
+					if (resolution === 'day')
+					{
+						console.dir(superseries, 3)
+					}
+					else
+					{
+						var intrs = mapValues(superseries, v =>
+						({
+							all:  v.length,
+							last: v.slice(-5)
+						}))
+						console.dir(intrs, 3)
+					}
 				}
 
 				var compiled = []
 
-				range.by('days', it =>
+				// range.by('days', it =>
+				grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
 
@@ -227,10 +273,45 @@ module.exports = function Portfolio (db, investor)
 					compiled.push([ moment(iso).utc().format(), total ])
 				})
 
+				if (resolution === 'intraday')
+				{
+					var utc_offset = mapValues(superseries, series =>
+					{
+						return get(series, '0.utcOffset', null)
+					})
+
+					utc_offset = values(utc_offset)
+
+					utc_offset = min(utc_offset)
+
+					compiled.utc_offset = utc_offset
+				}
+
 				return compiled
 			})
 		})
-	})
+		// for routes ~~~ :
+		.then(grid =>
+		{
+			if (grid.utc_offset)
+			{
+				var utc_offset = grid.utc_offset
+				delete grid.utc_offset
+			}
+
+			grid = grid.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
+			})
+
+			grid.utc_offset = utc_offset
+
+			return grid
+		})
+	}
 
 	// TODO rm
 	// portfolio.grid(120)
@@ -256,22 +337,80 @@ module.exports = function Portfolio (db, investor)
 		return new MRange(start, end)
 	}
 
-	function range_from (range, end)
+	function range_from (range, end, resolution)
 	{
 		end = moment(end)
-		var start = moment(end).subtract(2, 'years')
+
+		if (resolution === 'day')
+		{
+			var start = moment(end).subtract(2, 'years')
+		}
+		else
+		{
+			var start = moment(end)
+			.endOf('day')
+			.subtract(5 + 1, 'days')
+		}
 
 		start = moment.max(range.start, start)
 
 		return new MRange(start, end)
 	}
 
-
-	function grid_series (involved, range)
+	function range_correct_day (range, superseries, resolution)
 	{
-		var queries = involved.map(
-			symbol => symbols.seriesForPortfolio(symbol, range)
-		)
+		if (resolution === 'day') { return range }
+
+		var day = moment(range.end).startOf('day')
+		var r
+
+		while (day >= range.start)
+		{
+			r = find_for_day(day)
+
+			if (r) { break }
+
+			day.subtract(1, 'day')
+		}
+
+		return new MRange(day, moment(day).add(1, 'day'))
+
+		function find_for_day (day)
+		{
+			day = moment(day).toISOString()
+
+			var rs = mapValues(superseries, series =>
+			{
+				return findLast(series, tick =>
+				{
+					var ts = moment(tick.timestamp).toISOString()
+					return ts > day
+				})
+			})
+
+			rs = values(rs)
+
+			rs = any(rs)
+
+			return rs
+		}
+	}
+
+	function grid_series (involved, range, resolution)
+	{
+		if (resolution === 'day')
+		{
+			var queries = involved.map(
+				symbol => symbols.seriesForPortfolio(symbol, range)
+			)
+		}
+		else
+		{
+			var queries = involved.map(
+				symbol => symbols.seriesForPortfolio
+					.intraday(symbol, range)
+			)
+		}
 
 		return Promise.all(queries)
 		.then(batch =>
@@ -289,7 +428,27 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	var findLast = require('lodash/findLast')
+	function grid_iterator (range, resolution, fn)
+	{
+		if (resolution === 'day')
+		{
+			return range.by('days', fn)
+		}
+		else
+		{
+			// return range.by('m', fn)
+
+			// optimize to interval 5m instead of 1m:
+			var next = moment(range.start)
+
+			while (next <= range.end)
+			{
+				fn(next)
+
+				next.add(5, 'minutes')
+			}
+		}
+	}
 
 	function find_brokerage (brokerage, date)
 	{
