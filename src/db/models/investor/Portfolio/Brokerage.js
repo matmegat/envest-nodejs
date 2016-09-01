@@ -32,7 +32,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			.select('cash', 'multiplier')
 			.where('investor_id', investor_id)
 			.where('timestamp',
-				table().max('timestamp')
+				table(trx).max('timestamp')
 				.where('investor_id', raw('B.investor_id'))
 				.where(function ()
 				{
