@@ -210,7 +210,7 @@ module.exports = function Portfolio (db, investor)
 			{
 				range = range_correct_day(range, superseries, resolution)
 
-				if (1)
+				if (0)
 				{
 					console.dir(grid)
 					console.log('--- holdings:')
@@ -238,7 +238,8 @@ module.exports = function Portfolio (db, investor)
 
 				var compiled = []
 
-				range.by('days', it =>
+				grid_iterator(range, resolution, it =>
+				// range.by('days', it =>
 				{
 					var iso = it.toISOString()
 
@@ -387,6 +388,18 @@ module.exports = function Portfolio (db, investor)
 
 			return r
 		})
+	}
+
+	function grid_iterator (range, resolution, fn)
+	{
+		if (resolution === 'day')
+		{
+			return range.by('days', fn)
+		}
+		else
+		{
+			return range.by('m', fn)
+		}
 	}
 
 	function find_brokerage (brokerage, date)
