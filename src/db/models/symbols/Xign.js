@@ -124,9 +124,15 @@ module.exports = function Xign (cfg, log)
 						symbol:   symbols[i],
 						currency: r.Currency,
 						price:    r.Last,
-						company:  r.Security.Name,
-						gain:     r.PercentChangeFromPreviousClose
+						company:  r.Security.Name
 					})
+				}
+
+				/* this available only for today */
+				/* this not available for historical */
+				if (r.PercentChangeFromPreviousClose != null)
+				{
+					struct.gain = r.PercentChangeFromPreviousClose
 				}
 
 				return struct
