@@ -220,11 +220,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				throw NotActualBrokerage()
 			}
 
-			if (! is_exact && is_avail)
+			if (! is_exact)
 			{
 				return brokerage.set(trx, investor_id, amount, timestamp)
 			}
-			else if (is_exact && is_avail)
+			else
 			{
 				return portfolio.holdings.byId(trx, investor_id)
 				.then(holdings =>
