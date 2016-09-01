@@ -1,11 +1,14 @@
 
 var pick = require('lodash/pick')
 var omit = require('lodash/omit')
+var values = require('lodash/values')
+var any = require('lodash/some')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
 var mapValues = require('lodash/mapValues')
+var findLast = require('lodash/findLast')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -205,6 +208,8 @@ module.exports = function Portfolio (db, investor)
 			return grid_series(grid.holdings.involved, range, resolution)
 			.then(superseries =>
 			{
+				range = range_correct_day(range, superseries, resolution)
+
 				if (1)
 				{
 					console.dir(grid)
@@ -313,6 +318,44 @@ module.exports = function Portfolio (db, investor)
 		return new MRange(start, end)
 	}
 
+	function range_correct_day (range, superseries, resolution)
+	{
+		if (resolution === 'day') { return range }
+
+		var day = moment(range.end).startOf('day')
+		var r
+
+		while (day >= range.start)
+		{
+			r = find_for_day(day)
+
+			if (r) { break }
+
+			day.subtract(1, 'day')
+		}
+
+		return new MRange(day, moment(day).add(1, 'day'))
+
+		function find_for_day (day)
+		{
+			day = moment(day).toISOString()
+
+			var rs = mapValues(superseries, series =>
+			{
+				return findLast(series, tick =>
+				{
+					var ts = moment(tick.timestamp).toISOString()
+					return ts > day
+				})
+			})
+
+			rs = values(rs)
+
+			rs = any(rs)
+
+			return rs
+		}
+	}
 
 	function grid_series (involved, range, resolution)
 	{
@@ -345,8 +388,6 @@ module.exports = function Portfolio (db, investor)
 			return r
 		})
 	}
-
-	var findLast = require('lodash/findLast')
 
 	function find_brokerage (brokerage, date)
 	{
