@@ -8,8 +8,6 @@ var knexed = require('../../../knexed')
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
-var moment = require('moment')
-
 module.exports = function Brokerage (db, investor, portfolio)
 {
 	var brokerage = {}
@@ -340,7 +338,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'There can be only one Brokerage entry per timestamp for Investor')
 
 
-	brokerage.recalculate = knexed.transact(knex, (trx, investor_id, timestamp) =>
+	brokerage.recalculate = knexed.transact(knex,
+		(trx, investor_id, timestamp) =>
 	{
 		return brokerage.cashById(trx, investor_id, timestamp)
 		.then(cash =>
