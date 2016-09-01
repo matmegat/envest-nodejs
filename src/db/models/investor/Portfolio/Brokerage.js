@@ -208,18 +208,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			var is_exist = so[0]
 			var is_exact = so[1]
-			var is_later = so[2]
+			var is_avail = so[2]
 
 			if (! is_exist)
 			{
 				return init_brokerage()
 			}
 
-			if (! is_exact && is_later)
+			if (! is_exact && is_avail)
 			{
 				return brokerage.set(trx, investor_id, amount, timestamp)
 			}
-			else if (is_exact && is_later)
+			else if (is_exact && is_avail)
 			{
 				return portfolio.holdings.byId(trx, investor_id)
 				.then(holdings =>
