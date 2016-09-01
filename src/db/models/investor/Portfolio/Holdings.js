@@ -331,8 +331,11 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				if (is_exact)
 				{
-					console.info('COMING SOON')
-					return put(trx, investor_id, symbol, data)
+					return table(trx)
+					.where('investor_id', investor_id)
+					.where(symbol.toDb())
+					.where('timestamp', data.timestamp)
+					.update(pick(data, 'amount', 'price'))
 				}
 			})
 		}
