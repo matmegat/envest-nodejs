@@ -128,10 +128,71 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
 	{
+		var now = moment()
+		var day_ytd = moment(now)//.startOf('year') TODO
+		var day_intraday = moment(now).startOf('day')
+
+		console.log(day_intraday.format())
+		console.log(day_ytd.format())
+
+		return Promise.all(
+		[
+			portfolio.fullValue(trx, investor_id, now),
+			portfolio.fullValue(trx, investor_id, day_ytd),
+			portfolio.fullValue(trx, investor_id, day_intraday)
+		])
+		.then(values =>
+		{
+			var now = values[0]
+			var ytd = values[1]
+			var day = values[2]
+
+			return {
+				today: gain(day, now),
+				ytd:   gain(ytd, now),
+			}
+		})
+
+		function gain (from, to)
+		{
+			return (to.indexed / from.indexed) * 100 - 100
+		}
+	})
+
+	portfolio.gain(120)
+	.then(console.log, console.error)
+
+	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
 		return investor.all.ensure(investor_id, trx)
-		.then()
-	}
-	
+		.then(() =>
+		{
+			return Promise.all(
+			[
+				brokerage.byId(trx, investor_id, for_date),
+				portfolio.holdings.byId.quotes(trx, investor_id, for_date)
+			])
+			.then(values =>
+			{
+				var cash = values[0].cash
+				var multiplier = values[0].multiplier
+
+				var holdings = values[1]
+
+				var allocation
+				 = cash
+				 + sumBy(holdings, h => h.amount * h.price)
+
+				allocation *= multiplier
+
+				return {
+					real:    allocation,
+					indexed: allocation * multiplier
+				}
+			})
+		})
+	})
+
 
 	portfolio.full = function (investor_id)
 	{
