@@ -80,7 +80,7 @@ module.exports = function Portfolio (db, investor)
 						])
 						.toFull()
 
-						holding.gain = null
+						holding.gain = 0
 					}
 					else
 					{
@@ -125,6 +125,13 @@ module.exports = function Portfolio (db, investor)
 			})
 		})
 	})
+
+	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then()
+	}
+	
 
 	portfolio.full = function (investor_id)
 	{
