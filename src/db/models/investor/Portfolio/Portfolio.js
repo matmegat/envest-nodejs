@@ -158,6 +158,20 @@ module.exports = function Portfolio (db, investor)
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return grid(trx, investor_id)
+		.then(grid =>
+		{
+			return grid.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
+			})
+		})
+		.then(points =>
+		{
+			return { period: 'y2', points: points }
+		})
 	})
 
 	function grid (trx, investor_id)

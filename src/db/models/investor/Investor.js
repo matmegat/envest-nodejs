@@ -177,20 +177,6 @@ module.exports = function Investor (db)
 		.then(() =>
 		{
 			return investor.portfolio.grid(id)
-			.then(grid =>
-			{
-				return grid.map(entry =>
-				{
-					return {
-						timestamp: entry[0],
-						value: entry[1]
-					}
-				})
-			})
-			.then(points =>
-			{
-				return { period: 'y2', points: points }
-			})
 			.then(y2 =>
 			{
 				/* eslint-disable */
