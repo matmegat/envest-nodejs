@@ -68,5 +68,12 @@ module.exports = function NetvestSubsc (db, cfg)
 		})
 	}
 
+	netvest_subscr.isAble = (user_id) =>
+	{
+		return netvest_subscr
+		.getSubscription(user_id)
+		.then(() => true, () => false)
+	}
+
 	return netvest_subscr
 }
