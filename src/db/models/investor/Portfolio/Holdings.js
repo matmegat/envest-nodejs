@@ -386,7 +386,18 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 		.then(() =>
 		{
-			return portfolio.brokerage.recalculate(trx, investor_id) /* TODO timestamp here! */
+			// choose latest timestamp
+			var timestamp = moment.utc(holding_entries[0].timestamp)
+			holding_entries.forEach((holding) =>
+			{
+				if (moment.utc(holding.timestamp) > timestamp)
+				{
+					timestamp = moment.utc(holding.timestamp)
+				}
+			})
+
+			return portfolio.brokerage
+			.recalculate(trx, investor_id, timestamp.format())
 		})
 	})
 
