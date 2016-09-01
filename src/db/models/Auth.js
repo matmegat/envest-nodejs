@@ -12,7 +12,7 @@ var compare_passwords = cr_helpers.compare_passwords
 
 var knexed = require('../knexed')
 
-module.exports = function Auth (db, subsc)
+module.exports = function Auth (db)
 {
 	var auth = {}
 
@@ -33,10 +33,6 @@ module.exports = function Auth (db, subsc)
 				user_id: id,
 				new_email: userdata.email
 			})
-		})
-		.then((user_id) =>
-		{
-			return subsc.activate(user_id, 'trial', 30, trx)
 		})
 	})
 

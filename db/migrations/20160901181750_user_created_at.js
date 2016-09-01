@@ -12,7 +12,7 @@ exports.up = function (knex)
 	.then(() =>
 	{
 		return knex('users')
-		.update({ created_at: '2016-05-01 18:20:06.828532+03'})
+		.update({created_at: '2016-05-01 18:20:06.828532+03'})
 	})
 }
 
