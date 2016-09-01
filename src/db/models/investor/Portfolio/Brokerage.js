@@ -1,4 +1,5 @@
 
+var extend = require('lodash/extend')
 var sumBy = require('lodash/sumBy')
 
 var expect = require('chai').expect
@@ -22,15 +23,19 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	// byId
-	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
+	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
+		options = extend({ future: false }, options)
+
+		var query = knex(raw('brokerage AS B'))
+		.transacting(trx)
+		.select('cash', 'multiplier')
+		.where('investor_id', investor_id)
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return knex(raw('brokerage AS B'))
-			.transacting(trx)
-			.select('cash', 'multiplier')
-			.where('investor_id', investor_id)
+			return query.clone()
 			.where('timestamp',
 				table(trx).max('timestamp')
 				.where('investor_id', raw('B.investor_id'))
@@ -48,6 +53,23 @@ module.exports = function Brokerage (db, investor, portfolio)
 			/* brokerage.init guarantees
 			   brokerage existence for dates
 			   from Investor Onboarding */
+			if (! r.length)
+			{
+				if (for_date && options.future)
+				{
+					return query.clone()
+					.where('timestamp',
+						table(trx).min('timestamp')
+						.where('investor_id', raw('B.investor_id'))
+						.where('timestamp', '>', for_date)
+					)
+				}
+			}
+
+			return r
+		})
+		.then(r =>
+		{
 			if (! r.length)
 			{
 				throw BrokerageDoesNotExist({ for_date: for_date })
