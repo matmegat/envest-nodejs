@@ -215,6 +215,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return init_brokerage()
 			}
 
+			if (! is_avail)
+			{
+				throw NotActualBrokerage()
+			}
+
 			if (! is_exact && is_avail)
 			{
 				return brokerage.set(trx, investor_id, amount, timestamp)
@@ -242,10 +247,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 						multiplier: multiplier
 					})
 				})
-			}
-			else
-			{
-				throw NotActualBrokerage()
 			}
 		})
 	})
