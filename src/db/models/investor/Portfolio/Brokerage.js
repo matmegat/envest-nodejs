@@ -16,6 +16,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	var knex = db.knex
 	var one  = db.helpers.one
+	var oneMaybe  = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
 
@@ -30,7 +31,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			return knex(raw('brokerage AS B'))
 			.transacting(trx)
-			.select('cash', 'multiplier', 'timestamp')
+			.select('cash', 'multiplier')
 			.where('investor_id', investor_id)
 			.where('timestamp',
 				table().max('timestamp')
@@ -88,6 +89,17 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			return ! res.length
 		})
+	})
+
+	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+		})
+		.then(res => res.length)
 	})
 
 
@@ -177,72 +189,64 @@ module.exports = function Brokerage (db, investor, portfolio)
 			})
 		}
 
-		var catcher = (err) =>
+		var exact_date = () =>
 		{
-			if (err.code === 'brokerage_not_exist_for_date')
-			{
-				return null
-			}
-			else
-			{
-				throw err
-			}
+			return table(trx)
+			.where('investor_id', investor_id)
+			.where('timestamp', timestamp)
+			.then(oneMaybe)
+			.then(Boolean)
 		}
 
 		return Promise.all(
 		[
-			brokerage.byId(trx, investor_id, timestamp).catch(catcher),
-			brokerage.byId(trx, investor_id).catch(catcher)
+			brokerage.isExist(trx, investor_id),
+			exact_date(),
+			brokerage.isDateAvail(trx, investor_id, timestamp)
 		])
 		.then(so =>
 		{
-			if (so === null)
+			var is_exist = so[0]
+			var is_exact = so[1]
+			var is_later = so[2]
+
+			if (! is_exist)
 			{
 				return init_brokerage()
 			}
 
-			var bro_for_date = so[0]
-			var bro_latest = so[1]
-
-			if (! bro_for_date && bro_latest)
-			{
-				throw NotActualBrokerage({ actual: bro_latest.timestamp })
-			}
-
-			bro_for_date.moment = moment.utc(bro_for_date.timestamp)
-			bro_latest.moment = moment.utc(bro_latest.timestamp)
-			if (bro_for_date.moment < bro_latest.moment)
-			{
-				throw NotActualBrokerage({ actual: bro_latest.timestamp })
-			}
-
-			if (moment.utc(timestamp) > bro_latest.moment)
+			if (! is_exact && is_later)
 			{
 				return brokerage.set(trx, investor_id, amount, timestamp)
 			}
-
-			// update existing / latest
-			return portfolio.holdings.byId(trx, investor_id)
-			.then(holdings =>
+			else if (is_exact && is_later)
 			{
-				var real_allocation
-					= amount
-					+ sumBy(holdings, h => h.amount * h.price)
-
-				var multiplier = (index_amount_cap / real_allocation)
-
-				return table(trx)
-				.where(
+				return portfolio.holdings.byId(trx, investor_id)
+				.then(holdings =>
 				{
-					investor_id: investor_id,
-					timestamp: bro_latest.timestamp
+					var real_allocation
+						= amount
+						+ sumBy(holdings, h => h.amount * h.price)
+
+					var multiplier = (index_amount_cap / real_allocation)
+
+					return table(trx)
+					.where(
+					{
+						investor_id: investor_id,
+						timestamp: timestamp
+					})
+					.update(
+					{
+						cash: amount,
+						multiplier: multiplier
+					})
 				})
-				.update(
-				{
-					cash: amount,
-					multiplier: multiplier
-				})
-			})
+			}
+			else
+			{
+				throw NotActualBrokerage()
+			}
 		})
 	})
 
