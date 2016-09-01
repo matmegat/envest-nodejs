@@ -37,7 +37,7 @@ module.exports = function Xign (cfg, log)
 
 	extend(X, Series(token, logger))
 
-	X.quotes = (symbols) =>
+	X.quotes = (symbols, for_date) =>
 	{
 		expect(symbols).an('array')
 
@@ -48,21 +48,50 @@ module.exports = function Xign (cfg, log)
 
 		symbols.forEach(s => expect(s).a('string'))
 
-		var uri = format(
+		if (! for_date)
 		{
-			protocol: 'https:',
-			host: 'globalquotes.xignite.com',
+			/* today */
 
-			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
-
-			query:
+			var uri = format(
 			{
-				IdentifierType: 'Symbol',
-				Identifiers: symbols.join(','),
+				protocol: 'https:',
+				host: 'globalquotes.xignite.com',
 
-				_Token: token
-			}
-		})
+				pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
+
+				query:
+				{
+					IdentifierType: 'Symbol',
+					Identifiers: symbols.join(','),
+
+					_Token: token
+				}
+			})
+		}
+		else
+		{
+			/* historical */
+
+			var uri = format(
+			{
+				protocol: 'https:',
+				host: 'xignite.com',
+
+				pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotes',
+
+				query:
+				{
+					IdentifierType: 'Symbol',
+					Identifiers: symbols.join(','),
+
+					AsOfDate: util.apidate(for_date),
+
+					AdjustmentMethod: 'None',
+
+					_Token: token
+				}
+			})
+		}
 
 		return request(uri)
 		.then(util.unwrap.data)
