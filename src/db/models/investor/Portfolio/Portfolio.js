@@ -176,13 +176,15 @@ module.exports = function Portfolio (db, investor)
 
 	function grid (trx, investor_id)
 	{
+		var resolution = 'day'
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return Promise.all(
 			[
-				holdings.grid(trx, investor_id),
-				brokerage.grid(trx, investor_id)
+				holdings.grid(trx, investor_id, resolution),
+				brokerage.grid(trx, investor_id, resolution)
 			])
 		})
 		.then(grids =>

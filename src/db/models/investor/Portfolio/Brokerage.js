@@ -81,8 +81,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var first = require('lodash/head')
 	var last  = require('lodash/last')
 
-	brokerage.grid = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.grid = knexed.transact(knex, (trx, investor_id, resolution) =>
 	{
+		resolution || (resolution = 'day')
+
 		return table(trx)
 		.select(
 			'timestamp',
@@ -96,7 +98,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			var grid = {}
 
-			datadays = groupBy(datadays, it => it.day.toISOString())
+			if (resolution === 'day')
+			{
+				datadays = groupBy(datadays, it => it.day.toISOString())
+			}
+			else
+			{
+				datadays = groupBy(datadays, it => it.timestamp.toISOString())
+			}
 			datadays = toPairs(datadays)
 			datadays = orderBy(datadays, '0')
 
