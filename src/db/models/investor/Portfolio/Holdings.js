@@ -49,7 +49,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		return holdings.byId(trx, investor_id, for_date)
+		return byId(trx, investor_id, for_date)
 		.then(holdings =>
 		{
 			var symbols = holdings.map(holding =>
