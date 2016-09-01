@@ -314,8 +314,8 @@ module.exports = function Portfolio (db, investor)
 	}
 
 	// TODO rm
-	portfolio.grid(120)
-	.then(console.dir, console.error)
+	// portfolio.grid(120)
+	// .then(console.dir, console.error)
 
 	function max_range (brokerage, holdings)
 	{
