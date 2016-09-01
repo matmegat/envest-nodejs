@@ -157,6 +157,11 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
+		return grid(trx, investor_id)
+	})
+
+	function grid (trx, investor_id)
+	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -230,7 +235,7 @@ module.exports = function Portfolio (db, investor)
 				return compiled
 			})
 		})
-	})
+	}
 
 	// TODO rm
 	// portfolio.grid(120)
