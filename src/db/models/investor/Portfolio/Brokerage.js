@@ -294,7 +294,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		return Promise.all(
 		[
 			brokerage.byId(trx, investor_id),
-			portfolio.holdings.byId(trx, investor_id)
+			portfolio.holdings.byId.quotes(trx, investor_id),
 		])
 		.then(values =>
 		{

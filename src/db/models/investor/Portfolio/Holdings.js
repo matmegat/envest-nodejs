@@ -47,6 +47,50 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 	})
 
+	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return holdings.byId(trx, investor_id, for_date)
+		.then(holdings =>
+		{
+			var symbols = holdings.map(holding =>
+			{
+				return [ holding.symbol_ticker, holding.symbol_exchange ]
+			})
+
+			return db.symbols.quotes(symbols, for_date)
+			.then(quotes =>
+			{
+				return quotes.map((quote, i) =>
+				{
+					if (! quote.price)
+					{
+						throw new TypeError(
+							'Cannot recalculate Xignite Quotes failed'
+						)
+					}
+
+					var holding = holdings[i]
+
+					holding.symbol = Symbl(
+					[
+						holding.symbol_ticker,
+						holding.symbol_exchange
+					])
+					.toFull()
+
+					holding.price = quote.price
+					holding.gain = quote.gain
+					holding.currency = quote.currency
+
+					delete holding.symbol_ticker
+					delete holding.symbol_exchange
+
+					return holding
+				})
+			})
+		})
+	})
+
 
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
