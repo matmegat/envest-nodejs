@@ -22,7 +22,8 @@ exports.up = (knex) =>
 		table.decimal('price', 12, 2)
 			.notNullable()
 
-		table.primary([ 'investor_id', 'timestamp' ]
+		table.primary(
+			[ 'investor_id', 'symbol_exchange', 'symbol_ticker', 'timestamp' ]
 			, 'timed_portfolio_point_unique')
 	})
 	.then(() =>
