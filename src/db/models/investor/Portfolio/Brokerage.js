@@ -347,7 +347,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// cash -> new_cash,
 			// recalculate because of holdings changed
 
-			return put(trx, investor_id, cash)
+			return put(trx, investor_id, cash, timestamp)
 		})
 	})
 
