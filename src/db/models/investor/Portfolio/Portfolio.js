@@ -1,6 +1,7 @@
 
 var pick = require('lodash/pick')
 var omit = require('lodash/omit')
+var get = require('lodash/get')
 var values = require('lodash/values')
 var any = require('lodash/some')
 var sumBy = require('lodash/sumBy')
@@ -9,6 +10,7 @@ var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
 var mapValues = require('lodash/mapValues')
 var findLast = require('lodash/findLast')
+var min = require('lodash/min')
 
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
@@ -168,9 +170,15 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(points =>
 		{
+			var y2 = points[0]
+			var intraday = points[1]
+
+			var utc_offset = intraday.utc_offset
+			delete intraday.utc_offset
+
 			return [
-				{ period: 'y2', points: points[0] },
-				{ period: 'today', points: points[1] }
+				{ period: 'y2', points: y2 },
+				{ period: 'today', utc_offset: utc_offset, points: intraday }
 			]
 		})
 	})
@@ -265,19 +273,43 @@ module.exports = function Portfolio (db, investor)
 					compiled.push([ moment(iso).utc().format(), total ])
 				})
 
+				if (resolution === 'intraday')
+				{
+					var utc_offset = mapValues(superseries, series =>
+					{
+						return get(series, '0.utcOffset', null)
+					})
+
+					utc_offset = values(utc_offset)
+
+					utc_offset = min(utc_offset)
+
+					compiled.utc_offset = utc_offset
+				}
+
 				return compiled
 			})
 		})
+		// for routes ~~~ :
 		.then(grid =>
 		{
-			// for routes ~~~
-			return grid.map(entry =>
+			if (grid.utc_offset)
+			{
+				var utc_offset = grid.utc_offset
+				delete grid.utc_offset
+			}
+
+			grid = grid.map(entry =>
 			{
 				return {
 					timestamp: entry[0],
 					value: entry[1]
 				}
 			})
+
+			grid.utc_offset = utc_offset
+
+			return grid
 		})
 	}
 
