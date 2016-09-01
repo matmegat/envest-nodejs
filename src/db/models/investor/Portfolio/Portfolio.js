@@ -161,27 +161,22 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return grid(trx, investor_id)
-		.then(grid =>
-		{
-			return grid.map(entry =>
-			{
-				return {
-					timestamp: entry[0],
-					value: entry[1]
-				}
-			})
-		})
+		return Promise.all(
+		[
+			grid(trx, investor_id, 'day'),
+			grid(trx, investor_id, 'intraday')
+		])
 		.then(points =>
 		{
-			return { period: 'y2', points: points }
+			return [
+				{ period: 'y2', points: points[0] },
+				{ period: 'today', points: points[1] }
+			]
 		})
 	})
 
-	function grid (trx, investor_id)
+	function grid (trx, investor_id, resolution)
 	{
-		var resolution = 'intraday'
-
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -271,6 +266,17 @@ module.exports = function Portfolio (db, investor)
 				})
 
 				return compiled
+			})
+		})
+		.then(grid =>
+		{
+			// for routes ~~~
+			return grid.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
 			})
 		})
 	}
