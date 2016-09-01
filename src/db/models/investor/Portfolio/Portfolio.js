@@ -129,7 +129,7 @@ module.exports = function Portfolio (db, investor)
 	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
 	{
 		var now = moment()
-		var day_ytd = moment(now)//.startOf('year') TODO
+		var day_ytd = moment(now).startOf('year')
 		var day_intraday = moment(now).startOf('day')
 
 		console.log(day_intraday.format())
@@ -169,7 +169,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all(
 			[
-				brokerage.byId(trx, investor_id, for_date),
+				brokerage.byId(trx, investor_id, for_date, { future: true }),
 				portfolio.holdings.byId.quotes(trx, investor_id, for_date)
 			])
 			.then(values =>
