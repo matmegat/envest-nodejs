@@ -9,6 +9,20 @@ module.exports = function Subscr (subscr_model)
 	subscr.model = subscr_model
 	subscr.express = Router()
 
+	/*
+	how to use:
+	db.user.byId(user_id)
+	.then(user =>
+	{
+		user.created_at // is what you need
+	})
+
+	then you can use moment(this_date).add(1, 'month') or .add(30, 'days')
+	to get trial_end
+
+	TODO move it to model
+	*/
+
 	subscr.express.post('/activate', (rq, rs) =>
 	{
 		var trial_end = 1473014984 // this should be set with actual value
