@@ -179,28 +179,8 @@ module.exports = function Meta (investor, raw, options)
 				investor.gain = gains[i]
 			})
 
-			return investors.map(transform_investor)
+			return investors
 		})
-	}
-
-	function transform_investor (investor)
-	{
-		return _.pick(investor,
-		[
-			'id',
-			'first_name',
-			'last_name',
-			'pic',
-			'profile_pic',
-			'profession',
-			'focus',
-			'education',
-			'background',
-			'historical_returns',
-			'gain',
-			'is_featured',
-			'is_public'
-		])
 	}
 
 	return meta
