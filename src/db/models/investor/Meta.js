@@ -1,6 +1,7 @@
 
 var _ = require('lodash')
 var map = _.map
+var curry = _.curry
 
 var expect = require('chai').expect
 
@@ -96,7 +97,7 @@ module.exports = function Meta (investor, raw, options)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
-		.then(transform_investors)
+		.then(transform_investors(trx))
 		.then(helpers.oneMaybe)
 	}
 
@@ -150,7 +151,7 @@ module.exports = function Meta (investor, raw, options)
 		}
 
 		return paginator.paginate(queryset, options.paginator)
-		.then(transform_investors)
+		.then(transform_investors(null))
 		.then((investors) =>
 		{
 			var response =
@@ -166,10 +167,19 @@ module.exports = function Meta (investor, raw, options)
 		})
 	}
 
-	function transform_investors (investors)
+	var transform_investors = curry((trx, investors) =>
 	{
 		var ids = map(investors, 'id')
-		var gains = map(ids, investor.portfolio.gain)
+
+		// ugly fix
+		if (trx)
+		{
+			var gains = map(ids, id => investor.portfolio.gain(trx, id))
+		}
+		else
+		{
+			var gains = map(ids, id => investor.portfolio.gain(id))
+		}
 		var gains = Promise.all(gains)
 
 		return gains
@@ -182,7 +192,7 @@ module.exports = function Meta (investor, raw, options)
 
 			return investors
 		})
-	}
+	})
 
 	return meta
 }

@@ -54,6 +54,9 @@ module.exports = function Notifications (db)
 				emit.group = options.group
 				emit.event = target_or_event
 
+				/* shift */
+				trx = event
+
 				return notifications.createBroadcast(emit, trx)
 			}
 		}
