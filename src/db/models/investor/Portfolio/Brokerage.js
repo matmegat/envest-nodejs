@@ -24,7 +24,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	// byId
-	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date, options) =>
+	brokerage.byId = knexed.transact(knex,
+		(trx, investor_id, for_date, options) =>
 	{
 		options = extend({ future: false }, options)
 

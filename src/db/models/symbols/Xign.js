@@ -129,6 +129,7 @@ module.exports = function Xign (cfg, log)
 
 					/* this available only for today */
 					/* this not available for historical */
+					// eslint-disable-next-line id-length
 					if (r.PercentChangeFromPreviousClose != null)
 					{
 						struct.gain = r.PercentChangeFromPreviousClose

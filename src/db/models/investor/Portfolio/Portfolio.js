@@ -508,7 +508,7 @@ module.exports = function Portfolio (db, investor)
 			.startOf('day')
 			.toISOString()
 
-			return tick_day == day
+			return tick_day === day
 		}
 	}
 
