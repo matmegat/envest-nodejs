@@ -443,7 +443,14 @@ function Brokerage (investor_model, db)
 	{
 		get: (queryset, investor_id) =>
 		{
-			return db.investor.portfolio.brokerage.cashById(investor_id)
+			return db.investor.portfolio.brokerage.byId(investor_id)
+			.then((value) =>
+			{
+				value.amount = value.cash
+				value.date = moment.utc().format()
+
+				return value
+			})
 		},
 		validate: (value) =>
 		{
@@ -473,25 +480,18 @@ function Brokerage (investor_model, db)
 			return portfolio.brokerage
 			.initOrSet(investor_id, value.amount, value.date)
 		},
-		verify: (value, investor_id) =>
+		verify: (value) =>
 		{
-			return db.investor.portfolio.brokerage.byId(investor_id)
-			.catch(Err.fromCode('brokerage_not_exist_for_date',
-				() => CannotGoPublic({ reason: 'Brokerage does not exist' })
-			))
-			.then(brokerage =>
+			if (value.cash < 0)
 			{
-				if (brokerage.cash < 0)
-				{
-					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
-				}
-				if (brokerage.multiplier < 0)
-				{
-					throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
-				}
+				throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
+			}
+			if (value.multiplier < 0)
+			{
+				throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
+			}
 
-				return true
-			})
+			return true
 		}
 	})
 }
@@ -536,8 +536,20 @@ function Holdings (investor_model, db)
 	{
 		get: (queryset, investor_id) =>
 		{
-			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.holdings)
+			return db.investor.portfolio.holdings.byId(investor_id)
+			.then(holdings =>
+			{
+				var now = moment.utc().format()
+
+				holdings.forEach((holding) =>
+				{
+					holding.symbol
+					 = `${holding.symbol_ticker}.${holding.symbol_exchange}`
+					holding.date = now
+				})
+
+				return holdings
+			})
 		},
 		validate: (value, investor_id) =>
 		{

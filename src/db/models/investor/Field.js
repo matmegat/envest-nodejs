@@ -82,7 +82,7 @@ function verifier (field, verify)
 		return field.get(investor_id)
 		.then((value) =>
 		{
-			return field.validate(value)
+			return field.validate(value, investor_id)
 			.then(() =>
 			{
 				return verify(value, investor_id)
