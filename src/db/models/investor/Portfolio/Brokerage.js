@@ -111,6 +111,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
+	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
+	{
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.then(oneMaybe)
+		.then(Boolean)
+	})
+
 	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -218,19 +227,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 			})
 		}
 
-		var exact_date = () =>
-		{
-			return table(trx)
-			.where('investor_id', investor_id)
-			.where('timestamp', timestamp)
-			.then(oneMaybe)
-			.then(Boolean)
-		}
-
 		return Promise.all(
 		[
 			brokerage.isExist(trx, investor_id),
-			exact_date(),
+			brokerage.isExact(trx, investor_id, timestamp),
 			brokerage.isDateAvail(trx, investor_id, timestamp)
 		])
 		.then(so =>
@@ -316,7 +316,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		return Promise.all(
 		[
 			brokerage.byId(trx, investor_id, timestamp),
-			portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
+			portfolio.holdings.byId(trx, investor_id, timestamp),
 		])
 		.then(values =>
 		{
@@ -372,7 +372,54 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// cash -> new_cash,
 			// recalculate because of holdings changed
 
-			return put(trx, investor_id, cash, timestamp)
+			return Promise.all(
+			[
+				brokerage.isExact(trx, investor_id, timestamp),
+				brokerage.isDateAvail(trx, investor_id, timestamp)
+			])
+			.then((so) =>
+			{
+				var is_exact = so[0]
+				var is_avail = so[1]
+
+				if (! is_avail)
+				{
+					throw NotActualBrokerage(
+					{
+						reason: `Holdings could be modified after ${timestamp}`
+					})
+				}
+
+				if (! is_exact)
+				{
+					return put(trx, investor_id, cash, timestamp)
+				}
+				else
+				{
+					// Update latest entry
+					return portfolio
+					.holdings.byId(trx, investor_id, timestamp)
+					.then(holdings =>
+					{
+						// TODO: copy-paste!
+						var real_allocation
+							= cash
+							+ sumBy(holdings, h => h.amount * h.price)
+
+						var new_multiplier = (index_amount_cap / real_allocation)
+						return table(trx)
+						.where(
+						{
+							investor_id: investor_id,
+							timestamp: timestamp
+						})
+						.update(
+						{
+							multiplier: new_multiplier
+						})
+					})
+				}
+			})
 		})
 	})
 
