@@ -126,7 +126,7 @@ module.exports = function Xign (cfg, log)
 						price:    r.Last,
 						company:  r.Security.Name
 					})
-				
+
 					/* this available only for today */
 					/* this not available for historical */
 					if (r.PercentChangeFromPreviousClose != null)
