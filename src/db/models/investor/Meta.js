@@ -96,8 +96,8 @@ module.exports = function Meta (investor, raw, options)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
+		.then(transform_investors)
 		.then(helpers.oneMaybe)
-		.then(investor => transform_investors([ investor ]))
 	}
 
 	meta.fullById = byId
