@@ -327,15 +327,26 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, new_cash, timestamp)
+	function put (trx, investor_id, new_cash, timestamp, options)
 	{
 		expect(new_cash).a('number')
 
-		return Promise.all(
-		[
-			brokerage.byId(trx, investor_id, timestamp),
-			portfolio.holdings.byId(trx, investor_id, timestamp),
-		])
+		options || (options = {})
+
+		return brokerage.isDateAvail(trx, investor_id, timestamp)
+		.then((is_avail) =>
+		{
+			if (! is_avail)
+			{
+				throw NotActualBrokerage()
+			}
+
+			return Promise.all(
+			[
+				brokerage.byId(trx, investor_id, timestamp),
+				portfolio.holdings.byId(trx, investor_id, timestamp),
+			])
+		})
 		.then(values =>
 		{
 			var cash = values[0].cash
