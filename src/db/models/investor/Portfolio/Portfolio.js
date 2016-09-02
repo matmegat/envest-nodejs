@@ -184,6 +184,16 @@ module.exports = function Portfolio (db, investor)
 					indexed: allocation * multiplier
 				}
 			})
+			.catch(err =>
+			{
+				if (err.code === 'brokerage_not_exist_for_date')
+				{
+					return {
+						real:    0,
+						indexed: 0
+					}
+				}
+			})
 		})
 	})
 
