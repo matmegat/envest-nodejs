@@ -510,7 +510,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				})
 			}
 
-			amount = amount - holding.amount
+			amount = holding.amount - amount
 
 			var data_put =
 			{

@@ -148,11 +148,25 @@ module.exports = function Portfolio (db, investor)
 				today: gain(day, now),
 				ytd:   gain(ytd, now),
 			}
+		},
+		error =>
+		{
+			if (error.code === 'brokerage_not_exist_for_date')
+			{
+				return {
+					today: null,
+					ytd: null
+				}
+			}
+			else
+			{
+				throw error
+			}
 		})
 
 		function gain (from, to)
 		{
-			return (to.indexed / from.indexed) * 100 - 100
+			return round((to.indexed / from.indexed) * 100 - 100, 3)
 		}
 	})
 
