@@ -1,6 +1,7 @@
 
 var extend = require('lodash/extend')
 var sumBy = require('lodash/sumBy')
+var pick = require('lodash/pick')
 
 var expect = require('chai').expect
 
@@ -345,6 +346,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			[
 				brokerage.byId(trx, investor_id, timestamp),
 				portfolio.holdings.byId(trx, investor_id, timestamp),
+				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
 		.then(values =>
@@ -353,6 +355,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 			var multiplier = values[0].multiplier
 
 			var holdings = values[1]
+
+			var is_exact = values[2]
 
 			var real_allocation
 			 = new_cash
@@ -380,11 +384,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 				batch.timestamp = timestamp
 			}
 
-			return table(trx).insert(batch)
-			.catch(Err.fromDb(
-				'timed_brokerage_point_unique',
-				DuplicateBrokerageEntry
-			))
+			if (options.override === true && is_exact)
+			{
+				return table(trx)
+				.where('investor_id', investor_id)
+				.where('timestamp', timestamp)
+				.update(pick(batch, 'cash', 'multiplier'))
+			}
+			else
+			{
+				return table(trx).insert(batch)
+				.catch(Err.fromDb(
+					'timed_brokerage_point_unique',
+					DuplicateBrokerageEntry
+				))
+			}
 		})
 	}
 
