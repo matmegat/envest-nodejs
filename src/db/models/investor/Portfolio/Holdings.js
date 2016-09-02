@@ -47,6 +47,50 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 	})
 
+	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return byId(trx, investor_id, for_date)
+		.then(holdings =>
+		{
+			var symbols = holdings.map(holding =>
+			{
+				return [ holding.symbol_ticker, holding.symbol_exchange ]
+			})
+
+			return db.symbols.quotes(symbols, for_date)
+			.then(quotes =>
+			{
+				return quotes.map((quote, i) =>
+				{
+					if (! quote.price)
+					{
+						throw new TypeError(
+							'Cannot recalculate Xignite Quotes failed'
+						)
+					}
+
+					var holding = holdings[i]
+
+					holding.symbol = Symbl(
+					[
+						holding.symbol_ticker,
+						holding.symbol_exchange
+					])
+					.toFull()
+
+					holding.price = quote.price
+					holding.gain = quote.gain
+					holding.currency = quote.currency
+
+					delete holding.symbol_ticker
+					delete holding.symbol_exchange
+
+					return holding
+				})
+			})
+		})
+	})
+
 
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
@@ -70,13 +114,24 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 	holdings.isDateAvail =
-		knexed.transact(knex, (trx, investor_id, for_date) =>
+		knexed.transact(knex, (trx, investor_id, for_date, symbol) =>
 	{
+		if (symbol)
+		{
+			symbol = Symbl(symbol)
+		}
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
+			var where = { investor_id: investor_id }
+			if (symbol)
+			{
+				extend(where, symbol.toDb())
+			}
+
 			return table(trx)
-			.where('investor_id', investor_id)
+			.where(where)
 			.andWhere('timestamp', '>', for_date)
 		})
 		.then(res =>
@@ -238,6 +293,52 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
+		var exact_match = (investor_id, symbol, timestamp) =>
+		{
+			return table(trx)
+			.where('timestamp', timestamp)
+			.where(symbol.toDb())
+			.then(oneMaybe)
+			.then(Boolean)
+		}
+
+		var put_or_update = (investor_id, symbol, data) =>
+		{
+			return Promise.all(
+			[
+				exact_match(investor_id, symbol, data.timestamp),
+				holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
+			])
+			.then(so =>
+			{
+				var is_exact = so[0]
+				var is_avail = so[1]
+
+				if (! is_avail)
+				{
+					throw  InvalidHoldingDate(
+					{
+						symbol: symbol.toXign(),
+						reason: 'More actual holding already exist'
+					})
+				}
+
+				if (! is_exact)
+				{
+					return put(trx, investor_id, symbol, data)
+				}
+
+				if (is_exact)
+				{
+					return table(trx)
+					.where('investor_id', investor_id)
+					.where(symbol.toDb())
+					.where('timestamp', data.timestamp)
+					.update(pick(data, 'amount', 'price'))
+				}
+			})
+		}
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -279,12 +380,23 @@ module.exports = function Holdings (db, investor, portfolio)
 				var holding = holding_entries[i]
 				var data = pick(holding, 'amount', 'price', 'timestamp')
 
-				return put(trx, investor_id, symbol, data)
+				return put_or_update(investor_id, symbol, data)
 			}))
 		})
 		.then(() =>
 		{
-			return portfolio.brokerage.recalculate(trx, investor_id)
+			// choose latest timestamp
+			var timestamp = moment.utc(holding_entries[0].timestamp)
+			holding_entries.forEach((holding) =>
+			{
+				if (moment.utc(holding.timestamp) > timestamp)
+				{
+					timestamp = moment.utc(holding.timestamp)
+				}
+			})
+
+			return portfolio.brokerage
+			.recalculate(trx, investor_id, timestamp.format())
 		})
 	})
 

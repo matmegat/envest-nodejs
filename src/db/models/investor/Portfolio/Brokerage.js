@@ -1,4 +1,5 @@
 
+var extend = require('lodash/extend')
 var sumBy = require('lodash/sumBy')
 
 var expect = require('chai').expect
@@ -7,8 +8,6 @@ var knexed = require('../../../knexed')
 
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
-
-var moment = require('moment')
 
 module.exports = function Brokerage (db, investor, portfolio)
 {
@@ -24,17 +23,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	// byId
-	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date) =>
+	brokerage.byId = knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
+		options = extend({ future: false }, options)
+
+		var query = knex(raw('brokerage AS B'))
+		.transacting(trx)
+		.select('cash', 'multiplier')
+		.where('investor_id', investor_id)
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return knex(raw('brokerage AS B'))
-			.transacting(trx)
-			.select('cash', 'multiplier')
-			.where('investor_id', investor_id)
+			return query.clone()
 			.where('timestamp',
-				table().max('timestamp')
+				table(trx).max('timestamp')
 				.where('investor_id', raw('B.investor_id'))
 				.where(function ()
 				{
@@ -50,6 +53,23 @@ module.exports = function Brokerage (db, investor, portfolio)
 			/* brokerage.init guarantees
 			   brokerage existence for dates
 			   from Investor Onboarding */
+			if (! r.length)
+			{
+				if (for_date && options.future)
+				{
+					return query.clone()
+					.where('timestamp',
+						table(trx).min('timestamp')
+						.where('investor_id', raw('B.investor_id'))
+						.where('timestamp', '>', for_date)
+					)
+				}
+			}
+
+			return r
+		})
+		.then(r =>
+		{
 			if (! r.length)
 			{
 				throw BrokerageDoesNotExist({ for_date: for_date })
@@ -89,6 +109,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 		{
 			return ! res.length
 		})
+	})
+
+	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
+	{
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.then(oneMaybe)
+		.then(Boolean)
 	})
 
 	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
@@ -177,7 +206,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var index_amount_cap = 1e5
 
 	var NotActualBrokerage = Err('not_actual_brokerage',
-		'More actual brokerage already exists')
+		'More actual brokerage already exist')
 
 	brokerage.initOrSet = knexed.transact(knex,
 	(trx, investor_id, amount, timestamp) =>
@@ -198,19 +227,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 			})
 		}
 
-		var exact_date = () =>
-		{
-			return table(trx)
-			.where('investor_id', investor_id)
-			.where('timestamp', timestamp)
-			.then(oneMaybe)
-			.then(Boolean)
-		}
-
 		return Promise.all(
 		[
 			brokerage.isExist(trx, investor_id),
-			exact_date(),
+			brokerage.isExact(trx, investor_id, timestamp),
 			brokerage.isDateAvail(trx, investor_id, timestamp)
 		])
 		.then(so =>
@@ -235,6 +255,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 			else
 			{
+				// TODO .quotes ?
+				// rewrite to `put` ?
 				return portfolio.holdings.byId(trx, investor_id)
 				.then(holdings =>
 				{
@@ -293,20 +315,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		return Promise.all(
 		[
-			brokerage.byId(trx, investor_id),
-			portfolio.holdings.byId(trx, investor_id)
+			brokerage.byId(trx, investor_id, timestamp),
+			portfolio.holdings.byId(trx, investor_id, timestamp),
 		])
 		.then(values =>
 		{
 			var cash = values[0].cash
 			var multiplier = values[0].multiplier
 
-			var holdings  = values[1]
+			var holdings = values[1]
 
 			var real_allocation
 			 = new_cash
 			 + sumBy(holdings, h => h.amount * h.price)
 
+			// index_amount_cap ? TODO
 			var new_multiplier = (index_amount_cap / real_allocation)
 
 			if ((cash === new_cash) && (multiplier === new_multiplier))
@@ -340,15 +363,63 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'There can be only one Brokerage entry per timestamp for Investor')
 
 
-	brokerage.recalculate = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.recalculate = knexed.transact(knex,
+		(trx, investor_id, timestamp) =>
 	{
-		return brokerage.cashById(trx, investor_id)
+		return brokerage.cashById(trx, investor_id, timestamp)
 		.then(cash =>
 		{
 			// cash -> new_cash,
 			// recalculate because of holdings changed
 
-			return put(trx, investor_id, cash)
+			return Promise.all(
+			[
+				brokerage.isExact(trx, investor_id, timestamp),
+				brokerage.isDateAvail(trx, investor_id, timestamp)
+			])
+			.then((so) =>
+			{
+				var is_exact = so[0]
+				var is_avail = so[1]
+
+				if (! is_avail)
+				{
+					throw NotActualBrokerage(
+					{
+						reason: `Holdings could be modified after ${timestamp}`
+					})
+				}
+
+				if (! is_exact)
+				{
+					return put(trx, investor_id, cash, timestamp)
+				}
+				else
+				{
+					// Update latest entry
+					return portfolio
+					.holdings.byId(trx, investor_id, timestamp)
+					.then(holdings =>
+					{
+						// TODO: copy-paste!
+						var real_allocation
+							= cash
+							+ sumBy(holdings, h => h.amount * h.price)
+
+						var new_multiplier = (index_amount_cap / real_allocation)
+						return table(trx)
+						.where(
+						{
+							investor_id: investor_id,
+							timestamp: timestamp
+						})
+						.update(
+						{
+							multiplier: new_multiplier
+						})
+					})
+				}
+			})
 		})
 	})
 

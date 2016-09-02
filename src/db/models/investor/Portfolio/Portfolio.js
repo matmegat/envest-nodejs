@@ -69,6 +69,8 @@ module.exports = function Portfolio (db, investor)
 				{
 					var holding = holdings[i]
 
+					/* TODO */
+					/* soft-mode? holdings.byId.quotes */
 					if (quoted_symbol == null)
 					{
 						holding.symbol = Symbl(
@@ -78,13 +80,14 @@ module.exports = function Portfolio (db, investor)
 						])
 						.toFull()
 
-						holding.gain = null
+						holding.gain = 0
 					}
 					else
 					{
 						holding.symbol = quoted_symbol.symbol
 
 						/* calculated percentage */
+						/* TODO maybe wrong gain */
 						holding.gain
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
@@ -123,6 +126,68 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
+	{
+		var now = moment()
+		var day_ytd = moment(now).startOf('year')
+		var day_intraday = moment(now).startOf('day')
+
+		return Promise.all(
+		[
+			portfolio.fullValue(trx, investor_id, now),
+			portfolio.fullValue(trx, investor_id, day_ytd),
+			portfolio.fullValue(trx, investor_id, day_intraday)
+		])
+		.then(values =>
+		{
+			var now = values[0]
+			var ytd = values[1]
+			var day = values[2]
+
+			return {
+				today: gain(day, now),
+				ytd:   gain(ytd, now),
+			}
+		})
+
+		function gain (from, to)
+		{
+			return (to.indexed / from.indexed) * 100 - 100
+		}
+	})
+
+	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return Promise.all(
+			[
+				brokerage.byId(trx, investor_id, for_date, { future: true }),
+				portfolio.holdings.byId.quotes(trx, investor_id, for_date)
+			])
+			.then(values =>
+			{
+				var cash = values[0].cash
+				var multiplier = values[0].multiplier
+
+				var holdings = values[1]
+
+				var allocation
+				 = cash
+				 + sumBy(holdings, h => h.amount * h.price)
+
+				allocation *= multiplier
+
+				return {
+					real:    allocation,
+					indexed: allocation * multiplier
+				}
+			})
+		})
+	})
+
+
 	portfolio.full = function (investor_id)
 	{
 		return investor.all.ensure(investor_id)
@@ -140,6 +205,7 @@ module.exports = function Portfolio (db, investor)
 
 			holdings = holdings.map(holding =>
 			{
+				/* TODO rm */
 				holding.allocation
 				 = holding.amount * holding.price * brokerage.multiplier
 
@@ -307,15 +373,14 @@ module.exports = function Portfolio (db, investor)
 				}
 			})
 
-			grid.utc_offset = utc_offset
+			if (utc_offset)
+			{
+				grid.utc_offset = utc_offset
+			}
 
 			return grid
 		})
 	}
-
-	// TODO rm
-	// portfolio.grid(120)
-	// .then(console.dir, console.error)
 
 	function max_range (brokerage, holdings)
 	{

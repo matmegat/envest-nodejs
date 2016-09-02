@@ -1,5 +1,7 @@
 
 var _ = require('lodash')
+var map = _.map
+
 var expect = require('chai').expect
 
 var helpers = require('../../helpers')
@@ -13,8 +15,10 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
-module.exports = function Meta (knexed_table, raw, options)
+module.exports = function Meta (investor, raw, options)
 {
+	var knexed_table = investor.table
+
 	expect(knexed_table, 'meta table relation').a('function')
 
 	options = _.extend({}, options)
@@ -93,7 +97,7 @@ module.exports = function Meta (knexed_table, raw, options)
 			.where('user_id', id)
 		})
 		.then(helpers.oneMaybe)
-		.then(transform_investor)
+		.then(investor => transform_investors([ investor ]))
 	}
 
 	meta.fullById = byId
@@ -146,11 +150,12 @@ module.exports = function Meta (knexed_table, raw, options)
 		}
 
 		return paginator.paginate(queryset, options.paginator)
+		.then(transform_investors)
 		.then((investors) =>
 		{
 			var response =
 			{
-				investors: investors.map(transform_investor)
+				investors: investors
 			}
 
 			return helpers.count(count_queryset)
@@ -161,30 +166,22 @@ module.exports = function Meta (knexed_table, raw, options)
 		})
 	}
 
-	function transform_investor (investor)
+	function transform_investors (investors)
 	{
-		investor.gain =
-		{
-			ytd:   _.random(1, 10),
-			today: _.random(1, 1000) / 100
-		}
+		var ids = map(investors, 'id')
+		var gains = map(ids, investor.portfolio.gain)
+		var gains = Promise.all(gains)
 
-		return _.pick(investor,
-		[
-			'id',
-			'first_name',
-			'last_name',
-			'pic',
-			'profile_pic',
-			'profession',
-			'focus',
-			'education',
-			'background',
-			'historical_returns',
-			'gain',
-			'is_featured',
-			'is_public'
-		])
+		return gains
+		.then(gains =>
+		{
+			investors.forEach((investor, i) =>
+			{
+				investor.gain = gains[i]
+			})
+
+			return investors
+		})
 	}
 
 	return meta
