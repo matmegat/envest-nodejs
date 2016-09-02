@@ -166,7 +166,7 @@ module.exports = function Portfolio (db, investor)
 
 		function gain (from, to)
 		{
-			return (to.indexed / from.indexed) * 100 - 100
+			return round((to.indexed / from.indexed) * 100 - 100, 3)
 		}
 	})
 
