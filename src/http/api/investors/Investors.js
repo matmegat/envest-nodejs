@@ -82,7 +82,7 @@ module.exports = function (db, http)
 
 	investors.express.get('/:id/chart', authRequired, (rq, rs) =>
 	{
-		toss(rs, investors.model.chart(rq.params.id))
+		toss(rs, investors.model.portfolio.grid(rq.params.id))
 	})
 
 	investors.express.post('/:id/field', authRequired, (rq, rs) =>

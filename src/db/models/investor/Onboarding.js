@@ -571,7 +571,7 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return db.investor.portfolio.brokerage.grid(investor_id)
+			return db.investor.portfolio.brokerage.grid(investor_id, 'day')
 			.then(grid => grid.daterange[0])
 			.then((min_date) =>
 			{
