@@ -159,9 +159,6 @@ module.exports = function Portfolio (db, investor)
 		}
 	})
 
-	portfolio.gain(120)
-	.then(console.log, console.error)
-
 	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)

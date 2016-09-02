@@ -45,11 +45,20 @@ module.exports = function Investor (db)
 
 	investor.onboarding = Onboarding(db, investor)
 
-	investor.all    = Meta(investor.table, raw, {})
-	investor.public = Meta(investor.table, raw, { is_public: true })
+	investor.all    = Meta(investor, raw, {})
+	investor.public = Meta(investor, raw, { is_public: true })
 
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor)
+
+	investor.public.list({})
+	// portfolio.gain(120)
+	.then(it =>
+	{
+		it.investors.forEach(it => console.log(it.id, it.gain))
+	}
+	, console.error)
+
 
 	investor.all.fullById = wrap(investor.all.byId, (byId, id, trx) =>
 	{
