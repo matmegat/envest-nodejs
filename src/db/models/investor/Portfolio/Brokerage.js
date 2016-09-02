@@ -194,12 +194,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return [ pair[0], day ]
 			})
 
-			/* expect Brokerage datadays to be not empty.
-			   This means that if Investor is Onboarded
-			   there's always at least one entry in Brokerage.
-			 */
-			expect(datadays).not.empty
-
 			grid.daterange =
 			[
 				first(datadays)[0],
@@ -394,7 +388,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				batch.timestamp = timestamp
 			}
 
-			if (options.override === true && is_exact)
+			if (options.override && is_exact)
 			{
 				return table(trx)
 				.where('investor_id', investor_id)
