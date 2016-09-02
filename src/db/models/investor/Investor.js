@@ -113,14 +113,19 @@ module.exports = function Investor (db)
 				 * - to created investor?
 				 * */
 
-				emits.NewAdmin(
+				var n1 = emits.NewAdmin(
 				{
 					investor: [ ':user-id', investor_id ]
-				})
-				emits.NewInvestor(investor_id,
+				}
+				, trx)
+
+				var n2 = emits.NewInvestor(investor_id,
 				{
 					admin: [ ':user-id', data.admin_id ]
-				})
+				}
+				, trx)
+
+				return Promise.all([ n1, n2 ])
 			})
 			.then(() => investor_entry)
 		})
