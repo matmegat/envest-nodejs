@@ -209,30 +209,48 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'More actual brokerage already exist')
 
 	brokerage.initOrSet = knexed.transact(knex,
-	(trx, investor_id, amount, timestamp) =>
+	(trx, investor_id, cash, timestamp) =>
 	{
 		var init_brokerage = () =>
 		{
-			amount = amount || index_amount_cap
+			cash = cash || index_amount_cap
 
-			var multiplier = index_amount_cap / amount
+			var multiplier = index_amount_cap / cash
 
 			return table(trx)
 			.insert(
 			{
 				investor_id: investor_id,
-				cash: amount,
+				cash: cash,
 				timestamp: timestamp,
 				multiplier: multiplier
 			})
 		}
 
-		return Promise.all(
-		[
-			brokerage.isExist(trx, investor_id),
-			brokerage.isExact(trx, investor_id, timestamp),
-			brokerage.isDateAvail(trx, investor_id, timestamp)
-		])
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			/* validate update keys */
+			validate.required(cash, 'cash')
+			validate.number(cash, 'cash')
+
+			if (cash < 0)
+			{
+				throw InvalidAmount({ field: 'cash' })
+			}
+
+			validate.required(timestamp, 'timestamp')
+			validate.date(timestamp, 'timestamp')
+		})
+		.then(() =>
+		{
+			return Promise.all(
+			[
+				brokerage.isExist(trx, investor_id),
+				brokerage.isExact(trx, investor_id, timestamp),
+				brokerage.isDateAvail(trx, investor_id, timestamp)
+			])
+		})
 		.then(so =>
 		{
 			var is_exist = so[0]
@@ -251,7 +269,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			if (! is_exact)
 			{
-				return brokerage.set(trx, investor_id, amount, timestamp)
+				return brokerage.set(trx, investor_id, cash, timestamp)
 			}
 			else
 			{
@@ -261,7 +279,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				.then(holdings =>
 				{
 					var real_allocation
-						= amount
+						= cash
 						+ sumBy(holdings, h => h.amount * h.price)
 
 					var multiplier = (index_amount_cap / real_allocation)
@@ -274,7 +292,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 					})
 					.update(
 					{
-						cash: amount,
+						cash: cash,
 						multiplier: multiplier
 					})
 				})
