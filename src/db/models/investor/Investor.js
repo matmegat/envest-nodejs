@@ -162,15 +162,5 @@ module.exports = function Investor (db)
 		.then(one)
 	})
 
-
-	investor.chart = function (id)
-	{
-		return investor.public.ensure(id)
-		.then(() =>
-		{
-			return investor.portfolio.grid(id)
-		})
-	}
-
 	return investor
 }
