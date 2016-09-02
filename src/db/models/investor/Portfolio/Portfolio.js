@@ -9,7 +9,11 @@ var orderBy = require('lodash/orderBy')
 var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
 var mapValues = require('lodash/mapValues')
+var flatten = require('lodash/flatten')
+
+var find = require('lodash/find')
 var findLast = require('lodash/findLast')
+
 var min = require('lodash/min')
 
 var moment = require('moment')
@@ -291,7 +295,11 @@ module.exports = function Portfolio (db, investor)
 			return grid_series(grid.holdings.involved, range, resolution)
 			.then(superseries =>
 			{
+				/* pick single last trading day */
 				range = range_correct_day(range, superseries, resolution)
+
+				/* correct range to trading hours */
+				range = find_market_open(range, superseries, resolution)
 
 				if (0)
 				{
@@ -438,7 +446,7 @@ module.exports = function Portfolio (db, investor)
 
 	function range_correct_day (range, superseries, resolution)
 	{
-		if (resolution === 'day') { return range }
+		if (resolution !== 'intraday') { return range }
 
 		var day = moment(range.end).startOf('day')
 		var r
@@ -472,6 +480,35 @@ module.exports = function Portfolio (db, investor)
 			rs = any(rs)
 
 			return rs
+		}
+	}
+
+	function find_market_open (range, superseries, resolution)
+	{
+		if (resolution !== 'intraday') { return range }
+
+		superseries = values(superseries)
+		superseries = flatten(superseries)
+
+		var day = moment(range.start)
+		.startOf('day')
+		.toISOString()
+
+		var start = find(superseries, same_day)
+		var end   = findLast(superseries, same_day)
+
+		start = start.timestamp
+		end   = end.timestamp
+
+		return new MRange(start, end)
+
+		function same_day (tick)
+		{
+			var tick_day = moment(tick.timestamp)
+			.startOf('day')
+			.toISOString()
+
+			return tick_day == day
 		}
 	}
 
