@@ -148,6 +148,20 @@ module.exports = function Portfolio (db, investor)
 				today: gain(day, now),
 				ytd:   gain(ytd, now),
 			}
+		},
+		error =>
+		{
+			if (error.code === 'brokerage_not_exist_for_date')
+			{
+				return {
+					today: null,
+					ytd: null
+				}
+			}
+			else
+			{
+				throw error
+			}
 		})
 
 		function gain (from, to)
@@ -182,16 +196,6 @@ module.exports = function Portfolio (db, investor)
 				return {
 					real:    allocation,
 					indexed: allocation * multiplier
-				}
-			})
-			.catch(err =>
-			{
-				if (err.code === 'brokerage_not_exist_for_date')
-				{
-					return {
-						real:    0,
-						indexed: 0
-					}
 				}
 			})
 		})
