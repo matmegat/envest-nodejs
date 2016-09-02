@@ -51,14 +51,6 @@ module.exports = function Investor (db)
 	investor.portfolio = Portfolio(db, investor)
 	investor.featured = Featured(db, investor)
 
-	investor.public.list({})
-	// portfolio.gain(120)
-	.then(it =>
-	{
-		it.investors.forEach(it => console.log(it.id, it.gain))
-	}
-	, console.error)
-
 
 	investor.all.fullById = wrap(investor.all.byId, (byId, id, trx) =>
 	{

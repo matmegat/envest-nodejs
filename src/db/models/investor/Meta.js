@@ -171,6 +171,7 @@ module.exports = function Meta (investor, raw, options)
 		var ids = map(investors, 'id')
 		var gains = map(ids, investor.portfolio.gain)
 		var gains = Promise.all(gains)
+
 		return gains
 		.then(gains =>
 		{

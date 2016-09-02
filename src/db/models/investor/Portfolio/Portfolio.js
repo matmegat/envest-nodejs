@@ -132,9 +132,6 @@ module.exports = function Portfolio (db, investor)
 		var day_ytd = moment(now).startOf('year')
 		var day_intraday = moment(now).startOf('day')
 
-		console.log(day_intraday.format())
-		console.log(day_ytd.format())
-
 		return Promise.all(
 		[
 			portfolio.fullValue(trx, investor_id, now),
@@ -384,10 +381,6 @@ module.exports = function Portfolio (db, investor)
 			return grid
 		})
 	}
-
-	// TODO rm
-	// portfolio.grid(120)
-	// .then(console.dir, console.error)
 
 	function max_range (brokerage, holdings)
 	{

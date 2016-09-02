@@ -119,7 +119,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		if (symbol)
 		{
 			symbol = Symbl(symbol)
-			console.log(symbol, symbol.toXign())
 		}
 
 		return investor.all.ensure(investor_id, trx)
