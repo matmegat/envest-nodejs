@@ -101,6 +101,14 @@ module.exports = function (db, http)
 		))
 	})
 
+	investors.express.post('/cash', authRequired, (rq, rs) =>
+	{
+		var data = pick(rq.body, 'type', 'cash', 'date')
+
+		// TODO
+		rs.end()
+	})
+
 	// admin required
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
