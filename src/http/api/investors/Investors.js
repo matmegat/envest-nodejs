@@ -106,8 +106,7 @@ module.exports = function (db, http)
 		var investor_id = rq.user.id
 		var data = pick(rq.body, 'type', 'cash', 'date')
 
-		toss(rs, investors.model.portfolio.manageCash
-		, investor_id, data)
+		toss(rs, investors.model.portfolio.manageCash(investor_id, data))
 	})
 
 	// admin required
