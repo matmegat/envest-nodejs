@@ -28,6 +28,8 @@ var Holdings  = require('./Holdings')
 
 var Symbl = require('../../symbols/Symbl')
 
+var validate = require('../../../validate')
+
 var Err = require('../../../../Err')
 
 module.exports = function Portfolio (db, investor)
@@ -686,6 +688,32 @@ module.exports = function Portfolio (db, investor)
 			})
 		})
 	}
+
+
+	var val_cash_ops = validate.collection([
+		'deposit',
+		'withdraw',
+		'fee',
+		'interest'
+	])
+
+	portfolio.manageCash = knexed.transact(knex, (trx, investor_id, op) =>
+	{
+		validate.required(op.type, 'type')
+		val_cash_ops(op.type) // 'type'
+
+		validate.required(op.cash, 'cash')
+		validate.number(op.cash, 'cash')
+
+		validate.required(op.date, 'date')
+		validate.date(op.date) // 'date'
+
+		return brokerage.update(investor_id, op.date,
+		{
+			operation: op.type,
+			amount:    op.cash
+		})
+	})
 
 	return portfolio
 }
