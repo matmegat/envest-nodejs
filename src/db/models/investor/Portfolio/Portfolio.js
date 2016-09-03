@@ -717,5 +717,25 @@ module.exports = function Portfolio (db, investor)
 		.then(noop)
 	})
 
+	var Emitter = db.notifications.Emitter
+
+	var CashManaged = Emitter('cash_managed')
+
+	portfolio.manageCashAs = knexed.transact(
+		knex,
+		(trx, whom_id, investor_id, data) =>
+	{
+		return brokerage.manageCash(trx, investor_id, data)
+		.then(() =>
+		{
+			return CashManaged(investor_id,
+			{
+				admin: [ ':user-id', whom_id ],
+				investor_id: [ ':user-id', investor_id ],
+			})
+		})
+		.then(noop)
+	})
+
 	return portfolio
 }
