@@ -725,7 +725,7 @@ module.exports = function Portfolio (db, investor)
 		knex,
 		(trx, whom_id, investor_id, data) =>
 	{
-		return brokerage.manageCash(trx, investor_id, data)
+		return portfolio.manageCash(trx, investor_id, data)
 		.then(() =>
 		{
 			return CashManaged(investor_id,
