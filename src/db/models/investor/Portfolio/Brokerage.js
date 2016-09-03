@@ -214,7 +214,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var NotActualBrokerage = Err('not_actual_brokerage',
 		'More actual brokerage already exist')
 
-	brokerage.initOrSet = knexed.transact(knex,
+	brokerage.set = knexed.transact(knex,
 	(trx, investor_id, cash, timestamp) =>
 	{
 		var init_brokerage = () =>
@@ -236,7 +236,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			/* validate update keys */
 			validate.required(cash, 'cash')
 			validate.number(cash, 'cash')
 
@@ -256,32 +255,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return init_brokerage()
 			}
 			else
-			{	// works as upsert
+			{
 				return put(trx, investor_id, cash, timestamp, { override: true })
 			}
-		})
-	})
-
-
-	// set
-	brokerage.set = knexed.transact(knex, (trx, investor_id, cash, timestamp) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			/* validate update keys */
-			validate.required(cash, 'cash')
-			validate.number(cash, 'cash')
-
-			if (cash < 0)
-			{
-				throw InvalidAmount({ field: 'cash' })
-			}
-
-			validate.required(timestamp, 'timestamp')
-			validate.date(timestamp, 'timestamp')
-
-			return put(trx, investor_id, cash, timestamp)
 		})
 	})
 
