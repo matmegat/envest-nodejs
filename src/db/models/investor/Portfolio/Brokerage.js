@@ -369,6 +369,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 		var operation = data.operation
 		var amount = data.amount
 
+		// TODO should `trade` trigger recalculate?
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
