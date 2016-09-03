@@ -283,6 +283,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			[
 				brokerage.byId(trx, investor_id, timestamp),
 				portfolio.holdings.byId(trx, investor_id, timestamp),
+				portfolio.holdings.byId(investor_id, timestamp),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
@@ -292,20 +293,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 			var multiplier = values[0].multiplier
 
 			var holdings = values[1]
+			var old_holdings = values[2]
 
-			var is_exact = values[2]
+			var is_exact = values[3]
 
-			var real_allocation
-			 = new_cash
-			 + sumBy(holdings, h => h.amount * h.price)
-
-			// index_amount_cap ? TODO
-			var new_multiplier = (index_amount_cap / real_allocation)
-
-			if ((cash === new_cash) && (multiplier === new_multiplier))
+			if (options.recalculate)
 			{
-				console.warn('CASH recalculate to the same values')
-				return
+				var current_allocation
+				 = cash * multiplier
+				 + sumBy(old_holdings, h => h.amount * h.price) * multiplier
+
+				var real_allocation
+				 = new_cash
+				 + sumBy(holdings, h => h.amount * h.price)
+
+				multiplier = (current_allocation / real_allocation)
 			}
 
 			var batch =
@@ -313,7 +315,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				investor_id: investor_id,
 
 				cash: new_cash,
-				multiplier: new_multiplier
+				multiplier: multiplier
 			}
 
 			if (timestamp)
@@ -326,7 +328,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				return table(trx)
 				.where('investor_id', investor_id)
 				.where('timestamp', timestamp)
-				.update(pick(batch, [ 'cash', 'multiplier' ]))
+				.update(pick(batch, 'cash', 'multiplier'))
 			}
 			else
 			{
@@ -352,7 +354,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// cash -> new_cash,
 			// recalculate because of holdings changed
 
-			return put(trx, investor_id, cash, timestamp, { override: true })
+			return put(
+			trx,
+			investor_id,
+			cash,
+			timestamp,
+			{
+				override: true,
+				recalculate: true
+			})
 		})
 	})
 
@@ -369,8 +379,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		var operation = data.operation
 		var amount = data.amount
 
-		// TODO should `trade` trigger recalculate?
-
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -378,6 +386,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(brokerage =>
 		{
+			var options = {}
+			if (operation === 'deposit' || operation === 'withdraw')
+			{
+				options.recalculate = true
+			}
+
 			if (operation in valid_operations)
 			{
 				valid_operations[operation](amount, brokerage)
@@ -389,7 +403,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var cash = amount + brokerage.cash
 
-			return put(trx, investor_id, cash, date)
+			return put(trx, investor_id, cash, date, options)
 		})
 	})
 

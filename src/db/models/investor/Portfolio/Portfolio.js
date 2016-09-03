@@ -10,6 +10,7 @@ var forOwn = require('lodash/forOwn')
 var round = require('lodash/round')
 var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
+var noop = require('lodash/noop')
 
 var find = require('lodash/find')
 var findLast = require('lodash/findLast')
@@ -718,11 +719,12 @@ module.exports = function Portfolio (db, investor)
 		validate.required(op.date, 'date')
 		validate.date(op.date) // 'date'
 
-		return brokerage.update(investor_id, op.date,
+		return brokerage.update(trx, investor_id, op.date,
 		{
 			operation: op.type,
 			amount:    op.cash
 		})
+		.then(noop)
 	})
 
 	return portfolio
