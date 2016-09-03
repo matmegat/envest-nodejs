@@ -103,10 +103,11 @@ module.exports = function (db, http)
 
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
+		var investor_id = rq.user.id
 		var data = pick(rq.body, 'type', 'cash', 'date')
 
-		// TODO
-		rs.end()
+		toss(rs, investors.model.portfolio.manageCash
+		, investor_id, data)
 	})
 
 	// admin required
