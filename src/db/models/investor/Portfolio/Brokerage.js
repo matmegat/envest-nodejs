@@ -214,7 +214,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var NotActualBrokerage = Err('not_actual_brokerage',
 		'More actual brokerage already exist')
 
-	brokerage.initOrSet = knexed.transact(knex,
+	brokerage.set = knexed.transact(knex,
 	(trx, investor_id, cash, timestamp) =>
 	{
 		var init_brokerage = () =>
@@ -236,7 +236,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			/* validate update keys */
 			validate.required(cash, 'cash')
 			validate.number(cash, 'cash')
 
@@ -248,84 +247,17 @@ module.exports = function Brokerage (db, investor, portfolio)
 			validate.required(timestamp, 'timestamp')
 			validate.date(timestamp, 'timestamp')
 		})
-		.then(() =>
+		.then(() => brokerage.isExist(trx, investor_id))
+		.then(is_exist =>
 		{
-			return Promise.all(
-			[
-				brokerage.isExist(trx, investor_id),
-				brokerage.isExact(trx, investor_id, timestamp),
-				brokerage.isDateAvail(trx, investor_id, timestamp)
-			])
-		})
-		.then(so =>
-		{
-			var is_exist = so[0]
-			var is_exact = so[1]
-			var is_avail = so[2]
-
 			if (! is_exist)
 			{
 				return init_brokerage()
 			}
-
-			if (! is_avail)
-			{
-				throw NotActualBrokerage()
-			}
-
-			if (! is_exact)
-			{
-				return brokerage.set(trx, investor_id, cash, timestamp)
-			}
 			else
 			{
-				// TODO .quotes ?
-				// rewrite to `put` ?
-				return portfolio.holdings.byId(trx, investor_id)
-				.then(holdings =>
-				{
-					var real_allocation
-						= cash
-						+ sumBy(holdings, h => h.amount * h.price)
-
-					var multiplier = (index_amount_cap / real_allocation)
-
-					return table(trx)
-					.where(
-					{
-						investor_id: investor_id,
-						timestamp: timestamp
-					})
-					.update(
-					{
-						cash: cash,
-						multiplier: multiplier
-					})
-				})
+				return put(trx, investor_id, cash, timestamp, { override: true })
 			}
-		})
-	})
-
-
-	// set
-	brokerage.set = knexed.transact(knex, (trx, investor_id, cash, timestamp) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			/* validate update keys */
-			validate.required(cash, 'cash')
-			validate.number(cash, 'cash')
-
-			if (cash < 0)
-			{
-				throw InvalidAmount({ field: 'cash' })
-			}
-
-			validate.required(timestamp, 'timestamp')
-			validate.date(timestamp, 'timestamp')
-
-			return put(trx, investor_id, cash, timestamp)
 		})
 	})
 
@@ -436,6 +368,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 		 * */
 		var operation = data.operation
 		var amount = data.amount
+
+		// TODO should `trade` trigger recalculate?
 
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>

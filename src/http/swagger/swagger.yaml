@@ -107,6 +107,9 @@ paths:
   '/investors/{investor_id}/field':
     $ref: ../api/investors/swag/Field.yaml
 
+  '/investors/cash':
+    $ref: ../api/investors/swag/Cash.yaml
+
   '/investors/{investor_id}/go-public':
     $ref: ../api/investors/swag/Post-GoPublic.yaml
 

@@ -477,8 +477,7 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage
-			.initOrSet(investor_id, value.amount, value.date)
+			return portfolio.brokerage.set(investor_id, value.amount, value.date)
 		},
 		verify: (value) =>
 		{
