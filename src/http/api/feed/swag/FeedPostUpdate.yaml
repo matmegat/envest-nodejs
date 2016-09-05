@@ -30,7 +30,7 @@ post:
               enum:
               - low
               - medium
-              - hign
+              - high
             motivations:
               type: array
               items:
