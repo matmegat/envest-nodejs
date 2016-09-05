@@ -178,7 +178,7 @@ module.exports = function Update (db)
 			validate.empty(chart.series.period, 'chart.series.period')
 
 			validate.array(chart.series.points, 'chart.series.points')
-			points_length(chart.series.points, 'chart.series.points')
+			val_points_length(chart.series.points, 'chart.series.points')
 			chart.series.points.forEach(validate_point)
 
 			return Symbl.validate(chart.symbol)
@@ -190,7 +190,7 @@ module.exports = function Update (db)
 		}
 	}
 
-	var points_length = validate.length(Infinity, 1)
+	var val_points_length = validate.length(Infinity, 1)
 
 	function validate_point (point, i)
 	{
