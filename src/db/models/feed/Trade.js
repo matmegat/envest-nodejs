@@ -134,7 +134,7 @@ function validate_trade (data)
 
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
-		validate_risk(data_update.risk)
+		validate_risk(data.risk)
 
 		validate.required(data.motivations, 'motivations')
 		validate.empty(data.motivations, 'motivations')
