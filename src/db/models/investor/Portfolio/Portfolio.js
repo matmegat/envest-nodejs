@@ -450,6 +450,7 @@ module.exports = function Portfolio (db, investor)
 	function range_correct_day (range, superseries, resolution)
 	{
 		if (resolution !== 'intraday') { return range }
+		if (! superseries.length) { return range }
 
 		var day = moment(range.end).startOf('day')
 		var r
@@ -489,6 +490,7 @@ module.exports = function Portfolio (db, investor)
 	function find_market_open (range, superseries, resolution)
 	{
 		if (resolution !== 'intraday') { return range }
+		if (! superseries.length) { return range }
 
 		superseries = values(superseries)
 		superseries = flatten(superseries)
