@@ -56,6 +56,8 @@ module.exports = function Trade (portfolio, symbols, feed)
 	})
 }
 
+var validate_risk = validate.collection([ 'low', 'medium', 'high' ])
+
 function validate_trade_adds (data)
 {
 	var data_update = _.pick(data,
@@ -79,9 +81,17 @@ function validate_trade_adds (data)
 	{
 		validate.forbidden(data_restricted)
 
-		validate.empty(data_update.text, 'text')
+		if (data_update.text)
+		{
+			validate.empty(data_update.text, 'text')
+			validate.string(data_update.text, 'text')
+		}
 
-		validate.empty(data_update.risk, 'risk')
+		if (data_update.risk)
+		{
+			validate.empty(data_update.risk, 'risk')
+			validate_risk(data_update.risk)
+		}
 
 		data_update.motivations && validate.motivation(data_update.motivations)
 
@@ -111,6 +121,7 @@ function validate_trade (data)
 
 		validate.required(data.text, 'text')
 		validate.empty(data.text, 'text')
+		validate.string(data.text, 'text')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
@@ -123,6 +134,7 @@ function validate_trade (data)
 
 		validate.required(data.risk, 'risk')
 		validate.empty(data.risk, 'risk')
+		validate_risk(data_update.risk)
 
 		validate.required(data.motivations, 'motivations')
 		validate.empty(data.motivations, 'motivations')
