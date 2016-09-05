@@ -11,9 +11,13 @@ var Symbl = require('../symbols/Symbl')
 var PostPicNotFound = Err('post_pic_not_found',
 	'No corresponding picture for this hash')
 
+var AmbiguousAttach = Err('ambiguous_attach',
+	'Its not possible to attach both picture and chart')
+
 module.exports = function Update (db)
 {
 	var validate_symbols_length = validate.length(6, 1)
+	var val_points_length = validate.length(Infinity, 1)
 
 	return Type(
 	{
@@ -135,6 +139,15 @@ module.exports = function Update (db)
 
 			rs(data)
 		})
+		.then(data =>
+		{
+			if (data.pic && data.chart)
+			{
+				throw AmbiguousAttach()
+			}
+
+			return data
+		})
 		.then(validate_pic_exists)
 		.then(validate_chart)
 	}
@@ -189,8 +202,6 @@ module.exports = function Update (db)
 			return data
 		}
 	}
-
-	var val_points_length = validate.length(Infinity, 1)
 
 	function validate_point (point, i)
 	{
