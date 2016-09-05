@@ -325,9 +325,9 @@ module.exports = function Holdings (db, investor, portfolio)
 				{
 					return put(trx, investor_id, symbol, data)
 				}
-
-				if (is_exact)
+				else
 				{
+					// TODO mv to put (override: true)
 					return table(trx)
 					.where('investor_id', investor_id)
 					.where(symbol.toDb())
