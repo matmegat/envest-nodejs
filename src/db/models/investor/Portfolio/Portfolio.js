@@ -275,7 +275,7 @@ module.exports = function Portfolio (db, investor)
 
 			return [
 				{ period: 'y2', points: y2 },
-				{ period: 'today', utc_offset: utc_offset, points: intraday }
+				{ period: 'today', utcOffset: utc_offset, points: intraday }
 			]
 		})
 	})
