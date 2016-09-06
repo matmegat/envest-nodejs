@@ -299,11 +299,19 @@ var Feed = module.exports = function Feed (db)
 
 	feed.postByInvestor = function (trx, id, investor_id)
 	{
-		return feed.feed_table(trx)
-		.where(
+		return feed.validateFeedId(id)
+		.then(() =>
 		{
-			investor_id: investor_id,
-			id: id
+			return investor.all.ensure(investor_id, trx)
+		})
+		.then(() =>
+		{
+			return feed.feed_table(trx)
+			.where(
+			{
+				investor_id: investor_id,
+				id: id
+			})
 		})
 		.then(oneMaybe)
 	}
