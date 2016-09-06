@@ -71,12 +71,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 					var holding = holdings[i]
 
-					holding.symbol = Symbl(
-					[
-						holding.symbol_ticker,
-						holding.symbol_exchange
-					])
-					.toFull()
+					holding.symbol = quote.symbol
 
 					holding.price = quote.price
 					holding.gain = quote.gain
