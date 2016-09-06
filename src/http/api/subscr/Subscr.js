@@ -9,49 +9,14 @@ module.exports = function Subscr (subscr_model)
 	subscr.model = subscr_model
 	subscr.express = Router()
 
-	/*
-	how to use:
-	db.user.byId(user_id)
-	.then(user =>
-	{
-		user.created_at // is what you need
-	})
-
-	then you can use moment(this_date).add(1, 'month') or .add(30, 'days')
-	to get trial_end
-
-	TODO move it to model
-	*/
-
 	subscr.express.post('/activate', (rq, rs) =>
 	{
-		var trial_end = 1473014984 // this should be set with actual value
-		subscr.model.stripe.customers.create(
-			{
-				source: rq.body.stripe_token,
-				plan: rq.body.plan,
-				coupon: rq.body.coupon,
-				trial_end: trial_end
-			},
-			(err, customer) =>
-			{
-				if (err)
-				{
-					return toss.err(rs, err)
-				}
-
-				var subscription = customer.subscriptions.data[0]
-				var subscription_data =
-				{
-					user_id: rq.user.id,
-					type: rq.body.plan,
-					stripe_customer_id: customer.id,
-					stripe_subscriber_id: subscription.id
-				}
-
-				toss(rs, subscr.model.addSubscription(subscription_data))
-			}
-		)
+		var subscription_data = {
+			source: rq.body.stripe_token,
+			plan: rq.body.plan,
+			coupon: rq.body.coupon
+		}
+		toss(rs, subscr.model.addSubscription(rq.user.id, subscription_data))
 	})
 
 	subscr.express.get('/', (rq, rs) =>
@@ -96,6 +61,27 @@ module.exports = function Subscr (subscr_model)
 			)
 		})
 		.catch(toss.err(rs))
+	})
+
+	subscr.express.post('/listen', (rq, rs) =>
+	{
+		subscr.model.stripe.events.retrieve(
+			rq.body.event_id,
+			(err, event) =>
+			{
+				if (err)
+				{
+					return toss.err(rs, err)
+				}
+
+				if (event.type === 'invoice.payment_succeeded')
+				{
+					var next_period_end = event.data.object.lines.data[0].period.end
+					var subscription_id = event.data.object.subscription
+					toss(rs, subscr.model.extendSubscription(subscription_id, next_period_end))
+				}
+			}
+		)
 	})
 
 	return subscr
