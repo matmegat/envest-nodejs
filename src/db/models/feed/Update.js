@@ -97,7 +97,7 @@ module.exports = function Update (db)
 
 			validate.empty(data.title, 'title')
 
-			if (data.symbols)
+			if ('symbols' in data)
 			{
 				validate.empty(data.symbols, 'symbols')
 				validate.array(data.symbols, 'symbols')

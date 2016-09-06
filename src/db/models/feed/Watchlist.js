@@ -82,13 +82,16 @@ module.exports = function Watchlist (db)
 		{
 			validate.forbidden(data_restricted)
 
-			if (data_update.text)
+			if ('text' in data_update)
 			{
 				validate.empty(data_update.text, 'text')
 				validate.string(data.text, 'text')
 			}
 
-			data_update.motivations && validate.motivation(data_update.motivations)
+			if ('motivations' in data_update)
+			{
+				validate.motivation(data_update.motivations)
+			}
 
 			rs(data_update)
 		})
