@@ -142,21 +142,14 @@ module.exports = function Post (db)
 		})
 	}
 
-	var PostToDeleteNotFound =
-		Err('post_to_delete_not_found', 'Post To Delete Not Found')
-
 	post.remove = function (investor_id, post_id, whom_id, soft_mode)
 	{
 		return knex.transaction(function (trx)
 		{
 			return db.feed.postByInvestor(trx, post_id, investor_id)
+			.then(Err.nullish(db.feed.NotFound))
 			.then(res =>
 			{
-				if (! res)
-				{
-					throw PostToDeleteNotFound()
-				}
-
 				if (! soft_mode)
 				{
 					var post_type = post.types[res.type]
