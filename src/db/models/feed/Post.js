@@ -30,16 +30,16 @@ module.exports = function Post (db)
 
 	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
-		if (! (type in post.types))
-		{
-			throw WrongPostType({ type: type })
-		}
-
-		var post_type = post.types[type]
-
-		return Promise.resolve()
+		return db.investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
+			if (! (type in post.types))
+			{
+				throw WrongPostType({ type: type })
+			}
+
+			var post_type = post.types[type]
+
 			if (post_id)
 			{
 				return post_type.update(trx, investor_id, type, date, data, post_id)
