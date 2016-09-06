@@ -41,7 +41,7 @@ module.exports = function Update (db)
 				return data
 			})
 		},
-		update: (trx, investor_id, type, date, data, post_id) =>
+		update: (trx, investor_id, type, date, data) =>
 		{
 			return Promise.resolve()
 			.then(() =>
@@ -65,11 +65,7 @@ module.exports = function Update (db)
 			})
 			.then(() =>
 			{
-				return db.feed.postByInvestor(trx, post_id, investor_id)
-			})
-			.then(item =>
-			{
-				return _.assign({}, item.data, data)
+				return data
 			})
 		},
 		remove: () =>

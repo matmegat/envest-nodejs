@@ -47,13 +47,9 @@ module.exports = function Watchlist (db)
 				return data
 			})
 		},
-		update: (trx, investor_id, type, date, data, post_id) =>
+		update: (trx, investor_id, type, date, data) =>
 		{
-			return db.feed.postByInvestor(trx, post_id, investor_id)
-			.then(item =>
-			{
-				return _.assign({}, item.data, data)
-			})
+			return Promise.resolve(data)
 		},
 		remove: () =>
 		{

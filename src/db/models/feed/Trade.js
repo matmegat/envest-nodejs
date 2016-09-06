@@ -5,7 +5,7 @@ var _ = require('lodash')
 
 var validate = require('../../validate')
 
-module.exports = function Trade (portfolio, symbols, feed)
+module.exports = function Trade (portfolio, symbols)
 {
 	return Type(
 	{
@@ -31,13 +31,9 @@ module.exports = function Trade (portfolio, symbols, feed)
 				return data
 			})
 		},
-		update: (trx, investor_id, type, date, data, post_id) =>
+		update: (trx, investor_id, type, date, data) =>
 		{
-			return feed.postByInvestor(trx, post_id, investor_id)
-			.then(item =>
-			{
-				return _.assign({}, item.data, data)
-			})
+			return Promise.resolve(data)
 		},
 		remove: (trx, post) =>
 		{

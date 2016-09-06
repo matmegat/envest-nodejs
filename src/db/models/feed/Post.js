@@ -1,4 +1,6 @@
 
+var extend = require('lodash/extend')
+
 var validate = require('../../validate')
 
 var Err = require('../../../Err')
@@ -42,7 +44,16 @@ module.exports = function Post (db)
 
 			if (post_id)
 			{
-				return post_type.update(trx, investor_id, type, date, data, post_id)
+				return db.feed.postByInvestor(trx, post_id, investor_id)
+				.then(Err.nullish(db.feed.NotFound))
+				.then(prev_data =>
+				{
+					return post_type.update(trx, investor_id, type, date, data, post_id)
+					.then(data =>
+					{
+						return extend({}, prev_data, data)
+					})
+				})
 			}
 			else
 			{
