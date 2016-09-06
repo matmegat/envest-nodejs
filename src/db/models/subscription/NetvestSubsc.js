@@ -1,11 +1,10 @@
 
+var expect = require('chai').expect
+var moment = require('moment')
+
 var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
-
-var expect = require('chai').expect
-var moment = require('moment')
-var User = require('../User')
 
 module.exports = function NetvestSubsc (db, cfg)
 {
@@ -28,7 +27,15 @@ module.exports = function NetvestSubsc (db, cfg)
 		.then(user =>
 		{
 			var billing_start = moment(user.created_at).add(1, 'month')
-			subscription_data.trial_end = moment().isBefore(billing_start) ? parseInt(billing_start.valueOf() / 1000) : 'now'
+
+			if (moment().isBefore(billing_start))
+			{
+				subscription_data.trial_end = billing_start / 1000
+			}
+			else
+			{
+				subscription_data.trial_end = 'now'
+			}
 
 			return netvest_subscr.stripe.customers.create(
 				subscription_data,
@@ -46,7 +53,8 @@ module.exports = function NetvestSubsc (db, cfg)
 						type: subscription_data.plan,
 						stripe_customer_id: customer.id,
 						stripe_subscriber_id: subscription.id,
-						end_time: moment(subscription.current_period_end * 1000).format('YYYY-MM-DD HH:mm:ss Z')
+						end_time: moment(subscription.current_period_end * 1000)
+						.format('YYYY-MM-DD HH:mm:ss Z')
 					}
 
 					return netvest_subscr.table()

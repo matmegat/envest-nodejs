@@ -67,21 +67,22 @@ module.exports = function Subscr (subscr_model)
 	{
 		subscr.model.stripe.events.retrieve(
 			rq.body.event_id,
-			(err, event) =>
+		(err, event) =>
+		{
+			if (err)
 			{
-				if (err)
-				{
-					return toss.err(rs, err)
-				}
-
-				if (event.type === 'invoice.payment_succeeded')
-				{
-					var next_period_end = event.data.object.lines.data[0].period.end
-					var subscription_id = event.data.object.subscription
-					toss(rs, subscr.model.extendSubscription(subscription_id, next_period_end))
-				}
+				return toss.err(rs, err)
 			}
-		)
+
+			if (event.type === 'invoice.payment_succeeded')
+			{
+				var next_period_end = event.data.object.lines.data[0].period.end
+				var subscription_id = event.data.object.subscription
+
+				toss(rs, subscr.model
+					.extendSubscription(subscription_id, next_period_end))
+			}
+		})
 	})
 
 	return subscr
