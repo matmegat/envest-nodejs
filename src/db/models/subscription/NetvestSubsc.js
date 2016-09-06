@@ -7,7 +7,7 @@ var expect = require('chai').expect
 var moment = require('moment')
 var User = require('../User')
 
-module.exports = function NetvestSubsc (db, app, cfg)
+module.exports = function NetvestSubsc (db, cfg)
 {
 	var netvest_subscr = {}
 
@@ -20,12 +20,11 @@ module.exports = function NetvestSubsc (db, app, cfg)
 
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
-	netvest_subscr.user = User(db, app)
 
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
 
-		return netvest_subscr.user.byId(user_id)
+		return db.user.byId(user_id)
 		.then(user =>
 		{
 			var billing_start = moment(user.created_at).add(1, 'month')
