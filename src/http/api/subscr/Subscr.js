@@ -1,6 +1,7 @@
 
 var Router = require('express').Router
 var toss = require('../../toss')
+var authRequired = require('../../auth-required')
 
 module.exports = function Subscr (subscr_model)
 {
@@ -9,7 +10,7 @@ module.exports = function Subscr (subscr_model)
 	subscr.model = subscr_model
 	subscr.express = Router()
 
-	subscr.express.post('/activate', (rq, rs) =>
+	subscr.express.post('/activate', authRequired, (rq, rs) =>
 	{
 		var subscription_data = {
 			source: rq.body.stripe_token,
@@ -19,7 +20,7 @@ module.exports = function Subscr (subscr_model)
 		toss(rs, subscr.model.addSubscription(rq.user.id, subscription_data))
 	})
 
-	subscr.express.get('/', (rq, rs) =>
+	subscr.express.get('/', authRequired, (rq, rs) =>
 	{
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
@@ -42,7 +43,7 @@ module.exports = function Subscr (subscr_model)
 		.catch(toss.err(rs))
 	})
 
-	subscr.express.post('/deactivate', (rq, rs) =>
+	subscr.express.post('/deactivate', authRequired, (rq, rs) =>
 	{
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
