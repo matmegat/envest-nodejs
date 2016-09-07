@@ -1,5 +1,5 @@
 post:
-  description: Activated subscription
+  description: Subscribes the current user to stripe plan
   parameters:
   - name: payload
     in: body
@@ -12,15 +12,15 @@ post:
         plan:
           type: string
           description: Subscription plan
-        token:
+        stripe_token:
           type: string
-          description: Stripe token for customer subscription
+          description: Stripe token generated on front-end
         coupon:
           type: string
           description: Promotion code for subscription
       required:
       - plan
-      - token
+      - stripe_token
   responses:
     200:
       description: Subscription successfully created

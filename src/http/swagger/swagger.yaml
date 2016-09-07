@@ -143,8 +143,14 @@ paths:
   '/password/change':
     $ref: ../api/password/swag/Change.yaml
 
+  '/subscr/':
+    $ref: ../api/subscr/swag/Get.yaml
+
   '/subscr/activate':
     $ref: ../api/subscr/swag/Activate.yaml
+
+  '/subscr/deactivate':
+    $ref: ../api/subscr/swag/Deactivate.yaml
 
   '/promo/activate':
     $ref: ../api/promo/swag/Activate.yaml

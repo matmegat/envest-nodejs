@@ -1,0 +1,13 @@
+post:
+  description: Cancels user's current membership
+  responses:
+    200:
+      description: Subscription successfully cancelled
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - subscription
