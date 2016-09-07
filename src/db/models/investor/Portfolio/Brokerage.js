@@ -10,6 +10,8 @@ var knexed = require('../../../knexed')
 var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
+var moment = require('moment')
+
 module.exports = function Brokerage (db, investor, portfolio)
 {
 	var brokerage = {}
@@ -270,6 +272,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 		expect(new_cash).a('number')
 
 		options || (options = {})
+
+		if (timestamp)
+		{
+			timestamp = moment.utc(timestamp).format()
+		}
+		else
+		{
+			timestamp = moment.utc().format()
+		}
 
 		return brokerage.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
