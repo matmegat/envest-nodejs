@@ -83,7 +83,7 @@ function validate_trade_adds (data)
 			validate.string(data_update.text, 'text')
 		}
 
-		if ('risk', data_update)
+		if ('risk' in data_update)
 		{
 			validate.empty(data_update.risk, 'risk')
 			validate_risk(data_update.risk)
