@@ -17,6 +17,10 @@ module.exports = function Subscr (subscr_model)
 			plan: rq.body.plan,
 			coupon: rq.body.coupon
 		}
+		if (!subscription_data.coupon || subscription_data.coupon === '')
+		{
+			delete subscription_data.coupon
+		}
 		toss(rs, subscr.model.addSubscription(rq.user.id, subscription_data))
 	})
 
