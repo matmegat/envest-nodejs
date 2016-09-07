@@ -17,7 +17,7 @@ module.exports = function Subscr (subscr_model)
 			plan: rq.body.plan,
 			coupon: rq.body.coupon
 		}
-		if (!subscription_data.coupon || subscription_data.coupon === '')
+		if (! subscription_data.coupon)
 		{
 			delete subscription_data.coupon
 		}
@@ -72,22 +72,23 @@ module.exports = function Subscr (subscr_model)
 	{
 		subscr.model.stripe.events.retrieve(
 			rq.body.event_id,
-		(err, event) =>
-		{
-			if (err)
+			(err, event) =>
 			{
-				return toss.err(rs, err)
-			}
+				if (err)
+				{
+					return toss.err(rs, err)
+				}
 
-			if (event.type === 'invoice.payment_succeeded')
-			{
-				var next_period_end = event.data.object.lines.data[0].period.end
-				var subscription_id = event.data.object.subscription
+				if (event.type === 'invoice.payment_succeeded')
+				{
+					var next_period_end = event.data.object.lines.data[0].period.end
+					var subscription_id = event.data.object.subscription
 
-				toss(rs, subscr.model
-					.extendSubscription(subscription_id, next_period_end))
+					toss(rs, subscr.model
+						.extendSubscription(subscription_id, next_period_end))
+				}
 			}
-		})
+		)
 	})
 
 	return subscr
