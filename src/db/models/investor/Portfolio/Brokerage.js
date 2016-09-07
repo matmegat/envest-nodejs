@@ -222,6 +222,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		var init_brokerage = () =>
 		{
 			cash = cash || index_amount_cap
+			timestamp = moment.utc(timestamp).format()
 
 			var multiplier = index_amount_cap / cash
 
