@@ -358,11 +358,12 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				validate.required(holding.date, `holdings[${i}].date`)
 				validate.date(holding.date, `holdings[${i}].date`)
-				if (moment.utc(holding.date) > moment.utc())
+				holding.date = moment.utc(holding.date)
+				if (holding.date > moment.utc())
 				{
 					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
 				}
-				holding.timestamp = holding.date
+				holding.timestamp = holding.date.format()
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
@@ -381,17 +382,19 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(() =>
 		{
 			// choose latest timestamp
-			var timestamp = moment.utc(holding_entries[0].timestamp)
-			holding_entries.forEach((holding) =>
+			var index = 0
+			var timestamp = holding_entries[index].date
+			holding_entries.forEach((holding, i) =>
 			{
-				if (moment.utc(holding.timestamp) > timestamp)
+				if (holding.date > timestamp)
 				{
-					timestamp = moment.utc(holding.timestamp)
+					timestamp = holding.date
+					index = i
 				}
 			})
 
 			return portfolio.brokerage
-			.recalculate(trx, investor_id, timestamp.format())
+			.recalculate(trx, investor_id, holding_entries[index].timestamp)
 		})
 	})
 
