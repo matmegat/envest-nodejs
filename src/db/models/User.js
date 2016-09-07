@@ -76,6 +76,7 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'pic',
+				'created_at',
 				knex.raw(
 					'COALESCE(users.email, email_confirms.new_email) AS email')
 			)

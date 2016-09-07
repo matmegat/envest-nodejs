@@ -1,5 +1,5 @@
 post:
-  description: Activated subscription
+  description: Subscribes the current user to stripe plan
   parameters:
   - name: payload
     in: body
@@ -9,22 +9,18 @@ post:
       type: object
       title: Subscription Payload
       properties:
-        type:
+        plan:
           type: string
-          description: Subscription type
-        user_id:
-          type: integer
-          description: User Id
-        days:
-          type: integer
-          description: Number of subscription days (if null is used default)
-        token:
+          description: Subscription plan
+        stripe_token:
           type: string
-          description: Authorization token for activation
+          description: Stripe token generated on front-end
+        coupon:
+          type: string
+          description: Promotion code for subscription
       required:
-      - type
-      - user_id
-      - token
+      - plan
+      - stripe_token
   responses:
     200:
       description: Subscription successfully created
