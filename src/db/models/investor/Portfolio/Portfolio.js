@@ -45,7 +45,7 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
-	portfolio.byId = knexed.transact(knex, (trx, investor_id) =>
+	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
 		return investor.public.ensure(investor_id, trx)
 		.then(() =>
@@ -120,7 +120,7 @@ module.exports = function Portfolio (db, investor)
 				/* avg gain */
 				var gain = sumBy(holdings, 'gain') / total
 
-				return {
+				var resp = {
 					total:    total,
 					holdings: holdings,
 					full_portfolio:
@@ -129,6 +129,13 @@ module.exports = function Portfolio (db, investor)
 						gain:  gain
 					}
 				}
+
+				if (options.extended)
+				{
+					resp.brokerage = brokerage
+				}
+
+				return resp
 			})
 		})
 	})
@@ -217,45 +224,6 @@ module.exports = function Portfolio (db, investor)
 			})
 		})
 	})
-
-
-	portfolio.full = function (investor_id)
-	{
-		return investor.all.ensure(investor_id)
-		.then(() =>
-		{
-			return Promise.all([
-				brokerage.byId(investor_id),
-				 holdings.byId(investor_id)
-			])
-		})
-		.then((values) =>
-		{
-			var brokerage = values[0]
-			var holdings  = values[1]
-
-			holdings = holdings.map(holding =>
-			{
-				/* TODO rm */
-				holding.allocation
-				 = holding.amount * holding.price * brokerage.multiplier
-
-				holding.symbol =
-				{
-					ticker: holding.symbol_ticker,
-					exchange: holding.symbol_exchange,
-					company: null
-				}
-
-				return omit(holding, 'symbol_ticker', 'symbol_exchange')
-			})
-
-			return {
-				brokerage: brokerage,
-				holdings:  holdings
-			}
-		})
-	}
 
 
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>

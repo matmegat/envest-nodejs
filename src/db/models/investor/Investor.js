@@ -58,7 +58,7 @@ module.exports = function Investor (db)
 		.then(r =>
 		{
 			/* this info accessible for admin only */
-			return investor.portfolio.full(id)
+			return investor.portfolio.byId(id, { extended: true })
 			.then(full =>
 			{
 				return extend(r, full)
