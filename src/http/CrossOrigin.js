@@ -22,6 +22,15 @@ module.exports = function (cfg, express)
 			})
 		})
 
+		var methods =
+		[
+			'OPTIONS',
+			'GET',
+			'POST',
+			'PUT',
+			'DELETE'
+		]
+
 		allowed = flatten(allowed, 2)
 
 		express.use((rq, rs, next) =>
@@ -40,6 +49,7 @@ module.exports = function (cfg, express)
 				'Access-Control-Allow-Credentials'
 			)
 			rs.header('Access-Control-Allow-Credentials', 'true')
+			rs.header('Access-Control-Allow-Credentials', methods.join(', '))
 
 			return next()
 		})
