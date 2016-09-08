@@ -84,6 +84,7 @@ function validate_trade_adds (data)
 
 		if ('risk' in data_update)
 		{
+
 			validate.nullish(data_update.risk, 'risk')
 			validate.empty(data_update.risk, 'risk')
 			validate_risk(data_update.risk)
