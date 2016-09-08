@@ -119,7 +119,7 @@ Filter.by.date = curry((operator, column) =>
 		else
 		{
 			return queryset
-			.where(column, operator, date)
+			.where(column, operator, date.format())
 		}
 	}
 })

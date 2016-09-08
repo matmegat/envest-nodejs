@@ -13,6 +13,8 @@ var Err = require('../../../../Err')
 
 var Symbl = require('../../symbols/Symbl')
 
+var moment = require('moment')
+
 module.exports = function Holdings (db, investor, portfolio)
 {
 	var holdings = {}
@@ -45,6 +47,45 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 	})
 
+	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
+	{
+		return byId(trx, investor_id, for_date)
+		.then(holdings =>
+		{
+			var symbols = holdings.map(holding =>
+			{
+				return [ holding.symbol_ticker, holding.symbol_exchange ]
+			})
+
+			return db.symbols.quotes(symbols, for_date)
+			.then(quotes =>
+			{
+				return quotes.map((quote, i) =>
+				{
+					if (! quote.price)
+					{
+						throw new TypeError(
+							'Cannot recalculate Xignite Quotes failed'
+						)
+					}
+
+					var holding = holdings[i]
+
+					holding.symbol = quote.symbol
+
+					holding.price = quote.price
+					holding.gain = quote.gain
+					holding.currency = quote.currency
+
+					delete holding.symbol_ticker
+					delete holding.symbol_exchange
+
+					return holding
+				})
+			})
+		})
+	})
+
 
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
@@ -65,6 +106,45 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			return so
 		})
+	})
+
+	holdings.isDateAvail =
+		knexed.transact(knex, (trx, investor_id, for_date, symbol) =>
+	{
+		if (symbol)
+		{
+			symbol = Symbl(symbol)
+		}
+
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			var where = { investor_id: investor_id }
+			if (symbol)
+			{
+				extend(where, symbol.toDb())
+			}
+
+			return table(trx)
+			.where(where)
+			.andWhere('timestamp', '>', for_date)
+		})
+		.then(res =>
+		{
+			return ! res.length
+		})
+	})
+
+
+	holdings.isExact =
+		knexed.transact(knex, (trx, investor_id, symbol, timestamp) =>
+	{
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.where(symbol.toDb())
+		.then(oneMaybe)
+		.then(Boolean)
 	})
 
 
@@ -116,8 +196,10 @@ module.exports = function Holdings (db, investor, portfolio)
 	var first = require('lodash/head')
 	var last  = require('lodash/last')
 
-	holdings.grid = knexed.transact(knex, (trx, investor_id) =>
+	holdings.grid = knexed.transact(knex, (trx, investor_id, resolution) =>
 	{
+		resolution || (resolution = 'day')
+
 		return table(trx)
 		.select(
 			'timestamp',
@@ -136,7 +218,14 @@ module.exports = function Holdings (db, investor, portfolio)
 			var involved = new Set
 			var running  = {}
 
-			datadays = groupBy(datadays, it => it.day.toISOString())
+			if (resolution === 'day')
+			{
+				datadays = groupBy(datadays, it => it.day.toISOString())
+			}
+			else
+			{
+				datadays = groupBy(datadays, it => it.timestamp.toISOString())
+			}
 			datadays = toPairs(datadays)
 			datadays = orderBy(datadays, '0')
 
@@ -206,6 +295,8 @@ module.exports = function Holdings (db, investor, portfolio)
 	// set
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
+	var InvalidHoldingDate = Err('invalid_portfolio_date',
+		'Invalid date value for Portfolio Holdings')
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
@@ -230,28 +321,51 @@ module.exports = function Holdings (db, investor, portfolio)
 				{
 					throw InvalidAmount({ field: `holdings[${i}].price` })
 				}
+
+				validate.required(holding.date, `holdings[${i}].date`)
+				validate.date(holding.date, `holdings[${i}].date`)
+				holding.date = moment.utc(holding.date)
+				if (holding.date > moment.utc())
+				{
+					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
+				}
+				holding.timestamp = holding.date.format()
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
 		})
+		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
 			return Promise.all(symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
-				var data = pick(holding, 'amount', 'price')
+				var data = pick(holding, 'amount', 'price', 'timestamp')
 
-				return put(trx, investor_id, symbol, data)
+				return put(trx, investor_id, symbol, data, { override: true })
 			}))
 		})
 		.then(() =>
 		{
-			return portfolio.brokerage.recalculate(trx, investor_id)
+			// choose latest timestamp
+			var index = 0
+			var timestamp = holding_entries[index].date
+			holding_entries.forEach((holding, i) =>
+			{
+				if (holding.date > timestamp)
+				{
+					timestamp = holding.date
+					index = i
+				}
+			})
+
+			return portfolio.brokerage
+			.recalculate(trx, investor_id, holding_entries[index].timestamp)
 		})
 	})
 
 
-	function put (trx, investor_id, symbol, data)
+	function put (trx, investor_id, symbol, data, options)
 	{
 		expect(symbol).ok
 		expect(symbol.exchange).a('string')
@@ -261,6 +375,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		expect(data.amount).a('number')
 		expect(data.price).a('number')
 
+		options || (options = {})
+
 		data = pick(data,
 		[
 			'amount',
@@ -268,13 +384,50 @@ module.exports = function Holdings (db, investor, portfolio)
 			'timestamp'
 		])
 
-		var batch = extend(
-			{ investor_id: investor_id },
-			  symbol.toDb(),
-			  data
-		)
+		if (data.timestamp)
+		{
+			data.timestamp = moment.utc(data.timestamp).format()
+		}
+		else
+		{
+			data.timestamp = moment.utc().format()
+		}
 
-		return table(trx).insert(batch)
+		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
+		.then(is_avail =>
+		{
+			if (! is_avail)
+			{
+				throw  InvalidHoldingDate(
+				{
+					symbol: symbol.toXign(),
+					reason: 'More actual holding already exist'
+				})
+			}
+
+			return holdings.isExact(trx, investor_id, symbol, data.timestamp)
+		})
+		.then(is_exact =>
+		{
+			if (is_exact && options.override)
+			{
+				return table(trx)
+				.where('investor_id', investor_id)
+				.where(symbol.toDb())
+				.where('timestamp', data.timestamp)
+				.update(pick(data, 'amount', 'price'))
+			}
+			else
+			{
+				var batch = extend(
+					{ investor_id: investor_id },
+					symbol.toDb(),
+					data
+				)
+
+				return table(trx).insert(batch)
+			}
+		})
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
@@ -315,6 +468,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (holding)
 			{
+				price = ( holding.amount * holding.price + amount * price )
+				        / ( holding.amount + amount )
 				amount = holding.amount + amount
 			}
 
@@ -358,12 +513,12 @@ module.exports = function Holdings (db, investor, portfolio)
 				})
 			}
 
-			amount = amount - holding.amount
+			amount = holding.amount - amount
 
 			var data_put =
 			{
 				amount:    amount,
-				price:     price,
+				price:     holding.price,
 				timestamp: date
 			}
 

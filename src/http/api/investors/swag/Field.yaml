@@ -1,5 +1,5 @@
 post:
-  description: update Investor field while Onboarding following [Field Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Onboarding+Fields)
+  description: update Investor field while Onboarding following [Field Protocol](https://distillery.atlassian.net/wiki/display/NET/Onboarding+Fields)
   parameters:
   - name: investor_id
     in: path
@@ -30,7 +30,7 @@ post:
     400:
       description: |
         **Error object** which follows
-        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+        [Error Protocol](https://distillery.atlassian.net/wiki/display/NET/Errors)
 
       schema:
         $ref: ../../../swagger/Error.yaml

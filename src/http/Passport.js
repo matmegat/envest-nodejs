@@ -83,8 +83,8 @@ function useBearerToken (user)
 	}))
 }
 
-var clientID = 255696794812893
-var clientSecret = 'd94258d185cfd310fa7c1676ec6b9213'
+var clientID = 213309782384928
+var clientSecret = '7bb071d47fb514268d2d3e26edca4c57'
 
 function useFacebookToken (auth, user)
 {
@@ -103,7 +103,8 @@ function useFacebookToken (auth, user)
 			first_name: profile.name.givenName,
 			last_name: profile.name.familyName,
 			facebook_id: profile.id,
-			token: accessToken
+			token: accessToken,
+			is_manual: ! profile.emails[0].value && req.body.email
 		}
 
 		user.byFB(user_data)

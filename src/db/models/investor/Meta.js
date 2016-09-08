@@ -1,5 +1,8 @@
 
 var _ = require('lodash')
+var map = _.map
+var curry = _.curry
+
 var expect = require('chai').expect
 
 var helpers = require('../../helpers')
@@ -13,8 +16,10 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
-module.exports = function Meta (knexed_table, raw, options)
+module.exports = function Meta (investor, raw, options)
 {
+	var knexed_table = investor.table
+
 	expect(knexed_table, 'meta table relation').a('function')
 
 	options = _.extend({}, options)
@@ -71,6 +76,7 @@ module.exports = function Meta (knexed_table, raw, options)
 		'investors.profile_pic',
 		'investors.profession',
 		'investors.focus',
+		'investors.education',
 		'investors.background',
 		'investors.historical_returns',
 		raw(`
@@ -91,8 +97,8 @@ module.exports = function Meta (knexed_table, raw, options)
 			.innerJoin('users', 'investors.user_id', 'users.id')
 			.where('user_id', id)
 		})
+		.then(transform_investors(trx))
 		.then(helpers.oneMaybe)
-		.then(transform_investor)
 	}
 
 	meta.fullById = byId
@@ -145,11 +151,12 @@ module.exports = function Meta (knexed_table, raw, options)
 		}
 
 		return paginator.paginate(queryset, options.paginator)
+		.then(transform_investors(null))
 		.then((investors) =>
 		{
 			var response =
 			{
-				investors: investors.map(transform_investor)
+				investors: investors
 			}
 
 			return helpers.count(count_queryset)
@@ -160,30 +167,32 @@ module.exports = function Meta (knexed_table, raw, options)
 		})
 	}
 
-	function transform_investor (investor)
+	var transform_investors = curry((trx, investors) =>
 	{
-		investor.gain =
-		{
-			ytd:   _.random(1, 10),
-			today: _.random(1, 1000) / 100
-		}
+		var ids = map(investors, 'id')
 
-		return _.pick(investor,
-		[
-			'id',
-			'first_name',
-			'last_name',
-			'pic',
-			'profile_pic',
-			'profession',
-			'focus',
-			'background',
-			'historical_returns',
-			'gain',
-			'is_featured',
-			'is_public'
-		])
-	}
+		// ugly fix
+		if (trx)
+		{
+			var gains = map(ids, id => investor.portfolio.gain(trx, id))
+		}
+		else
+		{
+			var gains = map(ids, id => investor.portfolio.gain(id))
+		}
+		var gains = Promise.all(gains)
+
+		return gains
+		.then(gains =>
+		{
+			investors.forEach((investor, i) =>
+			{
+				investor.gain = gains[i]
+			})
+
+			return investors
+		})
+	})
 
 	return meta
 }

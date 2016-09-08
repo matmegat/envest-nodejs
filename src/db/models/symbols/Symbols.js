@@ -92,7 +92,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	symbols.quotes = (symbols) =>
+	symbols.quotes = (symbols, for_date) =>
 	{
 		expect(symbols).ok
 
@@ -100,7 +100,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 		symbols = symbols.map(Symbl)
 
-		return xign.quotes(invoke(symbols, 'toXign'))
+		return xign.quotes(invoke(symbols, 'toXign'), for_date)
 		.then(resl =>
 		{
 			return resl.map((r, i) =>
@@ -324,6 +324,11 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	symbols.seriesForPortfolio = (symbol, range) =>
 	{
 		return xign.seriesRange(symbol, range.start, range.end)
+	}
+
+	symbols.seriesForPortfolio.intraday = (symbol, range) =>
+	{
+		return xign.series.intraday(symbol, range.start, range.end)
 	}
 
 	return symbols

@@ -24,9 +24,9 @@ module.exports = function Featured (db, investor)
 	'new_featured_investor',
 	{ group: 'admins' })
 
-	var WrongInvestorId = investor.WrongInvestorId
+	var WrongInvestorId = investor.all.WrongInvestorId
 
-	var InvestorNotFound = investor.NotFound
+	var InvestorNotFound = investor.all.NotFound
 
 	featured.is = function (investor_id)
 	{
@@ -36,27 +36,38 @@ module.exports = function Featured (db, investor)
 		.then(Boolean)
 	}
 
-	featured.set = function (investor_id)
+	var InvestorIsNotPublic = Err('investor_is_not_public',
+		'No public investor cannot be featured.')
+
+	featured.set = knexed.transact(knex, (trx, investor_id) =>
 	{
 		var data = { investor_id: investor_id }
 
 		return validateId(WrongInvestorId, investor_id)
 		.then(() =>
 		{
-			return featured.table()
+			return investor.table(trx)
+			.where('user_id', investor_id)
+			.where('is_public', false)
+			.then(oneMaybe)
+		})
+		.then(Err.existent(InvestorIsNotPublic))
+		.then(() =>
+		{
+			return featured.table(trx)
 			.then(oneMaybe)
 		})
 		.then(item =>
 		{
 			if (item)
 			{
-				return featured.table()
+				return featured.table(trx)
 				.update(data)
 				.where('investor_id', item.investor_id)
 			}
 			else
 			{
-				return featured.table()
+				return featured.table(trx)
 				.insert(data)
 			}
 		})
@@ -71,7 +82,7 @@ module.exports = function Featured (db, investor)
 				investor: [ ':user-id', investor_id ]
 			})
 		})
-	}
+	})
 
 	var FeaturedInvestorNotFound = Err(
 		'featured_investor_not_found',

@@ -12,6 +12,9 @@ delete:
         post_id:
           type: integer
           description: Post id to delete
+        soft_mode:
+          type: boolean
+          description: If need to remove trade post without trade revert
       required:
       - post_id
   responses:

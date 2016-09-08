@@ -1,104 +1,119 @@
 
-var SubscrManager = require('./SubscrManager')
-var PromoCode    = require('./PromoCode')
+var expect = require('chai').expect
+var moment = require('moment')
 
 var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
 
-var expect = require('chai').expect
-
-var curry = require('lodash/curry')
-
 module.exports = function NetvestSubsc (db, cfg)
 {
+	var netvest_subscr = {}
+
 	var knex = db.knex
 
 	expect(db, 'Onboarding depends on Notifications').property('notifications')
-	var Emitter = db.notifications.Emitter
-	var SubscrEnterPromoA = Emitter('enter_promo', { group: 'admins' })
 
-	var OnlyOnceActivate = Err(
-	'only_once_activate',
-	'Subscription can be activated only once')
+	var NoSubscription = Err('no_subscription', 'No Subscription')
+	var StripeError = Err('stripe_error', 'Stripe API call failed')
 
-	var once_update = curry((type, user_id, subscr_table) =>
+	netvest_subscr.table = knexed(knex, 'subscriptions')
+	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
+
+	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
-		return by_user_id_type(user_id, type, subscr_table)
-		.then((items) =>
+
+		return db.user.byId(user_id)
+		.then(user =>
 		{
-			if (items.length > 1)
-			{
-				throw OnlyOnceActivate({ type: type })
-			}
-		})
-	})
+			var billing_start = moment(user.created_at).add(1, 'month')
 
-	function by_user_id_type (user_id, type, subscr_table)
-	{
-		return subscr_table()
-		.where('user_id', user_id)
-		.andWhere('type', type)
+			if (moment().isBefore(billing_start))
+			{
+				subscription_data.trial_end = billing_start / 1000
+			}
+			else
+			{
+				subscription_data.trial_end = 'now'
+			}
+
+			return netvest_subscr.stripe.customers.create(
+				subscription_data,
+				(err, customer) =>
+				{
+					if (err)
+					{
+						throw StripeError()
+					}
+
+					var subscription = customer.subscriptions.data[0]
+					var option =
+					{
+						user_id: user_id,
+						type: subscription_data.plan,
+						stripe_customer_id: customer.id,
+						stripe_subscriber_id: subscription.id,
+						end_time: moment(subscription.current_period_end * 1000)
+						.format('YYYY-MM-DD HH:mm:ss Z')
+					}
+
+					return netvest_subscr.table()
+					.insert(option, 'id')
+					.then(id =>
+					{
+						return id[0] > 0
+					})
+				}
+			)
+		})
 	}
 
-	var netvest_subscr  = SubscrManager(db,
+	netvest_subscr.getSubscription = (user_id) =>
 	{
-		premium:
+		return netvest_subscr.table()
+		.where('user_id', user_id)
+		.then(subscription =>
 		{
-			days: 30,
-			features: ['multiple_investors'],
-			fn: () => Promise.resolve()
-		},
-		trial:
-		{
-			days: 30,
-			features: ['multiple_investors'],
-			fn: once_update('trial')
-		}
-	})
-
-	netvest_subscr.promo = PromoCode(db)
-
-	netvest_subscr.promo.activate = knexed.transact(knex, (trx, code, user_id) =>
-	{
-		return netvest_subscr.promo.isValid(code, trx)
-		.then(item =>
-		{
-			return netvest_subscr.activate(user_id, item.type, null, trx)
-		})
-		.then(subscr =>
-		{
-			return netvest_subscr.promo.decrement(code, trx)
-			.then(() =>
+			if (subscription.length > 0)
 			{
-				return SubscrEnterPromoA(
-				{
-					user: [ ':user-id', user_id ],
-					code: code
-				})
-			})
-			.then(() =>
+				return subscription[0]
+			}
+			else
 			{
-				return subscr
-			})
+				throw NoSubscription()
+			}
 		})
-	})
+	}
 
-	var WrongToken = Err('wrong_subscr_token', 'Wrong subscription token')
-
-	netvest_subscr.buyActivation = function (option)
+	netvest_subscr.cancelSubscription = (user_id) =>
 	{
-		if (option.token === cfg.token)
+		return netvest_subscr.table()
+		.where('user_id', user_id)
+		.delete()
+		.then(result =>
 		{
-			return netvest_subscr.activate(
-			option.user_id,
-			option.type,
-			option.days)
-		}
-		else
+			return { success: result === 1 }
+		})
+	}
+
+	netvest_subscr.isAble = (user_id) =>
+	{
+		return netvest_subscr
+		.getSubscription(user_id)
+		.then(() => true, () => false)
+	}
+
+	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
+	{
+		return netvest_subscr.table()
+		.where('stripe_subscriber_id', subscription_id)
+		.update({
+			end_time: moment(next_period_end * 1000)
+		})
+		.then(result =>
 		{
-			throw WrongToken()
-		}
+			return { success: result === 1 }
+		})
 	}
 
 	return netvest_subscr

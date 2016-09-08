@@ -8,6 +8,7 @@ var CannotGoPublic = Err('cannot_go_public',
 var validate = require('../../validate')
 
 var _ = require('lodash')
+var moment = require('moment')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -17,6 +18,7 @@ module.exports = function Onboarding (db, investor)
 
 	onb.fields.profession = Profession(investor)
 	onb.fields.focus = Focus(investor)
+	onb.fields.education = Education(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
@@ -245,6 +247,40 @@ function Focus (investor)
 	})
 }
 
+var validateEduLength = validate.length(3)
+// eslint-disable-next-line id-length
+var validateEduItemLength = validate.length(250)
+
+function Education (investor)
+{
+	return Field(investor,
+	{
+		get: (queryset) =>
+		{
+			return queryset
+			.select('education')
+			.then(one)
+			.then(rs => rs.education)
+		},
+		validate: (value) =>
+		{
+			validate.array(value, 'education')
+			validateEduLength(value, 'education')
+			/* validate each element of array */
+			value.forEach((education_item, i) =>
+			{
+				validate.string(education_item, `education[${i}]`)
+				validate.empty(education_item, `education[${i}]`)
+				validateEduItemLength(education_item, `education[${i}]`)
+			})
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ education: JSON.stringify(value) })
+		}
+	})
+}
 
 var validateBackLength = validate.length(3000)
 
@@ -407,15 +443,32 @@ function Brokerage (investor_model, db)
 	{
 		get: (queryset, investor_id) =>
 		{
-			return db.investor.portfolio.brokerage.cashById(investor_id)
+			return db.investor.portfolio.brokerage.byId(investor_id)
+			.then((value) =>
+			{
+				value.amount = value.cash
+				value.date = moment.utc().format()
+
+				return value
+			})
 		},
 		validate: (value) =>
 		{
-			decimal(value, 'brokerage')
+			validate.required(value.amount, 'brokerage.amount')
+			validate.required(value.date, 'brokerage.date')
 
-			if (value < 0)
+			decimal(value.amount, 'brokerage.amount')
+
+			if (value.amount < 0)
 			{
-				throw WrongBrokerageFormat({ field: 'brokerage' })
+				throw WrongBrokerageFormat({ field: 'brokerage.amount' })
+			}
+
+			validate.date(value.date, 'brokerage.date')
+
+			if (moment.utc(value.date) > moment.utc())
+			{
+				throw WrongBrokerageFormat({ field: 'brokerage.date' })
 			}
 
 			return value
@@ -424,27 +477,20 @@ function Brokerage (investor_model, db)
 		{
 			var portfolio = db.investor.portfolio
 
-			return portfolio.brokerage.set(investor_id, value)
+			return portfolio.brokerage.set(investor_id, value.amount, value.date)
 		},
-		verify: (value, investor_id) =>
+		verify: (value) =>
 		{
-			return db.investor.portfolio.brokerage.byId(investor_id)
-			.catch(Err.fromCode('brokerage_not_exist_for_date',
-				() => CannotGoPublic({ reason: 'Brokerage does not exist' })
-			))
-			.then(brokerage =>
+			if (value.cash < 0)
 			{
-				if (brokerage.cash < 0)
-				{
-					throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
-				}
-				if (brokerage.multiplier < 0)
-				{
-					throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
-				}
+				throw CannotGoPublic({ reason: 'Wrong brokerage amount' })
+			}
+			if (value.multiplier < 0)
+			{
+				throw CannotGoPublic({ reason: 'Wrong brokerage multiplier' })
+			}
 
-				return true
-			})
+			return true
 		}
 	})
 }
@@ -475,6 +521,13 @@ function Holdings (investor_model, db)
 		{
 			throw WrongHoldingsFormat({ field: `holdings[${i}].price` })
 		}
+
+		validate.required(row.date, `holdings[${i}].date`)
+		validate.date(row.date, `holdings[${i}].date`)
+		if (moment.utc(row.date) > moment.utc())
+		{
+			throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+		}
 	}
 
 
@@ -482,10 +535,22 @@ function Holdings (investor_model, db)
 	{
 		get: (queryset, investor_id) =>
 		{
-			return db.investor.portfolio.full(investor_id)
-			.then(full_portfolio => full_portfolio.holdings)
+			return db.investor.portfolio.holdings.byId(investor_id)
+			.then(holdings =>
+			{
+				var now = moment.utc().format()
+
+				holdings.forEach((holding) =>
+				{
+					holding.symbol
+					 = `${holding.symbol_ticker}.${holding.symbol_exchange}`
+					holding.date = now
+				})
+
+				return holdings
+			})
 		},
-		validate: (value) =>
+		validate: (value, investor_id) =>
 		{
 			try
 			{
@@ -505,7 +570,22 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return value
+			return db.investor.portfolio.brokerage.grid(investor_id, 'day')
+			.then(grid => grid.daterange[0])
+			.then((min_date) =>
+			{
+				min_date = moment.utc(min_date)
+
+				value.forEach((row, i) =>
+				{
+					if (moment.utc(row.date) < min_date)
+					{
+						throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+					}
+				})
+
+				return value
+			})
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{
@@ -517,7 +597,6 @@ function Holdings (investor_model, db)
 }
 
 
-var moment = require('moment')
 var WrongStartDateFormat = Err('wrong_start_date_format',
 	'Wrong start_date format. Not ISO-8601')
 
