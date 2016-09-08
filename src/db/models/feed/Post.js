@@ -1,4 +1,6 @@
 
+var extend = require('lodash/extend')
+
 var validate = require('../../validate')
 
 var Err = require('../../../Err')
@@ -30,19 +32,29 @@ module.exports = function Post (db)
 
 	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
-		if (! (type in post.types))
-		{
-			throw WrongPostType({ type: type })
-		}
-
-		var post_type = post.types[type]
-
-		return Promise.resolve()
+		return db.investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
+			if (! (type in post.types))
+			{
+				throw WrongPostType({ type: type })
+			}
+
+			var post_type = post.types[type]
+
 			if (post_id)
 			{
-				return post_type.update(trx, investor_id, type, date, data, post_id)
+				return db.feed.postByInvestor(trx, post_id, investor_id)
+				.then(Err.nullish(db.feed.NotFound))
+				.then(prev_post =>
+				{
+					return post_type.update(
+						trx, investor_id, type, date, data, post_id)
+					.then(data =>
+					{
+						return extend({}, prev_post.data, data)
+					})
+				})
 			}
 			else
 			{
@@ -142,21 +154,14 @@ module.exports = function Post (db)
 		})
 	}
 
-	var PostToDeleteNotFound =
-		Err('post_to_delete_not_found', 'Post To Delete Not Found')
-
 	post.remove = function (investor_id, post_id, whom_id, soft_mode)
 	{
 		return knex.transaction(function (trx)
 		{
 			return db.feed.postByInvestor(trx, post_id, investor_id)
+			.then(Err.nullish(db.feed.NotFound))
 			.then(res =>
 			{
-				if (! res)
-				{
-					throw PostToDeleteNotFound()
-				}
-
 				if (! soft_mode)
 				{
 					var post_type = post.types[res.type]
