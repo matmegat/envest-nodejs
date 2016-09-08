@@ -136,6 +136,18 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 
+	holdings.isExact =
+		knexed.transact(knex, (trx, investor_id, symbol, timestamp) =>
+	{
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.where(symbol.toDb())
+		.then(oneMaybe)
+		.then(Boolean)
+	})
+
+
 	function byId (trx, investor_id, for_date, aux)
 	{
 		aux || (aux = noop)
@@ -288,52 +300,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
-		var exact_match = (investor_id, symbol, timestamp) =>
-		{
-			return table(trx)
-			.where('timestamp', timestamp)
-			.where(symbol.toDb())
-			.then(oneMaybe)
-			.then(Boolean)
-		}
-
-		var put_or_update = (investor_id, symbol, data) =>
-		{
-			return Promise.all(
-			[
-				exact_match(investor_id, symbol, data.timestamp),
-				holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
-			])
-			.then(so =>
-			{
-				var is_exact = so[0]
-				var is_avail = so[1]
-
-				if (! is_avail)
-				{
-					throw  InvalidHoldingDate(
-					{
-						symbol: symbol.toXign(),
-						reason: 'More actual holding already exist'
-					})
-				}
-
-				if (! is_exact)
-				{
-					return put(trx, investor_id, symbol, data)
-				}
-
-				if (is_exact)
-				{
-					return table(trx)
-					.where('investor_id', investor_id)
-					.where(symbol.toDb())
-					.where('timestamp', data.timestamp)
-					.update(pick(data, 'amount', 'price'))
-				}
-			})
-		}
-
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -358,11 +324,12 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				validate.required(holding.date, `holdings[${i}].date`)
 				validate.date(holding.date, `holdings[${i}].date`)
-				if (moment.utc(holding.date) > moment.utc())
+				holding.date = moment.utc(holding.date)
+				if (holding.date > moment.utc())
 				{
 					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
 				}
-				holding.timestamp = holding.date
+				holding.timestamp = holding.date.format()
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
@@ -375,28 +342,30 @@ module.exports = function Holdings (db, investor, portfolio)
 				var holding = holding_entries[i]
 				var data = pick(holding, 'amount', 'price', 'timestamp')
 
-				return put_or_update(investor_id, symbol, data)
+				return put(trx, investor_id, symbol, data, { override: true })
 			}))
 		})
 		.then(() =>
 		{
 			// choose latest timestamp
-			var timestamp = moment.utc(holding_entries[0].timestamp)
-			holding_entries.forEach((holding) =>
+			var index = 0
+			var timestamp = holding_entries[index].date
+			holding_entries.forEach((holding, i) =>
 			{
-				if (moment.utc(holding.timestamp) > timestamp)
+				if (holding.date > timestamp)
 				{
-					timestamp = moment.utc(holding.timestamp)
+					timestamp = holding.date
+					index = i
 				}
 			})
 
 			return portfolio.brokerage
-			.recalculate(trx, investor_id, timestamp.format())
+			.recalculate(trx, investor_id, holding_entries[index].timestamp)
 		})
 	})
 
 
-	function put (trx, investor_id, symbol, data)
+	function put (trx, investor_id, symbol, data, options)
 	{
 		expect(symbol).ok
 		expect(symbol.exchange).a('string')
@@ -406,6 +375,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		expect(data.amount).a('number')
 		expect(data.price).a('number')
 
+		options || (options = {})
+
 		data = pick(data,
 		[
 			'amount',
@@ -413,13 +384,50 @@ module.exports = function Holdings (db, investor, portfolio)
 			'timestamp'
 		])
 
-		var batch = extend(
-			{ investor_id: investor_id },
-			  symbol.toDb(),
-			  data
-		)
+		if (data.timestamp)
+		{
+			data.timestamp = moment.utc(data.timestamp).format()
+		}
+		else
+		{
+			data.timestamp = moment.utc().format()
+		}
 
-		return table(trx).insert(batch)
+		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
+		.then(is_avail =>
+		{
+			if (! is_avail)
+			{
+				throw  InvalidHoldingDate(
+				{
+					symbol: symbol.toXign(),
+					reason: 'More actual holding already exist'
+				})
+			}
+
+			return holdings.isExact(trx, investor_id, symbol, data.timestamp)
+		})
+		.then(is_exact =>
+		{
+			if (is_exact && options.override)
+			{
+				return table(trx)
+				.where('investor_id', investor_id)
+				.where(symbol.toDb())
+				.where('timestamp', data.timestamp)
+				.update(pick(data, 'amount', 'price'))
+			}
+			else
+			{
+				var batch = extend(
+					{ investor_id: investor_id },
+					symbol.toDb(),
+					data
+				)
+
+				return table(trx).insert(batch)
+			}
+		})
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
