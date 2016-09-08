@@ -1,7 +1,7 @@
 
 var Type = require('./Type')
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 var Err = require('../../../Err')
@@ -31,7 +31,7 @@ module.exports = function Update (db)
 				data.symbols = symbls
 				.map(item =>
 				{
-					return _.pick(item,
+					return pick(item,
 					[
 						'ticker',
 						'exchange'
@@ -54,7 +54,7 @@ module.exports = function Update (db)
 						data.symbols = symbls
 						.map(item =>
 						{
-							return _.pick(item,
+							return pick(item,
 							[
 								'ticker',
 								'exchange'
@@ -76,7 +76,7 @@ module.exports = function Update (db)
 
 	function validate_update_adds (data)
 	{
-		var data = _.pick(data,
+		var data = pick(data,
 		[
 			'symbols',
 			'title',
@@ -85,16 +85,23 @@ module.exports = function Update (db)
 			'chart'
 		])
 
-		data = _.omitBy(data, _.isNil)
-
 		return new Promise(rs =>
 		{
-			validate.empty(data.text, 'text')
+			if ('text' in data)
+			{
+				validate.nullish(data.text, 'text')
+				validate.empty(data.text, 'text')
+			}
 
-			validate.empty(data.title, 'title')
+			if ('title' in data)
+			{
+				validate.nullish(data.title, 'title')
+				validate.empty(data.title, 'title')
+			}
 
 			if ('symbols' in data)
 			{
+				validate.nullish(data.symbols, 'symbols')
 				validate.empty(data.symbols, 'symbols')
 				validate.array(data.symbols, 'symbols')
 				validate_symbols_length(data.symbols, 'symbols')
@@ -109,7 +116,7 @@ module.exports = function Update (db)
 
 	function validate_update (data)
 	{
-		var data = _.pick(data,
+		var data = pick(data,
 		[
 			'symbols',
 			'title',

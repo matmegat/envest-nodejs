@@ -31,6 +31,16 @@ validate.empty = function validate__empty (field, name)
 	}
 }
 
+var FieldNullish = Err('field_nullish', 'Field must not be nullish')
+
+validate.nullish = function validate__nullish (field, name)
+{
+	if (field === null)
+	{
+		throw FieldNullish({ field: name })
+	}
+}
+
 
 var FieldType = Err('field_wrong_type', 'Field must have certain type')
 

@@ -1,7 +1,7 @@
 
 var Type = require('./Type')
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
@@ -16,7 +16,7 @@ module.exports = function Trade (portfolio, symbols)
 			return symbols.resolve(data.symbol)
 			.then(symbl =>
 			{
-				data.symbol = _.pick(symbl,
+				data.symbol = pick(symbl,
 				[
 					'ticker',
 					'exchange'
@@ -56,14 +56,14 @@ var validate_risk = validate.collection([ 'low', 'medium', 'high' ])
 
 function validate_trade_adds (data)
 {
-	var data_update = _.pick(data,
+	var data_update = pick(data,
 	[
 		'text',
 		'risk',
 		'motivations'
 	])
 
-	var data_restricted = _.pick(data,
+	var data_restricted = pick(data,
 	[
 		'dir',
 		'symbol',
@@ -71,20 +71,20 @@ function validate_trade_adds (data)
 		'amount'
 	])
 
-	data_update = _.omitBy(data_update, _.isNil)
-
 	return new Promise(rs =>
 	{
 		validate.forbidden(data_restricted)
 
 		if ('text' in data_update)
 		{
+			validate.nullish(data_update.text, 'text')
 			validate.empty(data_update.text, 'text')
 			validate.string(data_update.text, 'text')
 		}
 
 		if ('risk' in data_update)
 		{
+			validate.nullish(data_update.risk, 'risk')
 			validate.empty(data_update.risk, 'risk')
 			validate_risk(data_update.risk)
 		}
@@ -100,7 +100,7 @@ function validate_trade_adds (data)
 
 function validate_trade (data)
 {
-	var data = _.pick(data,
+	var data = pick(data,
 	[
 		'dir',
 		'symbol',

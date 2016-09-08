@@ -1,7 +1,7 @@
 
 var Type = require('./Type')
 
-var _ = require('lodash')
+var pick = require('lodash/pick')
 
 var validate = require('../../validate')
 
@@ -13,7 +13,7 @@ module.exports = function Watchlist (db)
 		validate_update: validate_watchlist_adds,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			var additional = _.pick(data,
+			var additional = pick(data,
 			[
 				'target_price'
 			])
@@ -21,7 +21,7 @@ module.exports = function Watchlist (db)
 			return db.symbols.resolve(data.symbol)
 			.then(symbl =>
 			{
-				data.symbol = _.pick(symbl,
+				data.symbol = pick(symbl,
 				[
 					'ticker',
 					'exchange'
@@ -59,20 +59,18 @@ module.exports = function Watchlist (db)
 
 	function validate_watchlist_adds (data)
 	{
-		var data_update = _.pick(data,
+		var data_update = pick(data,
 		[
 			'text',
 			'motivations'
 		])
 
-		var data_restricted = _.pick(data,
+		var data_restricted = pick(data,
 		[
 			'dir',
 			'symbol',
 			'target_price'
 		])
-
-		data_update = _.omitBy(data_update, _.isNil)
 
 		return new Promise(rs =>
 		{
@@ -80,6 +78,7 @@ module.exports = function Watchlist (db)
 
 			if ('text' in data_update)
 			{
+				validate.nullish(data_update.text, 'text')
 				validate.empty(data_update.text, 'text')
 				validate.string(data.text, 'text')
 			}
@@ -95,7 +94,7 @@ module.exports = function Watchlist (db)
 
 	function validate_watchlist (data)
 	{
-		var data = _.pick(data,
+		var data = pick(data,
 		[
 			'dir',
 			'symbol',
