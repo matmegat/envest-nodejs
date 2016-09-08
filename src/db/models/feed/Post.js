@@ -46,12 +46,12 @@ module.exports = function Post (db)
 			{
 				return db.feed.postByInvestor(trx, post_id, investor_id)
 				.then(Err.nullish(db.feed.NotFound))
-				.then(prev_data =>
+				.then(prev_post =>
 				{
 					return post_type.update(trx, investor_id, type, date, data, post_id)
 					.then(data =>
 					{
-						return extend({}, prev_data, data)
+						return extend({}, prev_post.data, data)
 					})
 				})
 			}
