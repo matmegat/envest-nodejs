@@ -47,7 +47,18 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
-		return investor.public.ensure(investor_id, trx)
+		return new Promise(rs =>
+		{
+			if (options.extended)
+			{
+				return rs(investor.all)
+			}
+			else
+			{
+				return rs(investor.public)
+			}
+		})
+		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
 			return Promise.all([
