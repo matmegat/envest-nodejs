@@ -72,6 +72,12 @@ module.exports = function Portfolio (db, investor)
 			}))
 			.then((quoted_symbols) =>
 			{
+				var pick_list = ['symbol', 'allocation', 'gain']
+				if (options.extended)
+				{
+					pick_list = pick_list.concat(['price', 'amount'])
+				}
+
 				holdings = quoted_symbols.map((quoted_symbol, i) =>
 				{
 					var holding = holdings[i]
@@ -99,12 +105,7 @@ module.exports = function Portfolio (db, investor)
 						 = (quoted_symbol.price / holding.price - 1 ) * 100
 					}
 
-					return pick(holding,
-					[
-						'symbol',
-						'allocation',
-						'gain'
-					])
+					return pick(holding, pick_list)
 				})
 
 
