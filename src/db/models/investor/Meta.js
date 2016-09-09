@@ -16,6 +16,8 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
+var is_boolean = require('../../validate').boolean
+
 module.exports = function Meta (investor, raw, options)
 {
 	var knexed_table = investor.table
@@ -43,7 +45,7 @@ module.exports = function Meta (investor, raw, options)
 	var filter = Filter({
 		ids: Filter.by.ids('user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
-		is_public: Filter.by.field('is_public')
+		is_public: Filter.by.field('is_public', is_boolean)
 	})
 
 	meta.is = function (id, trx)
