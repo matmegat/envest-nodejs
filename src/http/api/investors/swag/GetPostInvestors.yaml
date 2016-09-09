@@ -27,7 +27,9 @@ get:
   - name: is_public
     in: query
     type: string
-    description: Filter investors by flag `is_public`
+    description: |
+      Filter investors by flag `is_public`.
+      Available for admin user only
   responses:
     200:
       description: Investors list
