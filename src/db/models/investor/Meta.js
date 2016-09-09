@@ -42,7 +42,8 @@ module.exports = function Meta (investor, raw, options)
 
 	var filter = Filter({
 		ids: Filter.by.ids('user_id'),
-		symbols: Filter.by.portfolio_symbols('investors.user_id')
+		symbols: Filter.by.portfolio_symbols('investors.user_id'),
+		is_public: Filter.by.field('is_public')
 	})
 
 	meta.is = function (id, trx)

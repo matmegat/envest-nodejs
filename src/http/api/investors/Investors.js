@@ -31,7 +31,8 @@ module.exports = function (db, http)
 		options.filter = pick(rq.query,
 		[
 			'symbol',
-			'symbols'
+			'symbols',
+			'is_public'
 		])
 
 		toss(rs, choose_model(rq)
