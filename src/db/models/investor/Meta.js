@@ -16,7 +16,7 @@ var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
 
-var is_boolean = require('../../validate').boolean
+var isBoolean = require('../../validate').boolean
 
 module.exports = function Meta (investor, raw, options)
 {
@@ -47,6 +47,16 @@ module.exports = function Meta (investor, raw, options)
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
 		is_public: Filter.by.field('is_public', is_boolean)
 	})
+
+	function is_boolean (field, name)
+	{
+		if (field === 'true' || field === 'false')
+		{
+			field = field === 'true'
+		}
+
+		isBoolean(field, name)
+	}
 
 	meta.is = function (id, trx)
 	{
