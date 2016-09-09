@@ -45,18 +45,8 @@ module.exports = function Meta (investor, raw, options)
 	var filter = Filter({
 		ids: Filter.by.ids('user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
-		is_public: Filter.by.field('is_public', is_boolean)
+		is_public: Filter.by.field('is_public', isBoolean)
 	})
-
-	function is_boolean (field, name)
-	{
-		if (field === 'true' || field === 'false')
-		{
-			field = field === 'true'
-		}
-
-		isBoolean(field, name)
-	}
 
 	meta.is = function (id, trx)
 	{
