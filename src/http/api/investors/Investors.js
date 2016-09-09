@@ -31,9 +31,13 @@ module.exports = function (db, http)
 		options.filter = pick(rq.query,
 		[
 			'symbol',
-			'symbols',
-			'is_public'
+			'symbols'
 		])
+
+		if (rq.user && rq.user.admin)
+		{
+			extend(options.filter, pick(rq.query, 'is_public'))
+		}
 
 		toss(rs, choose_model(rq)
 		.then(model =>
