@@ -244,6 +244,16 @@ Filter.by.symbols = function bySymbols ()
 }
 
 
+Filter.by.field = function byField (column)
+{
+	return function (queryset, value)
+	{
+		return queryset
+		.where(column, value)
+	}
+}
+
+
 var uniq = require('lodash/uniq')
 
 function symbol_split (symbols)
