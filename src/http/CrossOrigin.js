@@ -46,10 +46,10 @@ module.exports = function (cfg, express)
 				'Access-Control-Allow-Headers',
 
 				'Authorization, Origin, X-Requested-With, Content-Type, Accept, ' +
-				'Access-Control-Allow-Credentials'
+				'Access-Control-Allow-Credentials, Access-Control-Allow-Methods'
 			)
 			rs.header('Access-Control-Allow-Credentials', 'true')
-			rs.header('Access-Control-Allow-Credentials', methods.join(', '))
+			rs.header('Access-Control-Allow-Methods', methods.join(', '))
 
 			return next()
 		})
