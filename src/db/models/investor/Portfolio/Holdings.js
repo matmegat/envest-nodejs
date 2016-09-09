@@ -73,7 +73,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 					holding.symbol = quote.symbol
 
-					holding.price = quote.price
+					holding.quote_price = quote.price
 					holding.gain = quote.gain
 					holding.currency = quote.currency
 

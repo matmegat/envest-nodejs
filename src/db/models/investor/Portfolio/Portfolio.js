@@ -215,7 +215,7 @@ module.exports = function Portfolio (db, investor)
 
 				var allocation
 				 = cash
-				 + sumBy(holdings, h => h.amount * h.price)
+				 + sumBy(holdings, h => h.amount * h.quote_price)
 
 				allocation *= multiplier
 
