@@ -115,6 +115,22 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
+	brokerage.availableDate =
+		knexed.transact(knex, (trx, investor_id) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return table(trx)
+			.where('investor_id', investor_id)
+			.select(raw('MAX(timestamp) AS available_from'))
+		})
+	})
+
+	brokerage.availableDate(120)
+	.then(console.log, console.error)
+
+
 	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
 		return table(trx)

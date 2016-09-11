@@ -161,9 +161,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	holdings.availableDate(120)
-	.then(console.log, console.error)
-
 
 	holdings.isExact =
 		knexed.transact(knex, (trx, investor_id, symbol, timestamp) =>
