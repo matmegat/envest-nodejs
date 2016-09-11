@@ -1,0 +1,66 @@
+get:
+  description: get dates from which new entries can be added
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor ID
+    required: true
+
+  responses:
+    200:
+      description: dates for every symbol and for cash
+      schema:
+        title: DateFrom response
+        type: object
+        properties:
+          symbols:
+            type: array
+            items:
+              type: object
+              title: Symbol entry
+              properties:
+                symbol:
+                  type: object
+                  title: Symbol ticker-exchange
+                  properties:
+                    ticker:
+                      type: string
+                    exchange:
+                      type: string
+                  required:
+                  - ticker
+                  - exchange
+
+                available_from:
+                  type: string
+                  format: date-time
+
+              required:
+              - symbol
+              - available_from
+
+          cash:
+            type: object
+            title: Cash entry
+            properties:
+              available_from:
+                type: string
+                format: date-time
+            required:
+            - available_from
+
+        required:
+        - symbols
+        - cash
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://distillery.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors
