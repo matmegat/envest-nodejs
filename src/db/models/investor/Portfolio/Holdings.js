@@ -207,6 +207,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			r.forEach(it =>
 			{
+				// TODO transform to Symbl here, re-use in callers
 				it.price = Number(it.price)
 			})
 
