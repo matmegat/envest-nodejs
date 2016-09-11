@@ -127,9 +127,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
-	brokerage.availableDate(120)
-	.then(console.log, console.error)
-
 
 	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
