@@ -151,12 +151,10 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			return r.map(entry =>
 			{
-				entry.symbol = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
-
-				delete entry.symbol_ticker
-				delete entry.symbol_exchange
-
-				return entry
+				return {
+					symbol: Symbl([ entry.symbol_ticker, entry.symbol_exchange ]),
+					available_from: entry.available_from
+				}
 			})
 		})
 	})
