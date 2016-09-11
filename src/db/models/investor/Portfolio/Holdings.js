@@ -158,7 +158,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.where('investor_id', investor_id)
 		.where('amount', '>', 0)
 		.where('timestamp',
-			table().max('timestamp')
+			table(trx).max('timestamp')
 			.where(
 			{
 				investor_id:     raw('P.investor_id'),
