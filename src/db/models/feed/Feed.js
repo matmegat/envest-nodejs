@@ -338,7 +338,7 @@ var Feed = module.exports = function Feed (db)
 			type: type,
 			timestamp: date,
 			data: data
-		}, 'id')
+		}, ['id', 'investor_id'])
 		.then(one)
 	}
 
