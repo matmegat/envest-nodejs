@@ -135,8 +135,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	holdings.availableDate =
-		knexed.transact(knex, (trx, investor_id) =>
+	holdings.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>

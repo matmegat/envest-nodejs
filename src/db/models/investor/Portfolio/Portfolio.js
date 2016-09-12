@@ -661,8 +661,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.availableDate =
-		knexed.transact(knex, (trx, investor_id) =>
+	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return Promise.all(
 		[
