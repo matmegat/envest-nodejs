@@ -40,9 +40,9 @@ get:
               - symbol
               - available_from
 
-          cash:
+          brokerage:
             type: object
-            title: Cash entry
+            title: Brokerage entry
             properties:
               available_from:
                 type: string
@@ -52,7 +52,7 @@ get:
 
         required:
         - symbols
-        - cash
+        - brokerage
 
     400:
       description: |

@@ -671,8 +671,8 @@ module.exports = function Portfolio (db, investor)
 		.then(r =>
 		{
 			return {
-				symbols: r[0],
-				cash:    r[1]
+				symbols:   r[0],
+				brokerage: r[1]
 			}
 		})
 	})
