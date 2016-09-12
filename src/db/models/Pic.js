@@ -3,6 +3,8 @@ var Err = require('../../Err')
 
 var mime = require('mime')
 
+var validate = require('../validate')
+
 var lwip = require('lwip')
 var round = require('lodash/round')
 
@@ -61,12 +63,23 @@ module.exports = function (db)
 
 	function update_on_model (getter, setter, emitter, validations)
 	{
-		return (file, id) =>
+		return (file, id, byAdmin) =>
 		{
 			var new_pic
 			var old_pic
 
-			return validate_img(file, validations)
+			return Promise.resolve()
+			.then(() =>
+			{
+				if (byAdmin)
+				{
+					validate.required(id, 'investor id')
+					validate.empty(id, 'investor id')
+					validate.number.positive(id, 'investor id')
+				}
+
+				return validate_img(file, validations)
+			})
 			.then(() =>
 			{
 				return static.store(file)

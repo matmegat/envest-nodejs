@@ -60,7 +60,7 @@ module.exports = function Statics (rootpath, db, http)
 	)
 
 
-	statics.express.post('/upload/profile_pic', http.investorRequired,
+	statics.express.post('/upload/profile_pic', http.adminOrInvestorRequired,
 		uploader(
 			multer().single('profile_pic'),
 			statics.pic_model.updateProfile
@@ -78,6 +78,7 @@ module.exports = function Statics (rootpath, db, http)
 
 	var UploadError = Err('upload_error', 'Upload error')
 
+
 	function uploader (multipart_reader, setter)
 	{
 		return (rq, rs) =>
@@ -89,7 +90,22 @@ module.exports = function Statics (rootpath, db, http)
 					return toss.err(rs, UploadError(err))
 				}
 
-				toss(rs, setter(rq.file, rq.user.id))
+				var id = rq.user.id
+
+				return db.admin.is(id)
+				.then(is_admin =>
+				{
+					if (is_admin)
+					{
+						id = Number(rq.body.target_user_id)
+
+						toss(rs, setter(rq.file, id, true))
+					}
+					else
+					{
+						toss(rs, setter(rq.file, id))
+					}
+				})
 			})
 		}
 	}
