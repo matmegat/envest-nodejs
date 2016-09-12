@@ -229,15 +229,30 @@ function validate_aspect (img, ratio)
 	return with_image(img)
 	.then(image =>
 	{
-		var aspect_ratio = round(ratio.aspect_width / ratio.aspect_height, 1)
-		var real_ratio   = round(image.width() / image.height(), 1)
-
-		if (aspect_ratio !== real_ratio)
+		if (aspectish(ratio))
 		{
-			throw WrongAspect()
+			return aspect_strict(image, ratio)
 		}
 	})
 }
+
+function aspectish (ratio)
+{
+	return Boolean(ratio.aspect_width && ratio.aspect_height)
+}
+
+
+function aspect_strict (image, ratio)
+{
+	var aspect_ratio = round(ratio.aspect_width / ratio.aspect_height, 1)
+	var real_ratio   = round(image.width() / image.height(), 1)
+
+	if (aspect_ratio !== real_ratio)
+	{
+		throw WrongAspect()
+	}
+}
+
 
 function with_image (img)
 {
