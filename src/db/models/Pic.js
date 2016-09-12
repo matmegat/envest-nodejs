@@ -233,6 +233,18 @@ function validate_aspect (img, ratio)
 		{
 			return aspect_strict(image, ratio)
 		}
+		if (Array.isArray(ratio))
+		{
+			var ratio_tall = ratio[0]
+			var ratio_wide = ratio[1]
+
+			if (aspectish(ratio_tall) && aspectish(ratio_wide))
+			{
+				return aspect_range(image, ratio_tall, ratio_wide)
+			}
+		}
+
+		throw TypeError('wrong_aspect_settings')
 	})
 }
 
@@ -248,6 +260,25 @@ function aspect_strict (image, ratio)
 	var real_ratio   = round(image.width() / image.height(), 1)
 
 	if (aspect_ratio !== real_ratio)
+	{
+		throw WrongAspect()
+	}
+}
+
+function aspect_range (image, ratio_tall, ratio_wide)
+{
+	var tall = ratio_tall.aspect_width / ratio_tall.aspect_height
+	var wide = ratio_wide.aspect_width / ratio_wide.aspect_height
+
+	expect(tall < wide).true
+
+	var real_ratio = image.width() / image.height()
+
+	if (real_ratio < tall)
+	{
+		throw WrongAspect()
+	}
+	if (wide < real_ratio)
 	{
 		throw WrongAspect()
 	}
