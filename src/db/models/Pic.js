@@ -313,7 +313,7 @@ function with_image (img)
 		{
 			if (error)
 			{
-				return rj(error)
+				return rj(LwipError(error))
 			}
 			else
 			{
