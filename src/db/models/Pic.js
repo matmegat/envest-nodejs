@@ -261,7 +261,10 @@ function aspect_strict (image, ratio)
 
 	if (aspect_ratio !== real_ratio)
 	{
-		throw WrongAspect()
+		throw WrongAspect({
+			actual:   real_ratio,
+			expected: aspect_ratio
+		})
 	}
 }
 
@@ -276,11 +279,17 @@ function aspect_range (image, ratio_tall, ratio_wide)
 
 	if (real_ratio < tall)
 	{
-		throw WrongAspect()
+		throw WrongAspect({
+			actual:   real_ratio,
+			expected_between: [ tall, wide ]
+		})
 	}
 	if (wide < real_ratio)
 	{
-		throw WrongAspect()
+		throw WrongAspect({
+			actual:   real_ratio,
+			expected_between: [ tall, wide ]
+		})
 	}
 }
 
