@@ -1,6 +1,5 @@
 
 var pick = require('lodash/pick')
-var omit = require('lodash/omit')
 var get = require('lodash/get')
 var values = require('lodash/values')
 var any = require('lodash/some')
@@ -176,13 +175,15 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
+		var h_options = { soft_mode: true }
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				portfolio.holdings.byId.quotes(trx, investor_id, for_date)
+				holdings.byId.quotes(trx, investor_id, for_date, h_options)
 			])
 			.then(values =>
 			{
@@ -193,7 +194,7 @@ module.exports = function Portfolio (db, investor)
 
 				var allocation
 				 = cash
-				 + sumBy(holdings, h => h.amount * h.quote_price)
+				 + sumBy(holdings, h => h.amount * ( h.quote_price || h.price ))
 
 				allocation *= multiplier
 
