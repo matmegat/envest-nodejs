@@ -248,7 +248,7 @@ Filter.by.field = function byField (column, validator)
 {
 	if (! validator)
 	{
-		validator = validate.required()
+		validator = validate.required
 	}
 
 	return function (queryset, value)
