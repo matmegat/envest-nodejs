@@ -661,6 +661,23 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return Promise.all(
+		[
+			holdings.availableDate(trx, investor_id),
+			brokerage.availableDate(trx, investor_id)
+		])
+		.then(r =>
+		{
+			return {
+				symbols:   r[0],
+				brokerage: r[1]
+			}
+		})
+	})
+
+
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
 		var dir = data.dir

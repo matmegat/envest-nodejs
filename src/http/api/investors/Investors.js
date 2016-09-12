@@ -113,6 +113,13 @@ module.exports = function (db, http)
 		))
 	})
 
+	investors.express.get('/:id/date-from', authRequired, (rq, rs) =>
+	{
+		var investor_id = rq.params.id
+
+		toss(rs, investors.model.portfolio.availableDate(investor_id))
+	})
+
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
