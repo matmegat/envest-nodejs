@@ -677,9 +677,6 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
-	portfolio.availableDate(120)
-	.then(console.log, console.error)
-
 
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
