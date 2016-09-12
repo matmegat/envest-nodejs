@@ -63,7 +63,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all([
 				brokerage.byId(trx, investor_id),
-				 holdings.byId(trx, investor_id)
+				 holdings.byId.quotes(trx, investor_id)
 			])
 		})
 		.then((values) =>
@@ -71,84 +71,59 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			holdings.forEach(holding =>
+			var pick_list = ['symbol', 'allocation', 'gain']
+			if (options.extended)
+			{
+				pick_list = pick_list.concat(['price', 'amount'])
+			}
+
+			holdings = holdings.map((holding) =>
 			{
 				holding.allocation
-				 = holding.amount * holding.price * brokerage.multiplier
+				 = holding.amount * ( holding.quote_price || holding.price )
+				 * brokerage.multiplier
+
+				if (! holding.quote_price)
+				{
+					holding.gain = null
+				}
+				else
+				{
+					holding.gain
+					 = (holding.quote_price / holding.price - 1 ) * 100
+				}
+
+				return pick(holding, pick_list)
 			})
 
-			return db.symbols.quotes(holdings.map(holding =>
+			holdings = orderBy(holdings, 'allocation', 'desc')
+
+			var full_value
+			 = brokerage.cash * brokerage.multiplier
+			 + sumBy(holdings, 'allocation')
+
+			var real_value
+			 = brokerage.cash * brokerage.multiplier
+			 + sumBy(holdings, h => h.amount * h.price ) * brokerage.multiplier
+
+			var gain = ( full_value / real_value - 1 ) * 100
+
+			var resp = {
+				total:    holdings.length,
+				holdings: holdings,
+				full_portfolio:
+				{
+					value: full_value,
+					gain:  gain
+				}
+			}
+
+			if (options.extended)
 			{
-				return [ holding.symbol_ticker, holding.symbol_exchange ]
-			}))
-			.then((quoted_symbols) =>
-			{
-				var pick_list = ['symbol', 'allocation', 'gain']
-				if (options.extended)
-				{
-					pick_list = pick_list.concat(['price', 'amount'])
-				}
+				resp.brokerage = brokerage
+			}
 
-				holdings = quoted_symbols.map((quoted_symbol, i) =>
-				{
-					var holding = holdings[i]
-
-					/* TODO */
-					/* soft-mode? holdings.byId.quotes */
-					if (quoted_symbol == null)
-					{
-						holding.symbol = Symbl(
-						[
-							holding.symbol_ticker,
-							holding.symbol_exchange
-						])
-						.toFull()
-
-						holding.gain = 0
-					}
-					else
-					{
-						holding.symbol = quoted_symbol.symbol
-
-						/* calculated percentage */
-						/* TODO maybe wrong gain */
-						holding.gain
-						 = (quoted_symbol.price / holding.price - 1 ) * 100
-					}
-
-					return pick(holding, pick_list)
-				})
-
-
-				var total = holdings.length
-
-				holdings = orderBy(holdings, 'allocation', 'desc')
-
-				/* full = cash + holdings */
-				var full_value
-				 = brokerage.cash * brokerage.multiplier
-				 + sumBy(holdings, 'allocation')
-
-				/* avg gain */
-				var gain = sumBy(holdings, 'gain') / total
-
-				var resp = {
-					total:    total,
-					holdings: holdings,
-					full_portfolio:
-					{
-						value: full_value,
-						gain:  gain
-					}
-				}
-
-				if (options.extended)
-				{
-					resp.brokerage = brokerage
-				}
-
-				return resp
-			})
+			return resp
 		})
 	})
 

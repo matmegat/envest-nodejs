@@ -78,8 +78,8 @@ module.exports = function (db, http)
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
-		var is_admin = isPlainObject(rq.user.admin)
-		toss(rs, db.investor.portfolio.byId(rq.params.id, is_admin))
+		var options = { extended: isPlainObject(rq.user.admin) }
+		toss(rs, db.investor.portfolio.byId(rq.params.id, options))
 	})
 
 	investors.express.get('/:id/chart', authRequired, (rq, rs) =>

@@ -47,8 +47,11 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 	})
 
-	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
+	holdings.byId.quotes =
+		knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
+		options = options || {}
+
 		return byId(trx, investor_id, for_date)
 		.then(holdings =>
 		{
@@ -62,7 +65,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price)
+					if (! quote.price && ! options.soft_mode)
 					{
 						throw new TypeError(
 							'Cannot recalculate Xignite Quotes failed'
