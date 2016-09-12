@@ -1,5 +1,5 @@
 get:
-  description: get dates from which new entries can be added
+  description: get dates from which new entries can be added to Portfolio
   parameters:
   - name: investor_id
     in: path
@@ -9,7 +9,7 @@ get:
 
   responses:
     200:
-      description: dates for every symbol and for cash
+      description: valid post dates for every asset Investor posess
       schema:
         title: DateFrom response
         type: object
