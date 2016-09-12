@@ -297,6 +297,20 @@ var Feed = module.exports = function Feed (db)
 		return count(filter(feed.feed_table(), options))
 	}
 
+	feed.byIdRaw = function (id)
+	{
+		return feed.validateFeedId(id)
+		.then(() =>
+		{
+			return feed.feed_table()
+			.where(
+			{
+				id: id
+			})
+		})
+		.then(oneMaybe)
+	}
+
 	feed.postByInvestor = function (trx, id, investor_id)
 	{
 		return feed.validateFeedId(id)
@@ -335,7 +349,7 @@ var Feed = module.exports = function Feed (db)
 		.update({
 			timestamp: date,
 			data: data
-		}, 'id')
+		}, ['id', 'investor_id'])
 		.then(one)
 	}
 
