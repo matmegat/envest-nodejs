@@ -1,0 +1,43 @@
+post:
+  description: Manage cash by Investor.
+  parameters:
+  - name: payload
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Cash management operation
+      properties:
+        target_user_id:
+          type: integer
+          description: ID of target Investor
+        type:
+          type: string
+          description: 'Transaction type one of: deposit, withdrawal, fee, interest'
+        cash:
+          type: number
+          description: Amount of cash to process (> 0 for any *type*)
+        date:
+          type: string
+          format: date-time
+          description: Transaction date
+      required:
+      - target_user_id
+      - type
+      - cash
+      - date
+
+  responses:
+    200:
+      description: Cash updated
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://distillery.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors

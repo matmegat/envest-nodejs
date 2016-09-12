@@ -120,6 +120,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(() =>
 		{
 			var where = { investor_id: investor_id }
+
 			if (symbol)
 			{
 				extend(where, symbol.toDb())
@@ -317,11 +318,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 
 	// set
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
-	var InvalidHoldingDate = Err('invalid_portfolio_date',
-		'Invalid date value for Portfolio Holdings')
-
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -387,6 +383,11 @@ module.exports = function Holdings (db, investor, portfolio)
 			.recalculate(trx, investor_id, holding_entries[index].timestamp)
 		})
 	})
+
+	var InvalidAmount = Err('invalid_portfolio_amount',
+		'Invalid amount value for cash, share, price')
+	var InvalidHoldingDate = Err('invalid_portfolio_date',
+		'Invalid date value for Portfolio Holdings')
 
 
 	function put (trx, investor_id, symbol, data, options)
@@ -492,8 +493,12 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (holding)
 			{
-				price = ( holding.amount * holding.price + amount * price )
-				        / ( holding.amount + amount )
+				/* avg */
+				price =
+				(holding.amount * holding.price + amount * price)
+				 /
+				(holding.amount + amount)
+
 				amount = holding.amount + amount
 			}
 

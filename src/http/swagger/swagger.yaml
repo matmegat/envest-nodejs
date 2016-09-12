@@ -113,6 +113,9 @@ paths:
   '/investors/cash':
     $ref: ../api/investors/swag/Cash.yaml
 
+  '/investors/cash-as':
+    $ref: ../api/investors/swag/CashAs.yaml
+
   '/investors/{investor_id}/go-public':
     $ref: ../api/investors/swag/Post-GoPublic.yaml
 
