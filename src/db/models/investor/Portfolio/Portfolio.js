@@ -11,6 +11,7 @@ var round = require('lodash/round')
 var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
+var isEmpty = require('lodash/isEmpty')
 
 var find = require('lodash/find')
 var findLast = require('lodash/findLast')
@@ -460,7 +461,7 @@ module.exports = function Portfolio (db, investor)
 	function range_correct_day (range, superseries, resolution)
 	{
 		if (resolution !== 'intraday') { return range }
-		if (! superseries.length) { return range }
+		if (isEmpty(superseries)) { return range }
 
 		var day = moment(range.end).startOf('day')
 		var r
@@ -500,10 +501,11 @@ module.exports = function Portfolio (db, investor)
 	function find_market_open (range, superseries, resolution)
 	{
 		if (resolution !== 'intraday') { return range }
-		if (! superseries.length) { return range }
 
 		superseries = values(superseries)
 		superseries = flatten(superseries)
+
+		if (! superseries.length) { return range }
 
 		var day = moment(range.start)
 		.startOf('day')
