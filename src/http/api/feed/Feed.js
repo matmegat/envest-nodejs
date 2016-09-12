@@ -126,11 +126,11 @@ module.exports = function Feed (db, http)
 	{
 		var investor_id = rq.user.id
 		var post_id = rq.body.post_id
-		var type = rq.body.type
+
 		var data = rq.body.data
 		var date = rq.body.date
 
-		toss(rs, feed.post.update(investor_id, type, date, data, post_id))
+		toss(rs, feed.post.update(investor_id, post_id, date, data))
 	})
 
 	feed.express.post('/post-as', http.adminRequired, (rq, rs) =>
