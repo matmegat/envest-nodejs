@@ -34,6 +34,18 @@ module.exports = function (db, http)
 			'symbols'
 		])
 
+		if (rq.user && rq.user.admin && 'is_public' in rq.query)
+		{
+			try
+			{
+				options.filter.is_public = JSON.parse(rq.query.is_public)
+			}
+			catch (e)
+			{
+				options.filter.is_public = null
+			}
+		}
+
 		toss(rs, choose_model(rq)
 		.then(model =>
 		{
