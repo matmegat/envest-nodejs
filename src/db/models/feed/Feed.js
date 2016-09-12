@@ -299,16 +299,13 @@ var Feed = module.exports = function Feed (db)
 
 	feed.byIdRaw = function (id)
 	{
-		return feed.validateFeedId(id)
-		.then(() =>
+		return feed.feed_table()
+		.where(
 		{
-			return feed.feed_table()
-			.where(
-			{
-				id: id
-			})
+			id: id
 		})
 		.then(oneMaybe)
+		.then(Err.nullish(NotFound))
 	}
 
 	feed.postByInvestor = function (trx, id, investor_id)
