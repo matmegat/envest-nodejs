@@ -75,6 +75,8 @@ post:
             pic:
               type: string
               description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
       required:
       - data
   responses:
