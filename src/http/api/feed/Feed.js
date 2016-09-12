@@ -126,11 +126,11 @@ module.exports = function Feed (db, http)
 	{
 		var investor_id = rq.user.id
 		var post_id = rq.body.post_id
-		var type = rq.body.type
+
 		var data = rq.body.data
 		var date = rq.body.date
 
-		toss(rs, feed.post.update(investor_id, type, date, data, post_id))
+		toss(rs, feed.post.update(investor_id, post_id, date, data))
 	})
 
 	feed.express.post('/post-as', http.adminRequired, (rq, rs) =>
@@ -154,22 +154,12 @@ module.exports = function Feed (db, http)
 	feed.express.post('/post-as/update', http.adminRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
-		var target_user_id = rq.body.target_user_id
 		var post_id = rq.body.post_id
 
-		var type = rq.body.type
 		var data = rq.body.data
 		var date = rq.body.date
 
-		return feed.investor.all.ensure(target_user_id)
-		.then(() =>
-		{
-			toss(rs,
-				feed.post.updateAs(
-					whom_id, target_user_id, type, date, data, post_id
-				))
-		})
-		.catch(toss.err(rs))
+		toss(rs, feed.post.updateAs(whom_id, post_id, date, data))
 	})
 
 	feed.express.delete('/post/delete', http.investorRequired, (rq, rs) =>

@@ -112,6 +112,7 @@ module.exports = function Update (db)
 			rs(data)
 		})
 		.then(validate_pic_exists)
+		.then(validate_chart)
 	}
 
 	function validate_update (data)

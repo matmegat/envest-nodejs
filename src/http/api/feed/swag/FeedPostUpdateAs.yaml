@@ -12,8 +12,9 @@ post:
     schema:
       type: object
       properties:
-        target_user_id:
+        post_id:
           type: integer
+          description: Post id to delete
         date:
           type: string
           format: date-time
@@ -22,9 +23,6 @@ post:
           type: object
           description: Post properties
           properties:
-            post_id:
-              type: integer
-              description: Post id to delete
             text:
               type: string
             risk:
@@ -77,6 +75,8 @@ post:
             pic:
               type: string
               description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
       required:
       - data
   responses:

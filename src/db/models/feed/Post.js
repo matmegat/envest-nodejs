@@ -32,22 +32,22 @@ module.exports = function Post (db)
 
 	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
+		var post_type
+
 		return db.investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			if (! (type in post.types))
-			{
-				throw WrongPostType({ type: type })
-			}
-
-			var post_type = post.types[type]
-
 			if (post_id)
 			{
 				return db.feed.postByInvestor(trx, post_id, investor_id)
 				.then(Err.nullish(db.feed.NotFound))
 				.then(prev_post =>
 				{
+					var type = prev_post.type
+					var investor_id = prev_post.investor_id
+
+					post_type = post.types[type]
+
 					return post_type.update(
 						trx, investor_id, type, date, data, post_id)
 					.then(data =>
@@ -58,6 +58,13 @@ module.exports = function Post (db)
 			}
 			else
 			{
+				if (! (type in post.types))
+				{
+					throw WrongPostType({ type: type })
+				}
+
+				post_type = post.types[type]
+
 				return post_type.set(trx, investor_id, type, date, data)
 			}
 		})
@@ -70,18 +77,23 @@ module.exports = function Post (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	post.update = function (investor_id, type, date, data, post_id)
+	post.update = function (investor_id, post_id, date, data)
 	{
 		validate_update_fields(post_id)
 
-		return post.create(investor_id, type, date, data, post_id)
+		return post.create(investor_id, null, date, data, post_id)
 	}
 
-	post.updateAs = function (whom_id, investor_id, type, date, data, post_id)
+	post.updateAs = function (whom_id, post_id, date, data)
 	{
 		validate_update_fields(post_id)
 
-		return post.createAs(whom_id, investor_id, type, date, data, post_id)
+		return db.feed.byIdRaw(post_id)
+		.then(res_post =>
+		{
+			return post.createAs(
+				whom_id, res_post.investor_id, res_post.type, date, data, post_id)
+		})
 	}
 
 	post.create = function (investor_id, type, date, data, post_id)
@@ -106,12 +118,12 @@ module.exports = function Post (db)
 			{
 				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
-			.then(post_id =>
+			.then(upserted_post =>
 			{
 				PostCreated(investor_id,
 				{
 					investor: [ ':user-id', investor_id ],
-					post_id: post_id
+					post_id: upserted_post.id
 				})
 			})
 		})
@@ -132,22 +144,22 @@ module.exports = function Post (db)
 			{
 				return post.upsert(trx, investor_id, type, date, data, post_id)
 			})
-			.then(created_post_id =>
+			.then(upserted_post =>
 			{
 				if (post_id)
 				{
-					PostUpdated(investor_id,
+					PostUpdated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
-						post_id: created_post_id
+						post_id: upserted_post.id
 					})
 				}
 				else
 				{
-					PostCreated(investor_id,
+					PostCreated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
-						post_id: created_post_id
+						post_id: upserted_post.id
 					})
 				}
 			})

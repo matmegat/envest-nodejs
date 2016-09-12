@@ -16,13 +16,13 @@ post:
           type: string
           format: date-time
           description: Post date
+        post_id:
+          type: integer
+          description: Post id to delete
         trade_data:
           type: object
           description: Post properties
           properties:
-            post_id:
-              type: integer
-              description: Post id to delete
             text:
               type: string
             risk:
@@ -75,6 +75,8 @@ post:
             pic:
               type: string
               description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
       required:
       - data
   responses:
