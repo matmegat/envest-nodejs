@@ -51,10 +51,17 @@ module.exports = function (db)
 	/* upload Investor's `post_pic` */
 	pic.uploadPostPic = upload({
 		max_size: 10 * 1024 * 1024,
-		ratio: {
-			aspect_width: 2,
-			aspect_height: 1.1
-		}
+		ratio:
+		[
+			{
+				aspect_width:  1,
+				aspect_height: 2
+			},
+			{
+				aspect_width:  2,
+				aspect_height: 1
+			}
+		]
 	})
 
 	var static = db.static
