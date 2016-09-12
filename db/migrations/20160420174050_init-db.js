@@ -19,6 +19,10 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('auth_local', (table) =>
 		{
 			table.integer('user_id').primary()
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
+
 
 			table.string('password', 72).notNullable()
 			table.string('salt', 32).notNullable()
@@ -29,6 +33,9 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('email_confirms', (table) =>
 		{
 			table.integer('user_id').primary()
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.string('new_email').notNullable().unique()
 			table.string('code', 32).notNullable()
@@ -39,6 +46,9 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('pass_reset', (table) =>
 		{
 			table.integer('user_id').primary()
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.timestamp('timestamp').defaultTo(knex.fn.now())
 			table.string('code', 32).notNullable()
@@ -49,6 +59,9 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('auth_facebook', (table) =>
 		{
 			table.integer('user_id').primary()
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.bigInteger('facebook_id').notNullable().unique()
 		})

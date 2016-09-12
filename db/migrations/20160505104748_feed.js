@@ -7,9 +7,9 @@ exports.up = function (knex, Promise)
 		return knex.schema.createTable('investors', (table) =>
 		{
 			table.integer('user_id').primary().unique().notNullable()
-			.references('users.id')
-			.onUpdate('cascade')
-			.onDelete('cascade')
+				.references('users.id')
+				.onUpdate('cascade')
+				.onDelete('cascade')
 
 			table.text('profile_pic').nullable()
 			table.string('profession').defaultTo('')
