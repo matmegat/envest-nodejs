@@ -1,6 +1,7 @@
 
 var Err = require('../../Err')
 
+var expect = require('chai').expect
 var mime = require('mime')
 
 var lwip = require('lwip')
@@ -225,27 +226,37 @@ var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
 
 function validate_aspect (img, ratio)
 {
+	return with_image(img)
+	.then(image =>
+	{
+		var aspect_ratio = round(ratio.aspect_width / ratio.aspect_height, 1)
+		var real_ratio   = round(image.width() / image.height(), 1)
+
+		if (aspect_ratio !== real_ratio)
+		{
+			throw WrongAspect()
+		}
+	})
+}
+
+function with_image (img)
+{
+	expect(img).an('object')
+	expect(img.buffer).ok
+	expect(img.mimetype).ok
+
 	return new Promise((rs, rj) =>
 	{
-		lwip.open(img.buffer,
-			mime.extension(img.mimetype),
-			(err, image) =>
+		lwip.open(img.buffer, mime.extension(img.mimetype), (error, image) =>
 		{
-			if (err)
+			if (error)
 			{
-				return rj(LwipError(err))
+				return rj(error)
 			}
-
-			var aspect_ratio =
-				round(ratio.aspect_width / ratio.aspect_height, 1)
-			var real_ratio = round(image.width() / image.height(), 1)
-
-			if ( aspect_ratio !== real_ratio )
+			else
 			{
-				return rj(WrongAspect())
+				return rs(image)
 			}
-
-			return rs()
 		})
 	})
 }
