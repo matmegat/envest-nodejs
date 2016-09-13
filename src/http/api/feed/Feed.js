@@ -16,7 +16,7 @@ module.exports = function Feed (db, http)
 	feed.express = Router()
 	feed.express.use(authRequired)
 
-	var filters =
+	var filter_by =
 	[
 		'type',
 		'investors',
@@ -31,25 +31,27 @@ module.exports = function Feed (db, http)
 		'symbols'
 	]
 
+	var paginate_by =
+	[
+		'max_id',
+		'since_id',
+		'page'
+	]
+
 	feed.express.get('/', (rq, rs) =>
 	{
 		var options = {}
 
-		options.filter = pick(rq.query, filters)
+		options.filter = pick(rq.query, filter_by)
 
-		options.paginator = pick(rq.query,
-		[
-			'max_id',
-			'since_id',
-			'page'
-		])
+		options.paginator = pick(rq.query, paginate_by)
 
 		toss(rs, feed.model.list(options, rq.user.id))
 	})
 
 	feed.express.get('/counts', (rq, rs) =>
 	{
-		var options = pick(rq.query, filters)
+		var options = pick(rq.query, filter_by)
 
 		toss(rs, feed.model.counts(options))
 	})
@@ -81,6 +83,8 @@ module.exports = function Feed (db, http)
 	feed.express.get('/by-watchlist', (rq, rs) =>
 	{
 		var options = { filter: pick(rq.query, 'type') }
+
+		options.paginator = pick(rq.query, paginate_by)
 
 		toss(rs, feed.model.byWatchlist(rq.user.id, options))
 	})
