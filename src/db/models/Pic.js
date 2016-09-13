@@ -4,6 +4,8 @@ var Err = require('../../Err')
 var expect = require('chai').expect
 var mime = require('mime')
 
+var validateId = require('../../id').validate
+
 var lwip = require('lwip')
 var round = require('lodash/round')
 
@@ -66,15 +68,40 @@ module.exports = function (db)
 
 	var static = db.static
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
+	var WrongID = Err('wrong_id', 'Wrong ID')
 
 	function update_on_model (getter, setter, emitter, validations)
 	{
-		return (file, id) =>
+		return (file, id, target_user_id) =>
 		{
 			var new_pic
 			var old_pic
 
-			return validate_img(file, validations)
+			return Promise.resolve()
+			.then(() =>
+			{
+				if (target_user_id)
+				{
+					var validate_id = validateId(WrongID)
+
+					validate_id(target_user_id)
+
+					return ensure_can_upload(id, target_user_id)
+					.then(mode =>
+					{
+						if (mode === 'mode:admin')
+						{
+							id = target_user_id
+						}
+
+						return db.investor.all.ensure(id)
+					})
+				}
+			})
+			.then(() =>
+			{
+				return validate_img(file, validations)
+			})
 			.then(() =>
 			{
 				return static.store(file)
@@ -140,6 +167,35 @@ module.exports = function (db)
 				}
 			})
 		}
+	}
+
+	var AdminOrOwnerRequired =
+		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
+
+	function ensure_can_upload (whom_id, target_user_id)
+	{
+		return Promise.all([ db.admin.is(whom_id), db.investor.all.is(whom_id) ])
+		.then(so =>
+		{
+			var is_admin    = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return 'mode:admin'
+			}
+			else if (is_investor)
+			{
+				if (! (whom_id === target_user_id))
+				{
+					throw AdminOrOwnerRequired()
+				}
+			}
+			else
+			{
+				throw AdminOrOwnerRequired()
+			}
+		})
 	}
 
 	return pic

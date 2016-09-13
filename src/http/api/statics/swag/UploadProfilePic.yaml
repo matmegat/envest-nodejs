@@ -1,7 +1,7 @@
 post:
   description: Upload investor profile picture
   consumes:
-  - multipart/form-data
+  - application/x-www-form-urlencoded
   parameters:
   - name: profile_pic
     description: |
@@ -10,6 +10,11 @@ post:
     required: true
     type: file
     format: binary
+  - name: target_user_id
+    description: |
+      ID of target investor to set profile_pic
+    in: formData
+    type: number
   responses:
     200:
       description: investor's background updated
