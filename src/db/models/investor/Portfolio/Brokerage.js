@@ -312,13 +312,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 			if (options.recalculate)
 			{
 				var current_allocation
-				 = cash
-				 + sumBy(old_holdings, h => h.amount * h.quote_price)
+				 = cash + sumBy(old_holdings, 'real_allocation')
 				current_allocation *= multiplier
 
 				var real_allocation
-				 = new_cash
-				 + sumBy(holdings, h => h.amount * h.quote_price)
+				 = new_cash + sumBy(holdings, 'real_allocation')
 
 				multiplier = (current_allocation / real_allocation)
 			}

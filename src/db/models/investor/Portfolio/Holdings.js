@@ -80,6 +80,9 @@ module.exports = function Holdings (db, investor, portfolio)
 					holding.gain = quote.gain
 					holding.currency = quote.currency
 
+					holding.real_allocation
+					 = holding.amount * ( holding.quote_price || holding.proce )
+
 					delete holding.symbol_ticker
 					delete holding.symbol_exchange
 

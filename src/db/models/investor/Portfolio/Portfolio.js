@@ -81,8 +81,7 @@ module.exports = function Portfolio (db, investor)
 			holdings = holdings.map((holding) =>
 			{
 				holding.allocation
-				 = holding.amount * ( holding.quote_price || holding.price )
-				 * brokerage.multiplier
+				 = holding.real_allocation * brokerage.multiplier
 
 				if (! holding.quote_price)
 				{
@@ -105,7 +104,7 @@ module.exports = function Portfolio (db, investor)
 
 			var real_value
 			 = brokerage.cash * brokerage.multiplier
-			 + sumBy(holdings, h => h.amount * h.price ) * brokerage.multiplier
+			 + sumBy(holdings, 'real_allocation') * brokerage.multiplier
 
 			var gain = ( full_value / real_value - 1 ) * 100
 
@@ -189,11 +188,7 @@ module.exports = function Portfolio (db, investor)
 
 				var holdings = values[1]
 
-				var allocation
-				 = cash
-				 + sumBy(holdings, h => h.amount * ( h.quote_price || h.price ))
-
-				allocation *= multiplier
+				var allocation = cash + sumBy(holdings, 'real_allocation')
 
 				return {
 					real:    allocation,
