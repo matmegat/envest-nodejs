@@ -1,0 +1,22 @@
+#! /usr/bin/env node
+
+var rootpath = require('rootpath')
+
+var Config = require('../src/Config')
+var Log = require('../src/Log')
+var Symbols = require('../src/db/models/symbols/Symbols')
+
+var cfg = Config(rootpath(__dirname, '../cfg'))
+var log = Log()
+var symbols = Symbols(cfg, log)
+
+var symbol = process.argv[2]
+
+if (! symbol)
+{
+	console.error('no symbol')
+	process.exit(1)
+}
+
+symbols.resolve(symbol)
+.then(console.log, console.error)
