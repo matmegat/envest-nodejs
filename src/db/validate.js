@@ -257,6 +257,24 @@ validate.motivation = function validate__motivations (motivations)
 	})
 }
 
+validate.text_field = function validate__text_field (string, field_name)
+{
+	var validate_text_length = validate.length(2000)
+
+	validate.empty(string, field_name)
+	validate.string(string, field_name)
+	validate_text_length(string, field_name)
+}
+
+validate.title_field = function validate__title_field (string, field_name)
+{
+	var validate_title_length = validate.length(140)
+
+	validate.empty(string, field_name)
+	validate.string(string, field_name)
+	validate_title_length(string, field_name)
+}
+
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
 
