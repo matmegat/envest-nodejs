@@ -30,41 +30,46 @@ module.exports = function NetvestSubsc (db, cfg)
 
 			if (moment().isBefore(billing_start))
 			{
-				subscription_data.trial_end = billing_start / 1000
+				subscription_data.trial_end = Math.floor(billing_start / 1000)
 			}
 			else
 			{
 				subscription_data.trial_end = 'now'
 			}
 
-			return netvest_subscr.stripe.customers.create(
-				subscription_data,
-				(err, customer) =>
-				{
-					if (err)
+			return new Promise((rs, rj) =>
+			{
+				netvest_subscr.stripe.customers.create(
+					subscription_data,
+					(err, customer) =>
 					{
-						throw StripeError()
-					}
+						if (err)
+						{
+							rj(StripeError())
+						}
+						else
+						{
+							var subscription = customer.subscriptions.data[0]
+							var option =
+							{
+								user_id: user_id,
+								type: subscription_data.plan,
+								stripe_customer_id: customer.id,
+								stripe_subscriber_id: subscription.id,
+								end_time: moment(subscription.current_period_end * 1000)
+								.format('YYYY-MM-DD HH:mm:ss Z')
+							}
 
-					var subscription = customer.subscriptions.data[0]
-					var option =
-					{
-						user_id: user_id,
-						type: subscription_data.plan,
-						stripe_customer_id: customer.id,
-						stripe_subscriber_id: subscription.id,
-						end_time: moment(subscription.current_period_end * 1000)
-						.format('YYYY-MM-DD HH:mm:ss Z')
+							netvest_subscr.table()
+							.insert(option, 'id')
+							.then(id =>
+							{
+								rs(id[0] > 0)
+							})
+						}
 					}
-
-					return netvest_subscr.table()
-					.insert(option, 'id')
-					.then(id =>
-					{
-						return id[0] > 0
-					})
-				}
-			)
+				)
+			})
 		})
 	}
 
