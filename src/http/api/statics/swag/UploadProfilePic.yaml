@@ -10,6 +10,12 @@ post:
     required: true
     type: file
     format: binary
+  - name: target_user_id
+    description: |
+      ID of target investor to set profile_pic,
+      if user is admin, target_user_id is required
+    in: formData
+    type: number
   responses:
     200:
       description: investor's background updated
