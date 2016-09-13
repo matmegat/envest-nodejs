@@ -91,7 +91,7 @@ module.exports = function Statics (rootpath, db, http)
 				}
 
 				var target_user_id = Number(rq.body.target_user_id)
-				
+
 				toss(rs, setter(rq.file, rq.user.id, target_user_id))
 			})
 		}

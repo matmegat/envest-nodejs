@@ -3,7 +3,6 @@ var Err = require('../../Err')
 
 var mime = require('mime')
 
-var validate = require('../validate')
 var validateId = require('../../id').validate
 
 var lwip = require('lwip')
@@ -82,7 +81,7 @@ module.exports = function (db)
 					return ensure_can_upload(id, target_user_id)
 					.then(mode =>
 					{
-						if (mode == 'mode:admin')
+						if (mode === 'mode:admin')
 						{
 							id = target_user_id
 						}
@@ -165,7 +164,7 @@ module.exports = function (db)
 	var AdminOrOwnerRequired =
 		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
 
-	function ensure_can_upload(whom_id, target_user_id)
+	function ensure_can_upload (whom_id, target_user_id)
 	{
 		return Promise.all([ db.admin.is(whom_id), db.investor.all.is(whom_id) ])
 		.then(so =>
