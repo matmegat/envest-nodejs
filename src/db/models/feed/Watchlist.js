@@ -79,8 +79,7 @@ module.exports = function Watchlist (db)
 			if ('text' in data_update)
 			{
 				validate.nullish(data_update.text, 'text')
-				validate.empty(data_update.text, 'text')
-				validate.string(data.text, 'text')
+				validate.text_field(data_update.text, 'text')
 			}
 
 			if ('motivations' in data_update)
@@ -111,8 +110,7 @@ module.exports = function Watchlist (db)
 			validate_watchlist_dir(data.dir)
 
 			validate.required(data.text, 'text')
-			validate.empty(data.text, 'text')
-			validate.string(data.text, 'text')
+			validate.text_field(data.text, 'text')
 
 			validate.required(data.symbol, 'symbol')
 			validate.empty(data.symbol, 'symbol')

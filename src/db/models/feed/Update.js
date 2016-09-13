@@ -90,13 +90,13 @@ module.exports = function Update (db)
 			if ('text' in data)
 			{
 				validate.nullish(data.text, 'text')
-				validate.empty(data.text, 'text')
+				validate.text_field(data.text, 'text')
 			}
 
 			if ('title' in data)
 			{
 				validate.nullish(data.title, 'title')
-				validate.empty(data.title, 'title')
+				validate.title_field(data.title, 'title')
 			}
 
 			if ('symbols' in data)
@@ -129,10 +129,10 @@ module.exports = function Update (db)
 		return new Promise(rs =>
 		{
 			validate.required(data.text, 'text')
-			validate.empty(data.text, 'text')
+			validate.text_field(data.text, 'text')
 
 			validate.required(data.title, 'title')
-			validate.empty(data.title, 'title')
+			validate.title_field(data.title, 'title')
 
 			validate.required(data.symbols, 'symbols')
 			validate.empty(data.symbols, 'symbols')
