@@ -90,22 +90,9 @@ module.exports = function Statics (rootpath, db, http)
 					return toss.err(rs, UploadError(err))
 				}
 
-				var id = rq.user.id
-
-				return db.admin.is(id)
-				.then(is_admin =>
-				{
-					if (is_admin)
-					{
-						id = Number(rq.body.target_user_id)
-
-						toss(rs, setter(rq.file, id, true))
-					}
-					else
-					{
-						toss(rs, setter(rq.file, id))
-					}
-				})
+				var target_user_id = Number(rq.body.target_user_id)
+				
+				toss(rs, setter(rq.file, rq.user.id, target_user_id))
 			})
 		}
 	}
