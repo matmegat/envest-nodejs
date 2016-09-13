@@ -65,7 +65,7 @@ module.exports = function Investor (db)
 				var extend_list =
 				[
 					'holdings',
-					'full_portfolio'
+					'brokerage'
 				]
 
 				return extend(r, pick(full, extend_list))
