@@ -291,15 +291,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				throw NotActualBrokerage()
 			}
 
-			var h_options = { soft_mode: true }
-
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId.quotes(
-					trx, investor_id, timestamp, h_options),
-				portfolio.holdings.byId.quotes(
-					investor_id, timestamp, h_options),
+				portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
+				portfolio.holdings.byId.quotes(investor_id, timestamp),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
@@ -317,12 +313,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 			{
 				var current_allocation
 				 = cash
-				 + sumBy(old_holdings, h => h.amount * ( h.quote_price || h.price ))
+				 + sumBy(old_holdings, h => h.amount * h.quote_price)
 				current_allocation *= multiplier
 
 				var real_allocation
 				 = new_cash
-				 + sumBy(holdings, h => h.amount * ( h.quote_price || h.price ))
+				 + sumBy(holdings, h => h.amount * h.quote_price)
 
 				multiplier = (current_allocation / real_allocation)
 			}
