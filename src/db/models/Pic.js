@@ -1,6 +1,7 @@
 
 var Err = require('../../Err')
 
+var expect = require('chai').expect
 var mime = require('mime')
 
 var lwip = require('lwip')
@@ -50,10 +51,17 @@ module.exports = function (db)
 	/* upload Investor's `post_pic` */
 	pic.uploadPostPic = upload({
 		max_size: 10 * 1024 * 1024,
-		ratio: {
-			aspect_width: 2,
-			aspect_height: 1.1
-		}
+		ratio:
+		[
+			{
+				aspect_width:  1,
+				aspect_height: 2
+			},
+			{
+				aspect_width:  2,
+				aspect_height: 1
+			}
+		]
 	})
 
 	var static = db.static
@@ -225,27 +233,96 @@ var WrongAspect = Err('wrong_aspect_ratio', 'Wrong Aspect Ratio')
 
 function validate_aspect (img, ratio)
 {
+	return with_image(img)
+	.then(image =>
+	{
+		if (aspectish(ratio))
+		{
+			return aspect_strict(image, ratio)
+		}
+		if (Array.isArray(ratio))
+		{
+			var ratio_tall = ratio[0]
+			var ratio_wide = ratio[1]
+
+			if (aspectish(ratio_tall) && aspectish(ratio_wide))
+			{
+				return aspect_range(image, ratio_tall, ratio_wide)
+			}
+		}
+
+		throw TypeError('wrong_aspect_settings')
+	})
+}
+
+function aspectish (ratio)
+{
+	return Boolean(ratio.aspect_width && ratio.aspect_height)
+}
+
+
+function aspect_strict (image, ratio)
+{
+	var aspect_ratio = round(ratio.aspect_width / ratio.aspect_height, 1)
+	var real_ratio   = round(image.width() / image.height(), 1)
+
+	if (aspect_ratio !== real_ratio)
+	{
+		throw WrongAspect({
+			actual:   real_ratio,
+			expected: aspect_ratio
+		})
+	}
+}
+
+function aspect_range (image, ratio_tall, ratio_wide)
+{
+	var tall = ratio_tall.aspect_width / ratio_tall.aspect_height
+	var wide = ratio_wide.aspect_width / ratio_wide.aspect_height
+
+	expect(tall < wide).true
+
+	var real_ratio = image.width() / image.height()
+
+	if (real_ratio < tall)
+	{
+		fail()
+	}
+	if (wide < real_ratio)
+	{
+		fail()
+	}
+
+	return
+
+	function fail ()
+	{
+		throw WrongAspect({
+			actual: real_ratio,
+			expected_between: [ tall, wide ]
+		})
+	}
+}
+
+
+function with_image (img)
+{
+	expect(img).an('object')
+	expect(img.buffer).ok
+	expect(img.mimetype).ok
+
 	return new Promise((rs, rj) =>
 	{
-		lwip.open(img.buffer,
-			mime.extension(img.mimetype),
-			(err, image) =>
+		lwip.open(img.buffer, mime.extension(img.mimetype), (error, image) =>
 		{
-			if (err)
+			if (error)
 			{
-				return rj(LwipError(err))
+				return rj(LwipError(error))
 			}
-
-			var aspect_ratio =
-				round(ratio.aspect_width / ratio.aspect_height, 1)
-			var real_ratio = round(image.width() / image.height(), 1)
-
-			if ( aspect_ratio !== real_ratio )
+			else
 			{
-				return rj(WrongAspect())
+				return rs(image)
 			}
-
-			return rs()
 		})
 	})
 }
