@@ -20,3 +20,8 @@ if (! symbol)
 
 symbols.resolve(symbol)
 .then(console.log, console.error)
+.then(() =>
+{
+	return symbols.quotes(symbol)
+})
+.then(console.log, console.error)
