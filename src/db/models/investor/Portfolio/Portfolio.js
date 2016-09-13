@@ -47,7 +47,6 @@ module.exports = function Portfolio (db, investor)
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
 		var for_date = moment.utc().format()
-		var h_options = { soft_mode: true }
 
 		return new Promise(rs =>
 		{
@@ -65,7 +64,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return Promise.all([
 				brokerage.byId(trx, investor_id, for_date),
-				 holdings.byId.quotes(trx, investor_id, for_date, h_options)
+				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 		})
 		.then((values) =>
@@ -175,15 +174,13 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
-		var h_options = { soft_mode: true }
-
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				holdings.byId.quotes(trx, investor_id, for_date, h_options)
+				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 			.then(values =>
 			{

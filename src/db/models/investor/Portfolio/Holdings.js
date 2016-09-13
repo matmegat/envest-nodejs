@@ -60,12 +60,12 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date, options.soft_mode)
+			return db.symbols.quotes(symbols, for_date, options.soft)
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price && ! options.soft_mode)
+					if (! quote.price && ! options.soft)
 					{
 						throw new TypeError(
 							'Cannot recalculate Xignite Quotes failed'

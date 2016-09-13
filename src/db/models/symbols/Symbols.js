@@ -125,7 +125,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					else
 					{
 						log('XIGN Quotes fallback', symbols[i].toXign())
-						log('soft_mode', soft_mode)
 
 						return quotes_fallback_resolve(r, symbols[i], soft_mode)
 						.catch(err =>
