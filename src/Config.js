@@ -1,26 +1,15 @@
 
-var Config = module.exports = function Config (app)
-{
-	var root = app.root.partial('cfg')
-
-	var cfg = Config.process(root)
-
-	return cfg
-}
-
-
 var fs = require('fs-sync')
 var load = fs.readJSON
 var exists = fs.exists
 
 var merge = require('lodash/merge')
 
-Config.process = function (cfg_rootpath)
+var Config = module.exports = function Config (root)
 {
-	var cfg = load(cfg_rootpath('config.json'))
+	var cfg = load(root('config.json'))
 
-	var dev = cfg_rootpath('dev.json')
-
+	var dev = root('dev.json')
 	if (exists(dev))
 	{
 		console.info('applying dev config')

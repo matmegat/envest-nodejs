@@ -14,7 +14,7 @@ module.exports = function App ()
 	app.root = rootpath(__dirname, '..')
 	console.info('package at `%s`', app.root())
 
-	app.cfg  = Config(app)
+	app.cfg  = Config(app.root.partial('cfg'))
 	app.log  = Log()
 	app.mail = Mailer(app.cfg.sendgrid)
 	app.db   = Db(app)
