@@ -658,8 +658,8 @@ module.exports = function User (db, app)
 			this.whereRaw(
 				"lower(users.first_name || ' ' || users.last_name) LIKE ?",
 				pattern)
-			this.orWhere('users.email', 'like', pattern)
-			this.orWhere('email_confirms.new_email', 'like', pattern)
+			this.orWhere(
+			knex.raw('COALESCE(users.email, email_confirms.new_email) LIKE ?', pattern))
 		})
 	}
 
