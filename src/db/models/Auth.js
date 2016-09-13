@@ -73,7 +73,17 @@ module.exports = function Auth (db)
 
 	auth.emailConfirm = function (code)
 	{
-		return user.newEmailByCode(code.toLowerCase())
+		return new Promise(rs =>
+		{
+			validate.string(code, 'code')
+			validate.empty(code, 'code')
+
+			return rs()
+		})
+		.then(() =>
+		{
+			return user.newEmailByCode(code.toLowerCase())
+		})
 		.then(Err.nullish(WrongConfirmCode))
 		.then(email_confirms =>
 		{
