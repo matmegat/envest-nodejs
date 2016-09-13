@@ -5,7 +5,7 @@ var exists = fs.exists
 
 var merge = require('lodash/merge')
 
-var Config = module.exports = function Config (root)
+module.exports = function Config (root)
 {
 	var cfg = load(root('config.json'))
 
