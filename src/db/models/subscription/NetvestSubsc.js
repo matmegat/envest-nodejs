@@ -36,34 +36,40 @@ module.exports = function NetvestSubsc (db, cfg)
 			{
 				subscription_data.trial_end = 'now'
 			}
-			return netvest_subscr.stripe.customers.create(
-				subscription_data,
-				(err, customer) =>
-				{
-					if (err)
-					{
-						throw StripeError()
-					}
 
-					var subscription = customer.subscriptions.data[0]
-					var option =
+			return new Promise((rs, rj) =>
+			{
+				netvest_subscr.stripe.customers.create(
+					subscription_data,
+					(err, customer) =>
 					{
-						user_id: user_id,
-						type: subscription_data.plan,
-						stripe_customer_id: customer.id,
-						stripe_subscriber_id: subscription.id,
-						end_time: moment(subscription.current_period_end * 1000)
-						.format('YYYY-MM-DD HH:mm:ss Z')
-					}
+						if (err)
+						{
+							rj(StripeError())
+						}
+						else
+						{
+							var subscription = customer.subscriptions.data[0]
+							var option =
+							{
+								user_id: user_id,
+								type: subscription_data.plan,
+								stripe_customer_id: customer.id,
+								stripe_subscriber_id: subscription.id,
+								end_time: moment(subscription.current_period_end * 1000)
+								.format('YYYY-MM-DD HH:mm:ss Z')
+							}
 
-					return netvest_subscr.table()
-					.insert(option, 'id')
-					.then(id =>
-					{
-						return id[0] > 0
-					})
-				}
-			)
+							netvest_subscr.table()
+							.insert(option, 'id')
+							.then(id =>
+							{
+								rs(id[0] > 0)
+							})
+						}
+					}
+				)
+			})
 		})
 	}
 
