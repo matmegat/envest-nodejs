@@ -30,13 +30,12 @@ module.exports = function NetvestSubsc (db, cfg)
 
 			if (moment().isBefore(billing_start))
 			{
-				subscription_data.trial_end = billing_start / 1000
+				subscription_data.trial_end = Math.floor(billing_start / 1000)
 			}
 			else
 			{
 				subscription_data.trial_end = 'now'
 			}
-
 			return netvest_subscr.stripe.customers.create(
 				subscription_data,
 				(err, customer) =>
