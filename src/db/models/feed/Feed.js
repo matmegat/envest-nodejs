@@ -211,7 +211,10 @@ var Feed = module.exports = function Feed (db)
 				{
 					if (item.event.type === 'trade')
 					{
-						
+						var ts = item.timestamp
+						var id = item.investor_id
+
+						item.event.type.can_delete_trade = ts >= from_dates[id]
 					}
 				})
 
