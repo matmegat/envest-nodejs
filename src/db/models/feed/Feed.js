@@ -176,7 +176,7 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			var feed_ids = _.map(feed_items, 'id')
+			var feed_ids = pick_feed_ids(feed_items)
 
 			return comments
 			.countMany(feed_ids)
@@ -191,11 +191,23 @@ var Feed = module.exports = function Feed (db)
 				return transform_symbols(feed_items, symbols)
 			})
 		})
-		.then((feed_items) =>
+		.then(feed_items =>
 		{
+			var trades = feed_items.filter(item => item.event.type === 'trade')
+			var investor_ids = pick_feed_investors(trades)
+			console.log(investor_ids)
+
+			return feed_items
+		})
+		.then(feed_items =>
+		{
+			// ids
+			// unique
+			// availableDate .. ids
+
 			return investor.public.list(
 			{
-				filter: { ids: _.map(feed_items, 'investor_id').join(',') }
+				filter: { ids: pick_feed_investors(feed_items).join(',') }
 			})
 			.then((investors) =>
 			{
@@ -218,6 +230,9 @@ var Feed = module.exports = function Feed (db)
 			})
 		})
 	}
+
+	feed.list({}, 120)
+	//.then(console.log, console.error)
 
 	function update_queryset (queryset, user_id)
 	{
@@ -242,7 +257,8 @@ var Feed = module.exports = function Feed (db)
 			if (is_investor)
 			{
 				queryset.where(function ()
-				{	/* all investor post and all public posts */
+				{
+					/* all investor post and all public posts */
 					this.where('investors.is_public', true)
 					this.orWhere('feed_items.investor_id', user_id)
 				})
@@ -254,6 +270,19 @@ var Feed = module.exports = function Feed (db)
 
 			return subscr.isAble(user_id, 'multiple_investors')
 		})
+	}
+
+	function pick_feed_ids (feed_items)
+	{
+		return _.map(feed_items, 'id')
+	}
+
+	function pick_feed_investors (feed_items)
+	{
+		var ids
+		ids = _.map(feed_items, 'investor_id')
+		ids = _.uniq(ids)
+		return ids
 	}
 
 
