@@ -25,6 +25,8 @@ post:
           properties:
             text:
               type: string
+            brief:
+              type: string
             risk:
               type: string
               enum:
@@ -46,6 +48,8 @@ post:
           description: Post properties
           properties:
             text:
+              type: string
+            brief:
               type: string
             motivations:
               type: array
@@ -72,6 +76,8 @@ post:
             text: 
               type: string
               description: Update description
+            brief:
+              type: string
             pic:
               type: string
               description: Update post picture hash
