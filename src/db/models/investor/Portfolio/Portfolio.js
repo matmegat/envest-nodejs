@@ -62,8 +62,9 @@ module.exports = function Portfolio (db, investor)
 		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
+			/* TODO brokerage -> soft ? */
 			return Promise.all([
-				brokerage.byId(trx, investor_id, for_date),
+				brokerage.byId(trx, investor_id, for_date, { soft: true }),
 				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 		})
@@ -176,10 +177,14 @@ module.exports = function Portfolio (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
+			var soft = { soft: true }
+			var soft_future = Object.assign({}, soft, { future: true })
+
+			/* TODO brokerage -> soft ? */
 			return Promise.all(
 			[
-				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				brokerage.byId(trx, investor_id, for_date, soft_future),
+				holdings.byId.quotes(trx, investor_id, for_date, soft)
 			])
 			.then(values =>
 			{

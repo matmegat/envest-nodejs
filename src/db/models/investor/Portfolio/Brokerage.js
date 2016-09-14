@@ -29,7 +29,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.byId = knexed.transact(knex,
 		(trx, investor_id, for_date, options) =>
 	{
-		options = extend({ future: false }, options)
+		options = extend(
+		{
+			future: false,
+			soft:   false
+		}
+		, options)
 
 		var query = knex(raw('brokerage AS B'))
 		.transacting(trx)
@@ -74,14 +79,27 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(r =>
 		{
-			if (! r.length)
+			var exists = !! r.length
+			if (exists)
 			{
-				throw BrokerageDoesNotExist({ for_date: for_date })
+				return r[0]
 			}
-
-			return r
+			else
+			{
+				if (options.soft)
+				{
+					/* dummy */
+					return {
+						cash: index_amount_cap,
+						multiplier: 1
+					}
+				}
+				else
+				{
+					throw BrokerageDoesNotExist({ for_date: for_date })
+				}
+			}
 		})
-		.then(one)
 		.then(it =>
 		{
 			it.cash = Number(it.cash)
