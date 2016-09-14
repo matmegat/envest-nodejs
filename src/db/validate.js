@@ -257,7 +257,7 @@ validate.motivation = function validate__motivations (motivations)
 	})
 }
 
-validate.string_field = function validate__string_field(maxlength)
+validate.string_field = function validate__string_field (maxlength)
 {
 	return (string, field_name) =>
 	{
@@ -272,13 +272,6 @@ validate.string_field = function validate__string_field(maxlength)
 validate.text_field = function validate__text_field (string, field_name)
 {
 	var validate_field = validate.string_field(2000)
-
-	validate_field(string, field_name)
-}
-
-validate.brief_field = function validate__brief(string, field_name)
-{
-	var validate_field = validate.string_field(140)
 
 	validate_field(string, field_name)
 }

@@ -39,6 +39,8 @@ module.exports = function Update (db)
 					])
 				})
 
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
@@ -66,6 +68,8 @@ module.exports = function Update (db)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
@@ -92,8 +96,6 @@ module.exports = function Update (db)
 			{
 				validate.nullish(data.text, 'text')
 				validate.text_field(data.text, 'text')
-
-				data.text = sanitize.brief(data.text)
 			}
 
 			if ('title' in data)
@@ -133,8 +135,6 @@ module.exports = function Update (db)
 		{
 			validate.required(data.text, 'text')
 			validate.text_field(data.text, 'text')
-
-			data.text = sanitize.brief(data.text)
 
 			validate.required(data.title, 'title')
 			validate.title_field(data.title, 'title')

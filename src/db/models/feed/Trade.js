@@ -29,11 +29,15 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data) =>
 		{
+			data.text = sanitize(data.text)
+
 			return Promise.resolve(data)
 		},
 		remove: (trx, post) =>
@@ -80,13 +84,10 @@ function validate_trade_adds (data)
 		{
 			validate.nullish(data_update.text, 'text')
 			validate.text_field(data_update.text, 'text')
-
-			data_update.text = sanitize.brief(data_update.text)
 		}
 
 		if ('risk' in data_update)
 		{
-
 			validate.nullish(data_update.risk, 'risk')
 			validate.empty(data_update.risk, 'risk')
 			validate_risk(data_update.risk)
@@ -123,8 +124,6 @@ function validate_trade (data)
 
 		validate.required(data.text, 'text')
 		validate.text_field(data.text, 'text')
-
-		data.text = sanitize.brief(data.text)
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')

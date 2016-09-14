@@ -45,11 +45,15 @@ module.exports = function Watchlist (db)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data) =>
 		{
+			data.text = sanitize(data.text)
+
 			return Promise.resolve(data)
 		},
 		remove: () =>
@@ -81,8 +85,6 @@ module.exports = function Watchlist (db)
 			{
 				validate.nullish(data_update.text, 'text')
 				validate.text_field(data_update.text, 'text')
-
-				data_update.text = sanitize.brief(data_update.text)
 			}
 
 			if ('motivations' in data_update)
@@ -114,8 +116,6 @@ module.exports = function Watchlist (db)
 
 			validate.required(data.text, 'text')
 			validate.text_field(data.text, 'text')
-
-			data.text = sanitize.brief(data.text)
 
 			validate.required(data.symbol, 'symbol')
 			validate.empty(data.symbol, 'symbol')
