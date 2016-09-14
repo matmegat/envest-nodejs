@@ -199,14 +199,22 @@ var Feed = module.exports = function Feed (db)
 			var reqs = investor_ids.map(id =>
 			{
 				return investor.portfolio.availableDate(id)
+				.then(date => date.common.available_from)
 				.then(date => [ id, date ])
 			})
 
 			return Promise.all(reqs)
 			.then(_.fromPairs)
-			.then(console.dir)
-			.then(() =>
+			.then(from_dates =>
 			{
+				feed_items.forEach(item =>
+				{
+					if (item.event.type === 'trade')
+					{
+						
+					}
+				})
+
 				return feed_items
 			})
 		})
@@ -239,7 +247,7 @@ var Feed = module.exports = function Feed (db)
 	}
 
 	feed.list({}, 120)
-	//.then(console.log, console.error)
+	.then(console.log, console.error)
 
 	function update_queryset (queryset, user_id)
 	{
