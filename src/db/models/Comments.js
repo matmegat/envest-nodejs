@@ -131,10 +131,8 @@ module.exports = function Comments (db)
 		.then(Number)
 	}
 
-	var at  = require('lodash/fp/at')
-	var zip = _.fromPairs
-	var mapValues = _.mapValues
-	var toNumber = _.toNumber
+	var find = require('lodash/find')
+	var fromPairs = _.fromPairs
 
 	comments.countMany = function (feed_ids)
 	{
@@ -145,13 +143,25 @@ module.exports = function Comments (db)
 		.groupBy('feed_id')
 		.then(seq =>
 		{
-			seq = seq.map(at([ 'feed_id', 'count' ]))
+			var counts = feed_ids.map(id =>
+			{
+				var c = find(seq, [ 'feed_id', id ])
 
-			seq = zip(seq)
+				if (c)
+				{
+					c = Number(c.count)
+				}
+				else
+				{
+					c = 0
+				}
 
-			seq = mapValues(seq, toNumber)
+				return [ id, c ]
+			})
 
-			return seq
+			counts = fromPairs(counts)
+
+			return counts
 		})
 	}
 
