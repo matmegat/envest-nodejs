@@ -214,7 +214,7 @@ var Feed = module.exports = function Feed (db)
 						var ts = item.timestamp
 						var id = item.investor_id
 
-						item.event.type.can_delete_trade = ts >= from_dates[id]
+						item.event.can_delete_trade = ts >= from_dates[id]
 					}
 				})
 
@@ -250,7 +250,10 @@ var Feed = module.exports = function Feed (db)
 	}
 
 	feed.list({}, 120)
-	.then(console.log, console.error)
+	.then(it =>
+	{
+		console.dir(_.map(it.feed, 'event'))
+	}, console.error)
 
 	function update_queryset (queryset, user_id)
 	{
