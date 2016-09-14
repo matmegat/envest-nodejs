@@ -11,6 +11,7 @@ post:
     required: true
     schema:
       type: object
+      title: Post model
       properties:
         type:
           type: string
@@ -19,9 +20,12 @@ post:
           type: string
           format: date-time
           description: Post date
-        trade_data:
+        data:
           type: object
-          description: Post properties
+          description: '= **oneOf**(TradeData, WatchlistData, UpdateData)'
+        TradeData:
+          type: object
+          title: data = TradeData
           properties:
             dir:
               description: Type of trade operation
@@ -49,14 +53,18 @@ post:
               - high
             motivations:
               type: array
+              description: Motivation
               items:
                 type: object
-                description: Motivation
+                title: Motivation
                 properties:
                   id:
                     type: integer
                   text:
                     type: string
+                required:
+                - id
+                - text
           required:
           - dir
           - symbol
@@ -65,9 +73,9 @@ post:
           - text
           - risk
           - motivations
-        watchlist_data:
+        WatchlistData:
           type: object
-          description: Post properties
+          title: data = WatchlistData
           properties:
             dir:
               description: Type of watchlist operation
@@ -86,23 +94,27 @@ post:
               type: string
             motivations:
               type: array
+              description: Motivation
               items:
                 type: object
-                description: Motivation
+                title: Motivation
                 properties:
                   id:
                     type: integer
                   text:
                     type: string
+                required:
+                - id
+                - text
           required:
           - dir
           - symbol
           - target_price
           - text
           - motivations
-        update_data:
+        UpdateData:
           type: object
-          description: Post properties
+          title: data = UpdateData
           properties:
             symbols:
               type: array
