@@ -214,7 +214,7 @@ var Feed = module.exports = function Feed (db)
 						var ts = item.timestamp
 						var id = item.investor_id
 
-						item.event.can_delete_trade = ts >= from_dates[id]
+						item.event.data.can_delete_trade = ts >= from_dates[id]
 					}
 				})
 
