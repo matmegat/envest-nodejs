@@ -53,14 +53,18 @@ post:
               - high
             motivations:
               type: array
+              description: Motivation
               items:
                 type: object
-                description: Motivation
+                title: Motivation
                 properties:
                   id:
                     type: integer
                   text:
                     type: string
+                required:
+                - id
+                - text
           required:
           - dir
           - symbol
@@ -90,14 +94,18 @@ post:
               type: string
             motivations:
               type: array
+              description: Motivation
               items:
                 type: object
-                description: Motivation
+                title: Motivation
                 properties:
                   id:
                     type: integer
                   text:
                     type: string
+                required:
+                - id
+                - text
           required:
           - dir
           - symbol
