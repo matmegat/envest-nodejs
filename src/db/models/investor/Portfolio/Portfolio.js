@@ -13,6 +13,9 @@ var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
 
+var max = require('lodash/max')
+var maxBy = require('lodash/maxBy')
+
 var find = require('lodash/find')
 var findLast = require('lodash/findLast')
 
@@ -672,9 +675,21 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(r =>
 		{
+			var dates_symbols  = r[0]
+			var date_brokerage = r[1]
+
+			var max_symbols = maxBy(dates_symbols, 'available_from').available_from
+			var max_common  = max([ max_symbols, date_brokerage ])
+
+			var date_common =
+			{
+				available_from: max_common
+			}
+
 			return {
-				symbols:   r[0],
-				brokerage: r[1]
+				symbols:   dates_symbols,
+				brokerage: date_brokerage,
+				common:    date_common
 			}
 		})
 	})

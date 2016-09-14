@@ -18,7 +18,7 @@ get:
             type: array
             items:
               type: object
-              title: Symbol entry
+              title: Symbol entry (for Onboarding Holdings)
               properties:
                 symbol:
                   type: object
@@ -42,7 +42,17 @@ get:
 
           brokerage:
             type: object
-            title: Brokerage entry
+            title: Brokerage entry (for Onboarding Brokerage)
+            properties:
+              available_from:
+                type: string
+                format: date-time
+            required:
+            - available_from
+
+          common:
+            type: object
+            title: common date (for operations with Portfolio)
             properties:
               available_from:
                 type: string
