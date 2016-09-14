@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 
 module.exports = function Watchlist (db)
 {
@@ -62,7 +63,7 @@ module.exports = function Watchlist (db)
 		var data_update = pick(data,
 		[
 			'text',
-			'plain_text',
+			'brief',
 			'motivations'
 		])
 
@@ -81,12 +82,14 @@ module.exports = function Watchlist (db)
 			{
 				validate.nullish(data_update.text, 'text')
 				validate.text_field(data_update.text, 'text')
+
+				data_update.text = sanitize.brief(data_update.text)
 			}
 
-			if ('plain_text' in data_update)
+			if ('brief' in data_update)
 			{
-				validate.nullish(data_update.plain_text, 'plain_text')
-				validate.plain_text_field(data_update.plain_text, 'plain_text')
+				validate.nullish(data_update.brief, 'brief')
+				validate.brief_field(data_update.brief, 'brief')
 			}
 
 			if ('motivations' in data_update)
@@ -105,7 +108,7 @@ module.exports = function Watchlist (db)
 			'dir',
 			'symbol',
 			'text',
-			'plain_text',
+			'brief',
 			'target_price',
 			'motivations'
 		])
@@ -120,8 +123,10 @@ module.exports = function Watchlist (db)
 			validate.required(data.text, 'text')
 			validate.text_field(data.text, 'text')
 
-			validate.required(data.plain_text, 'plain_text')
-			validate.plain_text_field(data.plain_text, 'plain_text')
+			data.text = sanitize.brief(data.text)
+
+			validate.required(data.brief, 'brief')
+			validate.brief_field(data.brief, 'brief')
 
 			validate.required(data.symbol, 'symbol')
 			validate.empty(data.symbol, 'symbol')

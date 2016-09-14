@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 
 module.exports = function Trade (portfolio, symbols)
 {
@@ -59,7 +60,7 @@ function validate_trade_adds (data)
 	var data_update = pick(data,
 	[
 		'text',
-		'plain_text',
+		'brief',
 		'risk',
 		'motivations'
 	])
@@ -80,12 +81,14 @@ function validate_trade_adds (data)
 		{
 			validate.nullish(data_update.text, 'text')
 			validate.text_field(data_update.text, 'text')
+
+			data_update.text = sanitize.brief(data_update.text)
 		}
 
-		if ('plain_text' in data_update)
+		if ('brief' in data_update)
 		{
-			validate.nullish(data_update.plain_text, 'plain_text')
-			validate.plain_text_field(data_update.plain_text, 'plain_text')
+			validate.nullish(data_update.brief, 'brief')
+			validate.brief_field(data_update.brief, 'brief')
 		}
 
 		if ('risk' in data_update)
@@ -114,7 +117,7 @@ function validate_trade (data)
 		'price',
 		'amount',
 		'text',
-		'plain_text',
+		'brief',
 		'risk',
 		'motivations'
 	])
@@ -129,8 +132,10 @@ function validate_trade (data)
 		validate.required(data.text, 'text')
 		validate.text_field(data.text, 'text')
 
-		validate.required(data.plain_text, 'plain_text')
-		validate.plain_text_field(data.plain_text, 'plain_text')
+		data.text = sanitize.brief(data.text)
+
+		validate.required(data.brief, 'brief')
+		validate.brief_field(data.brief, 'brief')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')

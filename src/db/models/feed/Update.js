@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 var Err = require('../../../Err')
 
 var Symbl = require('../symbols/Symbl')
@@ -81,7 +82,7 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
-			'plain_text',
+			'brief',
 			'pic',
 			'chart'
 		])
@@ -92,12 +93,14 @@ module.exports = function Update (db)
 			{
 				validate.nullish(data.text, 'text')
 				validate.text_field(data.text, 'text')
+
+				data.text = sanitize.brief(data.text)
 			}
 
-			if ('plain_text' in data)
+			if ('brief' in data)
 			{
-				validate.nullish(data.plain_text, 'plain_text')
-				validate.plain_text_field(data.plain_text, 'plain_text')
+				validate.nullish(data.brief, 'brief')
+				validate.brief_field(data.brief, 'brief')
 			}
 
 			if ('title' in data)
@@ -129,7 +132,7 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
-			'plain_text',
+			'brief',
 			'pic',
 			'chart'
 		])
@@ -139,8 +142,10 @@ module.exports = function Update (db)
 			validate.required(data.text, 'text')
 			validate.text_field(data.text, 'text')
 
-			validate.required(data.plain_text, 'plain_text')
-			validate.plain_text_field(data.plain_text, 'plain_text')
+			data.text = sanitize.brief(data.text)
+
+			validate.required(data.brief, 'brief')
+			validate.brief_field(data.brief, 'brief')
 
 			validate.required(data.title, 'title')
 			validate.title_field(data.title, 'title')

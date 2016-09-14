@@ -276,7 +276,7 @@ validate.text_field = function validate__text_field (string, field_name)
 	validate_field(string, field_name)
 }
 
-validate.plain_text_field = function validate__plain_text(string, field_name)
+validate.brief_field = function validate__brief(string, field_name)
 {
 	var validate_field = validate.string_field(140)
 
