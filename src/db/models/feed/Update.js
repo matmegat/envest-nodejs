@@ -82,7 +82,6 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
-			'brief',
 			'pic',
 			'chart'
 		])
@@ -95,12 +94,6 @@ module.exports = function Update (db)
 				validate.text_field(data.text, 'text')
 
 				data.text = sanitize.brief(data.text)
-			}
-
-			if ('brief' in data)
-			{
-				validate.nullish(data.brief, 'brief')
-				validate.brief_field(data.brief, 'brief')
 			}
 
 			if ('title' in data)
@@ -132,7 +125,6 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
-			'brief',
 			'pic',
 			'chart'
 		])
@@ -143,9 +135,6 @@ module.exports = function Update (db)
 			validate.text_field(data.text, 'text')
 
 			data.text = sanitize.brief(data.text)
-
-			validate.required(data.brief, 'brief')
-			validate.brief_field(data.brief, 'brief')
 
 			validate.required(data.title, 'title')
 			validate.title_field(data.title, 'title')

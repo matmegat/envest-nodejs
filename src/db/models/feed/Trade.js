@@ -60,7 +60,6 @@ function validate_trade_adds (data)
 	var data_update = pick(data,
 	[
 		'text',
-		'brief',
 		'risk',
 		'motivations'
 	])
@@ -83,12 +82,6 @@ function validate_trade_adds (data)
 			validate.text_field(data_update.text, 'text')
 
 			data_update.text = sanitize.brief(data_update.text)
-		}
-
-		if ('brief' in data_update)
-		{
-			validate.nullish(data_update.brief, 'brief')
-			validate.brief_field(data_update.brief, 'brief')
 		}
 
 		if ('risk' in data_update)
@@ -117,7 +110,6 @@ function validate_trade (data)
 		'price',
 		'amount',
 		'text',
-		'brief',
 		'risk',
 		'motivations'
 	])
@@ -133,9 +125,6 @@ function validate_trade (data)
 		validate.text_field(data.text, 'text')
 
 		data.text = sanitize.brief(data.text)
-
-		validate.required(data.brief, 'brief')
-		validate.brief_field(data.brief, 'brief')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')

@@ -63,7 +63,6 @@ module.exports = function Watchlist (db)
 		var data_update = pick(data,
 		[
 			'text',
-			'brief',
 			'motivations'
 		])
 
@@ -86,12 +85,6 @@ module.exports = function Watchlist (db)
 				data_update.text = sanitize.brief(data_update.text)
 			}
 
-			if ('brief' in data_update)
-			{
-				validate.nullish(data_update.brief, 'brief')
-				validate.brief_field(data_update.brief, 'brief')
-			}
-
 			if ('motivations' in data_update)
 			{
 				validate.motivation(data_update.motivations)
@@ -108,7 +101,6 @@ module.exports = function Watchlist (db)
 			'dir',
 			'symbol',
 			'text',
-			'brief',
 			'target_price',
 			'motivations'
 		])
@@ -124,9 +116,6 @@ module.exports = function Watchlist (db)
 			validate.text_field(data.text, 'text')
 
 			data.text = sanitize.brief(data.text)
-
-			validate.required(data.brief, 'brief')
-			validate.brief_field(data.brief, 'brief')
 
 			validate.required(data.symbol, 'symbol')
 			validate.empty(data.symbol, 'symbol')
