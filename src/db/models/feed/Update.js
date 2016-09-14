@@ -81,6 +81,7 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
+			'plain_text',
 			'pic',
 			'chart'
 		])
@@ -91,6 +92,12 @@ module.exports = function Update (db)
 			{
 				validate.nullish(data.text, 'text')
 				validate.text_field(data.text, 'text')
+			}
+
+			if ('plain_text' in data)
+			{
+				validate.nullish(data.plain_text, 'plain_text')
+				validate.plain_text_field(data.plain_text, 'plain_text')
 			}
 
 			if ('title' in data)
@@ -122,6 +129,7 @@ module.exports = function Update (db)
 			'symbols',
 			'title',
 			'text',
+			'plain_text',
 			'pic',
 			'chart'
 		])
@@ -130,6 +138,9 @@ module.exports = function Update (db)
 		{
 			validate.required(data.text, 'text')
 			validate.text_field(data.text, 'text')
+
+			validate.required(data.plain_text, 'plain_text')
+			validate.plain_text_field(data.plain_text, 'plain_text')
 
 			validate.required(data.title, 'title')
 			validate.title_field(data.title, 'title')

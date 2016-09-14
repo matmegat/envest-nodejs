@@ -257,22 +257,37 @@ validate.motivation = function validate__motivations (motivations)
 	})
 }
 
+validate.string_field = function validate__string_field(maxlength)
+{
+	return (string, field_name) =>
+	{
+		var validate_text_length = validate.length(maxlength)
+
+		validate.empty(string, field_name)
+		validate.string(string, field_name)
+		validate_text_length(string, field_name)
+	}
+}
+
 validate.text_field = function validate__text_field (string, field_name)
 {
-	var validate_text_length = validate.length(2000)
+	var validate_field = validate.string_field(2000)
 
-	validate.empty(string, field_name)
-	validate.string(string, field_name)
-	validate_text_length(string, field_name)
+	validate_field(string, field_name)
+}
+
+validate.plain_text_field = function validate__plain_text(string, field_name)
+{
+	var validate_field = validate.string_field(140)
+
+	validate_field(string, field_name)
 }
 
 validate.title_field = function validate__title_field (string, field_name)
 {
-	var validate_title_length = validate.length(140)
+	var validate_field = validate.string_field(140)
 
-	validate.empty(string, field_name)
-	validate.string(string, field_name)
-	validate_title_length(string, field_name)
+	validate_field(string, field_name)
 }
 
 var XRegExp = require('xregexp')
