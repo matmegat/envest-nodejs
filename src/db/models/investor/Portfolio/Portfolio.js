@@ -177,14 +177,11 @@ module.exports = function Portfolio (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			var soft = { soft: true }
-			var soft_future = Object.assign({}, soft, { future: true })
-
-			/* TODO brokerage -> soft ? */
+			/* TODO actually, there's a catch down there */
 			return Promise.all(
 			[
-				brokerage.byId(trx, investor_id, for_date, soft_future),
-				holdings.byId.quotes(trx, investor_id, for_date, soft)
+				brokerage.byId(trx, investor_id, for_date, { future: true }),
+				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 			.then(values =>
 			{
