@@ -193,7 +193,7 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then((feed_items) =>
 		{
-			return investor.public.list(
+			return investor.all.list(
 			{
 				filter: { ids: _.map(feed_items, 'investor_id').join(',') }
 			})
