@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 
 module.exports = function Watchlist (db)
 {
@@ -44,11 +45,15 @@ module.exports = function Watchlist (db)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data) =>
 		{
+			data.text = sanitize(data.text)
+
 			return Promise.resolve(data)
 		},
 		remove: () =>

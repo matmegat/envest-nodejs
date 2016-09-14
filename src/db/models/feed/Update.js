@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 var Err = require('../../../Err')
 
 var Symbl = require('../symbols/Symbl')
@@ -38,6 +39,8 @@ module.exports = function Update (db)
 					])
 				})
 
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
@@ -65,6 +68,8 @@ module.exports = function Update (db)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},

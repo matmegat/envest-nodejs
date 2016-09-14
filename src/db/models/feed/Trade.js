@@ -4,6 +4,7 @@ var Type = require('./Type')
 var pick = require('lodash/pick')
 
 var validate = require('../../validate')
+var sanitize = require('../../../sanitize')
 
 module.exports = function Trade (portfolio, symbols)
 {
@@ -28,11 +29,15 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(() =>
 			{
+				data.text = sanitize(data.text)
+
 				return data
 			})
 		},
 		update: (trx, investor_id, type, date, data) =>
 		{
+			data.text = sanitize(data.text)
+
 			return Promise.resolve(data)
 		},
 		remove: (trx, post) =>
@@ -83,7 +88,6 @@ function validate_trade_adds (data)
 
 		if ('risk' in data_update)
 		{
-
 			validate.nullish(data_update.risk, 'risk')
 			validate.empty(data_update.risk, 'risk')
 			validate_risk(data_update.risk)
