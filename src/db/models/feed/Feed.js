@@ -249,12 +249,6 @@ var Feed = module.exports = function Feed (db)
 		})
 	}
 
-	feed.list({}, 120)
-	.then(it =>
-	{
-		console.dir(_.map(it.feed, 'event'))
-	}, console.error)
-
 	function update_queryset (queryset, user_id)
 	{
 		return Promise.all(
