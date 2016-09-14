@@ -195,16 +195,23 @@ var Feed = module.exports = function Feed (db)
 		{
 			var trades = feed_items.filter(item => item.event.type === 'trade')
 			var investor_ids = pick_feed_investors(trades)
-			console.log(investor_ids)
 
-			return feed_items
+			var reqs = investor_ids.map(id =>
+			{
+				return investor.portfolio.availableDate(id)
+				.then(date => [ id, date ])
+			})
+
+			return Promise.all(reqs)
+			.then(_.fromPairs)
+			.then(console.dir)
+			.then(() =>
+			{
+				return feed_items
+			})
 		})
 		.then(feed_items =>
 		{
-			// ids
-			// unique
-			// availableDate .. ids
-
 			return investor.public.list(
 			{
 				filter: { ids: pick_feed_investors(feed_items).join(',') }
