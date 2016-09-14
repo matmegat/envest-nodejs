@@ -131,7 +131,7 @@ var Feed = module.exports = function Feed (db)
 
 		queryset = filter(queryset, options.filter)
 
-		var count_queryset = queryset.clone()
+		var count_queryset
 
 		var paginator
 
@@ -154,13 +154,13 @@ var Feed = module.exports = function Feed (db)
 				{
 					queryset
 					.where('investor_id', item.investor_id)
-
-					count_queryset = queryset.clone()
 				})
 			}
 		})
 		.then(() =>
 		{
+			count_queryset = queryset.clone()
+
 			queryset = sorter.sort(queryset)
 		})
 		.then(() =>
