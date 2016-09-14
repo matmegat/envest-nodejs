@@ -41,8 +41,6 @@ post:
               minimum: 0
             text:
               type: string
-            brief:
-              type: string
             risk:
               type: string
               enum:
@@ -65,7 +63,6 @@ post:
           - price
           - amount
           - text
-          - brief
           - risk
           - motivations
         watchlist_data:
@@ -87,8 +84,6 @@ post:
               minimum: 0
             text:
               type: string
-            brief:
-              type: string
             motivations:
               type: array
               items:
@@ -104,7 +99,6 @@ post:
           - symbol
           - target_price
           - text
-          - brief
           - motivations
         update_data:
           type: object
@@ -120,8 +114,7 @@ post:
               description: Update title
             text:
               type: string
-            brief:
-              type: string
+              description: Update description
             pic:
               type: string
               description: Update post picture hash
@@ -131,7 +124,6 @@ post:
           - symbols
           - title
           - text
-          - brief
       required:
       - type
       - data
