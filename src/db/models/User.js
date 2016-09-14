@@ -118,6 +118,7 @@ module.exports = function User (db, app)
 				knex.raw(
 					'COALESCE(users.email, email_confirms.new_email) AS email'),
 				'users.pic AS pic',
+				'users.created_at',
 				'investors.user_id AS investor_user_id',
 				'investors.profile_pic AS profile_pic',
 				'investors.profession AS profession',
@@ -183,7 +184,8 @@ module.exports = function User (db, app)
 				'first_name',
 				'last_name',
 				'email',
-				'pic'
+				'pic',
+				'created_at'
 			])
 
 			user_data.subscription = pick(result,
