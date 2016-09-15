@@ -1,6 +1,7 @@
 
 var extend = require('lodash/extend')
 var wrap = require('lodash/wrap')
+var pick = require('lodash/pick')
 
 var generate_code = require('../../../crypto-helpers').generate_code
 
@@ -58,10 +59,16 @@ module.exports = function Investor (db)
 		.then(r =>
 		{
 			/* this info accessible for admin only */
-			return investor.portfolio.full(id)
+			return investor.portfolio.byId(id, { extended: true })
 			.then(full =>
 			{
-				return extend(r, full)
+				var extend_list =
+				[
+					'holdings',
+					'brokerage'
+				]
+
+				return extend(r, pick(full, extend_list))
 			})
 		})
 	})

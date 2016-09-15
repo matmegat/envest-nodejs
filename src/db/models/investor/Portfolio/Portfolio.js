@@ -1,6 +1,5 @@
 
 var pick = require('lodash/pick')
-var omit = require('lodash/omit')
 var get = require('lodash/get')
 var values = require('lodash/values')
 var any = require('lodash/some')
@@ -49,14 +48,28 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
-	portfolio.byId = knexed.transact(knex, (trx, investor_id) =>
+	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
-		return investor.public.ensure(investor_id, trx)
+		var for_date = moment.utc().format()
+
+		return new Promise(rs =>
+		{
+			if (options.extended)
+			{
+				return rs(investor.all)
+			}
+			else
+			{
+				return rs(investor.public)
+			}
+		})
+		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
+			/* TODO brokerage -> soft ? */
 			return Promise.all([
-				brokerage.byId(trx, investor_id),
-				 holdings.byId(trx, investor_id)
+				brokerage.byId(trx, investor_id, for_date, { soft: true }),
+				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 		})
 		.then((values) =>
@@ -64,76 +77,58 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			holdings.forEach(holding =>
+			var pick_list = ['symbol', 'allocation', 'gain']
+			if (options.extended)
+			{
+				pick_list = pick_list.concat(['price', 'amount'])
+			}
+
+			holdings = holdings.map((holding) =>
 			{
 				holding.allocation
-				 = holding.amount * holding.price * brokerage.multiplier
-			})
+				 = holding.real_allocation * brokerage.multiplier
 
-			return db.symbols.quotes(holdings.map(holding =>
-			{
-				return [ holding.symbol_ticker, holding.symbol_exchange ]
-			}))
-			.then((quoted_symbols) =>
-			{
-				holdings = quoted_symbols.map((quoted_symbol, i) =>
+				if (! holding.quote_price)
 				{
-					var holding = holdings[i]
-
-					/* TODO */
-					/* soft-mode? holdings.byId.quotes */
-					if (quoted_symbol == null)
-					{
-						holding.symbol = Symbl(
-						[
-							holding.symbol_ticker,
-							holding.symbol_exchange
-						])
-						.toFull()
-
-						holding.gain = 0
-					}
-					else
-					{
-						holding.symbol = quoted_symbol.symbol
-
-						/* calculated percentage */
-						/* TODO maybe wrong gain */
-						holding.gain
-						 = (quoted_symbol.price / holding.price - 1 ) * 100
-					}
-
-					return pick(holding,
-					[
-						'symbol',
-						'allocation',
-						'gain'
-					])
-				})
-
-
-				var total = holdings.length
-
-				holdings = orderBy(holdings, 'allocation', 'desc')
-
-				/* full = cash + holdings */
-				var full_value
-				 = brokerage.cash * brokerage.multiplier
-				 + sumBy(holdings, 'allocation')
-
-				/* avg gain */
-				var gain = sumBy(holdings, 'gain') / total
-
-				return {
-					total:    total,
-					holdings: holdings,
-					full_portfolio:
-					{
-						value: full_value,
-						gain:  gain
-					}
+					holding.gain = null
 				}
+				else
+				{
+					holding.gain
+					 = (holding.quote_price / holding.price - 1 ) * 100
+				}
+
+				return pick(holding, pick_list)
 			})
+
+			holdings = orderBy(holdings, 'allocation', 'desc')
+
+			var full_value
+			 = brokerage.cash * brokerage.multiplier
+			 + sumBy(holdings, 'allocation')
+
+			var real_value
+			 = brokerage.cash * brokerage.multiplier
+			 + sumBy(holdings, 'real_allocation') * brokerage.multiplier
+
+			var gain = ( full_value / real_value - 1 ) * 100
+
+			var resp = {
+				total:    holdings.length,
+				holdings: holdings,
+				full_portfolio:
+				{
+					value: full_value,
+					gain:  gain
+				}
+			}
+
+			if (options.extended)
+			{
+				resp.brokerage = brokerage
+			}
+
+			return resp
 		})
 	})
 
@@ -186,10 +181,11 @@ module.exports = function Portfolio (db, investor)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
+			/* TODO actually, there's a catch down there */
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				portfolio.holdings.byId.quotes(trx, investor_id, for_date)
+				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
 			])
 			.then(values =>
 			{
@@ -198,11 +194,7 @@ module.exports = function Portfolio (db, investor)
 
 				var holdings = values[1]
 
-				var allocation
-				 = cash
-				 + sumBy(holdings, h => h.amount * h.price)
-
-				allocation *= multiplier
+				var allocation = cash + sumBy(holdings, 'real_allocation')
 
 				return {
 					real:    allocation,
@@ -221,45 +213,6 @@ module.exports = function Portfolio (db, investor)
 			})
 		})
 	})
-
-
-	portfolio.full = function (investor_id)
-	{
-		return investor.all.ensure(investor_id)
-		.then(() =>
-		{
-			return Promise.all([
-				brokerage.byId(investor_id),
-				 holdings.byId(investor_id)
-			])
-		})
-		.then((values) =>
-		{
-			var brokerage = values[0]
-			var holdings  = values[1]
-
-			holdings = holdings.map(holding =>
-			{
-				/* TODO rm */
-				holding.allocation
-				 = holding.amount * holding.price * brokerage.multiplier
-
-				holding.symbol =
-				{
-					ticker: holding.symbol_ticker,
-					exchange: holding.symbol_exchange,
-					company: null
-				}
-
-				return omit(holding, 'symbol_ticker', 'symbol_exchange')
-			})
-
-			return {
-				brokerage: brokerage,
-				holdings:  holdings
-			}
-		})
-	}
 
 
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
