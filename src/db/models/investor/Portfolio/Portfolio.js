@@ -247,6 +247,29 @@ module.exports = function Portfolio (db, investor)
 	function grid (trx, investor_id, resolution)
 	{
 		return grid_ir(trx, investor_id, resolution)
+		.then(chart =>
+		{
+			if (chart.utc_offset)
+			{
+				var utc_offset = chart.utc_offset
+				delete chart.utc_offset
+			}
+
+			chart = chart.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
+			})
+
+			if (utc_offset)
+			{
+				chart.utc_offset = utc_offset
+			}
+
+			return chart
+		})
 	}
 
 	function grid_ir (trx, investor_id, resolution)
@@ -263,6 +286,8 @@ module.exports = function Portfolio (db, investor)
 		.then(grids =>
 		{
 			var grid = {}
+
+			grid.resolution = resolution
 
 			grid.holdings  = grids[0]
 			grid.brokerage = grids[1]
@@ -283,7 +308,7 @@ module.exports = function Portfolio (db, investor)
 				/* correct range to trading hours */
 				range = find_market_open(range, superseries, resolution)
 
-				if (1)
+				if (0)
 				{
 					console.dir(grid)
 					console.log('--- holdings:')
@@ -309,7 +334,7 @@ module.exports = function Portfolio (db, investor)
 					}
 				}
 
-				var compiled = []
+				var chart = []
 
 				// range.by('days', it =>
 				grid_iterator(range, resolution, it =>
@@ -340,7 +365,7 @@ module.exports = function Portfolio (db, investor)
 
 					total = round(total, 3)
 
-					compiled.push([ moment(iso).utc().format(), total ])
+					chart.push([ moment(iso).utc().format(), total ])
 				})
 
 				if (resolution === 'intraday')
@@ -354,35 +379,11 @@ module.exports = function Portfolio (db, investor)
 
 					utc_offset = min(utc_offset)
 
-					compiled.utc_offset = utc_offset
+					chart.utc_offset = utc_offset
 				}
 
-				return compiled
+				return chart
 			})
-		})
-		// for routes ~~~ :
-		.then(grid =>
-		{
-			if (grid.utc_offset)
-			{
-				var utc_offset = grid.utc_offset
-				delete grid.utc_offset
-			}
-
-			grid = grid.map(entry =>
-			{
-				return {
-					timestamp: entry[0],
-					value: entry[1]
-				}
-			})
-
-			if (utc_offset)
-			{
-				grid.utc_offset = utc_offset
-			}
-
-			return grid
 		})
 	}
 
