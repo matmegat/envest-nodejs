@@ -242,7 +242,14 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	portfolio.grid(120)
+
 	function grid (trx, investor_id, resolution)
+	{
+		return grid_ir(trx, investor_id, resolution)
+	}
+
+	function grid_ir (trx, investor_id, resolution)
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -276,7 +283,7 @@ module.exports = function Portfolio (db, investor)
 				/* correct range to trading hours */
 				range = find_market_open(range, superseries, resolution)
 
-				if (0)
+				if (1)
 				{
 					console.dir(grid)
 					console.log('--- holdings:')
