@@ -160,6 +160,10 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_id) =>
 		{
+			return investor.updateStartDate(investor_id, 'user_id')
+		})
+		.then((investor_id) =>
+		{
 			PublicChanged(investor_id, {
 				by: 'admin',
 				admin: [ ':user-id', whom_id ]

@@ -157,10 +157,20 @@ module.exports = function Investor (db)
 		{
 			return investor.table(trx)
 			.where('user_id', id)
-			.update({
-			is_public: value,
-			start_date: knex.fn.now()
-			}, returning)
+			.update('is_public', value, returning)
+		})
+		.then(one)
+	})
+
+	investor.updateStartDate = knexed.transact(knex, (trx, id, returning) =>
+	{
+		return investor.all.ensure(id)
+		.then(() =>
+		{
+			return investor.table(trx)
+			.where('user_id', id)
+			.update('start_date', knex.fn.now(),
+			returning)
 		})
 		.then(one)
 	})
