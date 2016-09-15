@@ -159,24 +159,28 @@ module.exports = function (db, http)
 	})
 
 	var csv_uploader = multer().single('csv')
-	var UploadError = Err('upload_error', 'Upload error')
 
-	investors.express.post('/:id/parse-csv', authRequired, (rq, rs) =>
+	investors.express.post(
+		'/:id/parse-csv', authRequired, csv_uploader, (rq, rs) =>
 	{
-		csv_uploader(rq, rs, (err) =>
-		{
-			if (err)
-			{
-				return toss.err(rs, UploadError(err))
-			}
+		var investor_id = rq.params.id
+		var csv = rq.file
 
-			var investor_id = rq.params.id
-			var csv = rq.file
+		var portfolio = investors.model.portfolio
 
-			var portfolio = investors.model.portfolio
+		toss(rs, portfolio.parseCsv(investor_id, csv))
+	})
 
-			toss(rs, portfolio.parseCsv(investor_id, csv))
-		})
+	investors.express.post(
+		'/:id/upload-history', authRequired, csv_uploader, (rq, rs) =>
+	{
+		var investor_id = rq.params.id
+		var whom_id = rq.user.id
+		var csv = rq.file
+
+		var portfolio = investors.model.portfolio
+
+		toss(rs, portfolio.uploadHistoryAs(investor_id, whom_id, csv))
 	})
 
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
