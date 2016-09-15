@@ -157,7 +157,10 @@ module.exports = function Investor (db)
 		{
 			return investor.table(trx)
 			.where('user_id', id)
-			.update('is_public', value, returning)
+			.update({
+			is_public: value,
+			start_date: knex.fn.now()
+			}, returning)
 		})
 		.then(one)
 	})
