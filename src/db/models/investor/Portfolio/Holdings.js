@@ -47,8 +47,11 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 	})
 
-	holdings.byId.quotes = knexed.transact(knex, (trx, investor_id, for_date) =>
+	holdings.byId.quotes =
+		knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
+		options = options || {}
+
 		return byId(trx, investor_id, for_date)
 		.then(holdings =>
 		{
@@ -57,12 +60,12 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date)
+			return db.symbols.quotes(symbols, for_date, options.soft)
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price)
+					if (! quote.price && ! options.soft)
 					{
 						throw new TypeError(
 							'Cannot recalculate Xignite Quotes failed'
@@ -73,9 +76,12 @@ module.exports = function Holdings (db, investor, portfolio)
 
 					holding.symbol = quote.symbol
 
-					holding.price = quote.price
+					holding.quote_price = quote.price
 					holding.gain = quote.gain
 					holding.currency = quote.currency
+
+					holding.real_allocation
+					 = holding.amount * (holding.quote_price || holding.price)
 
 					delete holding.symbol_ticker
 					delete holding.symbol_exchange

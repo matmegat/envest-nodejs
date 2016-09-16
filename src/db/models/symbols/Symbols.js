@@ -92,7 +92,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	symbols.quotes = (symbols, for_date) =>
+	symbols.quotes = (symbols, for_date, soft_mode) =>
 	{
 		expect(symbols).ok
 
@@ -126,7 +126,18 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					{
 						log('XIGN Quotes fallback', symbols[i].toXign())
 
-						return quotes_fallback_resolve(r, symbols[i])
+						return quotes_fallback_resolve(r, symbols[i], soft_mode)
+						.catch(err =>
+						{
+							if (soft_mode)
+							{
+								return r
+							}
+							else
+							{
+								throw err
+							}
+						})
 					}
 				}
 			})

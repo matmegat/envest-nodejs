@@ -1,6 +1,7 @@
 
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
+var isPlainObject = require('lodash/isPlainObject')
 
 var Router = require('express').Router
 
@@ -92,7 +93,8 @@ module.exports = function (db, http)
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
-		toss(rs, db.investor.portfolio.byId(rq.params.id))
+		var options = { extended: isPlainObject(rq.user.admin) }
+		toss(rs, db.investor.portfolio.byId(rq.params.id, options))
 	})
 
 	investors.express.get('/:id/chart', authRequired, (rq, rs) =>

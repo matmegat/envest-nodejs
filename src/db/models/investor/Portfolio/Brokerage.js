@@ -17,7 +17,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var brokerage = {}
 
 	var knex = db.knex
-	var one  = db.helpers.one
 	var oneMaybe  = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
@@ -29,7 +28,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.byId = knexed.transact(knex,
 		(trx, investor_id, for_date, options) =>
 	{
-		options = extend({ future: false }, options)
+		options = extend(
+		{
+			future: false,
+			soft:   false
+		}
+		, options)
 
 		var query = knex(raw('brokerage AS B'))
 		.transacting(trx)
@@ -74,14 +78,27 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(r =>
 		{
-			if (! r.length)
+			var exists = !! r.length
+			if (exists)
 			{
-				throw BrokerageDoesNotExist({ for_date: for_date })
+				return r[0]
 			}
-
-			return r
+			else
+			{
+				if (options.soft)
+				{
+					/* dummy */
+					return {
+						cash: index_amount_cap,
+						multiplier: 1
+					}
+				}
+				else
+				{
+					throw BrokerageDoesNotExist({ for_date: for_date })
+				}
+			}
 		})
-		.then(one)
 		.then(it =>
 		{
 			it.cash = Number(it.cash)
@@ -99,7 +116,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(it => it.cash)
 	})
 
-	brokerage.isDateAvail = knexed.transact(knex, (trx, investor_id, for_date) =>
+	brokerage.isDateAvail =
+		knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -225,6 +243,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
+	var NotActualBrokerage = Err('not_actual_brokerage',
+		'More actual brokerage already exist')
+
 	brokerage.set = knexed.transact(knex,
 		(trx, investor_id, cash, timestamp) =>
 	{
@@ -303,8 +324,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId(investor_id, timestamp), // bad idea TODO
+				portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
+				portfolio.holdings.byId.quotes(investor_id, timestamp),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
@@ -321,12 +342,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 			if (options.recalculate)
 			{
 				var current_allocation
-				 = cash * multiplier
-				 + sumBy(old_holdings, h => h.amount * h.price) * multiplier
+				 = cash + sumBy(old_holdings, 'real_allocation')
+				current_allocation *= multiplier
 
 				var real_allocation
-				 = new_cash
-				 + sumBy(holdings, h => h.amount * h.price)
+				 = new_cash + sumBy(holdings, 'real_allocation')
 
 				multiplier = (current_allocation / real_allocation)
 			}
@@ -365,9 +385,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var DuplicateBrokerageEntry = Err('brokerage_duplicate',
 		'There can be only one Brokerage entry per timestamp for Investor')
 
-	var NotActualBrokerage = Err('not_actual_brokerage',
-		'More actual brokerage already exist')
-
 
 	brokerage.recalculate = knexed.transact(knex,
 		(trx, investor_id, timestamp) =>
@@ -378,7 +395,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// cash -> new_cash,
 			// recalculate because of holdings changed
 
-			return put(trx, investor_id, cash, timestamp,
+			return put(
+			trx,
+			investor_id,
+			cash,
+			timestamp,
 			{
 				override: true,
 				recalculate: true

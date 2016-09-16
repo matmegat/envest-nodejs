@@ -1,6 +1,6 @@
 type: object
-title: Feed Post Chart Payload
-description: Optional Chart Series for Feed Post
+title: Chart
+description: Chart Series for Feed Post
 properties:
   symbol:
     type: string
