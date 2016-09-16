@@ -23,7 +23,6 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.hist_return = HistReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
 	onb.fields.holdings = Holdings(investor, db)
-	onb.fields.start_date = StartDate(investor)
 	onb.fields.is_public = IsPublic(investor)
 
 	expect(db, 'Onboarding depends on Admin').property('admin')
@@ -158,6 +157,10 @@ module.exports = function Onboarding (db, investor)
 			}
 
 			throw err
+		})
+		.then((investor_id) =>
+		{
+			return investor.updateStartDate(investor_id, 'user_id')
 		})
 		.then((investor_id) =>
 		{
@@ -596,43 +599,6 @@ function Holdings (investor_model, db)
 	})
 }
 
-
-var WrongStartDateFormat = Err('wrong_start_date_format',
-	'Wrong start_date format. Not ISO-8601')
-
-function StartDate (investor)
-{
-	return Field(investor,
-	{
-		get: (queryset) =>
-		{
-			return queryset
-			.select('start_date')
-			.then(one)
-			.then(rs => rs.start_date)
-		},
-		validate: (value) =>
-		{
-			if (! (value instanceof Date))
-			{
-				validate.string(value, 'start_date')
-				validate.empty(value, 'start_date')
-			}
-
-			var moment_date = moment(value)
-			if (! moment_date.isValid())
-			{
-				throw WrongStartDateFormat()
-			}
-
-			return moment_date.format()
-		},
-		set: (value, queryset) =>
-		{
-			return queryset.update({ start_date: value })
-		}
-	})
-}
 
 var CannotSetPrivate = Err('cannot_set_private',
 	`Cannot set Investor to private`)

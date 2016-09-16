@@ -169,5 +169,18 @@ module.exports = function Investor (db)
 		.then(one)
 	})
 
+	investor.updateStartDate = knexed.transact(knex, (trx, id, returning) =>
+	{
+		return investor.all.ensure(id)
+		.then(() =>
+		{
+			return investor.table(trx)
+			.where('user_id', id)
+			.update('start_date', knex.fn.now(),
+			returning)
+		})
+		.then(one)
+	})
+
 	return investor
 }
