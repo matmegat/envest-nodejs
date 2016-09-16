@@ -1,15 +1,16 @@
 
+var concat    = require('lodash/concat')
 var every     = require('lodash/every')
 var map       = require('lodash/map')
 var mapValues = require('lodash/mapValues')
-var maxBy     = require('lodash/maxBy')
 
 var moment = require('moment')
 var Parse  = require('csv-parse')
 
-var Err    = require('../../../../Err')
-var knexed = require('../../../knexed')
-var Symbl  = require('../../symbols/Symbl')
+var Err      = require('../../../../Err')
+var knexed   = require('../../../knexed')
+var Symbl    = require('../../symbols/Symbl')
+var validate = require('../../../validate')
 
 module.exports = function Parser (portfolio, db)
 {
@@ -52,13 +53,31 @@ module.exports = function Parser (portfolio, db)
 				})
 			}
 
-			bulk_data.forEach(entry =>
+			bulk_data.forEach((entry, i) =>
 			{
 				entry.is_valid_date = moment.utc(entry.Date) >= available_from
 
 				if (entry.Stock)
 				{
 					entry.symbol = Symbl([entry.Stock])
+				}
+
+				if (entry.Cash)
+				{
+					entry.Cash = Number(entry.Cash)
+					validate.number(entry.Cash, `csv[${i + 1}].Cash`)
+				}
+
+				if (entry.Amount)
+				{
+					entry.Amount = Number(entry.Amount)
+					validate.number(entry.Amount, `csv[${i + 1}].Amount`)
+				}
+
+				if (entry.Price)
+				{
+					entry.Price = Number(entry.Price)
+					validate.number(entry.Price, `csv[${i + 1}].Price`)
 				}
 			})
 
@@ -134,11 +153,13 @@ module.exports = function Parser (portfolio, db)
 			{
 				throw UploadHistoryError(
 				{
-					reason: 'Not all enties could be added'
+					reason: 'Not all entries could be added'
 				})
 			}
 
-			return map(bulk_data, entry_2_data)
+			var sequential = sequential_operation(trx, investor_id)
+
+			return sequential(bulk_data[0], 0, bulk_data)
 		})
 		.catch(err =>
 		{
@@ -151,8 +172,40 @@ module.exports = function Parser (portfolio, db)
 				throw UploadHistoryError({ reason: err.message })
 			}
 		})
+		.then((end) =>
+		{
+			return { processed: end }
+		})
 	})
 
+	function sequential_operation (trx, investor_id)
+	{
+		return function sequential_caller (entry, index, origin)
+		{
+			var data = entry_2_data(entry)
+			console.log(`${index + 2} :: ${entry.Type} --->>>`)
+			if (index + 2 === 39)
+			{
+				console.log('debug.me')
+			}
+
+			return data.method.apply(this, concat(trx, investor_id, data.args))
+			.then(() =>
+			{
+				console.log(`--->>> ${index + 2} :: ${entry.Type}`)
+				if ( ++ index < origin.length)
+				{
+					return sequential_caller(origin[index], index, origin)
+				}
+				else
+				{
+					return index - 1 // amount of processed operations
+				}
+			})
+		}
+	}
+
+	/* eslint-disable complexity */
 	function entry_2_data (entry)
 	{
 		var cash_management_ops =
@@ -168,26 +221,24 @@ module.exports = function Parser (portfolio, db)
 		if (entry.Type === 'onboarding' && entry.Cash)
 		{
 			return {
-				method: 'methods.brokerage',
-				// method: methods.brokerage,
-				args: [entry.Cash, entry.Date], // TODO: supply with trx and investor_id
+				method: methods.brokerage,
+				args: [entry.Cash, moment.utc(entry.Date).format()]
 			}
 		}
 
 		if (entry.Type === 'onboarding' && is_stock)
 		{
 			return {
-				method: 'methods.holdings',
-				// method: methods.holdings,
+				method: methods.holdings,
 				args:
 				[
 					[{
 						symbol: entry.Stock,
 						amount: entry.Amount,
 						price:  entry.Price,
-						date:   entry.Date
+						date:   moment.utc(entry.Date).format()
 					}]
-				], // TODO: supply with trx and investor_id
+				]
 			}
 		}
 
@@ -199,35 +250,33 @@ module.exports = function Parser (portfolio, db)
 			}
 
 			return {
-				method: 'methods.cash',
-				// method: methods.cash,
+				method: methods.cash,
 				args:
 				[
 					{
 						type: entry.Type,
 						cash: entry.Cash,
-						date: entry.Date
+						date: moment.utc(entry.Date).format()
 					}
-				], // TODO: supply with trx and investor_id
+				]
 			}
 		}
 
 		if ((entry.Type === 'bought' || entry.Type === 'sold') && is_stock)
 		{
 			return {
-				method: 'methods.trade',
-				// method: methods.trade,
+				method: methods.trade,
 				args:
 				[
 					'trade',
-					entry.Date,
+					moment.utc(entry.Date).format(),
 					{
 						dir: entry.Type,
 						symbol: entry.Stock,
 						amount: entry.Amount,
 						price: entry.Price
 					}
-				], // TODO: supply with trx and investor_id
+				]
 			}
 		}
 
@@ -236,6 +285,7 @@ module.exports = function Parser (portfolio, db)
 			reason: `Invalid entry '${entry.Date} - ${entry.Type}'`
 		})
 	}
+	/* eslint-enable complexity */
 
 
 	return parser
