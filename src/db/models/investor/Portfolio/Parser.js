@@ -33,29 +33,23 @@ module.exports = function Parser (portfolio, db)
 		})
 		.then(values =>
 		{
-			mapValues(values[0], (val) => val.forEach((entry) =>
-			{
-				if (entry)
-				{
-					entry.available_from = moment.utc(entry.available_from)
-				}
-			}))
-
-
+			var available_from = moment.utc(values[0].common.available_from)
+				// moment.utc(values[0].common always exist, but could be null
+				// moment.utc(null) -> invalid moment
 			var bulk_data = values[1]
-			var available_from = maxBy( // TODO: refactor!
-				[
-					maxBy(values[0].brokerage, 'available_from'),
-					maxBy(values[0].symbols, 'available_from')
-				],
-				'available_from'
-			)
-			.available_from
 
 
-			if (! available_from)
+			if (values[0].common.available_from === null)
 			{	// any date is available
 				available_from = moment.utc(0) // Jan 01 1970
+			}
+
+			if (! available_from.isValid())
+			{
+				throw UploadHistoryError(
+				{
+					reason: 'Unable to get portfolio available dates'
+				})
 			}
 
 			bulk_data.forEach(entry =>

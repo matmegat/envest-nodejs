@@ -631,15 +631,27 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(r =>
 		{
-			var dates_symbols  = r[0]
-			var date_brokerage = r[1]
+			var dates_symbols  = r[0] // array
+			var date_brokerage = r[1] // array of 1 element
 
-			var max_symbols = maxBy(dates_symbols, 'available_from').available_from
-			var max_common  = max([ max_symbols, date_brokerage ])
+			var max_of_symbols = maxBy(dates_symbols, 'available_from')
+			var max_brokerage = maxBy(date_brokerage, 'available_from')
+
+			if (max_of_symbols)
+			{
+				max_of_symbols = max_of_symbols.available_from
+			}
+
+			if (max_brokerage)
+			{
+				max_brokerage = max_brokerage.available_from
+			}
+
+			var max_common  = max([ max_of_symbols, max_brokerage ])
 
 			var date_common =
 			{
-				available_from: max_common
+				available_from: max_common || null
 			}
 
 			return {
