@@ -170,7 +170,7 @@ module.exports = function Parser (portfolio, db)
 			return {
 				method: 'methods.brokerage',
 				// method: methods.brokerage,
-				args: [], // TODO: supply with trx and investor_id
+				args: [entry.Cash, entry.Date], // TODO: supply with trx and investor_id
 			}
 		}
 
@@ -179,16 +179,36 @@ module.exports = function Parser (portfolio, db)
 			return {
 				method: 'methods.holdings',
 				// method: methods.holdings,
-				args: [], // TODO: supply with trx and investor_id
+				args:
+				[
+					[{
+						symbol: entry.Stock,
+						amount: entry.Amount,
+						price:  entry.Price,
+						date:   entry.Date
+					}]
+				], // TODO: supply with trx and investor_id
 			}
 		}
 
 		if (cash_management_ops.indexOf(entry.Type) !== -1 && entry.Cash)
 		{
+			if (entry.Type === 'withdraw' || entry.Type === 'fee')
+			{
+				entry.Cash *= -1
+			}
+
 			return {
 				method: 'methods.cash',
 				// method: methods.cash,
-				args: [], // TODO: supply with trx and investor_id
+				args:
+				[
+					{
+						type: entry.Type,
+						cash: entry.Cash,
+						date: entry.Date
+					}
+				], // TODO: supply with trx and investor_id
 			}
 		}
 
@@ -197,7 +217,17 @@ module.exports = function Parser (portfolio, db)
 			return {
 				method: 'methods.trade',
 				// method: methods.trade,
-				args: [], // TODO: supply with trx and investor_id
+				args:
+				[
+					'trade',
+					entry.Date,
+					{
+						dir: entry.Type,
+						symbol: entry.Stock,
+						amount: entry.Amount,
+						price: entry.Price
+					}
+				], // TODO: supply with trx and investor_id
 			}
 		}
 
