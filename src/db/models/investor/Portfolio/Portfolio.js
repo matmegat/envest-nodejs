@@ -247,6 +247,7 @@ module.exports = function Portfolio (db, investor)
 	function grid (trx, investor_id, resolution)
 	{
 		return grid_ir(trx, investor_id, resolution)
+		.then(grid => grid.chart)
 		.then(chart =>
 		{
 			if (chart.utc_offset)
@@ -336,6 +337,8 @@ module.exports = function Portfolio (db, investor)
 
 				var chart = []
 
+				grid.range = range
+
 				// range.by('days', it =>
 				grid_iterator(range, resolution, it =>
 				{
@@ -382,7 +385,9 @@ module.exports = function Portfolio (db, investor)
 					chart.utc_offset = utc_offset
 				}
 
-				return chart
+				grid.chart = chart
+
+				return grid
 			})
 		})
 	}
