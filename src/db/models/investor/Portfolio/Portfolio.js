@@ -242,7 +242,14 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
-	portfolio.grid(120)
+	portfolio.grid.ir = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return Promise.all(
+		[
+			grid_ir(trx, investor_id, 'day'),
+			grid_ir(trx, investor_id, 'intraday')
+		])
+	})
 
 	function grid (trx, investor_id, resolution)
 	{
