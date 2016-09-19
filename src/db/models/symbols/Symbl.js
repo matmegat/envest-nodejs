@@ -1,6 +1,8 @@
 /* eslint-disable complexity */
 /* eslint-disable max-statements */
 
+var expect = require('chai').expect
+
 var Symbl = module.exports = function Symbl (it)
 {
 	if (Symbl.is(it))
@@ -32,6 +34,9 @@ var Symbl = module.exports = function Symbl (it)
 
 		s.ticker   = it[0]
 		s.exchange = it[1] || null
+
+		expect(s.ticker).a('string')
+		s.exchange && expect(s.exchange).a('string')
 
 		s.toXign = () =>
 		{
