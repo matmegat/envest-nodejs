@@ -6,7 +6,7 @@ exports.up = function (knex)
 		table.integer('investor_id').primary()
 			.references('investors.user_id')
 				.onUpdate('cascade')
-				.onDelete('cascade')
+				.onDelete('restrict')
 	})
 }
 
@@ -14,4 +14,3 @@ exports.down = function (knex)
 {
 	return knex.schema.dropTableIfExists('featured_investor')
 }
-
