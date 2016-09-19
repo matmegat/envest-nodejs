@@ -75,6 +75,11 @@ var Symbl = module.exports = function Symbl (it)
 			}
 		}
 
+		s.isOther = () =>
+		{
+			return s.exchange === 'OTHER'
+		}
+
 		s.inspect = inspect
 
 		return s
