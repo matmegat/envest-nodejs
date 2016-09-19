@@ -101,6 +101,9 @@ paths:
   '/investors/{investor_id}/chart':
     $ref: ../api/investors/swag/Get-InvestorChart.yaml
 
+  '/investors/{investor_id}/chart/ir':
+    $ref: ../api/investors/swag/Get-InvestorIR.yaml
+
   '/investors/{investor_id}/portfolio':
     $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
 
