@@ -475,7 +475,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
-		validate_positive(data.price, 'price')
+		validate_positive(data.price, 'price')	// TODO: error if price is 0
 
 		var amount = data.amount
 		var price  = data.price
@@ -488,7 +488,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (sum > cash)
 			{
-				throw NotEnoughMoney()
+				// throw NotEnoughMoney()
+				console.warn('Brokerage goes less then zero!')
 			}
 		})
 		.then(() =>

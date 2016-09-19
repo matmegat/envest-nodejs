@@ -324,6 +324,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, timestamp),
+				brokerage.byId(investor_id, timestamp, { soft: true }),
 				portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
 				portfolio.holdings.byId.quotes(investor_id, timestamp),
 				brokerage.isExact(trx, investor_id, timestamp)
@@ -331,19 +332,20 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(values =>
 		{
-			var cash = values[0].cash
 			var multiplier = values[0].multiplier
+			var old_cash = values[1].cash
+			var old_multiplier = values[1].multiplier
 
-			var holdings = values[1]
-			var old_holdings = values[2]
+			var holdings = values[2]
+			var old_holdings = values[3]
 
-			var is_exact = values[3]
+			var is_exact = values[4]
 
 			if (options.recalculate)
 			{
 				var current_allocation
-				 = cash + sumBy(old_holdings, 'real_allocation')
-				current_allocation *= multiplier
+				 = old_cash + sumBy(old_holdings, 'real_allocation')
+				current_allocation *= old_multiplier
 
 				var real_allocation
 				 = new_cash + sumBy(holdings, 'real_allocation')
@@ -472,16 +474,17 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		validate.required(amount, 'amount')
 		validate.number(amount, 'amount')
-		if (amount === 0)
-		{
-			throw InvalidAmount()
-		}
+		// if (amount === 0)
+		// {
+		// 	throw InvalidAmount()
+		// }
 		if (amount + brokerage.cash < 0)
 		{
-			throw InvalidAmount(
-			{
-				data: 'Brokerage may not become less than zero'
-			})
+			// throw InvalidAmount(
+			// {
+			// 	data: 'Brokerage may not become less than zero'
+			// })
+			console.warn('Brokerage goes less then zero!')
 		}
 	}
 
