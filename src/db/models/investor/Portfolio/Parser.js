@@ -183,16 +183,10 @@ module.exports = function Parser (portfolio, db)
 		return function sequential_caller (entry, index, origin)
 		{
 			var data = entry_2_data(entry)
-			console.log(`${index + 2} :: ${entry.Type} --->>>`)
-			if (index + 2 === 39)
-			{
-				console.log('debug.me')
-			}
 
 			return data.method.apply(this, concat(trx, investor_id, data.args))
 			.then(() =>
 			{
-				console.log(`--->>> ${index + 2} :: ${entry.Type}`)
 				if ( ++ index < origin.length)
 				{
 					return sequential_caller(origin[index], index, origin)
@@ -264,6 +258,14 @@ module.exports = function Parser (portfolio, db)
 
 		if ((entry.Type === 'bought' || entry.Type === 'sold') && is_stock)
 		{
+			if (! entry.is_resolved)
+			{
+				throw UploadHistoryError(
+				{
+					reason: `Invalid entry '${entry.Date} - ${entry.Type}'`
+				})
+			}
+
 			return {
 				method: methods.trade,
 				args:
@@ -272,7 +274,7 @@ module.exports = function Parser (portfolio, db)
 					moment.utc(entry.Date).format(),
 					{
 						dir: entry.Type,
-						symbol: entry.Stock,
+						symbol: entry.symbol,
 						amount: entry.Amount,
 						price: entry.Price
 					}
