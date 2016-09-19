@@ -6,13 +6,20 @@ var Symbl = require('./Symbl')
 var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
-var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
-var GetDataErr = Err(
-	'unable_to_retrive_data_from_server',
-	'Unable to retrive data from server'
+
+var UnknownSymbol
+ = Err('unknown_symbol', 'Symbol cannot be resolved')
+
+var OtherSymbol
+ = Err('other_special_symbol_not_allowed', 'OTHER symbol not allowed')
+
+var GetDataErr
+ = Err('unable_to_retrive_data_from_server',
+       'Unable to retrive data from server'
 )
 
 var extend = require('lodash/assign')
+var pick = require('lodash/pick')
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
@@ -28,11 +35,29 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 	var xign = Xign(cfg.xignite, log)
 
-	symbols.resolve = (symbol) =>
+	symbols.resolve = (symbol, options) =>
 	{
+		options = extend(
+		{
+			other: false
+		},
+		options)
+
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
+			if (symbol.isOther())
+			{
+				if (! options.other)
+				{
+					throw OtherSymbol()
+				}
+				else
+				{
+					return symbol.toFull() /* not full data though */
+				}
+			}
+
 			return xign.resolve(symbol.toXign())
 			.then(resl =>
 			{
@@ -63,12 +88,16 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		options = extend(
 		{
-			soft: false
+			soft: false,
+			other: false
 		},
 		options)
 
 		var queries = symbols_arr
-		.map(symbols.resolve.cache)
+		.map(symbol =>
+		{
+			return symbols.resolve.cache(symbol, pick(options, 'other'))
+		})
 
 		if (options.soft)
 		{
@@ -83,7 +112,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 	/* cache-first */
-	symbols.resolve.cache = (symbol) =>
+	symbols.resolve.cache = (symbol, options) =>
 	{
 		return new Promise(rs =>
 		{
@@ -94,7 +123,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				return rs(data)
 			}
 
-			return rs(symbols.resolve(symbol))
+			return rs(symbols.resolve(symbol, options))
 		})
 	}
 
