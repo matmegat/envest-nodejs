@@ -36,7 +36,13 @@ var Symbl = module.exports = function Symbl (it)
 		s.exchange = it[1] || null
 
 		expect(s.ticker).a('string')
-		s.exchange && expect(s.exchange).a('string')
+		s.ticker = s.ticker.toUpperCase()
+
+		if (s.exchange)
+		{
+			expect(s.exchange).a('string')
+			s.exchange = s.exchange.toUpperCase()
+		}
 
 		s.toXign = () =>
 		{
