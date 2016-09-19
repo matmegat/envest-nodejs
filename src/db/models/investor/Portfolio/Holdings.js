@@ -60,7 +60,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date, options.soft)
+			return db.symbols.quotes(symbols, for_date, pick(options, 'soft'))
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>

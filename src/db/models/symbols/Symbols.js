@@ -12,6 +12,7 @@ var GetDataErr = Err(
 	'Unable to retrive data from server'
 )
 
+var extend = require('lodash/assign')
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
@@ -58,12 +59,18 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.resolveMany = (symbols_arr, soft_mode) =>
+	symbols.resolveMany = (symbols_arr, options) =>
 	{
+		options = extend(
+		{
+			soft: false
+		},
+		options)
+
 		var queries = symbols_arr
 		.map(symbols.resolve.cache)
 
-		if (soft_mode)
+		if (options.soft)
 		{
 			queries = queries
 			.map(query =>
@@ -92,8 +99,14 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	symbols.quotes = (symbols, for_date, soft_mode) =>
+	symbols.quotes = (symbols, for_date, options) =>
 	{
+		options = extend(
+		{
+			soft: false
+		},
+		options)
+
 		expect(symbols).ok
 
 		symbols = [].concat(symbols)
@@ -129,7 +142,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 						return quotes_fallback_resolve(r, symbols[i])
 						.catch(err =>
 						{
-							if (soft_mode)
+							if (options.soft)
 							{
 								return r
 							}
