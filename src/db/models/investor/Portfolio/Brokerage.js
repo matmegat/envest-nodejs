@@ -17,7 +17,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var brokerage = {}
 
 	var knex = db.knex
-	var oneMaybe  = db.helpers.oneMaybe
+	var one      = db.helpers.one
+	var oneMaybe = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
 
@@ -142,6 +143,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 			.where('investor_id', investor_id)
 			.select(raw('MAX(timestamp) AS available_from'))
 		})
+		.then(one)
 	})
 
 
