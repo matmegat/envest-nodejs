@@ -550,11 +550,22 @@ module.exports = function User (db, app)
 			})
 			.then((user_item) =>
 			{
+				var host = `${app.cfg.host}`
+				if (app.cfg.real_port !== 80)
+				{
+					host += `:${app.cfg.real_port}`
+				}
+
 				mailer.send('default', null,
 				{
 					to: user_item.email,
 					text: 'Email confirm code: '
-					+ data.code.toUpperCase()
+					+ data.code.toUpperCase(),
+					html: 'Please tap the link to confirm email: '
+					+ `<a href="http://${host}/confirm-email?code=`
+					+ `${code.toUpperCase()}" target="_blank">`
+					+ `Confirm Email</a><br>`
+					+ `Your email confirm code: ${code.toUpperCase()}`
 				})
 
 				return user_item.id
