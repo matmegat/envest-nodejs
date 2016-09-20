@@ -21,6 +21,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio')
+	var feed_table = knexed(knex, 'feed_items')
 
 	var raw = knex.raw
 
@@ -89,6 +90,39 @@ module.exports = function Holdings (db, investor, portfolio)
 					return holding
 				})
 			})
+		})
+	})
+
+	holdings.latestSymbolState =
+		knexed.transact(knex, (trx, investor_id, symbol) =>
+	{
+		return table(trx)
+  		.where('investor_id', investor_id)
+  		.andWhere('timestamp',
+  			table(trx)
+  			.select(raw('MAX(timestamp) AS timestamp'))
+  			.andWhere(symbol.toDb())
+  		)
+  		.then(oneMaybe)
+	})
+
+	var AlreadyTraded = Err('holging_is_already_traded',
+		'Holding is already traded')	
+
+	holdings.ensureNotTraded =
+		knexed.transact(knex, (trx, investor_id, symbol) =>
+	{
+		var symbol = pick(symbol.toFull(), 'ticker', 'exchange')
+
+		return feed_table(trx)
+		.where('investor_id', investor_id)
+		.andWhere(raw(`data->'symbol'`), '@>', symbol)
+		.then(res =>
+		{
+			if (res.length > 0)
+			{
+				throw AlreadyTraded({ symbol: symbol })
+			}
 		})
 	})
 
@@ -460,6 +494,71 @@ module.exports = function Holdings (db, investor, portfolio)
 			}
 		})
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
+	}
+
+	holdings.removeSymbol = knexed.transact(knex,
+		(trx, investor_id, holding_entries) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			validate.array(holding_entries, 'holdings')
+
+			holding_entries.forEach((holding, i) =>
+			{
+				validate.required(holding.symbol, `holdings[${i}].symbol`)
+				validate.empty(holding.symbol, `holdings[${i}].symbol`)
+
+				validate.number(holding.amount, `holdings[${i}].amount`)
+				if (holding.amount < 0)
+				{
+					throw InvalidAmount({ field: `holdings[${i}].amount` })
+				}
+
+				validate.number(holding.price, `holdings[${i}].price`)
+				if (holding.price <= 0)
+				{
+					throw InvalidAmount({ field: `holdings[${i}].price` })
+				}
+			})
+
+			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+		})
+		.then(symbols => symbols.map(Symbl))
+		.then(symbols =>
+		{
+			return Promise.all(symbols.map((symbol, i) =>
+			{
+				return holdings.ensure(trx, symbol, investor_id)
+				.then(() =>
+				{
+					return holdings.ensureNotTraded(trx, investor_id, symbol)
+				})
+				.then(() =>
+				{
+					return holdings.latestSymbolState(trx, investor_id, symbol)
+				})
+				.then(latest_state =>
+				{
+					var data_remove =
+					{
+						amount:    holding_entries[i].amount,
+						price:     holding_entries[i].price
+					}
+
+					// return put(trx, investor_id, symbol, data_put)
+					return remove(trx, investor_id, symbol, data_remove)
+				})
+			}))
+		})
+	})
+
+	holdings.remove = function (investor_id, holding_entries)
+	{
+		return knex.transaction(function (trx) 
+		{
+			return holdings.removeSymbol(trx, investor_id, holding_entries)
+		})
 	}
 
 	var DuplicateHoldingEntry = Err('holding_duplicate',

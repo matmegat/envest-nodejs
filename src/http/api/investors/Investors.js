@@ -142,6 +142,15 @@ module.exports = function (db, http)
 		)
 	})
 
+
+	investors.express.post('/holdings/remove', authRequired, (rq, rs) =>
+	{
+		var investor_id = rq.user.id
+		var holdings = rq.body.holdings
+
+		toss(rs, db.investor.portfolio.holdings.remove(investor_id, holdings))
+	})
+
 	// admin required
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
