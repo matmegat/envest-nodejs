@@ -66,10 +66,10 @@ module.exports = function Portfolio (db, investor)
 		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
-			/* TODO brokerage -> soft ? */
 			return Promise.all([
 				brokerage.byId(trx, investor_id, for_date, { soft: true }),
-				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				 holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 		})
 		.then((values) =>
@@ -140,9 +140,9 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			portfolio.fullValue(trx, investor_id, now),
-			portfolio.fullValue(trx, investor_id, day_ytd),
-			portfolio.fullValue(trx, investor_id, day_intraday)
+			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, day_ytd),
+			fullValue(trx, investor_id, day_intraday)
 		])
 		.then(values =>
 		{
@@ -176,16 +176,16 @@ module.exports = function Portfolio (db, investor)
 		}
 	})
 
-	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
+	var fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			/* TODO actually, there's a catch down there */
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 			.then(values =>
 			{
