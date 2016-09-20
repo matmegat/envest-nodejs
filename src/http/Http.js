@@ -81,6 +81,12 @@ module.exports = function Http (app)
 
 		file(app.root('static/reset-password.html')).pipe(rs)
 	})
+	http.express.get('/confirm-email', (rq, rs) =>
+	{
+		var file = require('fs').createReadStream
+
+		file(app.root('static/confirm-email.html')).pipe(rs)
+	})
 
 	http.api = {}
 
