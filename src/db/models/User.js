@@ -299,6 +299,7 @@ module.exports = function User (db, app)
 
 	var RemoveSelf = Err('remove_self', 'You cannot remove yourself')
 	var RemoveAdmin = Err('remove_admin', 'You cannot remove admins')
+	var RemoveFeatured = Err('remove_featured', 'You cannot remove featured investor')
 
 	var includes = require('lodash/includes')
 
@@ -339,6 +340,7 @@ module.exports = function User (db, app)
 			.whereIn('id', ids)
 			.del()
 		})
+		.catch(Err.fromDb('featured_investor_investor_id_foreign', RemoveFeatured))
 		.then(Err.falsy(user.NotFound))
 		.then(noop)
 	})
