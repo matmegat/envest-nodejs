@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>NetVest - Confirm Email</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<script type="text/javascript">
+		var is = {}
+		var code = get_code()
+
+		is.iOS     = navigator.userAgent.match(/iPhone|iPad/i)
+		is.Android = navigator.userAgent.match(/android/i)
+
+		document.addEventListener('DOMContentLoaded', function ()
+		{
+			document.querySelector('form#email-confirm')
+			.addEventListener('submit', function (event)
+			{
+				event.preventDefault()
+				var self = this
+
+				var request = new XMLHttpRequest()
+				var data =
+				{
+					code: this.code.value
+				}
+
+				request.open(this.method, this.action, true)
+				request.setRequestHeader("Content-type", "application/json")
+
+				request.onload = function ()
+				{
+					var data = {}
+
+					if (request.status >= 200 && request.status < 400)
+					{
+						// Success!
+						self.insertAdjacentHTML(
+							'beforebegin',
+							'<div class="alert alert-success" role="alert">' +
+							'<strong>New Password is set</strong>' +
+							'</div>'
+						)
+					} else if (request.status === 400)
+					{
+						// We reached our target server, but it returned an error
+						data = JSON.parse(request.responseText)
+						self.insertAdjacentHTML(
+							'beforebegin',
+							'<div class="alert alert-danger" role="alert">' +
+							'<strong>' + data.message + '</strong>' +
+							'</div>'
+						)
+					}
+					else
+					{
+						// display 'I have a bad feelings about this'
+						self.insertAdjacentHTML(
+							'beforebegin',
+							'<div class="alert alert-danger" role="alert">' +
+							'<strong>I have a bad feeling about this. © Han Solo</strong>' +
+							'</div>'
+						)
+					}
+				}
+
+				request.send(JSON.stringify(data))
+			})
+
+			if (code)
+			{
+				document.querySelector('form input#code').value = code
+			}
+		})
+
+		function get_code ()
+		{
+			var search = window.location.search
+			var query = {}
+
+			search = search.slice(1).split('&')
+			search.map(function (arg)
+			{
+				var key_value = arg.split('=')
+				query[key_value[0]] = key_value[1]
+			})
+
+			if ('code' in query && query.code)
+			{
+				return query.code
+			}
+
+			return ''
+		}
+	</script>
+
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12 col-md-8 col-md-offset-2">
+			<h1 class="text-center">NetVest</h1>
+			<h2 class="text-center">Confirm Email</h2>
+
+			<form id="email-confirm" action="/api/auth/confirm-email" method="POST">
+				<div class="form-group">
+					<label for="code">Code</label>
+					<input type="text" class="form-control" id="code" name="code" placeholder="Code" required>
+				</div>
+
+				<button type="submit" class="btn btn-default">Submit</button>
+			</form>
+		</div>
+	</div>
+</div>
+</body>
+</html>
