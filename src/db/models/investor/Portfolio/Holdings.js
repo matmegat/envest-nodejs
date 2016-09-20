@@ -70,11 +70,26 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price && ! options.soft)
+					if (! quote.price)
 					{
-						throw new TypeError(
-							'Cannot recalculate Xignite Quotes failed'
-						)
+						if (Symbl(quote.symbol).isOther())
+						{
+							if (! options.other)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes for OTHER'
+								)
+							}
+						}
+						else
+						{
+							if (! options.soft)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes, xIgnite failed'
+								)
+							}
+						}
 					}
 
 					var holding = holdings[i]
