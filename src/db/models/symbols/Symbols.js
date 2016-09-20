@@ -132,7 +132,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		options = extend(
 		{
-			soft: false
+			soft: false,
+			other: false
 		},
 		options)
 
@@ -153,7 +154,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				}
 				else
 				{
-					var symbol = symbols[i].toFull()
+					var orig_symbol = symbols[i]
+
+					var symbol = orig_symbol.toFull()
 					symbol.company = r.company
 
 					r = omit(r, 'symbol', 'company')
@@ -164,23 +167,33 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					{
 						return r
 					}
-					else
-					{
-						log('XIGN Quotes fallback', symbols[i].toXign())
 
-						return quotes_fallback_resolve(r, symbols[i])
-						.catch(err =>
+					if (orig_symbol.isOther())
+					{
+						if (options.other)
 						{
-							if (options.soft)
-							{
-								return r
-							}
-							else
-							{
-								throw err
-							}
-						})
+							return r
+						}
+						else
+						{
+							throw OtherSymbol()
+						}
 					}
+
+					log('XIGN Quotes fallback', orig_symbol.toXign())
+
+					return quotes_fallback_resolve(r, orig_symbol)
+					.catch(err =>
+					{
+						if (options.soft)
+						{
+							return r
+						}
+						else
+						{
+							throw err
+						}
+					})
 				}
 			})
 		})
