@@ -21,26 +21,57 @@ module.exports = function Parser (portfolio, db)
 	var UploadHistoryError = Err('upload_history_error',
 		'Unable to upload history of Investor')
 
-	parser.parseCsv = (investor_id, csv) =>
+	var AdminOrOwnerRequired =
+		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
+
+	function ensure_can_upload (whom_id, target_investor_id)
 	{
-		return db.investor.all.ensure(investor_id)
-		.then(() =>
+		return Promise.all(
+		[
+			db.admin.is(whom_id),
+			db.investor.all.is(whom_id)
+		])
+		.then(so =>
 		{
-			return Promise.all(
-			[
-				portfolio.availableDate(investor_id),
-				csv_to_array(csv)
-			])
+			var is_admin    = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return 'mode:admin'
+			}
+			else if (is_investor)
+			{
+				if (! (whom_id === target_investor_id))
+				{
+					throw AdminOrOwnerRequired()
+				}
+
+				return 'mode:investor'
+			}
+			else
+			{
+				throw AdminOrOwnerRequired()
+			}
 		})
-		.then(values =>
+	}
+
+	parser.parseCsv = (investor_id, whom_id, csv) =>
+	{
+		return ensure_can_upload(whom_id, investor_id)
+		.then(() => db.investor.all.ensure(investor_id))
+		.then(() => csv_to_array(csv))
+		.then(bulk_data => transform_hist_data(bulk_data, investor_id))
+	}
+
+	function transform_hist_data (bulk_data, investor_id)
+	{
+		return portfolio.availableDate(investor_id)
+		.then((dates) =>
 		{
-			var available_from = moment.utc(values[0].common.available_from)
-				// moment.utc(values[0].common always exist, but could be null
-				// moment.utc(null) -> invalid moment
-			var bulk_data = values[1]
+			var available_from = moment.utc(dates.common.available_from)
 
-
-			if (values[0].common.available_from === null)
+			if (dates.common.available_from === null)
 			{	// any date is available
 				available_from = moment.utc(0) // Jan 01 1970
 			}
@@ -48,9 +79,9 @@ module.exports = function Parser (portfolio, db)
 			if (! available_from.isValid())
 			{
 				throw UploadHistoryError(
-				{
-					reason: 'Unable to get portfolio available dates'
-				})
+					{
+						reason: 'Unable to get portfolio available dates'
+					})
 			}
 
 			bulk_data.forEach((entry, i) =>

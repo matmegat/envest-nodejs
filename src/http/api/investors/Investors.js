@@ -165,12 +165,13 @@ module.exports = function (db, http)
 	investors.express.post(
 		'/:id/parse-csv', authRequired, csv_uploader, (rq, rs) =>
 	{
-		var investor_id = rq.params.id
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
 		var csv = rq.file
 
 		var portfolio = investors.model.portfolio
 
-		toss(rs, portfolio.parseCsv(investor_id, csv))
+		toss(rs, portfolio.parseCsv(investor_id, whom_id, csv))
 	})
 
 	investors.express.post(
