@@ -50,7 +50,12 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.byId.quotes =
 		knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
-		options = options || {}
+		options = extend(
+		{
+			soft: false,
+			other: false
+		},
+		options)
 
 		return byId(trx, investor_id, for_date)
 		.then(holdings =>
@@ -60,7 +65,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date, pick(options, 'soft'))
+			return db.symbols.quotes(symbols, for_date, options)
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
