@@ -11,6 +11,7 @@ var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
+var reduce = require('lodash/reduce')
 
 var max = require('lodash/max')
 var maxBy = require('lodash/maxBy')
@@ -83,6 +84,16 @@ module.exports = function Portfolio (db, investor)
 				pick_list = pick_list.concat(['price', 'amount'])
 			}
 
+			var gain =
+				/* full portfolio by quote price / full portfolio by buy price */
+				(brokerage.cash + sumBy(holdings, 'real_allocation'))
+				/ (brokerage.cash + reduce(holdings, (sum, h) =>
+				{
+					return sum + h.amount * h.price
+				}, 0))
+
+			gain = (gain - 1) * 100
+
 			holdings = holdings.map((holding) =>
 			{
 				holding.allocation
@@ -106,12 +117,6 @@ module.exports = function Portfolio (db, investor)
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
 			 + sumBy(holdings, 'allocation')
-
-			var real_value
-			 = brokerage.cash * brokerage.multiplier
-			 + sumBy(holdings, 'real_allocation') * brokerage.multiplier
-
-			var gain = ( full_value / real_value - 1 ) * 100
 
 			var resp = {
 				total:    holdings.length,
