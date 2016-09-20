@@ -378,7 +378,9 @@ module.exports = function Holdings (db, investor, portfolio)
 				holding.timestamp = holding.date.format()
 			})
 
-			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+			var symbols = map(holding_entries, 'symbol')
+
+			return db.symbols.resolveMany(symbols, { other: true })
 		})
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
