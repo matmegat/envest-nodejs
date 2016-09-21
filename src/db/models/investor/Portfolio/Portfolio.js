@@ -78,19 +78,51 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var pick_list = ['symbol', 'allocation', 'gain']
+			var visible_fields = [ 'symbol', 'allocation', 'gain' ]
 			if (options.extended)
 			{
-				pick_list = pick_list.concat(['price', 'amount'])
+				visible_fields = visible_fields.concat([ 'price', 'amount' ])
 			}
 
-			var gain =
-				/* full portfolio by quote price / full portfolio by buy price */
-				(brokerage.cash + sumBy(holdings, 'real_allocation'))
-				/ (brokerage.cash + reduce(holdings, (sum, h) =>
+			/* collapse OTHER symbols */
+			var category_other = []
+
+			holdings = holdings.reduce((seq, holding) =>
+			{
+				if (Symbl(holding.symbol).isOther())
 				{
-					return sum + h.amount * h.price
-				}, 0))
+					category_other.push(holding)
+
+					return seq
+				}
+				else
+				{
+					return seq.concat(holding)
+				}
+			}, [])
+
+			var other =
+			{
+				symbol:
+					Symbl('OTHER.OTHER').toFull(),
+				allocation:
+					sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+				gain: null,
+				price: 0,
+				amount: sumBy(category_other, 'amount')
+			}
+
+			other.price = other.allocation / other.amount
+			other = pick(other, visible_fields)
+
+			/* full portfolio by quote price / full portfolio by buy price */
+			var gain =
+			(brokerage.cash + sumBy(holdings, 'real_allocation'))
+			 /
+			(brokerage.cash + reduce(holdings, (sum, h) =>
+			{
+				return sum + h.amount * h.price
+			}, 0))
 
 			gain = (gain - 1) * 100
 
@@ -109,10 +141,12 @@ module.exports = function Portfolio (db, investor)
 					 = (holding.quote_price / holding.price - 1 ) * 100
 				}
 
-				return pick(holding, pick_list)
+				return pick(holding, visible_fields)
 			})
 
 			holdings = orderBy(holdings, 'allocation', 'desc')
+
+			var total_holdings = holdings.concat(other)
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
@@ -120,7 +154,7 @@ module.exports = function Portfolio (db, investor)
 
 			var resp = {
 				total:    holdings.length,
-				holdings: holdings,
+				holdings: total_holdings,
 				full_portfolio:
 				{
 					value: full_value,
