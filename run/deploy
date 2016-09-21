@@ -144,7 +144,11 @@ rev()
 }))
 .then(outputify('copy static/', () =>
 {
-	return rsync(rootpath('static') + '/', target('static'))
+	return rsync(
+		[ '--exclude', '/images' ],
+		rootpath('static') + '/',
+		target('static')
+	)
 }))
 .then(outputify('copy src/', () =>
 {

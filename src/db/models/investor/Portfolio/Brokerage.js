@@ -325,10 +325,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			return Promise.all(
 			[
+				// TODO: "pull" previous holdings for recalculate
 				brokerage.byId(trx, investor_id, timestamp),
 				brokerage.byId(investor_id, timestamp, { soft: true }),
-				portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
-				portfolio.holdings.byId.quotes(investor_id, timestamp),
+				portfolio.holdings.byId
+					.quotes(trx, investor_id, timestamp, { other: true }),
+				portfolio.holdings.byId
+					.quotes(     investor_id, timestamp, { other: true }),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})

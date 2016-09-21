@@ -12,6 +12,7 @@ var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
 var extend = require('lodash/extend')
+var reduce = require('lodash/reduce')
 
 var max = require('lodash/max')
 var maxBy = require('lodash/maxBy')
@@ -69,10 +70,10 @@ module.exports = function Portfolio (db, investor)
 		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
-			/* TODO brokerage -> soft ? */
 			return Promise.all([
 				brokerage.byId(trx, investor_id, for_date, { soft: true }),
-				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				 holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 		})
 		.then((values) =>
@@ -80,11 +81,53 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var pick_list = ['symbol', 'allocation', 'gain']
+			var visible_fields = [ 'symbol', 'allocation', 'gain' ]
 			if (options.extended)
 			{
-				pick_list = pick_list.concat(['price', 'amount'])
+				visible_fields = visible_fields.concat([ 'price', 'amount' ])
 			}
+
+			/* collapse OTHER symbols */
+			var category_other = []
+
+			holdings = holdings.reduce((seq, holding) =>
+			{
+				if (Symbl(holding.symbol).isOther())
+				{
+					category_other.push(holding)
+
+					return seq
+				}
+				else
+				{
+					return seq.concat(holding)
+				}
+			}, [])
+
+			var other =
+			{
+				symbol:
+					Symbl('OTHER.OTHER').toFull(),
+				allocation:
+					sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+				gain: null,
+				price: 0,
+				amount: sumBy(category_other, 'amount')
+			}
+
+			other.price = other.allocation / other.amount
+			other = pick(other, visible_fields)
+
+			/* full portfolio by quote price / full portfolio by buy price */
+			var gain =
+			(brokerage.cash + sumBy(holdings, 'real_allocation'))
+			 /
+			(brokerage.cash + reduce(holdings, (sum, h) =>
+			{
+				return sum + h.amount * h.price
+			}, 0))
+
+			gain = (gain - 1) * 100
 
 			holdings = holdings.map((holding) =>
 			{
@@ -101,24 +144,20 @@ module.exports = function Portfolio (db, investor)
 					 = (holding.quote_price / holding.price - 1 ) * 100
 				}
 
-				return pick(holding, pick_list)
+				return pick(holding, visible_fields)
 			})
 
 			holdings = orderBy(holdings, 'allocation', 'desc')
+
+			var total_holdings = holdings.concat(other)
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
 			 + sumBy(holdings, 'allocation')
 
-			var real_value
-			 = brokerage.cash * brokerage.multiplier
-			 + sumBy(holdings, 'real_allocation') * brokerage.multiplier
-
-			var gain = ( full_value / real_value - 1 ) * 100
-
 			var resp = {
 				total:    holdings.length,
-				holdings: holdings,
+				holdings: total_holdings,
 				full_portfolio:
 				{
 					value: full_value,
@@ -143,9 +182,9 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			portfolio.fullValue(trx, investor_id, now),
-			portfolio.fullValue(trx, investor_id, day_ytd),
-			portfolio.fullValue(trx, investor_id, day_intraday)
+			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, day_ytd),
+			fullValue(trx, investor_id, day_intraday)
 		])
 		.then(values =>
 		{
@@ -179,16 +218,16 @@ module.exports = function Portfolio (db, investor)
 		}
 	})
 
-	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
+	var fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			/* TODO actually, there's a catch down there */
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 			.then(values =>
 			{
@@ -320,7 +359,7 @@ module.exports = function Portfolio (db, investor)
 						forOwn(c_holdings, holding =>
 						{
 							var price
-							 = find_series_value(superseries, holding.symbol, iso)
+							 = find_series_value(superseries, holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -572,8 +611,15 @@ module.exports = function Portfolio (db, investor)
 		}
 	}
 
-	function find_series_value (series, symbol, day)
+	function find_series_value (series, holding, day)
 	{
+		var symbol = holding.symbol
+
+		if (symbol.isOther())
+		{
+			return holding.price
+		}
+
 		series = series[symbol]
 
 		/* ISO dates are sortable */
@@ -631,8 +677,8 @@ module.exports = function Portfolio (db, investor)
 		])
 		.then(r =>
 		{
-			var dates_symbols  = r[0] // array
-			var date_brokerage = r[1] // array of 1 element
+			var dates_symbols  = r[0]
+			var date_brokerage = r[1]
 
 			var max_symbols = maxBy(dates_symbols, 'available_from')
 			if (max_symbols)
@@ -650,7 +696,7 @@ module.exports = function Portfolio (db, investor)
 
 			var date_common =
 			{
-				available_from: max_common || null
+				available_from: max_common
 			}
 
 			return {

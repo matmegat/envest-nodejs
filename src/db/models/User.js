@@ -299,6 +299,7 @@ module.exports = function User (db, app)
 
 	var RemoveSelf = Err('remove_self', 'You cannot remove yourself')
 	var RemoveAdmin = Err('remove_admin', 'You cannot remove admins')
+	var RemoveFeatured = Err('remove_featured', 'You cannot remove featured investor')
 
 	var includes = require('lodash/includes')
 
@@ -339,6 +340,7 @@ module.exports = function User (db, app)
 			.whereIn('id', ids)
 			.del()
 		})
+		.catch(Err.fromDb('featured_investor_investor_id_foreign', RemoveFeatured))
 		.then(Err.falsy(user.NotFound))
 		.then(noop)
 	})
@@ -548,14 +550,24 @@ module.exports = function User (db, app)
 			})
 			.then((user_item) =>
 			{
-				mailer.send('default', null,
+				var host = `${app.cfg.host}`
+				if (app.cfg.real_port !== 80)
+				{
+					host += `:${app.cfg.real_port}`
+				}
+
+				return mailer.send('default', null,
 				{
 					to: user_item.email,
-					text: 'Email confirm code: '
-					+ data.code.toUpperCase()
+					// text: 'Email confirm code: '
+					// + data.code.toUpperCase(),
+					html: 'Please tap the link to confirm email: '
+					+ `<a href="http://${host}/confirm-email?code=`
+					+ `${code.toUpperCase()}" target="_blank">`
+					+ `Confirm Email</a><br>`
+					+ `Your email confirm code: ${code.toUpperCase()}`
 				})
-
-				return user_item.id
+				.then(() => user_item.id, console.err)
 			})
 		})
 	}
