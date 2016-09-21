@@ -556,19 +556,18 @@ module.exports = function User (db, app)
 					host += `:${app.cfg.real_port}`
 				}
 
-				mailer.send('default', null,
+				return mailer.send('default', null,
 				{
 					to: user_item.email,
-					text: 'Email confirm code: '
-					+ data.code.toUpperCase(),
+					// text: 'Email confirm code: '
+					// + data.code.toUpperCase(),
 					html: 'Please tap the link to confirm email: '
 					+ `<a href="http://${host}/confirm-email?code=`
 					+ `${code.toUpperCase()}" target="_blank">`
 					+ `Confirm Email</a><br>`
 					+ `Your email confirm code: ${code.toUpperCase()}`
 				})
-
-				return user_item.id
+				.then(() => user_item.id, console.err)
 			})
 		})
 	}
