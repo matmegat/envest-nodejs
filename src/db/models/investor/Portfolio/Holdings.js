@@ -462,56 +462,50 @@ module.exports = function Holdings (db, investor, portfolio)
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
-	holdings.removeSymbol = knexed.transact(knex,
-		(trx, investor_id, holding_entries) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			validate.array(holding_entries, 'holdings')
-
-			holding_entries.forEach((holding, i) =>
-			{
-				validate.required(holding.symbol, `holdings[${i}].symbol`)
-				validate.empty(holding.symbol, `holdings[${i}].symbol`)
-			})
-
-			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
-		})
-		.then(symbols => symbols.map(Symbl))
-		.then(symbols =>
-		{
-			return Promise.all(symbols.map((symbol, i) =>
-			{
-				return holdings.ensure(trx, symbol, investor_id)
-				.then(() =>
-				{
-					return db.feed.ensureNotTraded(trx, investor_id, symbol)
-				})
-				.then(() =>
-				{
-					return holdings.symbolById(trx, symbol, investor_id)
-				})
-				.then(symbol_state =>
-				{
-					var data_remove =
-					{
-						amount:    0,
-						price:     0,
-						timestamp: symbol_state.timestamp
-					}
-
-					return put(trx, investor_id, symbol, data_remove, { override: true })
-				})
-			}))
-		})
-	})
-
 	holdings.remove = function (investor_id, holding_entries)
 	{
 		return knex.transaction(function (trx) 
 		{
-			return holdings.removeSymbol(trx, investor_id, holding_entries)
+			return investor.all.ensure(investor_id, trx)
+			.then(() =>
+			{
+				validate.array(holding_entries, 'holdings')
+
+				holding_entries.forEach((holding, i) =>
+				{
+					validate.required(holding.symbol, `holdings[${i}].symbol`)
+					validate.empty(holding.symbol, `holdings[${i}].symbol`)
+				})
+
+				return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+			})
+			.then(symbols => symbols.map(Symbl))
+			.then(symbols =>
+			{
+				return Promise.all(symbols.map((symbol, i) =>
+				{
+					return holdings.ensure(trx, symbol, investor_id)
+					.then(() =>
+					{
+						return db.feed.ensureNotTraded(trx, investor_id, symbol)
+					})
+					.then(() =>
+					{
+						return holdings.symbolById(trx, symbol, investor_id)
+					})
+					.then(symbol_state =>
+					{
+						var data_remove =
+						{
+							amount:    0,
+							price:     0,
+							timestamp: symbol_state.timestamp
+						}
+
+						return put(trx, investor_id, symbol, data_remove, { override: true })
+					})
+				}))
+			})
 		})
 	}
 
