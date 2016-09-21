@@ -383,7 +383,7 @@ var Feed = module.exports = function Feed (db)
 		return feed.feed_table(trx)
 		.where('investor_id', investor_id)
 		.andWhere(raw(`data->'symbol'`), '@>', symbol)
-		.then(Err.emptish.not(AlreadyTraded))
+		.then(Err.emptish.not(() => AlreadyTraded({ symbol: symbol })))
 	})
 
 	function create (trx, investor_id, type, date, data)
