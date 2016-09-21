@@ -106,26 +106,6 @@ module.exports = function Holdings (db, investor, portfolio)
   		.then(oneMaybe)
 	})
 
-	var AlreadyTraded = Err('holging_is_already_traded',
-		'Holding is already traded')	
-
-	holdings.ensureNotTraded =
-		knexed.transact(knex, (trx, investor_id, symbol) =>
-	{
-		var symbol = pick(symbol.toFull(), 'ticker', 'exchange')
-
-		return feed_table(trx)
-		.where('investor_id', investor_id)
-		.andWhere(raw(`data->'symbol'`), '@>', symbol)
-		.then(res =>
-		{
-			if (res.length > 0)
-			{
-				throw AlreadyTraded({ symbol: symbol })
-			}
-		})
-	})
-
 
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
@@ -532,7 +512,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				return holdings.ensure(trx, symbol, investor_id)
 				.then(() =>
 				{
-					return holdings.ensureNotTraded(trx, investor_id, symbol)
+					return db.feed.ensureNotTraded(trx, investor_id, symbol)
 				})
 				.then(() =>
 				{

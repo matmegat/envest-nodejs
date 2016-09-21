@@ -371,6 +371,26 @@ var Feed = module.exports = function Feed (db)
 		.then(oneMaybe)
 	}
 
+	var AlreadyTraded = Err('holging_is_already_traded',
+		'Holding is already traded')
+
+	feed.ensureNotTraded =
+		knexed.transact(knex, (trx, investor_id, symbol) =>
+	{
+		var symbol = pick(symbol.toFull(), 'ticker', 'exchange')
+
+		return feed.feed_table(trx)
+		.where('investor_id', investor_id)
+		.andWhere(raw(`data->'symbol'`), '@>', symbol)
+		.then(res =>
+		{
+			if (res.length > 0)
+			{
+				throw AlreadyTraded({ symbol: symbol })
+			}
+		})
+	})
+
 	function create (trx, investor_id, type, date, data)
 	{
 		return feed.feed_table(trx)
