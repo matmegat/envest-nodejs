@@ -356,7 +356,7 @@ module.exports = function Portfolio (db, investor)
 						forOwn(c_holdings, holding =>
 						{
 							var price
-							 = find_series_value(superseries, holding.symbol, iso)
+							 = find_series_value(superseries, holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -608,8 +608,15 @@ module.exports = function Portfolio (db, investor)
 		}
 	}
 
-	function find_series_value (series, symbol, day)
+	function find_series_value (series, holding, day)
 	{
+		var symbol = holding.symbol
+
+		if (symbol.isOther())
+		{
+			return holding.price
+		}
+
 		series = series[symbol]
 
 		/* ISO dates are sortable */
