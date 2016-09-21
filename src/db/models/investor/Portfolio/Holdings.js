@@ -93,20 +93,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	holdings.latestSymbolState =
-		knexed.transact(knex, (trx, investor_id, symbol) =>
-	{
-		return table(trx)
-  		.where('investor_id', investor_id)
-  		.andWhere('timestamp',
-  			table(trx)
-  			.select(raw('MAX(timestamp) AS timestamp'))
-  			.andWhere(symbol.toDb())
-  		)
-  		.then(oneMaybe)
-	})
-
-
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
 
@@ -488,18 +474,6 @@ module.exports = function Holdings (db, investor, portfolio)
 			{
 				validate.required(holding.symbol, `holdings[${i}].symbol`)
 				validate.empty(holding.symbol, `holdings[${i}].symbol`)
-
-				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount < 0)
-				{
-					throw InvalidAmount({ field: `holdings[${i}].amount` })
-				}
-
-				validate.number(holding.price, `holdings[${i}].price`)
-				if (holding.price <= 0)
-				{
-					throw InvalidAmount({ field: `holdings[${i}].price` })
-				}
 			})
 
 			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
@@ -516,9 +490,9 @@ module.exports = function Holdings (db, investor, portfolio)
 				})
 				.then(() =>
 				{
-					return holdings.latestSymbolState(trx, investor_id, symbol)
+					return holdings.symbolById(trx, symbol, investor_id)
 				})
-				.then(latest_state =>
+				.then(symbol =>
 				{
 					var data_remove =
 					{
@@ -527,7 +501,7 @@ module.exports = function Holdings (db, investor, portfolio)
 					}
 
 					// return put(trx, investor_id, symbol, data_put)
-					return remove(trx, investor_id, symbol, data_remove)
+					// return remove(trx, investor_id, symbol, data_remove)
 				})
 			}))
 		})
