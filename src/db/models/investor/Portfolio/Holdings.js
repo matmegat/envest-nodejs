@@ -21,7 +21,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio')
-	var feed_table = knexed(knex, 'feed_items')
 
 	var raw = knex.raw
 
@@ -464,7 +463,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.remove = function (investor_id, holding_entries)
 	{
-		return knex.transaction(function (trx) 
+		return knex.transaction(function (trx)
 		{
 			return investor.all.ensure(investor_id, trx)
 			.then(() =>
@@ -482,7 +481,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			.then(symbols => symbols.map(Symbl))
 			.then(symbols =>
 			{
-				return Promise.all(symbols.map((symbol, i) =>
+				return Promise.all(symbols.map((symbol) =>
 				{
 					return holdings.ensure(trx, symbol, investor_id)
 					.then(() =>
@@ -506,6 +505,7 @@ module.exports = function Holdings (db, investor, portfolio)
 					})
 				}))
 			})
+			.then(noop)
 		})
 	}
 

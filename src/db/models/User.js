@@ -661,7 +661,9 @@ module.exports = function User (db, app)
 				"lower(users.first_name || ' ' || users.last_name) LIKE ?",
 				pattern)
 			this.orWhere(
-			knex.raw('COALESCE(users.email, email_confirms.new_email) LIKE ?', pattern))
+			knex.raw(
+				'COALESCE(users.email, email_confirms.new_email) LIKE ?', pattern)
+			)
 		})
 	}
 
