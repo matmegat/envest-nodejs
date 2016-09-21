@@ -481,7 +481,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 		validate.number(amount, 'amount')
 		if (amount === 0)
 		{
-			throw InvalidAmount()
+			// TODO: allow operations with 0 amount (buy price is 0)
+			console.warn('Brokerage will not change due to 0 of amount')
+			// throw InvalidAmount()
 		}
 		if (amount + brokerage.cash < 0)
 		{

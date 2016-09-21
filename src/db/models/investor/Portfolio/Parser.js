@@ -97,7 +97,7 @@ module.exports = function Parser (portfolio, db)
 
 				if (entry.Stock)
 				{
-					entry.symbol = Symbl([entry.Stock])
+					entry.symbol = Symbl(entry.Stock)
 				}
 
 				if (entry.Cash)
@@ -119,7 +119,8 @@ module.exports = function Parser (portfolio, db)
 				}
 			})
 
-			return db.symbols.resolveMany(map(bulk_data, 'symbol'), true)
+			var options = { soft: true, other: true }
+			return db.symbols.resolveMany(map(bulk_data, 'symbol'), options)
 			.then(symbols =>
 			{
 				symbols.forEach((symbol, i) =>
@@ -197,6 +198,7 @@ module.exports = function Parser (portfolio, db)
 					throw UploadHistoryError(
 					{
 						reason: 'Not all entries could be added'
+						// TODO: show entries that could not be added
 					})
 				}
 
