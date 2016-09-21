@@ -119,6 +119,9 @@ paths:
   '/investors/{investor_id}/go-public':
     $ref: ../api/investors/swag/Post-GoPublic.yaml
 
+  '/investors/holdings/remove':
+    $ref: ../api/investors/swag/HoldingsRemove.yaml
+
   '/watchlist':
       $ref: ../api/watchlist/swag/WatchlistUser.yaml
 
