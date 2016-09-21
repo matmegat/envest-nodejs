@@ -9,7 +9,6 @@ var multer = require('multer')
 
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
-var Err = require('../../../Err')
 
 module.exports = function (db, http)
 {
