@@ -476,17 +476,16 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		validate.required(amount, 'amount')
 		validate.number(amount, 'amount')
-		// if (amount === 0)
-		// {
-		// 	throw InvalidAmount()
-		// }
+		if (amount === 0)
+		{
+			throw InvalidAmount()
+		}
 		if (amount + brokerage.cash < 0)
 		{
-			// throw InvalidAmount(
-			// {
-			// 	data: 'Brokerage may not become less than zero'
-			// })
-			console.warn('Brokerage goes less then zero!')
+			throw InvalidAmount(
+			{
+				data: 'Brokerage may not become less than zero'
+			})
 		}
 	}
 

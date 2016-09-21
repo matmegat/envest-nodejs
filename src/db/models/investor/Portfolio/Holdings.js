@@ -489,8 +489,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (sum > cash)
 			{
-				// throw NotEnoughMoney()
-				console.warn('Brokerage goes less then zero!')
+				throw NotEnoughMoney()
 			}
 		})
 		.then(() =>
