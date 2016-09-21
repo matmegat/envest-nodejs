@@ -1,8 +1,12 @@
 
 var concat    = require('lodash/concat')
 var every     = require('lodash/every')
+var flatten   = require('lodash/flatten')
+var groupBy   = require('lodash/groupBy')
 var map       = require('lodash/map')
 var mapValues = require('lodash/mapValues')
+var orderBy   = require('lodash/orderBy')
+var values    = require('lodash/values')
 
 var moment = require('moment')
 var Parse  = require('csv-parse')
@@ -86,7 +90,9 @@ module.exports = function Parser (portfolio, db)
 
 			bulk_data.forEach((entry, i) =>
 			{
-				entry.is_valid_date = moment.utc(entry.Date) >= available_from
+				entry.date = moment.utc(entry.Date)
+				entry.is_valid_date
+				 = entry.date.isValid() && entry.date >= available_from
 
 				if (entry.Stock)
 				{
@@ -175,37 +181,54 @@ module.exports = function Parser (portfolio, db)
 	parser.uploadHistoryAs
 		= knexed.transact(knex, (trx, investor_id, whom_id, csv) =>
 	{
-		// TODO: check access rights
-
-		return portfolio.parseCsv(investor_id, csv)
-		.then(bulk_data =>
+		return ensure_can_upload(whom_id, investor_id)
+		.then(mode =>
 		{
-			if (! every(bulk_data, { is_valid_date: true }))
-			{
-				throw UploadHistoryError(
-				{
-					reason: 'Not all entries could be added'
-				})
-			}
-
 			var sequential = sequential_operation(trx, investor_id)
 
-			return sequential(bulk_data[0], 0, bulk_data)
-		})
-		.catch(err =>
-		{
-			if (Err.is(err))
+			return db.investor.all.ensure(investor_id)
+			.then(() => csv_to_array(csv))
+			.then(bulk_data => transform_hist_data(bulk_data, investor_id))
+			.then(bulk_data =>
 			{
-				throw err
-			}
-			else
+				if (! every(bulk_data, { is_valid_date: true }))
+				{
+					throw UploadHistoryError(
+					{
+						reason: 'Not all entries could be added'
+					})
+				}
+
+				return adjust_date(bulk_data)
+			})
+			.then(bulk_data =>
 			{
-				throw UploadHistoryError({ reason: err.message })
-			}
-		})
-		.then((end) =>
-		{
-			return { processed: end }
+				return sequential(bulk_data[0], 0, bulk_data)
+			})
+			.catch(err =>
+			{
+				if (Err.is(err))
+				{
+					throw err
+				}
+				else
+				{
+					throw UploadHistoryError({ reason: err.message })
+				}
+			})
+			.then(added_amount =>
+			{
+				if (mode === 'mode:admin')
+				{
+					console.info('Add notification to Investor')
+				}
+				else
+				{
+					console.info('Add notification to Admins')
+				}
+
+				return { processed: added_amount }
+			})
 		})
 	})
 
@@ -247,7 +270,7 @@ module.exports = function Parser (portfolio, db)
 		{
 			return {
 				method: methods.brokerage,
-				args: [entry.Cash, moment.utc(entry.Date).format()]
+				args: [entry.Cash, entry.date.format()]
 			}
 		}
 
@@ -261,7 +284,7 @@ module.exports = function Parser (portfolio, db)
 						symbol: entry.Stock,
 						amount: entry.Amount,
 						price:  entry.Price,
-						date:   moment.utc(entry.Date).format()
+						date:   entry.date.format()
 					}]
 				]
 			}
@@ -281,7 +304,7 @@ module.exports = function Parser (portfolio, db)
 					{
 						type: entry.Type,
 						cash: entry.Cash,
-						date: moment.utc(entry.Date).format()
+						date: entry.date.format()
 					}
 				]
 			}
@@ -302,7 +325,7 @@ module.exports = function Parser (portfolio, db)
 				args:
 				[
 					'trade',
-					moment.utc(entry.Date).format(),
+					entry.date.format(),
 					{
 						dir: entry.Type,
 						symbol: entry.symbol,
@@ -320,6 +343,30 @@ module.exports = function Parser (portfolio, db)
 	}
 	/* eslint-enable complexity */
 
+	function adjust_date (bulk_data)
+	{
+		var minutes_offset = 5
+		var by_date = groupBy(bulk_data, 'date')
+
+		var adjusted_dates = mapValues(by_date, (values) =>
+		{
+			if (values.length > 1)
+			{
+
+				values.forEach((entry, i) =>
+				{
+					entry.date.add(i * minutes_offset, 'minutes')
+				})
+			}
+
+			return values
+		})
+
+		adjusted_dates = values(adjusted_dates)
+		adjusted_dates = flatten(adjusted_dates)
+
+		return orderBy(adjusted_dates, 'date')
+	}
 
 	return parser
 }
