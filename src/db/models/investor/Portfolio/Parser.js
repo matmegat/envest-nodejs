@@ -2,6 +2,7 @@
 var concat    = require('lodash/concat')
 var every     = require('lodash/every')
 var flatten   = require('lodash/flatten')
+var isNumber  = require('lodash/isNumber')
 var groupBy   = require('lodash/groupBy')
 var map       = require('lodash/map')
 var mapValues = require('lodash/mapValues')
@@ -264,7 +265,7 @@ module.exports = function Parser (portfolio, db)
 			'fee'
 		]
 
-		var is_stock = entry.Stock && entry.Amount && entry.Price
+		var is_stock = entry.Stock && entry.Amount && isNumber(entry.Price)
 
 		if (entry.Type === 'onboarding' && entry.Cash)
 		{
