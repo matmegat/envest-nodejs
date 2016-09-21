@@ -378,7 +378,7 @@ var Feed = module.exports = function Feed (db)
 	feed.ensureNotTraded =
 		knexed.transact(knex, (trx, investor_id, symbol) =>
 	{
-		var symbol = _.pick(symbol.toFull(), 'ticker', 'exchange')
+		var symbol = _.pick(symbol, 'ticker', 'exchange')
 
 		return feed.feed_table(trx)
 		.where('investor_id', investor_id)

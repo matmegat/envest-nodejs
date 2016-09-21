@@ -143,13 +143,16 @@ module.exports = function (db, http)
 	})
 
 
-	investors.express.post('/holdings/remove', http.adminOrInvestorRequired, (rq, rs) =>
+	investors.express.post('/holdings/remove',
+		http.adminOrInvestorRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.body.target_user_id
 		var holdings = rq.body.holdings
 
-		toss(rs, db.investor.portfolio.holdings.remove(whom_id, investor_id, holdings))
+		toss(rs,
+			db.investor.portfolio.holdings.remove(whom_id, investor_id, holdings)
+		)
 	})
 
 	// admin required

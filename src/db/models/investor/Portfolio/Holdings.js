@@ -183,7 +183,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		return knex(raw('portfolio AS P'))
 		.transacting(trx)
-		.select('symbol_ticker', 'symbol_exchange', 'timestamp', 'amount', 'price')
+		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		.where('investor_id', investor_id)
 		.where('amount', '>', 0)
 		.where('timestamp',
@@ -502,18 +502,13 @@ module.exports = function Holdings (db, investor, portfolio)
 					})
 					.then(() =>
 					{
-						return holdings.symbolById(trx, symbol, investor_id)
-					})
-					.then(symbol_state =>
-					{
 						var data_remove =
 						{
 							amount:    0,
-							price:     0,
-							timestamp: symbol_state.timestamp
+							price:     0
 						}
 
-						return put(trx, investor_id, symbol, data_remove, { override: true })
+						return put(trx, investor_id, symbol, data_remove)
 					})
 				}))
 			})

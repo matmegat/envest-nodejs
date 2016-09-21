@@ -200,15 +200,8 @@ module.exports = function Investor (db)
 				{
 					return 'mode:investor'
 				}
-				else
-				{
-					return false
-				}
 			}
-			else
-			{
-				return false
-			}
+			return false
 		})
 	}
 

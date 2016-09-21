@@ -25,9 +25,6 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.holdings = Holdings(investor, db)
 	onb.fields.is_public = IsPublic(investor)
 
-	expect(db, 'Onboarding depends on Admin').property('admin')
-	var admin = db.admin
-
 	expect(db, 'Onboarding depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
 
