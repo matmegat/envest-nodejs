@@ -468,6 +468,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	// buy, sell
 	var validate_positive = validate.number.positive
+	var validate_non_negative = validate.number.nonNegative
 
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
@@ -475,7 +476,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
-		validate_positive(data.price, 'price')	// TODO: error if price is 0
+		validate_non_negative(data.price, 'price')
 
 		var amount = data.amount
 		var price  = data.price
