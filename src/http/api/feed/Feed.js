@@ -170,7 +170,7 @@ module.exports = function Feed (db, http)
 	{
 		var investor_id = rq.user.id
 		var post_id = rq.body.post_id
-		var soft_mode = rq.body.soft
+		var soft_mode = rq.body.soft_mode
 
 		toss(rs, feed.post.remove(investor_id, post_id, null, soft_mode))
 	})
@@ -180,7 +180,7 @@ module.exports = function Feed (db, http)
 		var whom_id = rq.user.id
 		var target_user_id = rq.body.target_user_id
 		var post_id = rq.body.post_id
-		var soft_mode = rq.body.soft
+		var soft_mode = rq.body.soft_mode
 
 		toss(rs, feed.post.remove(target_user_id, post_id, whom_id, soft_mode))
 	})

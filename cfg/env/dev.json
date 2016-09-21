@@ -3,12 +3,14 @@
   "env": "dev",
 
   "host": "ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
-  "port": 8000,
+  "port": 8001,
   "real_port": 8000,
 
   "pg":
   {
     "database": "netvest_dev",
     "password": "ovjms3lmzf"
-  }
+  },
+
+  "nginx": true
 }
