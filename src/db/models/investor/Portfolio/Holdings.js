@@ -461,11 +461,23 @@ module.exports = function Holdings (db, investor, portfolio)
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
-	holdings.remove = function (investor_id, holding_entries)
+	var AdminOrOwnerRequired = Err('admin_or_owner_required',
+		'Admin Or Owner Required')
+
+	holdings.remove = function (whom_id, investor_id, holding_entries)
 	{
 		return knex.transaction(function (trx)
 		{
-			return investor.all.ensure(investor_id, trx)
+			return investor.getActionMode(whom_id, investor_id)
+			.then(mode =>
+			{
+				if (! mode)
+				{
+					throw AdminOrOwnerRequired()
+				}
+
+				return investor.all.ensure(investor_id, trx)
+			})
 			.then(() =>
 			{
 				validate.array(holding_entries, 'holdings')

@@ -40,9 +40,14 @@ module.exports = function Onboarding (db, investor)
 		whom_id = Number(whom_id)
 		investor_id = Number(investor_id)
 
-		return ensure_can_edit(whom_id, investor_id)
+		return investor.getActionMode(whom_id, investor_id)
 		.then(mode =>
 		{
+			if (! mode)
+			{
+				throw CantEdit()
+			}
+
 			if (! (field in onb.fields))
 			{
 				throw WrongField({ field: field })
@@ -72,36 +77,6 @@ module.exports = function Onboarding (db, investor)
 					by: 'admin',
 					admin: [ ':user-id', whom_id ]
 				})
-			}
-		})
-	}
-
-	function ensure_can_edit (whom_id, investor_id)
-	{
-		return Promise.all([ admin.is(whom_id), investor.all.is(whom_id) ])
-		.then(so =>
-		{
-			var is_admin    = so[0]
-			var is_investor = so[1]
-
-			if (is_admin)
-			{
-				return 'mode:admin'
-			}
-			else if (is_investor)
-			{
-				if (whom_id === investor_id)
-				{
-					return 'mode:investor'
-				}
-				else
-				{
-					throw CantEdit()
-				}
-			}
-			else
-			{
-				throw CantEdit()
 			}
 		})
 	}
