@@ -295,7 +295,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 					investor_id,       // investor_id
 					cash,              // new cash to set
 					timestamp,         // timestamp
-					null,              // holdings the same
+					null,              // holdings are the same
 					{ override: true } // override on exact match
 				)
 			}
@@ -469,7 +469,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var cash = amount + brokerage.cash
 
-			return put(trx, investor_id, cash, date, options)
+			return put(
+				trx,               // transaction
+				investor_id,       // investor_id
+				cash,              // new cash to set
+				date,              // timestamp
+				null,              // holdings are the same
+				{ override: true } // override on exact match
+			)
 		})
 	})
 
