@@ -1,0 +1,17 @@
+get:
+  description: |
+    Investor's Chart calculations intermediate representation
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investors Id
+    required: true
+  responses:
+    200:
+      description: Investor Chart data IR
+      schema:
+        type: object
+        title: internal intermediate representation
+  tags:
+  - investors

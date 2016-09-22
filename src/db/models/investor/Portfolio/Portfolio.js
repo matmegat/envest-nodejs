@@ -242,7 +242,45 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	portfolio.grid.ir = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return Promise.all(
+		[
+			grid_ir(trx, investor_id, 'day'),
+			grid_ir(trx, investor_id, 'intraday')
+		])
+	})
+
 	function grid (trx, investor_id, resolution)
+	{
+		return grid_ir(trx, investor_id, resolution)
+		.then(grid => grid.chart)
+		.then(chart =>
+		{
+			if (chart.utc_offset)
+			{
+				var utc_offset = chart.utc_offset
+				delete chart.utc_offset
+			}
+
+			chart = chart.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
+			})
+
+			if (utc_offset)
+			{
+				chart.utc_offset = utc_offset
+			}
+
+			return chart
+		})
+	}
+
+	function grid_ir (trx, investor_id, resolution)
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -256,6 +294,8 @@ module.exports = function Portfolio (db, investor)
 		.then(grids =>
 		{
 			var grid = {}
+
+			grid.resolution = resolution
 
 			grid.holdings  = grids[0]
 			grid.brokerage = grids[1]
@@ -302,7 +342,9 @@ module.exports = function Portfolio (db, investor)
 					}
 				}
 
-				var compiled = []
+				var chart = []
+
+				grid.range = range
 
 				// range.by('days', it =>
 				grid_iterator(range, resolution, it =>
@@ -333,7 +375,7 @@ module.exports = function Portfolio (db, investor)
 
 					total = round(total, 3)
 
-					compiled.push([ moment(iso).utc().format(), total ])
+					chart.push([ moment(iso).utc().format(), total ])
 				})
 
 				if (resolution === 'intraday')
@@ -347,35 +389,13 @@ module.exports = function Portfolio (db, investor)
 
 					utc_offset = min(utc_offset)
 
-					compiled.utc_offset = utc_offset
+					chart.utc_offset = utc_offset
 				}
 
-				return compiled
+				grid.chart = chart
+
+				return grid
 			})
-		})
-		// for routes ~~~ :
-		.then(grid =>
-		{
-			if (grid.utc_offset)
-			{
-				var utc_offset = grid.utc_offset
-				delete grid.utc_offset
-			}
-
-			grid = grid.map(entry =>
-			{
-				return {
-					timestamp: entry[0],
-					value: entry[1]
-				}
-			})
-
-			if (utc_offset)
-			{
-				grid.utc_offset = utc_offset
-			}
-
-			return grid
 		})
 	}
 
