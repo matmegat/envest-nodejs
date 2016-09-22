@@ -169,7 +169,7 @@ module.exports = function (db, http)
 	investors.express.post(
 		'/:id/upload-history', authRequired, csv_uploader, (rq, rs) =>
 	{
-		var investor_id = rq.params.id
+		var investor_id = Number(rq.params.id)
 		var whom_id = rq.user.id
 		var csv = rq.file
 
