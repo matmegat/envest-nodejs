@@ -119,6 +119,12 @@ paths:
   '/investors/{investor_id}/go-public':
     $ref: ../api/investors/swag/Post-GoPublic.yaml
 
+  '/investors/{investor_id}/parse-csv':
+    $ref: ../api/investors/swag/Post-ParseCSV.yaml
+
+  '/investors/{investor_id}/upload-history':
+    $ref: ../api/investors/swag/Post-UploadCSV.yaml
+
   '/watchlist':
       $ref: ../api/watchlist/swag/WatchlistUser.yaml
 
