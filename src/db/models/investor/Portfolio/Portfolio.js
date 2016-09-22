@@ -112,9 +112,6 @@ module.exports = function Portfolio (db, investor)
 				amount: sumBy(category_other, 'amount')
 			}
 
-			other.price = other.allocation / other.amount
-			other = pick(other, visible_fields)
-
 			/* full portfolio by quote price / full portfolio by buy price */
 			var gain =
 			(brokerage.cash + sumBy(holdings, 'real_allocation'))
@@ -144,16 +141,22 @@ module.exports = function Portfolio (db, investor)
 				return pick(holding, visible_fields)
 			})
 
-			holdings = orderBy(holdings, 'allocation', 'desc')
+			var total_holdings = orderBy(holdings, 'allocation', 'desc')
 
-			var total_holdings = holdings.concat(other)
+			if (other.amount)
+			{
+				other.price = other.allocation / other.amount
+				other = pick(other, visible_fields)
+
+				total_holdings = holdings.concat(other)
+			}
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
 			 + sumBy(holdings, 'allocation')
 
 			var resp = {
-				total:    holdings.length,
+				total:    total_holdings.length,
 				holdings: total_holdings,
 				full_portfolio:
 				{
