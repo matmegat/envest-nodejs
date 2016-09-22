@@ -290,7 +290,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 			else
 			{
-				return put(trx, investor_id, cash, timestamp, { override: true })
+				return put(
+					trx,               // transaction
+					investor_id,       // investor_id
+					cash,              // new cash to set
+					timestamp,         // timestamp
+					null,              // holdings the same
+					{ override: true } // override on exact match
+				)
 			}
 		})
 	})
@@ -299,9 +306,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, new_cash, timestamp, options)
+	// eslint-disable-next-line max-params
+	function put (trx, investor_id, new_cash, timestamp, old_holdings, options)
 	{
 		expect(new_cash).a('number')
+
+		if (old_holdings !== null)
+		{
+			expect(old_holdings).an('array')
+		}
 
 		options || (options = {})
 
@@ -324,35 +337,34 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			return Promise.all(
 			[
-				// TODO: "pull" previous holdings for recalculate
 				brokerage.byId(trx, investor_id, timestamp),
-				brokerage.byId(investor_id, timestamp, { soft: true }),
 				portfolio.holdings.byId
 					.quotes(trx, investor_id, timestamp, { other: true }),
-				portfolio.holdings.byId
-					.quotes(     investor_id, timestamp, { other: true }),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
 		.then(values =>
 		{
+			var cash       = values[0].cash
 			var multiplier = values[0].multiplier
-			var old_cash = values[1].cash
-			var old_multiplier = values[1].multiplier
 
-			var holdings = values[2]
-			var old_holdings = values[3]
+			var current_holdings = values[1]
 
-			var is_exact = values[4]
+			var is_exact = values[2]
+
+			if (old_holdings === null)
+			{
+				old_holdings = current_holdings
+			}
 
 			if (options.recalculate)
 			{
 				var current_allocation
-				 = old_cash + sumBy(old_holdings, 'real_allocation')
-				current_allocation *= old_multiplier
+				 = cash + sumBy(current_holdings, 'real_allocation')
+				current_allocation *= multiplier
 
 				var real_allocation
-				 = new_cash + sumBy(holdings, 'real_allocation')
+				 = cash + sumBy(old_holdings, 'real_allocation')
 
 				multiplier = (current_allocation / real_allocation)
 			}
@@ -393,8 +405,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	brokerage.recalculate = knexed.transact(knex,
-		(trx, investor_id, timestamp) =>
+		(trx, investor_id, timestamp, old_holdings) =>
 	{
+		if (old_holdings !== null)
+		{
+			expect(old_holdings).an('array')
+		}
+
 		return brokerage.cashById(trx, investor_id, timestamp)
 		.then(cash =>
 		{
@@ -402,14 +419,16 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// recalculate because of holdings changed
 
 			return put(
-			trx,
-			investor_id,
-			cash,
-			timestamp,
-			{
-				override: true,
-				recalculate: true
-			})
+				trx,
+				investor_id,
+				cash,
+				timestamp,
+				old_holdings,
+				{
+					override: true,
+					recalculate: true
+				}
+			)
 		})
 	})
 
