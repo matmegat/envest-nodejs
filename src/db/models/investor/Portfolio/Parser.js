@@ -79,11 +79,11 @@ module.exports = function Parser (portfolio, db)
 	function transform_hist_data (bulk_data, investor_id)
 	{
 		return portfolio.availableDate(investor_id)
-		.then((dates) =>
+		.then((portfolio_date) =>
 		{
-			var available_from = moment.utc(dates.common.available_from)
+			var available_from = moment.utc(portfolio_date.available_from)
 
-			if (dates.common.available_from === null)
+			if (portfolio_date.available_from === null)
 			{	// any date is available
 				available_from = moment.utc(0) // Jan 01 1970
 			}
@@ -92,7 +92,7 @@ module.exports = function Parser (portfolio, db)
 			{
 				throw UploadHistoryError(
 					{
-						reason: 'Unable to get portfolio available dates'
+						reason: 'Unable to get portfolio available date'
 					})
 			}
 
