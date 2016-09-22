@@ -1,0 +1,7 @@
+---
+- hosts: virtual
+  remote_user: root
+
+  tasks:
+  - name: ping
+    ping:
