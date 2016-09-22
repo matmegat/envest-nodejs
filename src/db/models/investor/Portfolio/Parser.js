@@ -9,6 +9,7 @@ var mapValues = require('lodash/mapValues')
 var orderBy   = require('lodash/orderBy')
 var values    = require('lodash/values')
 
+var expect = require('chai').expect
 var moment = require('moment')
 var Parse  = require('csv-parse')
 
@@ -22,6 +23,12 @@ module.exports = function Parser (portfolio, db)
 	var parser = {}
 
 	var knex = db.knex
+
+	expect(db, 'Parser depends on Notifications').property('notifications')
+	var Emitter = db.notifications.Emitter
+
+	var csvUploadedA = Emitter('csv_uploaded', { group: 'admins' })
+	var csvUploadedI = Emitter('csv_uploaded')
 
 	var UploadHistoryError = Err('upload_history_error',
 		'Unable to upload history of Investor')
@@ -223,11 +230,17 @@ module.exports = function Parser (portfolio, db)
 			{
 				if (mode === 'mode:admin')
 				{
-					console.info('Add notification to Investor')
+					csvUploadedI(investor_id, {
+						by: 'admin',
+						admin: [ ':user-id', whom_id ]
+					})
 				}
 				else
 				{
-					console.info('Add notification to Admins')
+					csvUploadedA({
+						by: 'investor',
+						investor: [ ':user-id', investor_id ]
+					})
 				}
 
 				return { processed: added_amount }
