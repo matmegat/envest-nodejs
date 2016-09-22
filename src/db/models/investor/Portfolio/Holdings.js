@@ -50,7 +50,12 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.byId.quotes =
 		knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
-		options = options || {}
+		options = extend(
+		{
+			soft: false,
+			other: false
+		},
+		options)
 
 		return byId(trx, investor_id, for_date)
 		.then(holdings =>
@@ -60,16 +65,31 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date, options.soft)
+			return db.symbols.quotes(symbols, for_date, options)
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price && ! options.soft)
+					if (! quote.price)
 					{
-						throw new TypeError(
-							'Cannot recalculate Xignite Quotes failed'
-						)
+						if (Symbl(quote.symbol).isOther())
+						{
+							if (! options.other)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes for OTHER'
+								)
+							}
+						}
+						else
+						{
+							if (! options.soft)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes, xIgnite failed'
+								)
+							}
+						}
 					}
 
 					var holding = holdings[i]
@@ -358,7 +378,9 @@ module.exports = function Holdings (db, investor, portfolio)
 				holding.timestamp = holding.date.format()
 			})
 
-			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+			var symbols = map(holding_entries, 'symbol')
+
+			return db.symbols.resolveMany(symbols, { other: true })
 		})
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>

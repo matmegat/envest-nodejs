@@ -14,7 +14,7 @@ module.exports = function Trade (portfolio, symbols)
 		validate_update: validate_trade_adds,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return symbols.resolve(data.symbol)
+			return symbols.resolve(data.symbol, { other: true })
 			.then(symbl =>
 			{
 				data.symbol = pick(symbl,
