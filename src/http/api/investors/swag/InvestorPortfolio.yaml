@@ -19,6 +19,12 @@ properties:
       gain:
         type: number
         description: The arithmetic mean of each Investor Portfolio Holding
+  available_from:
+    type: string
+    format: datetime
+    description: |
+      Date and time after which you can add new holdings, make trades,
+      make operations with cash_management
 required:
 - total
 - holdings

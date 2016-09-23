@@ -11,6 +11,7 @@ var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
+var extend = require('lodash/extend')
 var reduce = require('lodash/reduce')
 
 var max = require('lodash/max')
@@ -36,6 +37,8 @@ var Symbl = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
 var Err = require('../../../../Err')
+
+var Parser = require('./Parser')
 
 module.exports = function Portfolio (db, investor)
 {
@@ -168,9 +171,13 @@ module.exports = function Portfolio (db, investor)
 			if (options.extended)
 			{
 				resp.brokerage = brokerage
+				return portfolio.availableDate(investor_id)
+				.then(date => extend(resp, date))
 			}
-
-			return resp
+			else
+			{
+				return resp
+			}
 		})
 	})
 
@@ -714,16 +721,7 @@ module.exports = function Portfolio (db, investor)
 				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
 			}
 
-			var date_common =
-			{
-				available_from: max_common
-			}
-
-			return {
-				symbols:   dates_symbols,
-				brokerage: date_brokerage,
-				common:    date_common
-			}
+			return { available_from: max_common }
 		})
 	})
 
@@ -815,6 +813,9 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(noop)
 	})
+
+
+	extend(portfolio, Parser(portfolio, db))
 
 	return portfolio
 }

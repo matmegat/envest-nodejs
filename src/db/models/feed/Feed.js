@@ -199,7 +199,7 @@ var Feed = module.exports = function Feed (db)
 			var reqs = investor_ids.map(id =>
 			{
 				return investor.portfolio.availableDate(id)
-				.then(date => date.common.available_from)
+				.then(date => date.available_from)
 				.then(date => [ id, date ])
 			})
 

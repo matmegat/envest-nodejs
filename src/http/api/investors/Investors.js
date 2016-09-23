@@ -5,6 +5,8 @@ var isPlainObject = require('lodash/isPlainObject')
 
 var Router = require('express').Router
 
+var multer = require('multer')
+
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
@@ -115,13 +117,6 @@ module.exports = function (db, http)
 		))
 	})
 
-	investors.express.get('/:id/date-from', authRequired, (rq, rs) =>
-	{
-		var investor_id = rq.params.id
-
-		toss(rs, investors.model.portfolio.availableDate(investor_id))
-	})
-
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
@@ -155,6 +150,32 @@ module.exports = function (db, http)
 		var investor_id = rq.params.id
 
 		toss(rs, investors.model.onboarding.goPublic(whom_id, investor_id))
+	})
+
+	var csv_uploader = multer().single('csv')
+
+	investors.express.post(
+		'/:id/parse-csv', authRequired, csv_uploader, (rq, rs) =>
+	{
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+		var csv = rq.file
+
+		var portfolio = investors.model.portfolio
+
+		toss(rs, portfolio.parseCsv(investor_id, whom_id, csv))
+	})
+
+	investors.express.post(
+		'/:id/upload-history', authRequired, csv_uploader, (rq, rs) =>
+	{
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+		var csv = rq.file
+
+		var portfolio = investors.model.portfolio
+
+		toss(rs, portfolio.uploadHistoryAs(investor_id, whom_id, csv))
 	})
 
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>

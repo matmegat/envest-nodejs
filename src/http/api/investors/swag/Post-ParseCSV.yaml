@@ -1,0 +1,70 @@
+post:
+  description: |
+    Upload CSV file with history of operations and pre-validate each entry.
+    Take close look at `is_valid_date`, `is_resolved` and `date`
+  consumes:
+  - multipart/form-data
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investors Id
+    required: true
+  - name: csv
+    in: formData
+    required: true
+    type: file
+    format: binary
+    description: |
+      should follow
+      [format](https://distillery.atlassian.net/wiki/display/NET/CSV+rules)
+  responses:
+    200:
+      description: History of Operation uploaded successfully
+      schema:
+        type: array
+        items:
+        - type: object
+          title: Perced CSV model
+          properties:
+            Date:
+              type: string
+              description: Origin string from CSV
+            Type:
+              type: string
+              description: Origin string from CSV
+            Cash:
+              type: number
+              description: Origin number from CSV if exists or empty string
+            Stock:
+              type: string
+              description: Origin string from CSV if exists or empty string
+            Amount:
+              type: number
+              description: Origin number from CSV if exists or empty string
+            Price:
+              type: number
+              description: Origin number from CSV if exists or empty string
+            date:
+              type: string
+              format: datetime
+              description: Adjusted datetime
+            is_valid_date:
+              type: boolean
+              description: Flag that show is it possible to add this entry to investor's portfolio
+            is_resolved:
+              type: boolean
+              description: Flag that show is it possible to get some information about symbol
+            symbol:
+              type: object
+              description: If Symbol is resolved structure of Symbol or `null`
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors
+  - admin

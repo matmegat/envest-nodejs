@@ -3,6 +3,7 @@ var noop = require('lodash/noop')
 var map  = require('lodash/map')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
+var maxBy = require('lodash/maxBy')
 
 var expect = require('chai').expect
 
@@ -385,30 +386,32 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
-			return Promise.all(symbols.map((symbol, i) =>
+			var new_holdings = symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
 				var data = pick(holding, 'amount', 'price', 'timestamp')
 
 				return put(trx, investor_id, symbol, data, { override: true })
-			}))
-		})
-		.then(() =>
-		{
-			// choose latest timestamp
-			var index = 0
-			var timestamp = holding_entries[index].date
-			holding_entries.forEach((holding, i) =>
-			{
-				if (holding.date > timestamp)
-				{
-					timestamp = holding.date
-					index = i
-				}
 			})
 
-			return portfolio.brokerage
-			.recalculate(trx, investor_id, holding_entries[index].timestamp)
+			return holdings.byId.quotes(trx, investor_id, null, { other: true })
+			.then(previous_holdings =>
+			{
+				return Promise.all(new_holdings)
+				.then(() =>
+				{
+					var timestamp = maxBy(holding_entries, 'date').timestamp
+
+					return portfolio
+					.brokerage
+					.recalculate(
+						trx,              // transaction
+						investor_id,      // investor id
+						timestamp,        // timestamp
+						previous_holdings // previous state of holdings
+					)
+				})
+			})
 		})
 	})
 
@@ -490,6 +493,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	// buy, sell
 	var validate_positive = validate.number.positive
+	var validate_non_negative = validate.number.nonNegative
 
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
@@ -497,7 +501,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
-		validate_positive(data.price, 'price')
+		validate_non_negative(data.price, 'price')
 
 		var amount = data.amount
 		var price  = data.price
