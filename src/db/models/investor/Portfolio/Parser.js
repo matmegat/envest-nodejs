@@ -336,7 +336,8 @@ module.exports = function Parser (portfolio, db)
 			{
 				throw UploadHistoryError(
 				{
-					reason: `Invalid entry '${entry.Date} - ${entry.Type}'`
+					reason: `Symbol for '${entry.Date} - ${entry.Type}' is ` +
+					        `not resolved`
 				})
 			}
 
