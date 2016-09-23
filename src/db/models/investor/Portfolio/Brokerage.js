@@ -359,14 +359,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			if (options.recalculate)
 			{
-				var current_allocation
-				 = cash + sumBy(current_holdings, 'real_allocation')
-				current_allocation *= multiplier
-
-				var real_allocation
+				var previous_allocation
 				 = cash + sumBy(old_holdings, 'real_allocation')
+				previous_allocation *= multiplier
 
-				multiplier = (current_allocation / real_allocation)
+				var current_allocation
+				 = new_cash + sumBy(current_holdings, 'real_allocation')
+
+				multiplier = (previous_allocation / current_allocation)
 			}
 
 			var batch =
