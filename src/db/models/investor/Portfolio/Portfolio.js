@@ -88,31 +88,34 @@ module.exports = function Portfolio (db, investor)
 			}
 
 			/* collapse OTHER symbols */
-			var category_other = []
-
-			holdings = holdings.reduce((seq, holding) =>
+			if (! options.extended)
 			{
-				if (Symbl(holding.symbol).isOther())
-				{
-					category_other.push(holding)
+				var category_other = []
 
-					return seq
-				}
-				else
+				holdings = holdings.reduce((seq, holding) =>
 				{
-					return seq.concat(holding)
-				}
-			}, [])
+					if (Symbl(holding.symbol).isOther())
+					{
+						category_other.push(holding)
 
-			var other =
-			{
-				symbol:
-					Symbl('OTHER.OTHER').toFull(),
-				allocation:
-					sumBy(category_other, 'real_allocation') * brokerage.multiplier,
-				gain: null,
-				price: 0,
-				amount: sumBy(category_other, 'amount')
+						return seq
+					}
+					else
+					{
+						return seq.concat(holding)
+					}
+				}, [])
+
+				var other =
+				{
+					symbol:
+						Symbl('OTHER.OTHER').toFull(),
+					allocation:
+						sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+					gain: null,
+					price: 0,
+					amount: sumBy(category_other, 'amount')
+				}
 			}
 
 			/* full portfolio by quote price / full portfolio by buy price */
@@ -146,12 +149,13 @@ module.exports = function Portfolio (db, investor)
 
 			var total_holdings = orderBy(holdings, 'allocation', 'desc')
 
-			if (other.amount)
+			if (! options.extended && other.amount)
 			{
+				/* if collapsed and > 0 */
 				other.price = other.allocation / other.amount
 				other = pick(other, visible_fields)
 
-				total_holdings = holdings.concat(other)
+				total_holdings = total_holdings.concat(other)
 			}
 
 			var full_value
