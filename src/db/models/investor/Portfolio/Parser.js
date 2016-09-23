@@ -1,6 +1,7 @@
 
 var concat    = require('lodash/concat')
 var every     = require('lodash/every')
+var filter    = require('lodash/filter')
 var flatten   = require('lodash/flatten')
 var isNumber  = require('lodash/isNumber')
 var groupBy   = require('lodash/groupBy')
@@ -202,10 +203,13 @@ module.exports = function Parser (portfolio, db)
 			{
 				if (! every(bulk_data, { is_valid_date: true }))
 				{
+					var invalid_entries = filter(bulk_data, { is_valid_date: false })
+
 					throw UploadHistoryError(
 					{
-						reason: 'Not all entries could be added'
-						// TODO: show entries that could not be added
+						reason: `${invalid_entries.length} entries are older ` +
+						        `than last portfolio record`,
+						entries: invalid_entries
 					})
 				}
 
