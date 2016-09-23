@@ -171,13 +171,9 @@ module.exports = function Portfolio (db, investor)
 			if (options.extended)
 			{
 				resp.brokerage = brokerage
-				return portfolio.availableDate(investor_id)
-				.then(date => extend(resp, date))
 			}
-			else
-			{
-				return resp
-			}
+
+			return resp
 		})
 	})
 
