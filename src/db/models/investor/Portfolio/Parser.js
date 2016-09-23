@@ -263,7 +263,7 @@ module.exports = function Parser (portfolio, db)
 				}
 				else
 				{
-					return index - 1 // amount of processed operations
+					return index // amount of processed operations
 				}
 			})
 		}
