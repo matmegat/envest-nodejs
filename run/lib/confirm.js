@@ -1,8 +1,13 @@
 
-var confirm = require('inquirer-confirm')
+var confirmer = require('inquirer-confirm')
 
-module.exports = (message) =>
+var confirm = module.exports = function confirm (message)
 {
-	return confirm(message)
+	return confirmer(message)
 	.then(() => true, () => false)
+}
+
+confirm.env = (env) =>
+{
+	return confirm(`env = ${env}. continue?`)
 }

@@ -67,10 +67,6 @@ catch (e)
 
 var remote = remote_config.remote
 
-console.info(remote_config)
-console.info(remote)
-
-process.exit(0)
 
 ssh = partial(ssh, remote)
 rsync = partial(rsync, '--recursive')
@@ -142,7 +138,30 @@ function rev ()
 }
 
 
-rev()
+var confirm = require('./lib/confirm')
+
+Promise.resolve()
+.then(() =>
+{
+	if (remote_config.confirm)
+	{
+		return confirm.env(env)
+	}
+	else
+	{
+		return true
+	}
+})
+.then(so =>
+{
+	if (! so)
+	{
+		console.info('STOP')
+		process.exit(0)
+	}
+
+	return rev()
+})
 .then(fullrev =>
 {
 	var tmp_rev = tmp('netvest-REV')
@@ -242,6 +261,7 @@ rev()
 })
 .catch(error =>
 {
+	console.log(1)
 	console.error(error)
 	console.error(error.stack)
 
