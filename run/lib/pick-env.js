@@ -33,5 +33,10 @@ var envs =
 	{
 		remote: remotes.devs,
 		confirm: true
+	},
+	virtual:
+	{
+		remote: '172.17.0.2',
+		confirm: true
 	}
 }
