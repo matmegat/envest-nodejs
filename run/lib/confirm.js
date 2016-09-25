@@ -11,8 +11,3 @@ confirm.env = (env) =>
 {
 	return confirm(`env = ${env}. continue?`)
 }
-
-confirm.setup = (host) =>
-{
-	return confirm(`host = ${host}. setup infrastructure?`)
-}

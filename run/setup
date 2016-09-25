@@ -21,6 +21,8 @@ var remote = remote_config.remote
 get_env.confirm(remote_config, env) /* @shortcut */
 .then(() =>
 {
-	console.info('GO')
+	var playbook = 'playbook.yml'
+	var command = `ansible-playbook -i ${remote_config.remote}, ${playbook}`
+	console.info(command)
 })
 
