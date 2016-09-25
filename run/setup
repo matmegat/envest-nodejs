@@ -4,36 +4,13 @@ require('console-ultimate/global').replace()
 
 var env = 'prod'
 
-var pick_env = require('./lib/pick-env')
+var get_env = require('./lib/get-env')
 
-try
-{
-	var remote_config = pick_env(env)
-}
-catch (e)
-{
-	console.error(e.message)
-	process.exit(1)
-}
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = remote_config.remote
 
-var confirm = require('./lib/confirm')
-
-Promise.resolve()
+get_env.confirm(remote_config, env) /* @shortcut */
 .then(() =>
 {
-	if (remote_config.confirm)
-	{
-		return confirm.setup(remote_config.remote)
-	}
-	else
-	{
-		return true
-	}
-})
-.then(so =>
-{
-	if (! so)
-	{
-		console.info('STOP')
-	}
+	console.info('GO')
 })
