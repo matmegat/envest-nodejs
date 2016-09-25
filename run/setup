@@ -1,0 +1,39 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var env = 'prod'
+
+var pick_env = require('./lib/pick-env')
+
+try
+{
+	var remote_config = pick_env(env)
+}
+catch (e)
+{
+	console.error(e.message)
+	process.exit(1)
+}
+
+var confirm = require('./lib/confirm')
+
+Promise.resolve()
+.then(() =>
+{
+	if (remote_config.confirm)
+	{
+		return confirm.setup(remote_config.remote)
+	}
+	else
+	{
+		return true
+	}
+})
+.then(so =>
+{
+	if (! so)
+	{
+		console.info('STOP')
+	}
+})
