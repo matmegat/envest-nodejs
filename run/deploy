@@ -53,7 +53,24 @@ if (key)
 	rsync = partial(rsync, [ '-e', fkey ])
 }
 
-var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
+var pick_env = require('./lib/pick-env')
+
+try
+{
+	var remote_config = pick_env(env)
+}
+catch (e)
+{
+	console.error(e.message)
+	process.exit(1)
+}
+
+var remote = remote_config.remote
+
+console.info(remote_config)
+console.info(remote)
+
+process.exit(0)
 
 ssh = partial(ssh, remote)
 rsync = partial(rsync, '--recursive')
@@ -215,6 +232,8 @@ rev()
 {
 	console.info('OK')
 
+	return
+
 	rev()
 	.then(fullrev =>
 	{
@@ -225,6 +244,8 @@ rev()
 {
 	console.error(error)
 	console.error(error.stack)
+
+	return
 
 	slack.failure(env)
 	.then(() =>
