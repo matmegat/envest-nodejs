@@ -2,9 +2,18 @@
 
 require('console-ultimate/global').replace()
 
-var env = 'prod'
+var args = require('minimist')(process.argv.slice(2),
+{
+	string:
+	[
+		'env',
+		'key'
+	]
+})
 
 var get_env = require('./lib/get-env')
+
+var env = get_env(args) /* @shortcut */
 
 var remote_config = get_env.remote(env) /* @shortcut */
 var remote = remote_config.remote
@@ -14,3 +23,4 @@ get_env.confirm(remote_config, env) /* @shortcut */
 {
 	console.info('GO')
 })
+
