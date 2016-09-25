@@ -36,7 +36,6 @@ var envs =
 	},
 	virtual:
 	{
-		remote: '172.17.0.2',
-		confirm: true
+		remote: '172.17.0.2'
 	}
 }
