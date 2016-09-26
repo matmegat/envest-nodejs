@@ -14,3 +14,13 @@
     file:
       path: '/home/ubuntu/netvest/{{ netvest_env }}'
       state: directory
+      owner: ubuntu
+      group: ubuntu
+
+  - name: add Node.js repository
+    shell: curl -sL https://deb.nodesource.com/setup_4.x | bash -
+
+  - name: install Node.js
+    apt:
+      update_cache: true
+      name: nodejs=4.*
