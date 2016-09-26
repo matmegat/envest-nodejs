@@ -29,9 +29,11 @@ get_env.confirm(remote_config, env) /* @shortcut */
 .then(() =>
 {
 	var playbook = rootpath('infrastructure/playbook.yml')
-	var command = `ansible-playbook -i ${remote_config.remote}, ${playbook}`
+	var command = `ansible-playbook -i ${remote}, ${playbook}`
 
-	console.log(command)
+	console.log('$', command)
+
+	command += ` -e "netvest_env=${env}"`
 
 	return confirm('apply?')
 	.then(so =>

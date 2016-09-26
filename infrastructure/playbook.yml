@@ -5,3 +5,12 @@
   tasks:
   - name: ping
     ping:
+
+  - name: ensure ubuntu user
+    user:
+      name: ubuntu
+
+  - name: create env's dir `{{ netvest_env }}`
+    file:
+      path: '/home/ubuntu/netvest/{{ netvest_env }}'
+      state: directory
