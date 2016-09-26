@@ -24,3 +24,16 @@
     apt:
       update_cache: true
       name: nodejs=4.*
+
+  - name: add PostgreSQL repository
+    apt_repository:
+      repo: deb https://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main
+
+  - name: add PostgreSQL key
+    apt_key:
+      url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+
+  - name: install PostgreSQL
+    apt:
+      update_cache: true
+      name: postgresql-9.4=9.4.*
