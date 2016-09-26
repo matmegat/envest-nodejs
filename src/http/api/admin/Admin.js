@@ -22,6 +22,20 @@ module.exports = function (db, http, admin)
 		toss(rs, admin.intro(target_user_id, by_user_id))
 	})
 
+	express.post('/create', (rq, rs) =>
+	{
+		var by_user_id = rq.user.id
+		var user_data = _.pick(rq.body,
+		[
+			'first_name',
+			'last_name',
+			'email',
+			'password'
+		])
+
+		toss(rs, admin.create(by_user_id, user_data))
+	})
+
 	express.post('/change-name', (rq, rs) =>
 	{
 		var whom_id = rq.user.id

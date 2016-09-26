@@ -72,6 +72,18 @@ module.exports = function Admin (db)
 		.whereIn('user_id', user_ids)
 	}
 
+	admin.canIntro = function (user_id, trx)
+	{
+		return admin.byId(user_id, trx)
+		.then(admin =>
+		{
+			if (admin && ! admin.can_intro)
+			{
+				throw CannotIntro()
+			}
+		})
+	}
+
 	admin.intro = knexed.transact(knex, (trx, target_user_id, by_user_id) =>
 	{
 		by_user_id || (by_user_id = null)
@@ -90,14 +102,7 @@ module.exports = function Admin (db)
 				.then(() =>
 				{
 					/* check for can_intro */
-					return admin.byId(by_user_id, trx)
-					.then(by_whom =>
-					{
-						if (! by_whom.can_intro)
-						{
-							throw CannotIntro()
-						}
-					})
+					return admin.canIntro(by_user_id, trx)
 				})
 			}
 			else
@@ -107,7 +112,7 @@ module.exports = function Admin (db)
 		})
 		.then(() =>
 		{
-			return user.ensure(target_user_id, trx)
+			return user.ensure(trx, target_user_id)
 		})
 		.then(() =>
 		{
@@ -121,6 +126,15 @@ module.exports = function Admin (db)
 			.catch(Err.fromDb('admins_pkey', AlreadyAdmin))
 		})
 		.then(noop)
+	})
+
+	admin.create = knexed.transact(knex, (trx, by_user_id, userdata) =>
+	{
+		return db.auth.register(trx, userdata)
+		.then(id =>
+		{
+			return admin.intro(trx, id, by_user_id)
+		})
 	})
 
 	return admin

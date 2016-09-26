@@ -26,12 +26,16 @@ module.exports = function Auth (db)
 		{
 			return user.create(trx, userdata)
 		})
-		.then(function (id)
+		.then(id =>
 		{
 			return user.newEmailUpdate(trx,
 			{
 				user_id: id,
 				new_email: userdata.email
+			})
+			.then(() =>
+			{
+				return id
 			})
 		})
 	})
