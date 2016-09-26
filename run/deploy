@@ -50,9 +50,10 @@ if (key)
 
 var remote_config = get_env.remote(env) /* @shortcut */
 var remote = remote_config.remote
+var remote_with_user = 'ubuntu@' + remote
 
 
-ssh = partial(ssh, remote)
+ssh = partial(ssh, remote_with_user)
 rsync = partial(rsync, '--recursive')
 rsync_clean = partial(rsync, '--delete')
 
@@ -90,7 +91,7 @@ function remote_rootpath (path)
 
 function target (path)
 {
-	return remote + ':' + remote_rootpath(path)
+	return remote_with_user + ':' + remote_rootpath(path)
 }
 
 

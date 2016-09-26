@@ -12,8 +12,8 @@ module.exports = (env) =>
 }
 
 var remotes = {}
-remotes.devs = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
-remotes.prod = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
+remotes.devs = 'ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
+remotes.prod = 'ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
 var envs =
 {
