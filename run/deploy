@@ -199,6 +199,25 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 		return scp(tmp_f, target('cfg/nginx.conf'))
 	})()
+	.then(outputify('put ref to nginx/conf.d', () =>
+	{
+		var tmp_f_local = 'netvest-deploy-nginx-ref.conf'
+		var tmp_f = tmp(tmp_f_local)
+
+		var rendered = `include /home/ubuntu/netvest/${env}/cfg/nginx.conf;\n`
+
+		write(tmp_f, rendered)
+
+		var target_etc = `${remote_with_user}:/tmp/${tmp_f_local}`
+
+		return scp(tmp_f, target_etc)
+		.then(() =>
+		{
+			var from = `/tmp/${tmp_f_local}`
+			var to = `/etc/nginx/conf.d/netvest-${env}.conf`
+			return ssh(`sudo mv ${from} ${to}`)
+		})
+	}))
 })
 .then(() =>
 {
