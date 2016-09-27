@@ -21,9 +21,5 @@ module.exports =
 	{
 		remote: remotes.prod,
 		confirm: true
-	},
-	virtual:
-	{
-		remote: '172.17.0.2'
 	}
 }
