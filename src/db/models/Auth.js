@@ -149,8 +149,6 @@ module.exports = function Auth (db)
 	}
 
 	var validate = require('../validate')
-
-	var validate_name = validate.name
 	var validate_email = validate.email
 
 	return auth
