@@ -114,7 +114,17 @@ module.exports = function Xign (cfg, log)
 				{
 					symbol: symbols[i],
 					price:  null,
-					gain:   null
+					gain:   null,
+
+					prev_close: null,
+					low: null,
+					high: null,
+					volume: null,
+					last: null,
+					percent_change_from_open: null,
+					one_year_low: null,
+					one_year_high: null,
+					currency: null,
 				}
 
 				if (r)
@@ -124,8 +134,23 @@ module.exports = function Xign (cfg, log)
 						symbol:   symbols[i],
 						currency: r.Currency,
 						price:    r.Last,
-						company:  r.Security.Name
+						company:  r.Security.Name,
+
+						prev_close: r.PreviousClose,
+						low: r.Low,
+						high: r.High,
+						volume: r.Volume,
+						last: r.Last,
+						one_year_low: r.Low52Weeks,
+						one_year_high: r.High52Weeks,
 					})
+
+					struct.percent_change_from_open
+					 = (r.Last / r.Open - 1) * 100
+					/* The percentage difference between Last and Open prices.
+					 * Dynamic change during trading day from bid to bid.
+					 * OR The percentage difference between Open and Close
+					 * prices. */
 
 					/* this available only for today */
 					/* this not available for historical */
@@ -133,6 +158,9 @@ module.exports = function Xign (cfg, log)
 					if (r.PercentChangeFromPreviousClose != null)
 					{
 						struct.gain = r.PercentChangeFromPreviousClose
+						/* The percentage difference between Last and
+						 * PreviousClose prices. Dynamic change during trading
+						 * day from bid to bid */
 					}
 				}
 
@@ -207,32 +235,6 @@ module.exports = function Xign (cfg, log)
 		.then(util.unwrap.first)
 		.then(util.unwrap.success)
 		.catch(logger.warn_rethrow)
-	}
-
-	X.historical = (symbol) =>
-	{
-		var uri = format(
-		{
-			protocol: 'https',
-			host: 'xignite.com',
-
-			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuote',
-
-			query:
-			{
-				IdentifierType: 'Symbol',
-				Identifier: symbol,
-
-				AdjustmentMethod: 'All',
-
-				AsOfDate: util.apidate(),
-
-				_Token: token
-			}
-		})
-
-		return request(uri)
-		.then(util.unwrap.data)
 	}
 
 	X.lastTradeDate = (symbol) =>
