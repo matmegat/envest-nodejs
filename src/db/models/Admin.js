@@ -116,7 +116,7 @@ module.exports = function Admin (db)
 		})
 		.then(() =>
 		{
-			return table()
+			return table(trx)
 			.insert(
 			{
 				user_id: target_user_id,
