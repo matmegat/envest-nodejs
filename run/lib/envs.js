@@ -1,7 +1,7 @@
 
 var remotes = {}
 remotes.devs = 'ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
-remotes.prod = 'ec2-52-37-60-63.us-west-2.compute.amazonaws.com'
+remotes.prod = 'ec2-52-42-79-12.us-west-2.compute.amazonaws.com'
 
 module.exports =
 {
