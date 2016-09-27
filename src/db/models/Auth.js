@@ -21,7 +21,11 @@ module.exports = function Auth (db)
 
 	auth.register = knexed.transact(db.knex, (trx, userdata) =>
 	{
-		return validate_register(userdata)
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.register(userdata)
+		})
 		.then(() =>
 		{
 			return user.create(trx, userdata)
@@ -123,18 +127,6 @@ module.exports = function Auth (db)
 	}
 
 	/* validations */
-	function validate_register (credentials)
-	{
-		return new Promise(rs =>
-		{
-			validate_name(credentials.first_name, 'first_name')
-			validate_name(credentials.last_name, 'last_name')
-			validate_email(credentials.email)
-
-			return rs()
-		})
-	}
-
 	function validate_change_email (email)
 	{
 		return new Promise(rs =>

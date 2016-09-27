@@ -511,7 +511,7 @@ module.exports = function User (db, app)
 		.del()
 	}
 
-	user.newEmailUpdate = function (trx, data)
+	user.newEmailUpdate = function (trx, data, for_admin)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
@@ -551,6 +551,13 @@ module.exports = function User (db, app)
 			.then((user_item) =>
 			{
 				var host = `${app.cfg.host}`
+				var admin_string = ''
+
+				if (for_admin)
+				{
+					admin_string = 'You\'ve been chosen as admin.<br/>'
+				}
+
 				if (app.cfg.real_port !== 80)
 				{
 					host += `:${app.cfg.real_port}`
@@ -561,7 +568,7 @@ module.exports = function User (db, app)
 					to: user_item.email,
 					// text: 'Email confirm code: '
 					// + data.code.toUpperCase(),
-					html: 'Please tap the link to confirm email: '
+					html: admin_string + 'Please tap the link to confirm email: '
 					+ `<a href="http://${host}/confirm-email?code=`
 					+ `${code.toUpperCase()}" target="_blank">`
 					+ `Confirm Email</a><br>`

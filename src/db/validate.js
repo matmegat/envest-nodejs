@@ -283,6 +283,14 @@ validate.title_field = function validate__title_field (string, field_name)
 	validate_field(string, field_name)
 }
 
+
+validate.register = function validate__register (credentials)
+{
+	validate_name(credentials.first_name, 'first_name')
+	validate_name(credentials.last_name, 'last_name')
+	validate_email(credentials.email)
+}
+
 var XRegExp = require('xregexp')
 var WrongName = Err('wrong_name_format', 'Wrong name format')
 

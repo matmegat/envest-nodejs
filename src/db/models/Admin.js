@@ -130,11 +130,32 @@ module.exports = function Admin (db)
 
 	admin.create = knexed.transact(knex, (trx, by_user_id, userdata) =>
 	{
-		return db.auth.register(trx, userdata)
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.register(userdata)
+		})
+		.then(() =>
+		{
+			return user.create(trx, userdata)
+		})
 		.then(id =>
 		{
 			return admin.intro(trx, id, by_user_id)
+			.then(() =>
+			{
+				return id
+			})
 		})
+		.then(id =>
+		{
+			return user.newEmailUpdate(trx,
+			{
+				user_id: id,
+				new_email: userdata.email
+			}, true)
+		})
+		.then(noop)
 	})
 
 	return admin
