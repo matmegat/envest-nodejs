@@ -1,0 +1,15 @@
+{
+  "dev":  false,
+  "env": "prod",
+
+  "host": "ec2-52-42-79-12.us-west-2.compute.amazonaws.com",
+  "port": 81,
+  "real_port": 80,
+
+  "pg":
+  {
+    "database": "netvest_prod"
+  },
+
+  "nginx": true
+}
