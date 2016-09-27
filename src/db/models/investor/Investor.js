@@ -182,5 +182,28 @@ module.exports = function Investor (db)
 		.then(one)
 	})
 
+	investor.getActionMode = function (whom_id, investor_id)
+	{
+		return Promise.all([ db.admin.is(whom_id), investor.all.is(whom_id) ])
+		.then(so =>
+		{
+			var is_admin    = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return 'mode:admin'
+			}
+			else if (is_investor)
+			{
+				if (whom_id === investor_id)
+				{
+					return 'mode:investor'
+				}
+			}
+			return false
+		})
+	}
+
 	return investor
 }
