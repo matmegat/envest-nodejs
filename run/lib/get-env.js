@@ -13,22 +13,20 @@ var get_env = module.exports = (args) =>
 }
 
 
-var pick_env = require('./pick-env')
-
 get_env.remote = (env) =>
 {
-	try
+	if (env in envs)
 	{
-		var remote_config = pick_env(env)
+		return envs[env]
 	}
-	catch (e)
+	else
 	{
-		console.error(e.message)
+		console.error('wrong env `' + env + '`')
 		process.exit(1)
 	}
-
-	return remote_config
 }
+
+var envs = require('./envs')
 
 
 var confirm = require('./confirm')
