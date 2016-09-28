@@ -154,14 +154,21 @@ Filter.by.name = function by_name (when_column)
 }
 
 
-Filter.by.query = function by_query ()
+Filter.by.query = function by_query (raw_joins)
 {
+	validate.array(raw_joins, 'raw_joins')
+
 	return function (queryset, query)
 	{
 		validate.required(query, 'query')
 		validate.empty(query, 'query')
 
 		var pattern = '%' + query.toLowerCase() + '%'
+
+		raw_joins.forEach((raw_join) =>
+		{
+			queryset.joinRaw(raw_join)
+		})
 
 		return queryset
 		.where(function ()

@@ -17,8 +17,6 @@ var BookedPaginator = require('../../paginator/Booked')
 var Filter = require('../../Filter')
 
 var isBoolean = require('../../validate').boolean
-var isRequired = require('../../validate').required
-var isEmpty = require('../../validate').empty
 
 module.exports = function Meta (investor, raw, options)
 {
@@ -48,13 +46,10 @@ module.exports = function Meta (investor, raw, options)
 		ids: Filter.by.ids('user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
 		is_public: Filter.by.field('is_public', isBoolean),
-		query: (queryset, query) =>
-		{
-			queryset
-			.leftJoin('email_confirms', 'email_confirms.user_id', 'users.id')
-
-			return Filter.by.query()(queryset, query)
-		}
+		query: Filter.by.query([
+			`left join "email_confirms" 
+			        on "email_confirms"."user_id" = "users"."id"`,
+		])
 	})
 
 	meta.is = function (id, trx)

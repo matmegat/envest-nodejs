@@ -587,7 +587,7 @@ module.exports = function User (db, app)
 	})
 
 	var filter = Filter({
-		query: Filter.by.query()
+		query: Filter.by.query([])
 	})
 
 	user.byGroup = function (user_group, options)
