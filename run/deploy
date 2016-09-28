@@ -236,8 +236,6 @@ get_env.confirm(remote_config, env) /* @shortcut */
 {
 	console.info('OK')
 
-	return
-
 	rev()
 	.then(fullrev =>
 	{
@@ -246,11 +244,8 @@ get_env.confirm(remote_config, env) /* @shortcut */
 })
 .catch(error =>
 {
-	console.log(1)
 	console.error(error)
 	console.error(error.stack)
-
-	return
 
 	slack.failure(env)
 	.then(() =>
