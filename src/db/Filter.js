@@ -154,6 +154,31 @@ Filter.by.name = function by_name (when_column)
 }
 
 
+Filter.by.query = function by_query ()
+{
+	return function (queryset, query)
+	{
+		validate.required(query, 'query')
+		validate.empty(query, 'query')
+
+		var pattern = '%' + query.toLowerCase() + '%'
+
+		return queryset
+		.where(function ()
+		{
+			this.whereRaw(
+				`lower(users.first_name || ' ' || users.last_name) LIKE ?`,
+				pattern
+			)
+			this.orWhere(raw(
+				`COALESCE(users.email, email_confirms.new_email) LIKE ?`,
+				pattern)
+			)
+		})
+	}
+}
+
+
 var Symbl = require('./models/symbols/Symbl')
 
 Filter.by.portfolio_symbols = function by_portfolio_symbols (column)

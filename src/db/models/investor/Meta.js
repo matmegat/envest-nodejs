@@ -50,24 +50,10 @@ module.exports = function Meta (investor, raw, options)
 		is_public: Filter.by.field('is_public', isBoolean),
 		query: (queryset, query) =>
 		{
-			isRequired(query, 'query')
-			isEmpty(query, 'query')
-
-			var pattern = '%' + query.toLowerCase() + '%'
-
-			return queryset
+			queryset
 			.leftJoin('email_confirms', 'email_confirms.user_id', 'users.id')
-			.where(function ()
-			{
-				this.whereRaw(
-					`lower(users.first_name || ' ' || users.last_name) LIKE ?`,
-					pattern
-				)
-				this.orWhere(raw(
-					`COALESCE(users.email, email_confirms.new_email) LIKE ?`,
-					pattern)
-				)
-			})
+
+			return Filter.by.query()(queryset, query)
 		}
 	})
 
