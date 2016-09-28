@@ -71,7 +71,9 @@ module.exports = function Investor (db)
 					'brokerage'
 				]
 
-				return extend(r, pick(values[0], extend_list), values[1])
+				r.available_from = values[1].format()
+
+				return extend(r, pick(values[0], extend_list))
 			})
 		})
 	})

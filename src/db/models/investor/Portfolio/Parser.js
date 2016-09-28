@@ -82,14 +82,12 @@ module.exports = function Parser (portfolio, db)
 		return portfolio.availableDate(investor_id)
 		.then((portfolio_date) =>
 		{
-			var available_from = moment.utc(portfolio_date.available_from)
-
 			if (portfolio_date.available_from === null)
 			{	// any date is available
-				available_from = moment.utc(0) // Jan 01 1970
+				portfolio_date = moment.utc(0) // Jan 01 1970
 			}
 
-			if (! available_from.isValid())
+			if (! portfolio_date.isValid())
 			{
 				throw UploadHistoryError(
 					{
@@ -101,7 +99,7 @@ module.exports = function Parser (portfolio, db)
 			{
 				entry.date = moment.utc(entry.Date)
 				entry.is_valid_date
-				 = entry.date.isValid() && entry.date >= available_from
+				 = entry.date.isValid() && entry.date >= portfolio_date
 
 				if (entry.Stock)
 				{

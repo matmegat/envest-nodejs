@@ -715,9 +715,10 @@ module.exports = function Portfolio (db, investor)
 			if (max_symbols || max_brokerage)
 			{
 				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
+				max_common = moment.utc(max_common)
 			}
 
-			return { available_from: max_common }
+			return max_common
 		})
 	})
 

@@ -574,16 +574,11 @@ function Holdings (investor_model, db)
 			}
 
 			return db.investor.portfolio.availableDate(investor_id)
-			.then(date => date.available_from)
 			.then((min_date) =>
 			{
 				if (min_date === null)
 				{
 					min_date = moment.utc(0)
-				}
-				else
-				{
-					min_date = moment.utc(min_date)
 				}
 
 				value.forEach((row, i) =>
