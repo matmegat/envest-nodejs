@@ -8,7 +8,8 @@
 
   "pg":
   {
-    "database": "netvest_perf"
+    "database": "netvest_perf",
+    "password": "1d2z8yf2hkyy14i3"
   },
 
   "nginx": true
