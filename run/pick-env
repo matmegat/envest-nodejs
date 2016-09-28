@@ -1,9 +1,0 @@
-#! /usr/bin/env node
-
-var pick_env = require('./lib/pick-env')
-
-var env = pick_env(process.argv[2])
-
-var remote_with_user = 'ubuntu@' + env.remote + '\n'
-
-process.stdout.write(remote_with_user)
