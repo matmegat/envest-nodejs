@@ -768,6 +768,35 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
+	portfolio.removeTrade = function (trx, post)
+	{
+		var symbol = post.data.symbol
+
+		symbol.symbol_ticker = symbol.ticker
+		symbol.symbol_exchange = symbol.exchange
+
+		return portfolio.isDateAvail(trx, post.investor_id, post.timestamp)
+		.then(is_avail =>
+		{
+			if (! is_avail)
+			{
+				throw PostDateErr()
+			}
+		})
+		.then(() =>
+		{
+			return holdings.symbolById(trx, symbol, post.investor_id, null, true)
+		})
+		.then(symbol_state =>
+		{
+			return holdings.removeById(trx, symbol_state)
+		})
+		.then(() =>
+		{
+			return brokerage.removeState(trx, post.investor_id, post.timestamp)
+		})
+	}
+
 
 	var val_cash_ops = validate.collection([
 		'deposit',

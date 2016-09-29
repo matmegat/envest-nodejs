@@ -480,6 +480,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
+	brokerage.removeState = knexed.transact(knex, (trx, investor_id, date) =>
+	{
+		date = moment(date).startOf('second')
+
+		return table(trx)
+		.where({
+			'investor_id': investor_id,
+			'timestamp': date
+		})
+		.del()
+	})
+
 	var valid_operations =
 	{
 		deposit: validate_positive,
