@@ -320,11 +320,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		if (timestamp)
 		{
-			timestamp = moment.utc(timestamp).format()
+			timestamp = moment(timestamp).startOf('second')
 		}
 		else
 		{
-			timestamp = moment.utc().format()
+			timestamp = moment().startOf('second')
 		}
 
 		return brokerage.isDateAvail(trx, investor_id, timestamp)

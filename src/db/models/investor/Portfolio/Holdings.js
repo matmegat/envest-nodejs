@@ -451,11 +451,11 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		if (data.timestamp)
 		{
-			data.timestamp = moment.utc(data.timestamp).format()
+			data.timestamp = moment(data.timestamp).startOf('second')
 		}
 		else
 		{
-			data.timestamp = moment.utc().format()
+			data.timestamp = moment(data.timestamp).startOf('second')
 		}
 
 		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
