@@ -175,13 +175,9 @@ module.exports = function Portfolio (db, investor)
 			if (options.extended)
 			{
 				resp.brokerage = brokerage
-				return portfolio.availableDate(investor_id)
-				.then(date => extend(resp, date))
 			}
-			else
-			{
-				return resp
-			}
+
+			return resp
 		})
 	})
 
@@ -723,9 +719,10 @@ module.exports = function Portfolio (db, investor)
 			if (max_symbols || max_brokerage)
 			{
 				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
+				max_common = moment.utc(max_common)
 			}
 
-			return { available_from: max_common }
+			return max_common
 		})
 	})
 
