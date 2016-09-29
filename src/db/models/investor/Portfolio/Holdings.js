@@ -531,7 +531,8 @@ module.exports = function Holdings (db, investor, portfolio)
 					validate.empty(holding.symbol, `holdings[${i}].symbol`)
 				})
 
-				return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+				return db.symbols.resolveMany(map(holding_entries, 'symbol'),
+					{ other: true })
 			})
 			.then(symbols => symbols.map(Symbl))
 			.then(symbols =>
