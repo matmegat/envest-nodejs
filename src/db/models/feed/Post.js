@@ -100,7 +100,14 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = date || new Date()
+			if (date)
+			{
+				date = moment(date).startOf('second')
+			}
+			else
+			{
+				date = moment().startOf('second')
+			}
 
 			return Promise.resolve()
 			.then(() =>
