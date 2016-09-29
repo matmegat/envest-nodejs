@@ -486,8 +486,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		return table(trx)
 		.where({
-			'investor_id': investor_id,
-			'timestamp': date
+			investor_id: investor_id,
+			timestamp: date
 		})
 		.del()
 	})
