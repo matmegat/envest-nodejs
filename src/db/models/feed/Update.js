@@ -166,12 +166,19 @@ module.exports = function Update (db)
 
 			return data
 		})
-		.then(validate_pic_exists)
-		.then(validate_chart)
+		.then(() => validate_pic_exists(data, true))
+		.then(() => validate_chart(data, true))
 	}
 
-	function validate_pic_exists (data)
+	function validate_pic_exists (data, for_update)
 	{
+		if (for_update && data.pic === null)
+		{
+			// Delete picture from disc
+
+			return data
+		}
+
 		if (data.pic)
 		{
 			return db.static.exists(data.pic)
@@ -189,9 +196,14 @@ module.exports = function Update (db)
 		return data
 	}
 
-	function validate_chart (data)
+	function validate_chart (data, for_update)
 	{
 		var chart = data.chart
+
+		if (for_update && chart === null)
+		{
+			return data
+		}
 
 		if (chart)
 		{
