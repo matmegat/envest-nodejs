@@ -145,23 +145,9 @@ module.exports = function Xign (cfg, log)
 						one_year_high: r.High52Weeks,
 					})
 
-					struct.percent_change_from_open
-					 = (r.Last / r.Open - 1) * 100
-					/* The percentage difference between Last and Open prices.
-					 * Dynamic change during trading day from bid to bid.
-					 * OR The percentage difference between Open and Close
-					 * prices. */
-
-					/* this available only for today */
-					/* this not available for historical */
+					struct.gain = struct.percent_change_from_open
 					// eslint-disable-next-line id-length
-					if (r.PercentChangeFromPreviousClose != null)
-					{
-						struct.gain = r.PercentChangeFromPreviousClose
-						/* The percentage difference between Last and
-						 * PreviousClose prices. Dynamic change during trading
-						 * day from bid to bid */
-					}
+					 = r.PercentChangeFromPreviousClose || 0
 				}
 
 				return struct
