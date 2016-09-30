@@ -44,7 +44,7 @@ module.exports = function Update (db)
 				return data
 			})
 		},
-		update: (trx, investor_id, type, date, data) =>
+		update: (trx, investor_id, type, date, data, prev_data) =>
 		{
 			return Promise.resolve()
 			.then(() =>
@@ -79,7 +79,7 @@ module.exports = function Update (db)
 		}
 	})
 
-	function validate_update_adds (data)
+	function validate_update_adds (data, prev_data)
 	{
 		var data = pick(data,
 		[
@@ -125,8 +125,8 @@ module.exports = function Update (db)
 
 			return data
 		})
-		.then(validate_pic_exists)
-		.then(validate_chart)
+		.then(() => validate_pic_exists(data, true, prev_data.pic))
+		.then(() => validate_chart(data, true))
 	}
 
 	function validate_update (data)
@@ -166,17 +166,19 @@ module.exports = function Update (db)
 
 			return data
 		})
-		.then(() => validate_pic_exists(data, true))
-		.then(() => validate_chart(data, true))
+		.then(validate_pic_exists)
+		.then(validate_chart)
 	}
 
-	function validate_pic_exists (data, for_update)
+	function validate_pic_exists (data, for_update, prev_pic)
 	{
 		if (for_update && data.pic === null)
 		{
-			// Delete picture from disc
-
-			return data
+			return db.static.remove(prev_pic)
+			.then(() =>
+			{
+				return data
+			})
 		}
 
 		if (data.pic)

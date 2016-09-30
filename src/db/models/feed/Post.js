@@ -49,7 +49,7 @@ module.exports = function Post (db)
 					post_type = post.types[type]
 
 					return post_type.update(
-						trx, investor_id, type, date, data, post_id)
+						trx, investor_id, type, date, data, prev_post.data)
 					.then(data =>
 					{
 						return extend({}, prev_post.data, data)
