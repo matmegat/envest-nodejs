@@ -38,12 +38,12 @@ function setter (type, set)
 
 function updater (type, update)
 {
-	return (trx, investor_id, feed_type, date, data, prev_data) =>
+	return (trx, investor_id, feed_type, date, data, post_id) =>
 	{
-		return type.validate_update(data, prev_data)
+		return type.validate_update(data)
 		.then(data =>
 		{
-			return update(trx, investor_id, feed_type, date, data, prev_data)
+			return update(trx, investor_id, feed_type, date, data, post_id)
 		})
 	}
 }
