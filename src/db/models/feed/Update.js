@@ -116,6 +116,15 @@ module.exports = function Update (db)
 
 			rs(data)
 		})
+		.then(data =>
+		{
+			if (data.pic && data.chart)
+			{
+				throw AmbiguousAttach()
+			}
+
+			return data
+		})
 		.then(validate_pic_exists)
 		.then(validate_chart)
 	}
