@@ -5,6 +5,8 @@ var isPlainObject = require('lodash/isPlainObject')
 
 var Router = require('express').Router
 
+var multer = require('multer')
+
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
@@ -32,7 +34,8 @@ module.exports = function (db, http)
 		options.filter = pick(rq.query,
 		[
 			'symbol',
-			'symbols'
+			'symbols',
+			'query',
 		])
 
 		if (rq.user && rq.user.admin && 'is_public' in rq.query)
@@ -115,13 +118,6 @@ module.exports = function (db, http)
 		))
 	})
 
-	investors.express.get('/:id/date-from', authRequired, (rq, rs) =>
-	{
-		var investor_id = rq.params.id
-
-		toss(rs, investors.model.portfolio.availableDate(investor_id))
-	})
-
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
@@ -142,6 +138,19 @@ module.exports = function (db, http)
 		)
 	})
 
+
+	investors.express.post('/holdings/remove',
+		http.adminOrInvestorRequired, (rq, rs) =>
+	{
+		var whom_id = rq.user.id
+		var investor_id = rq.body.target_user_id
+		var holdings = rq.body.holdings
+
+		toss(rs,
+			db.investor.portfolio.holdings.remove(whom_id, investor_id, holdings)
+		)
+	})
+
 	// admin required
 	investors.express.post('/', http.adminRequired, (rq, rs) =>
 	{
@@ -157,9 +166,40 @@ module.exports = function (db, http)
 		toss(rs, investors.model.onboarding.goPublic(whom_id, investor_id))
 	})
 
+	var csv_uploader = multer().single('csv')
+
+	investors.express.post(
+		'/:id/parse-csv', authRequired, csv_uploader, (rq, rs) =>
+	{
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+		var csv = rq.file
+
+		var portfolio = investors.model.portfolio
+
+		toss(rs, portfolio.parseCsv(investor_id, whom_id, csv))
+	})
+
+	investors.express.post(
+		'/:id/upload-history', authRequired, csv_uploader, (rq, rs) =>
+	{
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+		var csv = rq.file
+
+		var portfolio = investors.model.portfolio
+
+		toss(rs, portfolio.uploadHistoryAs(investor_id, whom_id, csv))
+	})
+
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
 	{
 		toss(rs, investors.model.featured.set(rq.body.investor_id))
+	})
+
+	investors.express.get('/:id/chart/ir', http.adminRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.portfolio.grid.ir(rq.params.id))
 	})
 
 	return investors

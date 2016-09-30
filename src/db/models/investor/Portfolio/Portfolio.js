@@ -11,6 +11,7 @@ var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
+var extend = require('lodash/extend')
 var reduce = require('lodash/reduce')
 
 var max = require('lodash/max')
@@ -36,6 +37,8 @@ var Symbl = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
 var Err = require('../../../../Err')
+
+var Parser = require('./Parser')
 
 module.exports = function Portfolio (db, investor)
 {
@@ -67,10 +70,10 @@ module.exports = function Portfolio (db, investor)
 		.then((model) => model.ensure(investor_id, trx))
 		.then(() =>
 		{
-			/* TODO brokerage -> soft ? */
 			return Promise.all([
 				brokerage.byId(trx, investor_id, for_date, { soft: true }),
-				 holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				 holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 		})
 		.then((values) =>
@@ -78,19 +81,51 @@ module.exports = function Portfolio (db, investor)
 			var brokerage = values[0]
 			var holdings  = values[1]
 
-			var pick_list = ['symbol', 'allocation', 'gain']
+			var visible_fields = [ 'symbol', 'allocation', 'gain' ]
 			if (options.extended)
 			{
-				pick_list = pick_list.concat(['price', 'amount'])
+				visible_fields = visible_fields.concat([ 'price', 'amount' ])
 			}
 
-			var gain =
-				/* full portfolio by quote price / full portfolio by buy price */
-				(brokerage.cash + sumBy(holdings, 'real_allocation'))
-				/ (brokerage.cash + reduce(holdings, (sum, h) =>
+			/* collapse OTHER symbols */
+			if (! options.extended)
+			{
+				var category_other = []
+
+				holdings = holdings.reduce((seq, holding) =>
 				{
-					return sum + h.amount * h.price
-				}, 0))
+					if (Symbl(holding.symbol).isOther())
+					{
+						category_other.push(holding)
+
+						return seq
+					}
+					else
+					{
+						return seq.concat(holding)
+					}
+				}, [])
+
+				var other =
+				{
+					symbol:
+						Symbl('OTHER.OTHER').toFull(),
+					allocation:
+						sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+					gain: null,
+					price: 0,
+					amount: sumBy(category_other, 'amount')
+				}
+			}
+
+			/* full portfolio by quote price / full portfolio by buy price */
+			var gain =
+			(brokerage.cash + sumBy(holdings, 'real_allocation'))
+			 /
+			(brokerage.cash + reduce(holdings, (sum, h) =>
+			{
+				return sum + h.amount * h.price
+			}, 0))
 
 			gain = (gain - 1) * 100
 
@@ -109,18 +144,27 @@ module.exports = function Portfolio (db, investor)
 					 = (holding.quote_price / holding.price - 1 ) * 100
 				}
 
-				return pick(holding, pick_list)
+				return pick(holding, visible_fields)
 			})
 
-			holdings = orderBy(holdings, 'allocation', 'desc')
+			var total_holdings = orderBy(holdings, 'allocation', 'desc')
+
+			if (! options.extended && other.amount)
+			{
+				/* if collapsed and > 0 */
+				other.price = other.allocation / other.amount
+				other = pick(other, visible_fields)
+
+				total_holdings = total_holdings.concat(other)
+			}
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
 			 + sumBy(holdings, 'allocation')
 
 			var resp = {
-				total:    holdings.length,
-				holdings: holdings,
+				total:    total_holdings.length,
+				holdings: total_holdings,
 				full_portfolio:
 				{
 					value: full_value,
@@ -145,9 +189,9 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			portfolio.fullValue(trx, investor_id, now),
-			portfolio.fullValue(trx, investor_id, day_ytd),
-			portfolio.fullValue(trx, investor_id, day_intraday)
+			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, day_ytd),
+			fullValue(trx, investor_id, day_intraday)
 		])
 		.then(values =>
 		{
@@ -181,16 +225,16 @@ module.exports = function Portfolio (db, investor)
 		}
 	})
 
-	portfolio.fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
+	var fullValue = knexed.transact(knex, (trx, investor_id, for_date) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			/* TODO actually, there's a catch down there */
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, for_date, { future: true }),
-				holdings.byId.quotes(trx, investor_id, for_date, { soft: true })
+				holdings.byId
+					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 			.then(values =>
 			{
@@ -242,7 +286,45 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	portfolio.grid.ir = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return Promise.all(
+		[
+			grid_ir(trx, investor_id, 'day'),
+			grid_ir(trx, investor_id, 'intraday')
+		])
+	})
+
 	function grid (trx, investor_id, resolution)
+	{
+		return grid_ir(trx, investor_id, resolution)
+		.then(grid => grid.chart)
+		.then(chart =>
+		{
+			if (chart.utc_offset)
+			{
+				var utc_offset = chart.utc_offset
+				delete chart.utc_offset
+			}
+
+			chart = chart.map(entry =>
+			{
+				return {
+					timestamp: entry[0],
+					value: entry[1]
+				}
+			})
+
+			if (utc_offset)
+			{
+				chart.utc_offset = utc_offset
+			}
+
+			return chart
+		})
+	}
+
+	function grid_ir (trx, investor_id, resolution)
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -256,6 +338,8 @@ module.exports = function Portfolio (db, investor)
 		.then(grids =>
 		{
 			var grid = {}
+
+			grid.resolution = resolution
 
 			grid.holdings  = grids[0]
 			grid.brokerage = grids[1]
@@ -302,7 +386,9 @@ module.exports = function Portfolio (db, investor)
 					}
 				}
 
-				var compiled = []
+				var chart = []
+
+				grid.range = range
 
 				// range.by('days', it =>
 				grid_iterator(range, resolution, it =>
@@ -322,7 +408,7 @@ module.exports = function Portfolio (db, investor)
 						forOwn(c_holdings, holding =>
 						{
 							var price
-							 = find_series_value(superseries, holding.symbol, iso)
+							 = find_series_value(superseries, holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -333,7 +419,7 @@ module.exports = function Portfolio (db, investor)
 
 					total = round(total, 3)
 
-					compiled.push([ moment(iso).utc().format(), total ])
+					chart.push([ moment(iso).utc().format(), total ])
 				})
 
 				if (resolution === 'intraday')
@@ -347,35 +433,13 @@ module.exports = function Portfolio (db, investor)
 
 					utc_offset = min(utc_offset)
 
-					compiled.utc_offset = utc_offset
+					chart.utc_offset = utc_offset
 				}
 
-				return compiled
+				grid.chart = chart
+
+				return grid
 			})
-		})
-		// for routes ~~~ :
-		.then(grid =>
-		{
-			if (grid.utc_offset)
-			{
-				var utc_offset = grid.utc_offset
-				delete grid.utc_offset
-			}
-
-			grid = grid.map(entry =>
-			{
-				return {
-					timestamp: entry[0],
-					value: entry[1]
-				}
-			})
-
-			if (utc_offset)
-			{
-				grid.utc_offset = utc_offset
-			}
-
-			return grid
 		})
 	}
 
@@ -574,8 +638,15 @@ module.exports = function Portfolio (db, investor)
 		}
 	}
 
-	function find_series_value (series, symbol, day)
+	function find_series_value (series, holding, day)
 	{
+		var symbol = holding.symbol
+
+		if (symbol.isOther())
+		{
+			return holding.price
+		}
+
 		series = series[symbol]
 
 		/* ISO dates are sortable */
@@ -648,18 +719,10 @@ module.exports = function Portfolio (db, investor)
 			if (max_symbols || max_brokerage)
 			{
 				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
+				max_common = moment.utc(max_common)
 			}
 
-			var date_common =
-			{
-				available_from: max_common
-			}
-
-			return {
-				symbols:   dates_symbols,
-				brokerage: date_brokerage,
-				common:    date_common
-			}
+			return max_common
 		})
 	})
 
@@ -751,6 +814,9 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(noop)
 	})
+
+
+	extend(portfolio, Parser(portfolio, db))
 
 	return portfolio
 }

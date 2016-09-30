@@ -3,6 +3,7 @@ var noop = require('lodash/noop')
 var map  = require('lodash/map')
 var pick = require('lodash/pick')
 var extend = require('lodash/extend')
+var maxBy = require('lodash/maxBy')
 
 var expect = require('chai').expect
 
@@ -50,7 +51,12 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.byId.quotes =
 		knexed.transact(knex, (trx, investor_id, for_date, options) =>
 	{
-		options = options || {}
+		options = extend(
+		{
+			soft: false,
+			other: false
+		},
+		options)
 
 		return byId(trx, investor_id, for_date)
 		.then(holdings =>
@@ -60,16 +66,31 @@ module.exports = function Holdings (db, investor, portfolio)
 				return [ holding.symbol_ticker, holding.symbol_exchange ]
 			})
 
-			return db.symbols.quotes(symbols, for_date, options.soft)
+			return db.symbols.quotes(symbols, for_date, options)
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
 				{
-					if (! quote.price && ! options.soft)
+					if (! quote.price)
 					{
-						throw new TypeError(
-							'Cannot recalculate Xignite Quotes failed'
-						)
+						if (Symbl(quote.symbol).isOther())
+						{
+							if (! options.other)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes for OTHER'
+								)
+							}
+						}
+						else
+						{
+							if (! options.soft)
+							{
+								throw new TypeError(
+									'Cannot get Holdings with Quotes, xIgnite failed'
+								)
+							}
+						}
 					}
 
 					var holding = holdings[i]
@@ -91,7 +112,6 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 		})
 	})
-
 
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
@@ -358,35 +378,39 @@ module.exports = function Holdings (db, investor, portfolio)
 				holding.timestamp = holding.date.format()
 			})
 
-			return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+			var symbols = map(holding_entries, 'symbol')
+
+			return db.symbols.resolveMany(symbols, { other: true })
 		})
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
-			return Promise.all(symbols.map((symbol, i) =>
+			var new_holdings = symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
 				var data = pick(holding, 'amount', 'price', 'timestamp')
 
 				return put(trx, investor_id, symbol, data, { override: true })
-			}))
-		})
-		.then(() =>
-		{
-			// choose latest timestamp
-			var index = 0
-			var timestamp = holding_entries[index].date
-			holding_entries.forEach((holding, i) =>
-			{
-				if (holding.date > timestamp)
-				{
-					timestamp = holding.date
-					index = i
-				}
 			})
 
-			return portfolio.brokerage
-			.recalculate(trx, investor_id, holding_entries[index].timestamp)
+			return holdings.byId.quotes(trx, investor_id, null, { other: true })
+			.then(previous_holdings =>
+			{
+				return Promise.all(new_holdings)
+				.then(() =>
+				{
+					var timestamp = maxBy(holding_entries, 'date').timestamp
+
+					return portfolio
+					.brokerage
+					.recalculate(
+						trx,              // transaction
+						investor_id,      // investor id
+						timestamp,        // timestamp
+						previous_holdings // previous state of holdings
+					)
+				})
+			})
 		})
 	})
 
@@ -462,12 +486,68 @@ module.exports = function Holdings (db, investor, portfolio)
 		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
+	var AdminOrOwnerRequired = Err('admin_or_owner_required',
+		'Admin Or Owner Required')
+
+	holdings.remove = function (whom_id, investor_id, holding_entries)
+	{
+		return knex.transaction(function (trx)
+		{
+			return investor.getActionMode(whom_id, investor_id)
+			.then(mode =>
+			{
+				if (! mode)
+				{
+					throw AdminOrOwnerRequired()
+				}
+
+				return investor.all.ensure(investor_id, trx)
+			})
+			.then(() =>
+			{
+				validate.array(holding_entries, 'holdings')
+
+				holding_entries.forEach((holding, i) =>
+				{
+					validate.required(holding.symbol, `holdings[${i}].symbol`)
+					validate.empty(holding.symbol, `holdings[${i}].symbol`)
+				})
+
+				return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+			})
+			.then(symbols => symbols.map(Symbl))
+			.then(symbols =>
+			{
+				return Promise.all(symbols.map((symbol) =>
+				{
+					return holdings.ensure(trx, symbol, investor_id)
+					.then(() =>
+					{
+						return db.feed.ensureNotTraded(trx, investor_id, symbol)
+					})
+					.then(() =>
+					{
+						var data_remove =
+						{
+							amount:    0,
+							price:     0
+						}
+
+						return put(trx, investor_id, symbol, data_remove)
+					})
+				}))
+			})
+			.then(noop)
+		})
+	}
+
 	var DuplicateHoldingEntry = Err('holding_duplicate',
 		'There can be only one Holding entry per timestamp for Investor')
 
 
 	// buy, sell
 	var validate_positive = validate.number.positive
+	var validate_non_negative = validate.number.nonNegative
 
 	var NotEnoughMoney = Err('not_enough_money_to_buy',
 		'Not Enough Money To Buy')
@@ -475,7 +555,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
-		validate_positive(data.price, 'price')
+		validate_non_negative(data.price, 'price')
 
 		var amount = data.amount
 		var price  = data.price

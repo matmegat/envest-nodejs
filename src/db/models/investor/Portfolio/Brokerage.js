@@ -133,8 +133,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 	})
 
-	brokerage.availableDate =
-		knexed.transact(knex, (trx, investor_id) =>
+	brokerage.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
@@ -291,7 +290,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 			}
 			else
 			{
-				return put(trx, investor_id, cash, timestamp, { override: true })
+				return put(
+					trx,               // transaction
+					investor_id,       // investor_id
+					cash,              // new cash to set
+					timestamp,         // timestamp
+					null,              // holdings are the same
+					{ override: true } // override on exact match
+				)
 			}
 		})
 	})
@@ -300,9 +306,15 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
-	function put (trx, investor_id, new_cash, timestamp, options)
+	// eslint-disable-next-line max-params
+	function put (trx, investor_id, new_cash, timestamp, old_holdings, options)
 	{
 		expect(new_cash).a('number')
+
+		if (old_holdings !== null)
+		{
+			expect(old_holdings).an('array')
+		}
 
 		options || (options = {})
 
@@ -326,31 +338,35 @@ module.exports = function Brokerage (db, investor, portfolio)
 			return Promise.all(
 			[
 				brokerage.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId.quotes(trx, investor_id, timestamp),
-				portfolio.holdings.byId.quotes(investor_id, timestamp),
+				portfolio.holdings.byId
+					.quotes(trx, investor_id, timestamp, { other: true }),
 				brokerage.isExact(trx, investor_id, timestamp)
 			])
 		})
 		.then(values =>
 		{
-			var cash = values[0].cash
+			var cash       = values[0].cash
 			var multiplier = values[0].multiplier
 
-			var holdings = values[1]
-			var old_holdings = values[2]
+			var current_holdings = values[1]
 
-			var is_exact = values[3]
+			var is_exact = values[2]
+
+			if (old_holdings === null)
+			{
+				old_holdings = current_holdings
+			}
 
 			if (options.recalculate)
 			{
-				var current_allocation
+				var previous_allocation
 				 = cash + sumBy(old_holdings, 'real_allocation')
-				current_allocation *= multiplier
+				previous_allocation *= multiplier
 
-				var real_allocation
-				 = new_cash + sumBy(holdings, 'real_allocation')
+				var current_allocation
+				 = new_cash + sumBy(current_holdings, 'real_allocation')
 
-				multiplier = (current_allocation / real_allocation)
+				multiplier = (previous_allocation / current_allocation)
 			}
 
 			var batch =
@@ -389,8 +405,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 
 	brokerage.recalculate = knexed.transact(knex,
-		(trx, investor_id, timestamp) =>
+		(trx, investor_id, timestamp, old_holdings) =>
 	{
+		if (old_holdings !== null)
+		{
+			expect(old_holdings).an('array')
+		}
+
 		return brokerage.cashById(trx, investor_id, timestamp)
 		.then(cash =>
 		{
@@ -398,14 +419,16 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// recalculate because of holdings changed
 
 			return put(
-			trx,
-			investor_id,
-			cash,
-			timestamp,
-			{
-				override: true,
-				recalculate: true
-			})
+				trx,
+				investor_id,
+				cash,
+				timestamp,
+				old_holdings,
+				{
+					override: true,
+					recalculate: true
+				}
+			)
 		})
 	})
 
@@ -446,7 +469,14 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var cash = amount + brokerage.cash
 
-			return put(trx, investor_id, cash, date, options)
+			return put(
+				trx,               // transaction
+				investor_id,       // investor_id
+				cash,              // new cash to set
+				date,              // timestamp
+				null,              // holdings are the same
+				{ override: true } // override on exact match
+			)
 		})
 	})
 
@@ -476,7 +506,9 @@ module.exports = function Brokerage (db, investor, portfolio)
 		validate.number(amount, 'amount')
 		if (amount === 0)
 		{
-			throw InvalidAmount()
+			// TODO: allow operations with 0 amount (buy price is 0)
+			console.warn('Brokerage will not change due to 0 of amount')
+			// throw InvalidAmount()
 		}
 		if (amount + brokerage.cash < 0)
 		{

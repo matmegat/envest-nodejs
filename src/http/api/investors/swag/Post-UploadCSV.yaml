@@ -1,0 +1,37 @@
+post:
+  description: Upload CSV file with history of operations
+  consumes:
+  - multipart/form-data
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investors Id
+    required: true
+  - name: csv
+    in: formData
+    required: true
+    type: file
+    format: binary
+    description: |
+      should follow
+      [format](https://distillery.atlassian.net/wiki/display/NET/CSV+rules)
+  responses:
+    200:
+      description: History of Operation uploaded successfully
+      schema:
+        type: object
+        properties:
+          processed:
+            type: number
+            description: Amount of added operations
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors
+  - admin

@@ -6,12 +6,20 @@ var Symbl = require('./Symbl')
 var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
-var UnknownSymbol = Err('unknown_symbol', `Symbol cannot be resolved`)
-var GetDataErr = Err(
-	'unable_to_retrive_data_from_server',
-	'Unable to retrive data from server'
+
+var UnknownSymbol
+ = Err('unknown_symbol', 'Symbol cannot be resolved')
+
+var OtherSymbol
+ = Err('other_special_symbol_not_allowed', 'OTHER symbol not allowed')
+
+var GetDataErr
+ = Err('unable_to_retrive_data_from_server',
+       'Unable to retrive data from server'
 )
 
+var extend = require('lodash/assign')
+var pick = require('lodash/pick')
 var omit = require('lodash/omit')
 var invoke = require('lodash/invokeMap')
 var merge = require('lodash/merge')
@@ -27,11 +35,29 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 	var xign = Xign(cfg.xignite, log)
 
-	symbols.resolve = (symbol) =>
+	symbols.resolve = (symbol, options) =>
 	{
+		options = extend(
+		{
+			other: false
+		},
+		options)
+
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
+			if (symbol.isOther())
+			{
+				if (! options.other)
+				{
+					throw OtherSymbol()
+				}
+				else
+				{
+					return symbol.toFull() /* not full data though */
+				}
+			}
+
 			return xign.resolve(symbol.toXign())
 			.then(resl =>
 			{
@@ -58,12 +84,22 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.resolveMany = (symbols_arr, soft_mode) =>
+	symbols.resolveMany = (symbols_arr, options) =>
 	{
-		var queries = symbols_arr
-		.map(symbols.resolve.cache)
+		options = extend(
+		{
+			soft: false,
+			other: false
+		},
+		options)
 
-		if (soft_mode)
+		var queries = symbols_arr
+		.map(symbol =>
+		{
+			return symbols.resolve.cache(symbol, pick(options, 'other'))
+		})
+
+		if (options.soft)
 		{
 			queries = queries
 			.map(query =>
@@ -76,7 +112,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 	/* cache-first */
-	symbols.resolve.cache = (symbol) =>
+	symbols.resolve.cache = (symbol, options) =>
 	{
 		return new Promise(rs =>
 		{
@@ -87,13 +123,20 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				return rs(data)
 			}
 
-			return rs(symbols.resolve(symbol))
+			return rs(symbols.resolve(symbol, options))
 		})
 	}
 
 
-	symbols.quotes = (symbols, for_date, soft_mode) =>
+	symbols.quotes = (symbols, for_date, options) =>
 	{
+		options = extend(
+		{
+			soft: false,
+			other: false
+		},
+		options)
+
 		expect(symbols).ok
 
 		symbols = [].concat(symbols)
@@ -111,7 +154,9 @@ var Symbols = module.exports = function Symbols (cfg, log)
 				}
 				else
 				{
-					var symbol = symbols[i].toFull()
+					var orig_symbol = symbols[i]
+
+					var symbol = orig_symbol.toFull()
 					symbol.company = r.company
 
 					r = omit(r, 'symbol', 'company')
@@ -122,23 +167,33 @@ var Symbols = module.exports = function Symbols (cfg, log)
 					{
 						return r
 					}
-					else
-					{
-						log('XIGN Quotes fallback', symbols[i].toXign())
 
-						return quotes_fallback_resolve(r, symbols[i], soft_mode)
-						.catch(err =>
+					if (orig_symbol.isOther())
+					{
+						if (options.other)
 						{
-							if (soft_mode)
-							{
-								return r
-							}
-							else
-							{
-								throw err
-							}
-						})
+							return r
+						}
+						else
+						{
+							throw OtherSymbol()
+						}
 					}
+
+					log('XIGN Quotes fallback', orig_symbol.toXign())
+
+					return quotes_fallback_resolve(r, orig_symbol)
+					.catch(err =>
+					{
+						if (options.soft)
+						{
+							return r
+						}
+						else
+						{
+							throw err
+						}
+					})
 				}
 			})
 		})
@@ -153,35 +208,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			r.symbol = symbol
 
 			return r
-		})
-	}
-
-
-	function get_historical (symbol)
-	{
-		return Symbl.validate(symbol)
-		.then(symbol =>
-		{
-			return xign.historical(symbol.toXign())
-			.catch(() =>
-			{
-				// warn_rethrow ~
-				// util.unwrap
-
-				throw GetDataErr({ symbol: symbol })
-			})
-		})
-		.then(resl =>
-		{
-			return {
-				prev_close: resl.LastClose,
-				low: resl.Low,
-				high: resl.High,
-				volume: resl.Volume,
-				currency: resl.Currency,
-				last: resl.Last,
-				percent_change_from_open: resl.PercentChangeFromOpen
-			}
 		})
 	}
 
@@ -253,12 +279,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		return Promise.all(
 		[
-			get_historical(symbol),
-			get_last_fundamentals(symbol)
+			// get_historical(symbol),
+			get_last_fundamentals(symbol),
+			xign.quotes([ symbol ]),
 		])
 		.then(so =>
 		{
-			return merge(so[0], so[1])
+			return merge(so[0], so[1][0])
 		})
 	}
 

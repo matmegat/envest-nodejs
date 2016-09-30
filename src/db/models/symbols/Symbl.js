@@ -1,6 +1,8 @@
 /* eslint-disable complexity */
 /* eslint-disable max-statements */
 
+var expect = require('chai').expect
+
 var Symbl = module.exports = function Symbl (it)
 {
 	if (Symbl.is(it))
@@ -33,6 +35,15 @@ var Symbl = module.exports = function Symbl (it)
 		s.ticker   = it[0]
 		s.exchange = it[1] || null
 
+		expect(s.ticker).a('string')
+		s.ticker = s.ticker.toUpperCase()
+
+		if (s.exchange)
+		{
+			expect(s.exchange).a('string')
+			s.exchange = s.exchange.toUpperCase()
+		}
+
 		s.toXign = () =>
 		{
 			var r = [ s.ticker ]
@@ -62,6 +73,11 @@ var Symbl = module.exports = function Symbl (it)
 				symbol_ticker: s.ticker,
 				symbol_exchange: s.exchange
 			}
+		}
+
+		s.isOther = () =>
+		{
+			return s.exchange === 'OTHER'
 		}
 
 		s.inspect = inspect

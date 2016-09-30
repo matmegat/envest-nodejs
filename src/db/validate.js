@@ -119,6 +119,15 @@ validate.number.positive = function (field, name)
 	}
 }
 
+validate.number.nonNegative = function (field, name)
+{
+	validate.number(field, name)
+
+	if (field < 0)
+	{
+		throw FieldType({ field: name, type: 'number/non-negative' })
+	}
+}
 
 var isInteger = require('lodash/isInteger')
 

@@ -25,9 +25,6 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.holdings = Holdings(investor, db)
 	onb.fields.is_public = IsPublic(investor)
 
-	expect(db, 'Onboarding depends on Admin').property('admin')
-	var admin = db.admin
-
 	expect(db, 'Onboarding depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
 
@@ -40,9 +37,14 @@ module.exports = function Onboarding (db, investor)
 		whom_id = Number(whom_id)
 		investor_id = Number(investor_id)
 
-		return ensure_can_edit(whom_id, investor_id)
+		return investor.getActionMode(whom_id, investor_id)
 		.then(mode =>
 		{
+			if (! mode)
+			{
+				throw CantEdit()
+			}
+
 			if (! (field in onb.fields))
 			{
 				throw WrongField({ field: field })
@@ -72,36 +74,6 @@ module.exports = function Onboarding (db, investor)
 					by: 'admin',
 					admin: [ ':user-id', whom_id ]
 				})
-			}
-		})
-	}
-
-	function ensure_can_edit (whom_id, investor_id)
-	{
-		return Promise.all([ admin.is(whom_id), investor.all.is(whom_id) ])
-		.then(so =>
-		{
-			var is_admin    = so[0]
-			var is_investor = so[1]
-
-			if (is_admin)
-			{
-				return 'mode:admin'
-			}
-			else if (is_investor)
-			{
-				if (whom_id === investor_id)
-				{
-					return 'mode:investor'
-				}
-				else
-				{
-					throw CantEdit()
-				}
-			}
-			else
-			{
-				throw CantEdit()
 			}
 		})
 	}
@@ -573,11 +545,13 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return db.investor.portfolio.brokerage.grid(investor_id, 'day')
-			.then(grid => grid.daterange[0])
+			return db.investor.portfolio.availableDate(investor_id)
 			.then((min_date) =>
 			{
-				min_date = moment.utc(min_date)
+				if (min_date === null)
+				{
+					min_date = moment.utc(0)
+				}
 
 				value.forEach((row, i) =>
 				{

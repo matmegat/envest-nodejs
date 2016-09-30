@@ -1,0 +1,39 @@
+post:
+  description: Delete investor's holding
+  parameters:
+  - name: payload
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Cash management operation
+      properties:
+        target_user_id:
+          type: integer
+          description: ID of target Investor
+        holdings:
+          type: array
+          items:
+            type: object
+            title: Symbol entry
+            properties:
+              symbol:
+                type: string
+                description: ticker.exchange
+      required:
+      - holdings
+
+  responses:
+    200:
+      description: Holdings deleted
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://distillery.atlassian.net/wiki/display/NET/Errors)
+
+      schema:
+        $ref: ../../../swagger/Error.yaml
+
+  tags:
+  - investors
