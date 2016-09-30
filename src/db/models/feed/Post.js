@@ -52,7 +52,31 @@ module.exports = function Post (db)
 						trx, investor_id, type, date, data, post_id)
 					.then(data =>
 					{
-						return extend({}, prev_post.data, data)
+						return Promise.resolve()
+						.then(() =>
+						{
+							if (data.pic === null)
+							{
+								return db.static.remove(prev_post.data.pic)
+								.then(() =>
+								{
+									delete data.pic
+									delete prev_post.data.pic
+								})
+							}
+						})
+						.then(() =>
+						{
+							if (data.chart === null)
+							{
+								delete data.chart
+								delete prev_post.data.chart
+							}
+						})
+						.then(() =>
+						{
+							return extend({}, prev_post.data, data)
+						})
 					})
 				})
 			}
