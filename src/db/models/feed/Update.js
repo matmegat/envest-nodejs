@@ -125,8 +125,8 @@ module.exports = function Update (db)
 
 			return data
 		})
-		.then(validate_pic_exists)
-		.then(validate_chart)
+		.then(() => validate_pic_exists(data, true))
+		.then(() => validate_chart(data, true))
 	}
 
 	function validate_update (data)
@@ -166,16 +166,14 @@ module.exports = function Update (db)
 
 			return data
 		})
-		.then(() => validate_pic_exists(data, true))
-		.then(() => validate_chart(data, true))
+		.then(validate_pic_exists)
+		.then(validate_chart)
 	}
 
 	function validate_pic_exists (data, for_update)
 	{
 		if (for_update && data.pic === null)
 		{
-			// Delete picture from disc
-
 			return data
 		}
 
