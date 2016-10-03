@@ -40,10 +40,13 @@ module.exports = function Holdings (db, investor, portfolio)
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return byId(trx, investor_id, for_date, function ()
-			{
-				this.where(symbol.toDb())
-			}, raw_select)
+			return byId(trx, investor_id, for_date, {
+				aux: () =>
+				{
+					this.where(symbol.toDb())
+				},
+				raw_select: raw_select
+			})
 		})
 		.then(oneMaybe)
 	})
@@ -198,9 +201,10 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 
-	function byId (trx, investor_id, for_date, aux, raw_select)
+	function byId (trx, investor_id, for_date, options)
 	{
-		aux || (aux = noop)
+		var aux = options.aux || noop
+		var raw_select = options.raw_select
 
 		var portfolio_table = knex(raw('portfolio AS P'))
 		.transacting(trx)
