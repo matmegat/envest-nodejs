@@ -77,7 +77,8 @@ module.exports = function Admin (db)
 
 	admin.ensureCanIntro = function (user_id, trx)
 	{
-		return admin.byId(user_id, trx)
+		return admin.ensure(by_user_id, trx)
+		.then(() => admin.byId(user_id, trx))
 		.then(admin =>
 		{
 			if (admin && ! admin.can_intro)
@@ -100,8 +101,7 @@ module.exports = function Admin (db)
 		{
 			if (by_user_id)
 			{
-				return admin.ensure(by_user_id, trx)
-				.then(() => admin.ensureCanIntro(by_user_id, trx))
+				return admin.ensureCanIntro(by_user_id, trx)
 			}
 			else
 			{
