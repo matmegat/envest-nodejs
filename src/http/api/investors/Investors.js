@@ -34,7 +34,8 @@ module.exports = function (db, http)
 		options.filter = pick(rq.query,
 		[
 			'symbol',
-			'symbols'
+			'symbols',
+			'query',
 		])
 
 		if (rq.user && rq.user.admin && 'is_public' in rq.query)

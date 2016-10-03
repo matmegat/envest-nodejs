@@ -45,7 +45,11 @@ module.exports = function Meta (investor, raw, options)
 	var filter = Filter({
 		ids: Filter.by.ids('user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
-		is_public: Filter.by.field('is_public', isBoolean)
+		is_public: Filter.by.field('is_public', isBoolean),
+		query: Filter.by.query([
+			`left join "email_confirms" 
+			        on "email_confirms"."user_id" = "users"."id"`,
+		])
 	})
 
 	meta.is = function (id, trx)
@@ -120,7 +124,7 @@ module.exports = function Meta (investor, raw, options)
 	var paginator_chunked = ChunkedPaginator(
 	{
 		table: paging_table,
-		order_column: 'user_id',
+		order_column: 'investors.user_id',
 		real_order_column: 'last_name',
 		default_direction: 'asc'
 	})

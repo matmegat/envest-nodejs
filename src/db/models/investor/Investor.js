@@ -71,7 +71,11 @@ module.exports = function Investor (db)
 					'brokerage'
 				]
 
-				r.available_from = values[1].format()
+				r.available_from = values[1]
+				if (r.available_from != null)
+				{
+					r.available_from = r.available_from.format()
+				}
 
 				return extend(r, pick(values[0], extend_list))
 			})
