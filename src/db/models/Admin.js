@@ -77,7 +77,7 @@ module.exports = function Admin (db)
 
 	admin.ensureCanIntro = function (user_id, trx)
 	{
-		return admin.ensure(by_user_id, trx)
+		return admin.ensure(user_id, trx)
 		.then(() => admin.byId(user_id, trx))
 		.then(admin =>
 		{
