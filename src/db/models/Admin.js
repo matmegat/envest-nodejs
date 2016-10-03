@@ -125,7 +125,7 @@ module.exports = function Admin (db)
 
 	admin.create = knexed.transact(knex, (trx, by_user_id, userdata) =>
 	{
-		return auth.registerWithPass (trx, userdata)
+		return auth.registerWithPass(trx, userdata)
 		.then(id =>
 		{
 			return admin.intro(trx, id, by_user_id)

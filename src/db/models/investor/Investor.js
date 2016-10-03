@@ -17,8 +17,6 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-var validate = require('../../validate')
-
 module.exports = function Investor (db)
 {
 	var investor = {}
