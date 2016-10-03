@@ -5,10 +5,12 @@ var Err = require('../../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var noop = require('lodash/noop')
+var extend = require('lodash/extend')
 
 var cr_helpers = require('../../crypto-helpers')
 
 var compare_passwords = cr_helpers.compare_passwords
+var generate_code = cr_helpers.generate_code
 
 var knexed = require('../knexed')
 
@@ -42,6 +44,27 @@ module.exports = function Auth (db)
 				return id
 			})
 		})
+	})
+
+	auth.registerWithPass = knexed.transact(db.knex, (trx, data) =>
+	{
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.register(data)
+		})
+		.then(() => generate_code())
+		.then(password =>
+		{
+			var user_data = extend({}, data,
+			{
+				password: password
+			})
+
+			return user.create(trx, user_data)
+		})
+		.then(user_id => user.byId(user_id, trx))
+		.then(user => user.id)
 	})
 
 	auth.login = function (email, password, trx)
