@@ -9,6 +9,8 @@ var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
 var noop   = require('lodash/noop')
 
+var expect = require('chai').expect
+
 var Password = require('./Password')
 
 var Groups = require('./Groups')
@@ -511,6 +513,41 @@ module.exports = function User (db, app)
 		.del()
 	}
 
+	var email_templates =
+	{
+		user: function (host, email, code)
+		{
+			expect('host').to.be.a('string')
+			expect('email').to.be.a('string')
+			expect('code').to.be.a('string')
+
+			return {
+				to: email,
+				html: 'Please tap the link to confirm email: '
+				+ `<a href="http://${host}/confirm-email?code=`
+				+ `${code.toUpperCase()}" target="_blank">`
+				+ `Confirm Email</a><br>`
+				+ `Your email confirm code: ${code.toUpperCase()}`
+			}
+		},
+		admin: function (host, email, code)
+		{
+			expect('host').to.be.a('string')
+			expect('email').to.be.a('string')
+			expect('code').to.be.a('string')
+
+			return {
+				to: email,
+				html: 'You\'ve been chosen as admin.<br/>'
+				+ 'Please tap the link to confirm email: '
+				+ `<a href="http://${host}/confirm-email?code=`
+				+ `${code.toUpperCase()}" target="_blank">`
+				+ `Confirm Email</a><br>`
+				+ `Your email confirm code: ${code.toUpperCase()}`
+			}
+		}
+	}
+
 	user.newEmailUpdate = function (trx, data, for_admin)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
@@ -548,32 +585,26 @@ module.exports = function User (db, app)
 			{
 				return user.byId(user_id, trx)
 			})
-			.then((user_item) =>
+			.then(user_item =>
 			{
 				var host = `${app.cfg.host}`
-				var admin_string = ''
-
-				if (for_admin)
-				{
-					admin_string = 'You\'ve been chosen as admin.<br/>'
-				}
+				var mail_content = {}
 
 				if (app.cfg.real_port !== 80)
 				{
 					host += `:${app.cfg.real_port}`
 				}
 
-				return mailer.send('default', null,
+				if (for_admin)
 				{
-					to: user_item.email,
-					// text: 'Email confirm code: '
-					// + data.code.toUpperCase(),
-					html: admin_string + 'Please tap the link to confirm email: '
-					+ `<a href="http://${host}/confirm-email?code=`
-					+ `${code.toUpperCase()}" target="_blank">`
-					+ `Confirm Email</a><br>`
-					+ `Your email confirm code: ${code.toUpperCase()}`
-				})
+					mail_content = email_templates.admin(host, user_item.email, code)
+				}
+				else
+				{
+					mail_content = email_templates.user(host, user_item.email, code)
+				}
+
+				return mailer.send('default', null, mail_content)
 				.then(() => user_item.id, console.err)
 			})
 		})
