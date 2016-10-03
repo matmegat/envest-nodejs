@@ -177,6 +177,11 @@ module.exports = function Update (db)
 			return data
 		}
 
+		if (! for_update && 'pic' in data)
+		{
+			validate.nullish(data.pic, 'pic')
+		}
+
 		if (data.pic)
 		{
 			return db.static.exists(data.pic)
@@ -201,6 +206,11 @@ module.exports = function Update (db)
 		if (for_update && chart === null)
 		{
 			return data
+		}
+
+		if (! for_update && 'chart' in data)
+		{
+			validate.nullish(data.pic, 'pic')
 		}
 
 		if (chart)
