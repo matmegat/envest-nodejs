@@ -74,6 +74,9 @@ paths:
   '/admin/intro':
     $ref: ../api/admin/swag/Intro.yaml
 
+  '/admin/create':
+    $ref: ../api/admin/swag/Create.yaml
+
   '/admin/change-name':
     $ref: ../api/admin/swag/ChangeName.yaml
 
