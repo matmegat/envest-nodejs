@@ -100,14 +100,7 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			if (date)
-			{
-				date = moment(date).startOf('second')
-			}
-			else
-			{
-				date = moment().startOf('second')
-			}
+			date = moment(date || undefined).startOf('second')
 
 			return Promise.resolve()
 			.then(() =>
@@ -140,7 +133,7 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = date || new Date()
+			date = moment(date || undefined).startOf('second')
 
 			return Promise.resolve()
 			.then(() =>
