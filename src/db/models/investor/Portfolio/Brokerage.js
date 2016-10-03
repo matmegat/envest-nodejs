@@ -318,7 +318,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		options || (options = {})
 
-		timestamp = moment(timestamp || undefined).startOf('second')
+		timestamp = moment(timestamp || void 0).startOf('second')
 
 		return brokerage.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
