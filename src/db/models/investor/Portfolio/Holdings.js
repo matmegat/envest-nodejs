@@ -41,7 +41,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(symbol =>
 		{
 			return byId(trx, investor_id, for_date, {
-				aux: () =>
+				aux: function ()
 				{
 					this.where(symbol.toDb())
 				},
@@ -203,6 +203,8 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	function byId (trx, investor_id, for_date, options)
 	{
+		options = extend({}, options)
+		
 		var aux = options.aux || noop
 		var raw_select = options.raw_select
 
