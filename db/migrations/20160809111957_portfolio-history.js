@@ -1,5 +1,6 @@
 
 var Symbols = require('../../src/db/models/symbols/Symbols')
+var withSeed = require('../with-seed')
 
 exports.up = (knex) =>
 {
@@ -51,7 +52,10 @@ exports.up = (knex) =>
 	})
 	.then(() =>
 	{
-		return knex.seed.run({ directory: './seeds/portfolio-history' })
+		return withSeed(() =>
+		{
+			return knex.seed.run({ directory: './seeds/portfolio-history' })
+		})
 	})
 	.then(() =>
 	{

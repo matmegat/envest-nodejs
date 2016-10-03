@@ -30,6 +30,10 @@ get:
     description: |
       Filter investors by flag `is_public`.
       Available for admin user only
+  - name: query
+    in: query
+    type: string
+    description: Search query
   responses:
     200:
       description: Investors list

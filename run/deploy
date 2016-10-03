@@ -9,8 +9,8 @@ var fs = require('fs-sync')
 var read  = fs.read
 var write = fs.write
 
+var get_env = require('./lib/get-env')
 var slack = require('./lib/slack')
-
 
 var args = require('minimist')(process.argv.slice(2),
 {
@@ -21,13 +21,7 @@ var args = require('minimist')(process.argv.slice(2),
 	]
 })
 
-var env = args.env
-
-if (! env)
-{
-	console.error('--env must be present')
-	process.exit(1)
-}
+var env = get_env(args) /* @shortcut */
 
 var cmd = require('command-promise')
 var partial = require('lodash/partial')
@@ -53,9 +47,13 @@ if (key)
 	rsync = partial(rsync, [ '-e', fkey ])
 }
 
-var remote = 'ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com'
 
-ssh = partial(ssh, remote)
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = remote_config.remote
+var remote_with_user = 'ubuntu@' + remote
+
+
+ssh = partial(ssh, remote_with_user)
 rsync = partial(rsync, '--recursive')
 rsync_clean = partial(rsync, '--delete')
 
@@ -93,7 +91,7 @@ function remote_rootpath (path)
 
 function target (path)
 {
-	return remote + ':' + remote_rootpath(path)
+	return remote_with_user + ':' + remote_rootpath(path)
 }
 
 
@@ -125,7 +123,11 @@ function rev ()
 }
 
 
-rev()
+get_env.confirm(remote_config, env) /* @shortcut */
+.then(so =>
+{
+	return rev()
+})
 .then(fullrev =>
 {
 	var tmp_rev = tmp('netvest-REV')
@@ -197,6 +199,25 @@ rev()
 
 		return scp(tmp_f, target('cfg/nginx.conf'))
 	})()
+	.then(outputify('put ref to nginx/conf.d', () =>
+	{
+		var tmp_f_local = 'netvest-deploy-nginx-ref.conf'
+		var tmp_f = tmp(tmp_f_local)
+
+		var rendered = `include /home/ubuntu/netvest/${env}/cfg/nginx.conf;\n`
+
+		write(tmp_f, rendered)
+
+		var target_etc = `${remote_with_user}:/tmp/${tmp_f_local}`
+
+		return scp(tmp_f, target_etc)
+		.then(() =>
+		{
+			var from = `/tmp/${tmp_f_local}`
+			var to = `/etc/nginx/conf.d/netvest-${env}.conf`
+			return ssh(`sudo mv ${from} ${to}`)
+		})
+	}))
 })
 .then(() =>
 {
