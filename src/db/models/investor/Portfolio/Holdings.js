@@ -597,10 +597,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			return put(trx, investor_id, symbol, data_put)
 		})
-		.then(() =>
-		{
-			return -sum
-		})
+		.then(() => -sum)
 	}
 
 
@@ -639,10 +636,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 			return put(trx, investor_id, symbol, data_put)
 		})
-		.then(() =>
-		{
-			return sum
-		})
+		.then(() => sum)
 	}
 
 	return holdings

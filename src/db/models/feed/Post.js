@@ -73,10 +73,7 @@ module.exports = function Post (db)
 								delete prev_post.data.chart
 							}
 						})
-						.then(() =>
-						{
-							return extend({}, prev_post.data, data)
-						})
+						.then(() => extend({}, prev_post.data, data))
 					})
 				})
 			}
