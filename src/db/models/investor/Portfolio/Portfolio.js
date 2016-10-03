@@ -789,7 +789,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(symbol_state =>
 		{
-			return holdings.removeById(trx, symbol_state)
+			return holdings.removeBySymbolState(trx, symbol_state)
 		})
 		.then(() =>
 		{
