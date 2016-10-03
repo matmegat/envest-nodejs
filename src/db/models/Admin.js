@@ -81,7 +81,7 @@ module.exports = function Admin (db)
 		.then(() => admin.byId(user_id, trx))
 		.then(admin =>
 		{
-			if (admin && ! admin.can_intro)
+			if (! admin.can_intro)
 			{
 				throw CannotIntro()
 			}
