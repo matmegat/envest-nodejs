@@ -13,11 +13,6 @@ var UnknownSymbol
 var OtherSymbol
  = Err('other_special_symbol_not_allowed', 'OTHER symbol not allowed')
 
-var GetDataErr
- = Err('unable_to_retrive_data_from_server',
-       'Unable to retrive data from server'
-)
-
 var extend = require('lodash/assign')
 var pick = require('lodash/pick')
 var omit = require('lodash/omit')

@@ -342,3 +342,10 @@ validate.email = function validate__email (email)
 		throw WrongEmail()
 	}
 }
+
+validate.register = function validate__register (credentials)
+{
+	validate.name(credentials.first_name, 'first_name')
+	validate.name(credentials.last_name, 'last_name')
+	validate.email(credentials.email)
+}

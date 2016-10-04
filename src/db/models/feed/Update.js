@@ -116,8 +116,17 @@ module.exports = function Update (db)
 
 			rs(data)
 		})
-		.then(validate_pic_exists)
-		.then(validate_chart)
+		.then(data =>
+		{
+			if (data.pic && data.chart)
+			{
+				throw AmbiguousAttach()
+			}
+
+			return data
+		})
+		.then(() => validate_pic_exists(data, true))
+		.then(() => validate_chart(data, true))
 	}
 
 	function validate_update (data)
@@ -161,8 +170,18 @@ module.exports = function Update (db)
 		.then(validate_chart)
 	}
 
-	function validate_pic_exists (data)
+	function validate_pic_exists (data, for_update)
 	{
+		if (for_update && data.pic === null)
+		{
+			return data
+		}
+
+		if (! for_update && 'pic' in data)
+		{
+			validate.nullish(data.pic, 'pic')
+		}
+
 		if (data.pic)
 		{
 			return db.static.exists(data.pic)
@@ -180,9 +199,19 @@ module.exports = function Update (db)
 		return data
 	}
 
-	function validate_chart (data)
+	function validate_chart (data, for_update)
 	{
 		var chart = data.chart
+
+		if (for_update && chart === null)
+		{
+			return data
+		}
+
+		if (! for_update && 'chart' in data)
+		{
+			validate.nullish(data.pic, 'pic')
+		}
 
 		if (chart)
 		{

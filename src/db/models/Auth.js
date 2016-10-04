@@ -5,10 +5,12 @@ var Err = require('../../Err')
 var WrongLogin = Err('wrong_login_data', 'Wrong email or password')
 
 var noop = require('lodash/noop')
+var extend = require('lodash/extend')
 
 var cr_helpers = require('../../crypto-helpers')
 
 var compare_passwords = cr_helpers.compare_passwords
+var generate_code = cr_helpers.generate_code
 
 var knexed = require('../knexed')
 
@@ -21,19 +23,48 @@ module.exports = function Auth (db)
 
 	auth.register = knexed.transact(db.knex, (trx, userdata) =>
 	{
-		return validate_register(userdata)
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.register(userdata)
+		})
 		.then(() =>
 		{
 			return user.create(trx, userdata)
 		})
-		.then(function (id)
+		.then(id =>
 		{
 			return user.newEmailUpdate(trx,
 			{
 				user_id: id,
 				new_email: userdata.email
 			})
+			.then(() =>
+			{
+				return id
+			})
 		})
+	})
+
+	auth.registerWithPass = knexed.transact(db.knex, (trx, data) =>
+	{
+		return Promise.resolve()
+		.then(() =>
+		{
+			return validate.register(data)
+		})
+		.then(() => generate_code())
+		.then(password =>
+		{
+			var user_data = extend({}, data,
+			{
+				password: password
+			})
+
+			return user.create(trx, user_data)
+		})
+		.then(user_id => user.byId(user_id, trx))
+		.then(user => user.id)
 	})
 
 	auth.login = function (email, password, trx)
@@ -119,18 +150,6 @@ module.exports = function Auth (db)
 	}
 
 	/* validations */
-	function validate_register (credentials)
-	{
-		return new Promise(rs =>
-		{
-			validate_name(credentials.first_name, 'first_name')
-			validate_name(credentials.last_name, 'last_name')
-			validate_email(credentials.email)
-
-			return rs()
-		})
-	}
-
 	function validate_change_email (email)
 	{
 		return new Promise(rs =>
@@ -153,8 +172,6 @@ module.exports = function Auth (db)
 	}
 
 	var validate = require('../validate')
-
-	var validate_name = validate.name
 	var validate_email = validate.email
 
 	return auth

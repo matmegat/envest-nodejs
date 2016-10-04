@@ -59,7 +59,9 @@ post:
                     type: string
         update_data:
           type: object
-          description: Post properties
+          description: |
+            Post properties
+            Set null for pic or chart to delete
           properties:
             symbols:
               type: array
