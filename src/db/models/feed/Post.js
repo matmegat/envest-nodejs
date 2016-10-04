@@ -44,6 +44,7 @@ module.exports = function Post (db)
 				.then(prev_post =>
 				{
 					var type = prev_post.type
+					var date = prev_post.date
 					var investor_id = prev_post.investor_id
 
 					post_type = post.types[type]
