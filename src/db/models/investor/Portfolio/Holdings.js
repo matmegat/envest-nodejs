@@ -204,7 +204,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	function byId (trx, investor_id, for_date, options)
 	{
 		options = extend({}, options)
-		
+
 		var aux = options.aux || noop
 		var raw_select = options.raw_select
 
@@ -217,7 +217,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		}
 		else
 		{
-			portfolio_table.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
+			portfolio_table.select(
+				'symbol_ticker', 'symbol_exchange', 'amount', 'price')
 		}
 
 		return portfolio_table
