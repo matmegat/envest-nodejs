@@ -707,27 +707,6 @@ module.exports = function User (db, app)
 		}
 	}
 
-<<<<<<< HEAD
-	function filter_by_query (queryset, query)
-	{
-		var pattern = '%' + query.toLowerCase() + '%'
-
-		return queryset
-		.where(function ()
-		{
-			this.whereRaw(
-				"lower(users.first_name || ' ' || users.last_name) LIKE ?",
-				pattern)
-			this.orWhere(
-			knex.raw(
-				'COALESCE(users.email, email_confirms.new_email) LIKE ?',
-				pattern)
-			)
-		})
-	}
-
-=======
->>>>>>> backend/develop
 	var get_pic = require('lodash/fp/get')('pic')
 
 	user.picById = function (id)
