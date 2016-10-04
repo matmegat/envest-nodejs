@@ -11,6 +11,7 @@ var mapValues = require('lodash/mapValues')
 var flatten = require('lodash/flatten')
 var noop = require('lodash/noop')
 var isEmpty = require('lodash/isEmpty')
+var extend = require('lodash/extend')
 var reduce = require('lodash/reduce')
 
 var max = require('lodash/max')
@@ -36,6 +37,8 @@ var Symbl = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
 var Err = require('../../../../Err')
+
+var Parser = require('./Parser')
 
 module.exports = function Portfolio (db, investor)
 {
@@ -85,31 +88,34 @@ module.exports = function Portfolio (db, investor)
 			}
 
 			/* collapse OTHER symbols */
-			var category_other = []
-
-			holdings = holdings.reduce((seq, holding) =>
+			if (! options.extended)
 			{
-				if (Symbl(holding.symbol).isOther())
-				{
-					category_other.push(holding)
+				var category_other = []
 
-					return seq
-				}
-				else
+				holdings = holdings.reduce((seq, holding) =>
 				{
-					return seq.concat(holding)
-				}
-			}, [])
+					if (Symbl(holding.symbol).isOther())
+					{
+						category_other.push(holding)
 
-			var other =
-			{
-				symbol:
-					Symbl('OTHER.OTHER').toFull(),
-				allocation:
-					sumBy(category_other, 'real_allocation') * brokerage.multiplier,
-				gain: null,
-				price: 0,
-				amount: sumBy(category_other, 'amount')
+						return seq
+					}
+					else
+					{
+						return seq.concat(holding)
+					}
+				}, [])
+
+				var other =
+				{
+					symbol:
+						Symbl('OTHER.OTHER').toFull(),
+					allocation:
+						sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+					gain: null,
+					price: 0,
+					amount: sumBy(category_other, 'amount')
+				}
 			}
 
 			/* full portfolio by quote price / full portfolio by buy price */
@@ -143,12 +149,13 @@ module.exports = function Portfolio (db, investor)
 
 			var total_holdings = orderBy(holdings, 'allocation', 'desc')
 
-			if (other.amount)
+			if (! options.extended && other.amount)
 			{
+				/* if collapsed and > 0 */
 				other.price = other.allocation / other.amount
 				other = pick(other, visible_fields)
 
-				total_holdings = holdings.concat(other)
+				total_holdings = total_holdings.concat(other)
 			}
 
 			var full_value
@@ -712,18 +719,10 @@ module.exports = function Portfolio (db, investor)
 			if (max_symbols || max_brokerage)
 			{
 				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
+				max_common = moment.utc(max_common)
 			}
 
-			var date_common =
-			{
-				available_from: max_common
-			}
-
-			return {
-				symbols:   dates_symbols,
-				brokerage: date_brokerage,
-				common:    date_common
-			}
+			return max_common
 		})
 	})
 
@@ -815,6 +814,9 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(noop)
 	})
+
+
+	extend(portfolio, Parser(portfolio, db))
 
 	return portfolio
 }

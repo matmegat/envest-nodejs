@@ -58,8 +58,11 @@ module.exports = function Investor (db)
 		.then(r =>
 		{
 			/* this info accessible for admin only */
-			return investor.portfolio.byId(id, { extended: true })
-			.then(full =>
+			return Promise.all([
+				investor.portfolio.byId(id, { extended: true }),
+				investor.portfolio.availableDate(id)
+			])
+			.then(values =>
 			{
 				var extend_list =
 				[
@@ -67,7 +70,13 @@ module.exports = function Investor (db)
 					'brokerage'
 				]
 
-				return extend(r, pick(full, extend_list))
+				r.available_from = values[1]
+				if (r.available_from != null)
+				{
+					r.available_from = r.available_from.format()
+				}
+
+				return extend(r, pick(values[0], extend_list))
 			})
 		})
 	})
@@ -162,6 +171,29 @@ module.exports = function Investor (db)
 		})
 		.then(one)
 	})
+
+	investor.getActionMode = function (whom_id, investor_id)
+	{
+		return Promise.all([ db.admin.is(whom_id), investor.all.is(whom_id) ])
+		.then(so =>
+		{
+			var is_admin    = so[0]
+			var is_investor = so[1]
+
+			if (is_admin)
+			{
+				return 'mode:admin'
+			}
+			else if (is_investor)
+			{
+				if (whom_id === investor_id)
+				{
+					return 'mode:investor'
+				}
+			}
+			return false
+		})
+	}
 
 	return investor
 }

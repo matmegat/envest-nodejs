@@ -1,6 +1,7 @@
 /* eslint-disable no-unreachable */
 
 var Symbols = require('../../src/db/models/symbols/Symbols')
+var withSeed = require('../with-seed')
 
 exports.up = function (knex, Promise)
 {
@@ -48,7 +49,10 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
-		return knex.seed.run({ directory: './seeds/20160518' })
+		return withSeed(() =>
+		{
+			return knex.seed.run({ directory: './seeds/20160518' })
+		})
 	})
 }
 

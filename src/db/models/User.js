@@ -21,6 +21,7 @@ var EmailAlreadyExists = Err('email_already_use', 'Email already in use')
 var validate_email = require('../validate').email
 var PaginatorBooked = require('../paginator/Booked')
 var Sorter = require('../Sorter')
+var Filter = require('../Filter')
 
 var validateMany = require('../../id').validateMany
 
@@ -627,6 +628,10 @@ module.exports = function User (db, app)
 		]
 	})
 
+	var filter = Filter({
+		query: Filter.by.query([])
+	})
+
 	user.byGroup = function (user_group, options)
 	{
 		var queryset = users_by_group(user_group)
@@ -636,10 +641,7 @@ module.exports = function User (db, app)
 			'email_confirms.user_id'
 		)
 
-		if (options.filter.query)
-		{
-			queryset = filter_by_query(queryset, options.filter.query)
-		}
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 
@@ -650,6 +652,7 @@ module.exports = function User (db, app)
 			'users.id',
 			'users.first_name',
 			'users.last_name',
+			'users.pic',
 			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 		)
 
@@ -704,6 +707,7 @@ module.exports = function User (db, app)
 		}
 	}
 
+<<<<<<< HEAD
 	function filter_by_query (queryset, query)
 	{
 		var pattern = '%' + query.toLowerCase() + '%'
@@ -722,6 +726,8 @@ module.exports = function User (db, app)
 		})
 	}
 
+=======
+>>>>>>> backend/develop
 	var get_pic = require('lodash/fp/get')('pic')
 
 	user.picById = function (id)

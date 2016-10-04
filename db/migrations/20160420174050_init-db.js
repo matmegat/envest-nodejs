@@ -1,4 +1,6 @@
 
+var withSeed = require('../with-seed')
+
 exports.up = function (knex, Promise)
 {
 	return Promise.resolve()
@@ -68,7 +70,10 @@ exports.up = function (knex, Promise)
 	})
 	.then(() =>
 	{
-		return knex.seed.run({ directory: './seeds/20160420' })
+		return withSeed(() =>
+		{
+			return knex.seed.run({ directory: './seeds/20160420' })
+		})
 	})
 }
 

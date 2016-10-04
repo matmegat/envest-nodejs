@@ -102,5 +102,6 @@ var shortcut = Err.shortcut = curry(function (pred, fn)
 
 Err.nullish  = shortcut(it => it == null)
 Err.emptish  = shortcut(it => ! it.length)
+Err.emptish.not = shortcut(it => it.length > 0)
 Err.falsy    = shortcut(it => ! it)
 Err.existent = shortcut(it => !! it)

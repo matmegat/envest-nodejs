@@ -120,7 +120,10 @@
       "0.9",
 
     "sanitize-html":
-      "1.13.0"
+      "1.13.0",
+
+    "csv-parse":
+      "^1.1"
   },
 
   "devDependencies":
@@ -147,6 +150,9 @@
       "^2",
 
     "swagger":
-      "^0.7"
+      "^0.7",
+
+    "inquirer-confirm":
+      "0.2"
   }
 }

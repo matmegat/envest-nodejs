@@ -212,35 +212,6 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	}
 
 
-	function get_historical (symbol)
-	{
-		return Symbl.validate(symbol)
-		.then(symbol =>
-		{
-			return xign.historical(symbol.toXign())
-			.catch(() =>
-			{
-				// warn_rethrow ~
-				// util.unwrap
-
-				throw GetDataErr({ symbol: symbol })
-			})
-		})
-		.then(resl =>
-		{
-			return {
-				prev_close: resl.LastClose,
-				low: resl.Low,
-				high: resl.High,
-				volume: resl.Volume,
-				currency: resl.Currency,
-				last: resl.Last,
-				percent_change_from_open: resl.PercentChangeFromOpen
-			}
-		})
-	}
-
-
 	function get_last_fundamentals (symbol)
 	{
 		var funds =
@@ -308,12 +279,13 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		return Promise.all(
 		[
-			get_historical(symbol),
-			get_last_fundamentals(symbol)
+			// get_historical(symbol),
+			get_last_fundamentals(symbol),
+			xign.quotes([ symbol ]),
 		])
 		.then(so =>
 		{
-			return merge(so[0], so[1])
+			return merge(so[0], so[1][0])
 		})
 	}
 
