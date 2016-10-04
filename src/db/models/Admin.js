@@ -25,6 +25,9 @@ module.exports = function Admin (db)
 	var user = db.user
 	expect(db, 'Admin depends on User').property('user')
 
+	var auth = db.auth
+	expect(db, 'Investors depends on Auth').property('auth')
+
 	var oneMaybe = db.helpers.oneMaybe
 
 	admin.ensure = function (user_id, trx)
@@ -72,6 +75,19 @@ module.exports = function Admin (db)
 		.whereIn('user_id', user_ids)
 	}
 
+	admin.ensureCanIntro = function (user_id, trx)
+	{
+		return admin.ensure(user_id, trx)
+		.then(() => admin.byId(user_id, trx))
+		.then(admin =>
+		{
+			if (! admin.can_intro)
+			{
+				throw CannotIntro()
+			}
+		})
+	}
+
 	admin.intro = knexed.transact(knex, (trx, target_user_id, by_user_id) =>
 	{
 		by_user_id || (by_user_id = null)
@@ -85,33 +101,17 @@ module.exports = function Admin (db)
 		{
 			if (by_user_id)
 			{
-				/* check for admin privileges */
-				return admin.ensure(by_user_id, trx)
-				.then(() =>
-				{
-					/* check for can_intro */
-					return admin.byId(by_user_id, trx)
-					.then(by_whom =>
-					{
-						if (! by_whom.can_intro)
-						{
-							throw CannotIntro()
-						}
-					})
-				})
+				return admin.ensureCanIntro(by_user_id, trx)
 			}
 			else
 			{
 				console.warn('admin privileges granted without by_user_id')
 			}
 		})
+		.then(() => user.ensure(trx, target_user_id))
 		.then(() =>
 		{
-			return user.ensure(target_user_id, trx)
-		})
-		.then(() =>
-		{
-			return table()
+			return table(trx)
 			.insert(
 			{
 				user_id: target_user_id,
@@ -119,6 +119,25 @@ module.exports = function Admin (db)
 				can_intro: false
 			})
 			.catch(Err.fromDb('admins_pkey', AlreadyAdmin))
+		})
+		.then(noop)
+	})
+
+	admin.create = knexed.transact(knex, (trx, by_user_id, userdata) =>
+	{
+		return auth.registerWithPass(trx, userdata)
+		.then(id =>
+		{
+			return admin.intro(trx, id, by_user_id)
+			.then(() => id)
+		})
+		.then(id =>
+		{
+			return user.newEmailUpdate(trx,
+			{
+				user_id: id,
+				new_email: userdata.email
+			}, true)
 		})
 		.then(noop)
 	})

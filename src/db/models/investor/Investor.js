@@ -3,8 +3,6 @@ var extend = require('lodash/extend')
 var wrap = require('lodash/wrap')
 var pick = require('lodash/pick')
 
-var generate_code = require('../../../crypto-helpers').generate_code
-
 var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
@@ -19,8 +17,6 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-var validate = require('../../validate')
-
 module.exports = function Investor (db)
 {
 	var investor = {}
@@ -34,6 +30,9 @@ module.exports = function Investor (db)
 
 	expect(db, 'Investors depends on User').property('user')
 	var user = db.user
+
+	expect(db, 'Investors depends on Auth').property('auth')
+	var auth = db.auth
 
 	expect(db, 'Investors depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
@@ -84,31 +83,13 @@ module.exports = function Investor (db)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
-		return new Promise(rs =>
-		{
-			validate.name(data.first_name, 'first_name')
-			validate.name(data.last_name, 'last_name')
-			validate.email(data.email)
-
-			return rs()
-		})
-		.then(() => generate_code())
-		.then((password) =>
-		{
-			var user_data = extend({}, data,
-			{
-				password: password /* new Investor should reset his password */
-			})
-
-			return user.create(trx, user_data)
-		})
-		.then((user_id) => user.byId(user_id, trx))
-		.then((user) =>
+		return auth.registerWithPass(trx, data)
+		.then(id =>
 		{
 			return investor.table(trx)
 			.insert(
 			{
-				user_id: user.id,
+				user_id: id,
 				historical_returns: '[]'	// PostgreSQL json representation
 			}
 			, 'user_id')
