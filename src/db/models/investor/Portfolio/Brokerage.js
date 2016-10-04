@@ -318,7 +318,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		options || (options = {})
 
-		timestamp = moment(timestamp || void 0).startOf('second')
+		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
 		return brokerage.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
@@ -475,7 +475,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	brokerage.removeState = knexed.transact(knex, (trx, investor_id, date) =>
 	{
-		date = moment(date).startOf('second')
+		date = moment(date).startOf('second').utc().format()
 
 		return table(trx)
 		.where({
