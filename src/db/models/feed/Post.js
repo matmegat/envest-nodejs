@@ -46,6 +46,8 @@ module.exports = function Post (db)
 					var type = prev_post.type
 					var investor_id = prev_post.investor_id
 
+					date = prev_post.timestamp
+
 					post_type = post.types[type]
 
 					return post_type.update(
