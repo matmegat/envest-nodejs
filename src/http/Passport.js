@@ -9,6 +9,8 @@ var LocalStrategy = require('passport-local')
 var FacebookStrategy = require('passport-facebook-token')
 var BearerStrategy = require('passport-http-bearer')
 
+var Err = require('../Err')
+
 module.exports = function (express, db)
 {
 	var user = db.user
@@ -33,6 +35,17 @@ module.exports = function (express, db)
 	passport.deserializeUser((id, done) =>
 	{
 		user.infoById(id)
+		.catch(err =>
+		{
+			if (Err.is(err) && err.code === 'user_not_found')
+			{
+				return false
+			}
+			else
+			{
+				throw err
+			}
+		})
 		.then(user =>
 		{
 			if (! user)
