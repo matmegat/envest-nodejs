@@ -35,14 +35,17 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 	holdings.symbolById = knexed.transact(knex,
-	(trx, symbol, investor_id, for_date) =>
+	(trx, symbol, investor_id, for_date, raw_select) =>
 	{
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return byId(trx, investor_id, for_date, function ()
-			{
-				this.where(symbol.toDb())
+			return byId(trx, investor_id, for_date, {
+				aux: function ()
+				{
+					this.where(symbol.toDb())
+				},
+				raw_select: raw_select
 			})
 		})
 		.then(oneMaybe)
@@ -198,13 +201,27 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 
-	function byId (trx, investor_id, for_date, aux)
+	function byId (trx, investor_id, for_date, options)
 	{
-		aux || (aux = noop)
+		options = extend({}, options)
 
-		return knex(raw('portfolio AS P'))
+		var aux = options.aux || noop
+		var raw_select = options.raw_select
+
+		var portfolio_table = knex(raw('portfolio AS P'))
 		.transacting(trx)
-		.select('symbol_ticker', 'symbol_exchange', 'amount', 'price')
+
+		if (raw_select)
+		{
+			portfolio_table.select('*')
+		}
+		else
+		{
+			portfolio_table.select(
+				'symbol_ticker', 'symbol_exchange', 'amount', 'price')
+		}
+
+		return portfolio_table
 		.where('investor_id', investor_id)
 		.where('amount', '>', 0)
 		.where('timestamp',
@@ -439,14 +456,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			'timestamp'
 		])
 
-		if (data.timestamp)
-		{
-			data.timestamp = moment.utc(data.timestamp).format()
-		}
-		else
-		{
-			data.timestamp = moment.utc().format()
-		}
+		data.timestamp = moment(data.timestamp).startOf('second').utc().format()
 
 		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
 		.then(is_avail =>
@@ -489,6 +499,14 @@ module.exports = function Holdings (db, investor, portfolio)
 	var AdminOrOwnerRequired = Err('admin_or_owner_required',
 		'Admin Or Owner Required')
 
+	holdings.removeBySymbolState = knexed.transact(knex,
+	(trx, symbol_state) =>
+	{
+		return table(trx)
+		.where(symbol_state)
+		.del()
+	})
+
 	holdings.remove = function (whom_id, investor_id, holding_entries)
 	{
 		return knex.transaction(function (trx)
@@ -513,7 +531,8 @@ module.exports = function Holdings (db, investor, portfolio)
 					validate.empty(holding.symbol, `holdings[${i}].symbol`)
 				})
 
-				return db.symbols.resolveMany(map(holding_entries, 'symbol'))
+				return db.symbols.resolveMany(map(holding_entries, 'symbol'),
+					{ other: true })
 			})
 			.then(symbols => symbols.map(Symbl))
 			.then(symbols =>
@@ -527,13 +546,19 @@ module.exports = function Holdings (db, investor, portfolio)
 					})
 					.then(() =>
 					{
-						var data_remove =
-						{
-							amount:    0,
-							price:     0
-						}
+						return holdings.symbolById(trx, symbol, investor_id, null, true)
+					})
+					.then(state_to_delete =>
+					{
+						var holding = pick(state_to_delete,
+						[
+							'investor_id',
+							'symbol_ticker',
+							'symbol_exchange',
+							'timestamp'
+						])
 
-						return put(trx, investor_id, symbol, data_remove)
+						return holdings.removeBySymbolState(trx, holding)
 					})
 				}))
 			})

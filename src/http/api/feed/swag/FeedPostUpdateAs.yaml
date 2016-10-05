@@ -15,10 +15,6 @@ post:
         post_id:
           type: integer
           description: Post id to delete
-        date:
-          type: string
-          format: date-time
-          description: Post date
         trade_data:
           type: object
           description: Post properties

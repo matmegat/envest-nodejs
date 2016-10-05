@@ -318,14 +318,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		options || (options = {})
 
-		if (timestamp)
-		{
-			timestamp = moment.utc(timestamp).format()
-		}
-		else
-		{
-			timestamp = moment.utc().format()
-		}
+		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
 		return brokerage.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
@@ -478,6 +471,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 				{ override: true } // override on exact match
 			)
 		})
+	})
+
+	brokerage.removeState = knexed.transact(knex, (trx, investor_id, date) =>
+	{
+		date = moment(date).startOf('second').utc().format()
+
+		return table(trx)
+		.where({
+			investor_id: investor_id,
+			timestamp: date
+		})
+		.del()
 	})
 
 	var valid_operations =

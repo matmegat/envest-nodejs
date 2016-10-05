@@ -12,10 +12,6 @@ post:
     schema:
       type: object
       properties:
-        date:
-          type: string
-          format: date-time
-          description: Post date
         post_id:
           type: integer
           description: Post id to delete

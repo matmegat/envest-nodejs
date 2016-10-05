@@ -46,6 +46,8 @@ module.exports = function Post (db)
 					var type = prev_post.type
 					var investor_id = prev_post.investor_id
 
+					date = prev_post.timestamp
+
 					post_type = post.types[type]
 
 					return post_type.update(
@@ -121,7 +123,7 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = date || new Date()
+			date = moment(date || void 0).startOf('second').utc().format()
 
 			return Promise.resolve()
 			.then(() =>
@@ -154,7 +156,7 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = date || new Date()
+			date = moment(date || void 0).startOf('second').utc().format()
 
 			return Promise.resolve()
 			.then(() =>

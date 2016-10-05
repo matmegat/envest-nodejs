@@ -42,17 +42,7 @@ module.exports = function Trade (portfolio, symbols)
 		},
 		remove: (trx, post) =>
 		{
-			var reverted_dirs =
-			{
-				bought: 'sold',
-				sold: 'bought'
-			}
-
-			post.data.dir = reverted_dirs[post.data.dir]
-			post.data.is_delete = true
-
-			return portfolio.makeTrade(
-				trx, post.investor_id, post.type, post.timestamp, post.data)
+			return portfolio.removeTrade(trx, post)
 		}
 	})
 }
