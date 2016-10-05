@@ -111,7 +111,8 @@ module.exports = function Portfolio (db, investor)
 					symbol:
 						Symbl('OTHER.OTHER').toFull(),
 					allocation:
-						sumBy(category_other, 'real_allocation') * brokerage.multiplier,
+						sumBy(category_other, 'real_allocation')
+						 * brokerage.multiplier,
 					gain: null,
 					price: 0,
 					amount: sumBy(category_other, 'amount')
