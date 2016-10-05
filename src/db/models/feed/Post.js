@@ -30,6 +30,7 @@ module.exports = function Post (db)
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
 
+	// eslint-disable-next-line max-params
 	post.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
 		var post_type
@@ -152,6 +153,7 @@ module.exports = function Post (db)
 		})
 	}
 
+	// eslint-disable-next-line max-params
 	post.createAs = function (whom_id, investor_id, type, date, data, post_id)
 	{
 		return knex.transaction(function (trx)

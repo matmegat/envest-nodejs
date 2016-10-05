@@ -26,6 +26,7 @@ function validator (func)
 
 function setter (type, set)
 {
+	// eslint-disable-next-line max-params
 	return (trx, investor_id, feed_type, date, data, post_id) =>
 	{
 		return type.validate(data)
@@ -38,6 +39,7 @@ function setter (type, set)
 
 function updater (type, update)
 {
+	// eslint-disable-next-line max-params
 	return (trx, investor_id, feed_type, date, data, post_id) =>
 	{
 		return type.validate_update(data)

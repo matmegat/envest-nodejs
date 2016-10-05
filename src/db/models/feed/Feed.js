@@ -397,6 +397,7 @@ var Feed = module.exports = function Feed (db)
 		.then(one)
 	}
 
+	// eslint-disable-next-line max-params
 	function update (trx, investor_id, type, date, data, post_id)
 	{
 		return feed.feed_table(trx)
@@ -419,6 +420,7 @@ var Feed = module.exports = function Feed (db)
 		.then(_.noop)
 	}
 
+	// eslint-disable-next-line max-params
 	feed.upsert = function (trx, investor_id, type, date, data, post_id)
 	{
 		if (post_id)
