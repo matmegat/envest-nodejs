@@ -12,6 +12,7 @@ module.exports =
 	{
 		'no-unused-expressions': 0,
 		 complexity:  [ 1, 7 ],
-		'max-params': [ 1, 5 ]
+		'max-params': [ 1, 5 ],
+		'max-nested-callbacks': [ 1, 4 ]
 	}
 }
