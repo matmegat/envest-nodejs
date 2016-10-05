@@ -76,6 +76,7 @@ module.exports = function Portfolio (db, investor)
 					.quotes(trx, investor_id, for_date, { soft: true, other: true })
 			])
 		})
+		// eslint-disable-next-line max-statements
 		.then((values) =>
 		{
 			var brokerage = values[0]
@@ -353,6 +354,7 @@ module.exports = function Portfolio (db, investor)
 			range = range_from(range, moment(), resolution)
 
 			return grid_series(grid.holdings.involved, range, resolution)
+			// eslint-disable-next-line max-statements
 			.then(superseries =>
 			{
 				/* pick single last trading day */
