@@ -1,5 +1,8 @@
 /* eslint-disable max-len */
 
+var random = require('lodash/random')
+var round = require('lodash/round')
+
 var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ' +
 	'eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m' +
 	'inim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip e' +
@@ -62,6 +65,7 @@ exports.seed = function (knex, Promise)
 						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})
@@ -101,6 +105,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})
@@ -141,6 +146,7 @@ exports.seed = function (knex, Promise)
 						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})
@@ -181,6 +187,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})
@@ -222,6 +229,7 @@ exports.seed = function (knex, Promise)
 						profile_pic: 'b4f18f5b05307bd1e3cc00e0802d641b',
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})
@@ -262,6 +270,7 @@ exports.seed = function (knex, Promise)
 						focus: focus,
 						background: lorem,
 						historical_returns: history_default,
+						annual_return: round(random(20, true), 2),
 						is_public: true,
 						start_date: new Date()
 					})

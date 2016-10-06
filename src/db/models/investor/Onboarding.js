@@ -21,6 +21,7 @@ module.exports = function Onboarding (db, investor)
 	onb.fields.education = Education(investor)
 	onb.fields.background = Background(investor)
 	onb.fields.hist_return = HistReturn(investor)
+	onb.fields.annual_return = AnnualReturn(investor)
 	onb.fields.brokerage = Brokerage(investor, db)
 	onb.fields.holdings = Holdings(investor, db)
 	onb.fields.is_public = IsPublic(investor)
@@ -404,6 +405,31 @@ function HistReturn (investor)
 		}
 	})
 }
+
+
+function AnnualReturn (investor)
+{
+	return Field(investor,
+	{
+		get: (queryset) =>
+		{
+			return queryset
+			.select('annual_return')
+			.then(one)
+			.then(rs => rs.annual_return)
+		},
+		validate: (value) =>
+		{
+			validate.empty(value, 'annual_return')
+			validate.number(value, 'annual_return')
+			return value
+		},
+		set: (value, queryset) =>
+		{
+			return queryset.update({ annual_return: value })
+		}
+	})
+} 
 
 
 // eslint-disable-next-line id-length
