@@ -54,6 +54,11 @@ module.exports = function Sorter (sorter_options)
 
 		queryset.orderByRaw(raw)
 
+		if (sorter_options.fallback_by)
+		{
+			queryset.orderBy(sorter_options.fallback_by, 'desc')
+		}
+
 		return queryset
 	}
 
