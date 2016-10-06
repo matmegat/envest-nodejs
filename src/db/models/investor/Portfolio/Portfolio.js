@@ -105,10 +105,6 @@ module.exports = function Portfolio (db, investor)
 					}
 				}, [])
 
-				console.log('holdings', holdings)
-				console.log('==================')
-				console.log('other', category_other)
-
 				var other =
 				{
 					symbol:
