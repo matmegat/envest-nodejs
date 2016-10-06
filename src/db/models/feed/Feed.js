@@ -452,7 +452,7 @@ function transform_symbols (items, api)
 {
 	var symbols = Feed.symbolsInvolved(items)
 
-	return api.resolveMany(symbols, { soft: true })
+	return api.resolveMany(symbols, { soft: true, other: true })
 	.then(compact)
 	.then(symbols =>
 	{
