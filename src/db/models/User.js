@@ -625,7 +625,8 @@ module.exports = function User (db, app)
 			{ column: 'last_name',  aux: 'COLLATE "C"' },
 			{ column: 'first_name', aux: 'COLLATE "C"' },
 			'email'
-		]
+		],
+		fallback_by: 'id'
 	})
 
 	var filter = Filter({

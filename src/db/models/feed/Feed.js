@@ -57,8 +57,7 @@ var Feed = module.exports = function Feed (db)
 
 	var sorter = Sorter(
 	{
-		order_column: 'timestamp',
-		allowed_columns: ['timestamp']
+		allowed_columns: [ 'timestamp' ]
 	})
 
 	var filter = Filter(
