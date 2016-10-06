@@ -546,7 +546,8 @@ module.exports = function Holdings (db, investor, portfolio)
 					})
 					.then(() =>
 					{
-						return holdings.symbolById(trx, symbol, investor_id, null, true)
+						return holdings.symbolById(
+							trx, symbol, investor_id, null, true)
 					})
 					.then(state_to_delete =>
 					{

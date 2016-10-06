@@ -120,9 +120,12 @@ module.exports = function Watchlist (db)
 			validate.required(data.symbol, 'symbol')
 			validate.empty(data.symbol, 'symbol')
 
-			validate.required(data.target_price, 'target_price')
-			validate.empty(data.target_price, 'target_price')
-			validate.number.positive(data.target_price, 'target_price')
+			if (data.dir === 'added')
+			{
+				validate.required(data.target_price, 'target_price')
+				validate.empty(data.target_price, 'target_price')
+				validate.number.positive(data.target_price, 'target_price')
+			}
 
 			validate.required(data.motivations, 'motivations')
 			validate.motivation(data.motivations)
