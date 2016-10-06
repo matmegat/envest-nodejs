@@ -8,7 +8,8 @@
 			[
 				".sublime",
 				"node_modules",
-				"var"
+				"var",
+				"frontend"
 			]
 		}
 	]
