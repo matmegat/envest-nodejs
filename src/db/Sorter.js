@@ -17,6 +17,7 @@ module.exports = function Sorter (sorter_options)
 
 	sorter_options = extend({}, defaults, sorter_options)
 
+	// eslint-disable-next-line max-statements
 	sorter.sort = function (queryset, options)
 	{
 		var column
