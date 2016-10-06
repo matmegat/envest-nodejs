@@ -82,7 +82,7 @@ module.exports = function Parser (portfolio, db)
 		return portfolio.availableDate(investor_id)
 		.then((portfolio_date) =>
 		{
-			if (portfolio_date.available_from === null)
+			if (portfolio_date === null)
 			{	// any date is available
 				portfolio_date = moment.utc(0) // Jan 01 1970
 			}
