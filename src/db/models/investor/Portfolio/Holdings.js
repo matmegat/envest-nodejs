@@ -575,9 +575,6 @@ module.exports = function Holdings (db, investor, portfolio)
 	var validate_positive = validate.number.positive
 	var validate_non_negative = validate.number.nonNegative
 
-	var NotEnoughMoney = Err('not_enough_money_to_buy',
-		'Not Enough Money To Buy')
-
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
@@ -590,12 +587,13 @@ module.exports = function Holdings (db, investor, portfolio)
 		var for_date = date
 
 		return portfolio.brokerage.cashById(trx, investor_id, for_date)
-		.then(cash =>
+		.then(() =>
 		{
-			if (sum > cash)
-			{
-				throw NotEnoughMoney()
-			}
+			console.warn('Brokerage will go less than zero after trade')
+			// if (sum > cash)
+			// {
+			// 	throw NotEnoughMoney()
+			// }
 		})
 		.then(() =>
 		{
