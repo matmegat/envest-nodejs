@@ -429,7 +429,7 @@ function AnnualReturn (investor)
 			return queryset.update({ annual_return: value })
 		}
 	})
-} 
+}
 
 
 // eslint-disable-next-line id-length
