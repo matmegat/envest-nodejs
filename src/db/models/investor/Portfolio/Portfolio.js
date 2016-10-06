@@ -54,8 +54,6 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
-		var for_date = moment.utc().format()
-
 		return new Promise(rs =>
 		{
 			if (options.extended)
@@ -71,9 +69,9 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return Promise.all([
-				brokerage.byId(trx, investor_id, for_date, { soft: true }),
+				brokerage.byId(trx, investor_id, null, { soft: true }),
 				 holdings.byId
-					.quotes(trx, investor_id, for_date, { soft: true, other: true })
+					.quotes(trx, investor_id, null, { soft: true, other: true })
 			])
 		})
 		// eslint-disable-next-line max-statements

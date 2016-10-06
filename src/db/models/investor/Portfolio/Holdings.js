@@ -402,6 +402,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
+			var timestamp = maxBy(holding_entries, 'date').timestamp
+
 			var new_holdings = symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
@@ -410,14 +412,14 @@ module.exports = function Holdings (db, investor, portfolio)
 				return put(trx, investor_id, symbol, data, { override: true })
 			})
 
-			return holdings.byId.quotes(trx, investor_id, null, { other: true })
+			return holdings.byId.quotes(
+				trx, investor_id, timestamp, { other: true }
+			)
 			.then(previous_holdings =>
 			{
 				return Promise.all(new_holdings)
 				.then(() =>
 				{
-					var timestamp = maxBy(holding_entries, 'date').timestamp
-
 					return portfolio
 					.brokerage
 					.recalculate(
