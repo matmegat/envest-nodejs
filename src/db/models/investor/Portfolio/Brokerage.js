@@ -445,7 +445,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(brokerage =>
 		{
-			var options = {}
+			var options = { override: true }
 			if (operation === 'deposit' || operation === 'withdraw')
 			{
 				options.recalculate = true
@@ -468,7 +468,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				cash,              // new cash to set
 				date,              // timestamp
 				null,              // holdings are the same
-				{ override: true } // override on exact match
+				options            // override on exact match
 			)
 		})
 	})
