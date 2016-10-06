@@ -320,7 +320,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
-		return brokerage.isDateAvail(trx, investor_id, timestamp)
+		return portfolio.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
 		{
 			if (! is_avail)

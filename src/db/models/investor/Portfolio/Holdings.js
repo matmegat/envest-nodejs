@@ -458,7 +458,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		data.timestamp = moment(data.timestamp).startOf('second').utc().format()
 
-		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
+		return portfolio.isDateAvail(trx, investor_id, data.timestamp, symbol)
 		.then(is_avail =>
 		{
 			if (! is_avail)
