@@ -107,6 +107,11 @@ module.exports = function Holdings (db, investor, portfolio)
 					holding.real_allocation
 					 = holding.amount * (holding.quote_price || holding.price)
 
+					if (holding.amount < 0)
+					{
+						holding.real_allocation = 0
+					}
+
 					delete holding.symbol_ticker
 					delete holding.symbol_exchange
 
@@ -223,7 +228,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		return portfolio_table
 		.where('investor_id', investor_id)
-		.where('amount', '>', 0)
+		.where('amount', '!=', 0)
 		.where('timestamp',
 			table(trx).max('timestamp')
 			.where(
@@ -577,6 +582,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
+		validate_positive(data.amount, 'amount')
 		validate_non_negative(data.price, 'price')
 
 		var amount = data.amount
@@ -586,13 +592,12 @@ module.exports = function Holdings (db, investor, portfolio)
 		var for_date = date
 
 		return portfolio.brokerage.cashById(trx, investor_id, for_date)
-		.then(() =>
+		.then(cash =>
 		{
-			console.warn('Brokerage will go less than zero after trade')
-			// if (sum > cash)
-			// {
-			// 	throw NotEnoughMoney()
-			// }
+			if (sum > cash)
+			{
+				console.warn('Brokerage will go less than zero after trade')
+			}
 		})
 		.then(() =>
 		{
@@ -609,6 +614,11 @@ module.exports = function Holdings (db, investor, portfolio)
 				(holding.amount + amount)
 
 				amount = holding.amount + amount
+
+				if (! isFinite(price))
+				{
+					price = 0
+				}
 			}
 
 			var data_put =
@@ -626,6 +636,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.sell = function (trx, investor_id, symbol, date, data)
 	{
+		validate_positive(data.amount, 'amount')
 		validate_positive(data.price, 'price')
 
 		var amount = data.amount
