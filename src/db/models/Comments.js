@@ -84,6 +84,7 @@ module.exports = function Comments (db)
 	}
 
 	var NewFeedComment = Emitter('new_feed_comment')
+	var validate_comment_length = validate.length(1200)
 
 	comments.create = function (data)
 	{
@@ -93,6 +94,7 @@ module.exports = function Comments (db)
 			validate.required(data.feed_id, 'feed_id')
 			validate.required(data.text, 'text')
 			validate.empty(data.text, 'text')
+			validate_comment_length(data.text, 'text')
 
 			return rs(data)
 		})
