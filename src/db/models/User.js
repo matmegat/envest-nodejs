@@ -206,6 +206,7 @@ module.exports = function User (db, app)
 					'profession',
 					'background',
 					'historical_returns',
+					'annual_return',
 					'is_public',
 					'start_date',
 					'is_featured'
