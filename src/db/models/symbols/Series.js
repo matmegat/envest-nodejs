@@ -86,13 +86,20 @@ module.exports = function Series (token)
 			return new Date(quote.Date)
 		})
 
-		return quotes.map((quote) =>
+		quotes = quotes.map((quote) =>
 		{
 			return {
 				timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
 				value:     quote.LastClose
 			}
 		})
+
+		if (quotes.length && quotes[0].value === 0)
+		{
+			quotes = quotes.slice(1)
+		}
+
+		return quotes
 	}
 
 
