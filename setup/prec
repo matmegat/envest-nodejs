@@ -14,6 +14,33 @@ var kx = knex({
 	connection: cfg.pg
 })
 
-kx.raw('SELECT 1')
+var prec_migr = require('../db/migrations/20161011000404_portfolio-prec')
+
+var portfolio_table_name = 'portfolio_prec'
+
+kx.schema.hasTable(portfolio_table_name)
+.then(so =>
+{
+	if (! so)
+	{
+		return prec_migr.up(kx)
+	}
+})
+.then(() =>
+{
+	return kx.from(portfolio_table_name).select(kx.raw('COUNT(*)'))
+	.then(it => it.count)
+	.then(Boolean)
+})
+.then(so =>
+{
+	if (so)
+	{
+		console.info('looks like %s already has data', portfolio_table_name)
+		return
+	}
+
+	return kx.raw(`INSERT INTO ${portfolio_table_name} SELECT * FROM portfolio;`)
+})
 .then(console.dir, console.error)
 .finally(process.exit)
