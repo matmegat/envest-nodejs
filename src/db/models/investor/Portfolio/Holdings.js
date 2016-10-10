@@ -379,9 +379,13 @@ module.exports = function Holdings (db, investor, portfolio)
 				validate.empty(holding.symbol, `holdings[${i}].symbol`)
 
 				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount < 0)
+				if (holding.amount === 0)
 				{
-					throw InvalidAmount({ field: `holdings[${i}].amount` })
+					throw InvalidAmount(
+					{
+						field: `holdings[${i}].amount`,
+						reason: `Should be not equal to zero`
+					})
 				}
 
 				validate.number(holding.price, `holdings[${i}].price`)
