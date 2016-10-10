@@ -6,7 +6,7 @@ var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
 
-module.exports = function NetvestSubsc (db, cfg)
+module.exports = function NetvestSubsc (db, cfg, mailer)
 {
 	var netvest_subscr = {}
 
@@ -95,6 +95,31 @@ module.exports = function NetvestSubsc (db, cfg)
 		return netvest_subscr.table()
 		.where('user_id', user_id)
 		.delete()
+		.then(() =>
+		{ // send Trial Expired
+			return db.user.byId(user_id)
+			.then(user =>
+			{
+				var substs =
+				{
+					email_title: [ 'Trial Expired' ],
+				}
+
+				return mailer.send(`default`, substs,
+				{
+					to: user.email,
+					subject: `Trial Expired`,
+					// text: '',
+					html: `Hi, ${user.first_name} ${user.last_name}.` +
+						`<br/>` +
+						`Your trial period has expired. ` +
+						`Now you can track only one investor. ` +
+						`Please visit our <a href="http://www.netvest.com">` +
+						`website</a> for premium subscription ` +
+						`to get full access to all the investors and insights.`
+				})
+			})
+		})
 		.then(result =>
 		{
 			return { success: result === 1 }
