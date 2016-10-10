@@ -109,6 +109,8 @@ module.exports = function Holdings (db, investor, portfolio)
 					holding.real_allocation
 					 = holding.amount * (holding.quote_price || holding.price)
 
+					holding.real_alloaction = Math.max(0, holding.real_allocation)
+
 					delete holding.symbol_ticker
 					delete holding.symbol_exchange
 
@@ -225,7 +227,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		return portfolio_table
 		.where('investor_id', investor_id)
-		.where('amount', '>', 0)
+		.where('amount', '!=', 0)
 		.where('timestamp',
 			table(trx).max('timestamp')
 			.where(
@@ -376,9 +378,13 @@ module.exports = function Holdings (db, investor, portfolio)
 				validate.empty(holding.symbol, `holdings[${i}].symbol`)
 
 				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount < 0)
+				if (holding.amount === 0)
 				{
-					throw InvalidAmount({ field: `holdings[${i}].amount` })
+					throw InvalidAmount(
+					{
+						field: `holdings[${i}].amount`,
+						reason: `Should be not equal to zero`
+					})
 				}
 
 				validate.number(holding.price, `holdings[${i}].price`)
@@ -460,9 +466,9 @@ module.exports = function Holdings (db, investor, portfolio)
 			'timestamp'
 		])
 
-		data.timestamp = moment(data.timestamp).startOf('second').utc().format()
+		data.timestamp = moment.utc(data.timestamp).startOf('second').format()
 
-		return holdings.isDateAvail(trx, investor_id, data.timestamp, symbol)
+		return portfolio.isDateAvail(trx, investor_id, data.timestamp, symbol)
 		.then(is_avail =>
 		{
 			if (! is_avail)
@@ -581,9 +587,6 @@ module.exports = function Holdings (db, investor, portfolio)
 	var validate_positive = validate.number.positive
 	var validate_non_negative = validate.number.nonNegative
 
-	var NotEnoughMoney = Err('not_enough_money_to_buy',
-		'Not Enough Money To Buy')
-
 	holdings.buy = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
@@ -600,7 +603,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			if (sum > cash)
 			{
-				throw NotEnoughMoney()
+				console.warn('Brokerage will go less than zero after trade')
 			}
 		})
 		.then(() =>
@@ -618,6 +621,11 @@ module.exports = function Holdings (db, investor, portfolio)
 				(holding.amount + amount)
 
 				amount = holding.amount + amount
+
+				if (! isFinite(price))
+				{
+					price = 0
+				}
 			}
 
 			var data_put =
@@ -633,9 +641,6 @@ module.exports = function Holdings (db, investor, portfolio)
 	}
 
 
-	var NotEnoughAmount = Err('not_enough_amount_to_sell',
-		'Not Enough Amount To Sell')
-
 	holdings.sell = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
@@ -645,16 +650,20 @@ module.exports = function Holdings (db, investor, portfolio)
 		var price  = data.price
 		var sum    = amount * price
 
-		return holdings.ensure(trx, symbol, investor_id)
+		return Symbl.validate(symbol)
+		.then(symbol =>
+		{
+			return holdings.symbolById(trx, symbol, investor_id)
+		})
 		.then(holding =>
 		{
-			if (holding.amount < amount)
+			if (! holding)
 			{
-				throw NotEnoughAmount(
+				holding =
 				{
-					available_amount: holding.amount,
-					sell_amount: amount
-				})
+					amount: 0,
+					price: price
+				}
 			}
 
 			amount = holding.amount - amount

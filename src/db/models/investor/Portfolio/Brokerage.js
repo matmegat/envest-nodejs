@@ -320,7 +320,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
-		return brokerage.isDateAvail(trx, investor_id, timestamp)
+		return portfolio.isDateAvail(trx, investor_id, timestamp)
 		.then((is_avail) =>
 		{
 			if (! is_avail)
@@ -498,12 +498,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 	{
 		/* Validations:
 		 * deposit: is number, amount > 0
-		 * withdraw: is number, 0 < amount <= brokerage
-		 * transactional fee: is number, 0 < amount <= brokerage
 		 * interest: is number, amount > 0
 		 * trade:
 		 * - is number
-		 * - buy: amount < 0, abs(amount) <= brokerage
+		 * - buy: amount < 0
 		 * - sold: amount > 0
 		 * */
 
@@ -517,10 +515,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 		}
 		if (amount + brokerage.cash < 0)
 		{
-			throw InvalidAmount(
-			{
-				data: 'Brokerage may not become less than zero'
-			})
+			console.warn('Brokerage goes less than zero')
+			// throw InvalidAmount(
+			// {
+			// 	data: 'Brokerage may not become less than zero'
+			// })
 		}
 	}
 

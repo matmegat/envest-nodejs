@@ -512,9 +512,13 @@ function Holdings (investor_model, db)
 		validate.empty(row.symbol, `holdings[${i}].symbol`)
 
 		validate.number(row.amount, `holdings[${i}].amount`)
-		if (row.amount < 0)
+		if (row.amount === 0)
 		{
-			throw WrongHoldingsFormat({ field: `holdings[${i}].amount` })
+			throw WrongHoldingsFormat(
+			{
+				field: `holdings[${i}].amount`,
+				reason: `Should be not equal to zero`
+			})
 		}
 
 		decimal(row.price, `holdings[${i}].price`)
