@@ -1,0 +1,19 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var Config = require('../src/Config')
+var rootpath = require('rootpath')
+
+var cfg = Config(rootpath(__dirname, '../cfg'))
+
+var knex = require('knex')
+
+var kx = knex({
+	client: 'pg',
+	connection: cfg.pg
+})
+
+kx.raw('SELECT 1')
+.then(console.dir, console.error)
+.finally(process.exit)
