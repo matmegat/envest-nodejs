@@ -781,14 +781,14 @@ module.exports = function Portfolio (db, investor)
 
 				if (data.is_delete)
 				{
-					date = moment()
+					for_date = moment()
 				}
 
-				return holdings.dirs[dir](trx, investor_id, symbol, date, data)
+				return holdings.dirs[dir](trx, investor_id, symbol, for_date, data)
 			})
 			.then(sum =>
 			{
-				return brokerage.update(trx, investor_id, date,
+				return brokerage.update(trx, investor_id, for_date,
 				{
 					operation: 'trade',
 					amount: sum
