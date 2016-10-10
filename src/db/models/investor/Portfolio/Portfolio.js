@@ -758,7 +758,8 @@ module.exports = function Portfolio (db, investor)
 		var symbol = {}
 
 		return portfolio.adjustDate(trx, investor_id, date)
-		.then(for_date => {
+		.then(for_date =>
+		{
 			return portfolio.isDateAvail(trx, investor_id, for_date)
 			.then(is_avail =>
 			{
