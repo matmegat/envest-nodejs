@@ -14,7 +14,7 @@ var generate_code = cr_helpers.generate_code
 
 var knexed = require('../knexed')
 
-module.exports = function Auth (db)
+module.exports = function Auth (db, mailer)
 {
 	var auth = {}
 
@@ -41,7 +41,22 @@ module.exports = function Auth (db)
 			})
 			.then(() =>
 			{
-				return id
+				var substs =
+				{
+					email_title: [ 'Welcome' ],
+				}
+
+				return mailer.send('default', substs,
+				{
+					to: userdata.email,
+					subject: 'Welcome to NetVest',
+					html: `Hi, ${userdata.first_name} ${userdata.last_name}.` +
+						`<br/><br/>` +
+						`Welcome to NetVest.<br/>` +
+						`Check our <a href="http://www.netvest.com">` +
+						`website</a>, iOS and Android applications.`
+				})
+				.then(() => id, () => id)
 			})
 		})
 	})

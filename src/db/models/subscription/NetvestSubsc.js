@@ -111,7 +111,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 					subject: `Trial Expired`,
 					// text: '',
 					html: `Hi, ${user.first_name} ${user.last_name}.` +
-						`<br/>` +
+						`<br/><br/>` +
 						`Your trial period has expired. ` +
 						`Now you can track only one investor. ` +
 						`Please visit our <a href="http://www.netvest.com">` +
