@@ -140,16 +140,23 @@ module.exports = function Password (db, user, app)
 						host += `:${app.cfg.real_port}`
 					}
 
-					return mailer.send('default', null,
+					var substs =
+					{
+						email_title: [ 'Reset Password' ]
+					}
+
+					return mailer.send('default', substs,
 					{
 						to: email,
-						// text: 'Password reset code: '
-						// + code.toUpperCase(),
-						html: 'Please tap the link to reset password: '
+						subject: `Reset Password`,
+						html: `Hi, ${user.first_name} ${user.last_name}.`
+						+ `<br/><br/>`
+						+ `Please tap the link to reset password: `
 						+ `<a href="http://${host}/reset-password?code=`
 						+ `${code.toUpperCase()}" target="_blank">`
 						+ `Reset Password</a><br>`
-						+ `Your password reset code: ${code.toUpperCase()}`
+						+ `Your password reset code: `
+						+ `<strong>${code.toUpperCase()}</strong>`
 					})
 				})
 			})
