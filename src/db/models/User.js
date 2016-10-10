@@ -521,35 +521,41 @@ module.exports = function User (db, app)
 
 	var email_templates =
 	{
-		user: function (host, email, code)
+		user: function (host, user, code)
 		{
 			expect('host').to.be.a('string')
 			expect('email').to.be.a('string')
 			expect('code').to.be.a('string')
 
 			return {
-				to: email,
-				html: 'Please tap the link to confirm email: '
+				to: user.email,
+				subject: 'Confirm Email',
+				html: `Hi, ${user.first_name} ${user.last_name}.`
+				+ `<br/><br/>`
+				+ `Please tap the link to confirm email: `
 				+ `<a href="http://${host}/confirm-email?code=`
 				+ `${code.toUpperCase()}" target="_blank">`
 				+ `Confirm Email</a><br>`
-				+ `Your email confirm code: ${code.toUpperCase()}`
+				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
 			}
 		},
-		admin: function (host, email, code)
+		admin: function (host, user, code)
 		{
 			expect('host').to.be.a('string')
 			expect('email').to.be.a('string')
 			expect('code').to.be.a('string')
 
 			return {
-				to: email,
-				html: 'You\'ve been chosen as admin.<br/>'
-				+ 'Please tap the link to confirm email: '
+				to: user.email,
+				subject: 'Confirm Email',
+				html: `Hi, ${user.first_name} ${user.last_name}.`
+				+ `<br/><br/>`
+				+ `You've been chosen as admin.<br/>`
+				+ `Please tap the link to confirm email: `
 				+ `<a href="http://${host}/confirm-email?code=`
 				+ `${code.toUpperCase()}" target="_blank">`
 				+ `Confirm Email</a><br>`
-				+ `Your email confirm code: ${code.toUpperCase()}`
+				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
 			}
 		}
 	}
@@ -595,6 +601,10 @@ module.exports = function User (db, app)
 			{
 				var host = `${app.cfg.host}`
 				var mail_content = {}
+				var substs =
+				{
+					email_title: [ 'Confirm Email' ]
+				}
 
 				if (app.cfg.real_port !== 80)
 				{
@@ -603,14 +613,14 @@ module.exports = function User (db, app)
 
 				if (for_admin)
 				{
-					mail_content = email_templates.admin(host, user_item.email, code)
+					mail_content = email_templates.admin(host, user_item, code)
 				}
 				else
 				{
-					mail_content = email_templates.user(host, user_item.email, code)
+					mail_content = email_templates.user(host, user_item, code)
 				}
 
-				return mailer.send('default', null, mail_content)
+				return mailer.send('default', substs, mail_content)
 				.then(() => user_item.id, console.err)
 			})
 		})
