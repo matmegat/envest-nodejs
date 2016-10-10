@@ -288,12 +288,24 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.grid.ir = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return Promise.all(
-		[
-			grid_ir(trx, investor_id, 'day'),
-			grid_ir(trx, investor_id, 'intraday')
-		])
+		return grid_ir(trx, investor_id, 'day')
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				throw ReportErr(err)
+			}
+			else
+			{
+				throw ReportErr({ reason: err.message })
+			}
+		})
 	})
+
+	var ReportErr = Err(
+		'investor_report_error',
+		'Unable to build Investor Report'
+	)
 
 	function grid (trx, investor_id, resolution)
 	{
