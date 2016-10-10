@@ -35,8 +35,10 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 	holdings.symbolById = knexed.transact(knex,
-	(trx, symbol, investor_id, for_date, raw_select) =>
+	(trx, symbol, investor_id, for_date, options) =>
 	{
+		options = extend({}, options)
+
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
@@ -45,7 +47,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				{
 					this.where(symbol.toDb())
 				},
-				raw_select: raw_select
+				raw_select: options.raw_select
 			})
 		})
 		.then(oneMaybe)
@@ -504,6 +506,8 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.removeBySymbolState = knexed.transact(knex,
 	(trx, symbol_state) =>
 	{
+		expect(symbol_state).an('object')
+
 		return table(trx)
 		.where(symbol_state)
 		.del()
@@ -549,7 +553,7 @@ module.exports = function Holdings (db, investor, portfolio)
 					.then(() =>
 					{
 						return holdings.symbolById(
-							trx, symbol, investor_id, null, true)
+							trx, symbol, investor_id, null, { raw_select: true })
 					})
 					.then(state_to_delete =>
 					{
