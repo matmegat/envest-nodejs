@@ -26,7 +26,7 @@ module.exports = function Update (db)
 		validate_update: validate_update_adds,
 		set: (trx, investor_id, type, date, data) =>
 		{
-			return db.symbols.resolveMany(data.symbols)
+			return db.symbols.resolveMany(data.symbols, { other: true })
 			.then(symbls =>
 			{
 				data.symbols = symbls
