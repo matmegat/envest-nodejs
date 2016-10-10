@@ -727,44 +727,71 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	portfolio.adjustDate = knexed.transact(knex, (trx, investor_id, timestamp) =>
+	{
+		expect(timestamp).ok
+		timestamp = moment.utc(timestamp)
+
+		return portfolio.availableDate(trx, investor_id)
+		.then(portfolio_date =>
+		{
+			if (timestamp > portfolio_date)
+			{
+				return timestamp.format()
+			}
+
+			if (timestamp.isSameOrAfter(portfolio_date.clone().startOf('day')))
+			{
+				return portfolio_date.add(5, 'minutes').format()
+			}
+
+			return timestamp.format()
+			// Do Nothing. Will create error 'Wrong Date'
+			// Or, in feature, will insert between to date
+		})
+	})
+
 
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
 		var dir = data.dir
 		var symbol = {}
 
-		return portfolio.isDateAvail(trx, investor_id, date)
-		.then(is_avail =>
-		{
-			if (! is_avail)
+		return portfolio.adjustDate(trx, investor_id, date)
+		.then(for_date => {
+			return portfolio.isDateAvail(trx, investor_id, for_date)
+			.then(is_avail =>
 			{
-				throw PostDateErr()
-			}
+				if (! is_avail)
+				{
+					throw PostDateErr()
+				}
 
-			return Symbl.validate(data.symbol)
-		})
-		.then(symbl =>
-		{
-			symbol = symbl
-
-			if (! (dir in holdings.dirs))
+				return Symbl.validate(data.symbol)
+			})
+			.then(symbl =>
 			{
-				throw WrongTradeDir({ dir: dir })
-			}
+				symbol = symbl
 
-			if (data.is_delete)
-			{
-				date = moment()
-			}
+				if (! (dir in holdings.dirs))
+				{
+					throw WrongTradeDir({ dir: dir })
+				}
 
-			return holdings.dirs[dir](trx, investor_id, symbol, date, data)
-		})
-		.then(sum =>
-		{
-			return brokerage.update(trx, investor_id, date,
+				if (data.is_delete)
+				{
+					date = moment()
+				}
+
+				return holdings.dirs[dir](trx, investor_id, symbol, date, data)
+			})
+			.then(sum =>
 			{
-				operation: 'trade',
-				amount: sum
+				return brokerage.update(trx, investor_id, date,
+				{
+					operation: 'trade',
+					amount: sum
+				})
 			})
 		})
 	}
