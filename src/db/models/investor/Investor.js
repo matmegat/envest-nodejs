@@ -161,13 +161,7 @@ module.exports = function Investor (db)
 			expect(value).ok
 
 			return investor.onboarding
-			.update(
-				trx,
-				admin_id,
-				investor_id,
-				field,
-				value
-			)
+			.update(trx, admin_id, investor_id, field, value)
 		}
 	}
 
@@ -240,7 +234,7 @@ module.exports = function Investor (db)
 			}
 			return false
 		})
-	}
+	})
 
 	return investor
 }
