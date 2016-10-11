@@ -1,0 +1,26 @@
+post:
+  description: Send feedback from authenticated user
+  parameters:
+  - name: payload
+    in: body
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of feedback
+        text:
+          type: string
+          description: Text of feedback
+      required:
+      - title
+      - text
+  responses:
+    200:
+      description: success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - users
