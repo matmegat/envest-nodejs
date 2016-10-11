@@ -1,4 +1,6 @@
 
+var raw = require('knex').raw
+
 var Symbols = require('../../src/db/models/symbols/Symbols')
 
 exports.up = function (knex)
@@ -27,6 +29,23 @@ exports.up = function (knex)
 			)
 		})
 	])
+	.then(() =>
+	{
+		return Promise.all(
+		[
+			count_on(knex.from('portfolio')),
+			count_on(knex.from('portfolio_prec'))
+		])
+	})
+	.then(counts =>
+	{
+		console.info('old table rows: %s', counts[0])
+		console.info('new table rows: %s', counts[1])
+	})
+	.then(() =>
+	{
+		return knex.raw(`INSERT INTO portfolio_prec SELECT * FROM portfolio;`)
+	})
 }
 
 exports.down = function (knex)
@@ -35,4 +54,12 @@ exports.down = function (knex)
 	[
 		knex.schema.dropTableIfExists('portfolio_prec')
 	])
+}
+
+function count_on (qs)
+{
+	return qs
+	.select(raw('COUNT(*) AS count'))
+	.then(it => it[0].count)
+	.then(Number)
 }
