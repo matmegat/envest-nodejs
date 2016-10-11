@@ -172,9 +172,13 @@ module.exports = function Investor (db)
 		.then(one)
 	})
 
-	investor.getActionMode = function (whom_id, investor_id)
+	investor.getActionMode = knexed.transact(knex, (trx, whom_id, investor_id) =>
 	{
-		return Promise.all([ db.admin.is(whom_id), investor.all.is(whom_id) ])
+		return Promise.all(
+		[
+			db.admin.is(whom_id, trx),
+			investor.all.is(whom_id, trx)
+		])
 		.then(so =>
 		{
 			var is_admin    = so[0]
