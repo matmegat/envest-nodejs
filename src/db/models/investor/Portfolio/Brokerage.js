@@ -438,42 +438,38 @@ module.exports = function Brokerage (db, investor, portfolio)
 		var operation = data.operation
 		var amount = data.amount
 
-		return portfolio.adjustDate(trx, investor_id, date)
-		.then(for_date =>
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
 		{
-			return investor.all.ensure(investor_id, trx)
-			.then(() =>
+			return brokerage.byId(trx, investor_id, date)
+		})
+		.then(brokerage =>
+		{
+			var options = { override: true }
+			if (operation === 'deposit' || operation === 'withdraw')
 			{
-				return brokerage.byId(trx, investor_id, for_date)
-			})
-			.then(brokerage =>
+				options.recalculate = true
+			}
+
+			if (operation in valid_operations)
 			{
-				var options = { override: true }
-				if (operation === 'deposit' || operation === 'withdraw')
-				{
-					options.recalculate = true
-				}
+				valid_operations[operation](amount, brokerage)
+			}
+			else
+			{
+				throw InvalidOperation()
+			}
 
-				if (operation in valid_operations)
-				{
-					valid_operations[operation](amount, brokerage)
-				}
-				else
-				{
-					throw InvalidOperation()
-				}
+			var cash = amount + brokerage.cash
 
-				var cash = amount + brokerage.cash
-
-				return put(
-					trx,               // transaction
-					investor_id,       // investor_id
-					cash,              // new cash to set
-					for_date,          // timestamp
-					null,              // holdings are the same
-					options            // override on exact match
-				)
-			})
+			return put(
+				trx,               // transaction
+				investor_id,       // investor_id
+				cash,              // new cash to set
+				date,              // timestamp
+				null,              // holdings are the same
+				options            // override on exact match
+			)
 		})
 	})
 

@@ -847,10 +847,14 @@ module.exports = function Portfolio (db, investor)
 		validate.required(op.date, 'date')
 		validate.date(op.date) // 'date'
 
-		return brokerage.update(trx, investor_id, op.date,
+		return portfolio.adjustDate(trx, investor_id, op.date)
+		.then(for_date =>
 		{
-			operation: op.type,
-			amount:    op.cash
+			return brokerage.update(trx, investor_id, for_date,
+			{
+				operation: op.type,
+				amount: op.cash
+			})
 		})
 		.then(noop)
 	})
