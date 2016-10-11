@@ -45,6 +45,20 @@ exports.up = function (knex)
 	.then(() =>
 	{
 		return knex.raw(`INSERT INTO portfolio_prec SELECT * FROM portfolio;`)
+
+		/* idempotent query */
+		/* not working because of knex nag on `alter table "portfolio_prec"`
+		   when table is already exists, so no use
+		*/
+/*		return knex.raw(
+`INSERT INTO portfolio_prec
+  (SELECT * FROM portfolio WHERE NOT EXISTS
+    (SELECT * FROM portfolio_prec WHERE
+      portfolio_prec.investor_id = portfolio.investor_id
+     AND
+      portfolio_prec.timestamp   = portfolio.timestamp
+    ));
+`)*/
 	})
 }
 
