@@ -39,6 +39,15 @@ module.exports = function Users (http, user_model)
 		toss(rs, users.model.changeName(target_user_id, credentials))
 	})
 
+	users.express.post('/feedback', (rq, rs) =>
+	{
+		var target_user_id = rq.user.id
+
+		var data = _.pick(rq.body, 'title', 'text')
+
+		toss(rs, users.model.feedback(target_user_id, data))
+	})
+
 
 	function by_group (group)
 	{

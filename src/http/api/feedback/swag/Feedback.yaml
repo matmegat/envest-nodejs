@@ -1,0 +1,30 @@
+post:
+  description: Send feedback
+  parameters:
+  - name: payload
+    in: body
+    schema:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email of feedback sender
+        title:
+          type: string
+          description: Title of feedback
+        text:
+          type: string
+          description: Text of feedback
+      required:
+      - email
+      - title
+      - text
+  responses:
+    200:
+      description: success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feedback

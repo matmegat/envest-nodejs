@@ -173,6 +173,9 @@ paths:
   '/users/{ids}':
     $ref: ../api/users/swag/UsersRemove.yaml
 
+  '/feedback':
+    $ref: ../api/feedback/swag/Feedback.yaml
+
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
 
