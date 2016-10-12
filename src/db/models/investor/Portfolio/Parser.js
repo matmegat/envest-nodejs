@@ -90,9 +90,9 @@ module.exports = function Parser (portfolio, db)
 			if (! portfolio_date.isValid())
 			{
 				throw UploadHistoryError(
-					{
-						reason: 'Unable to get portfolio available date'
-					})
+				{
+					reason: 'Unable to get portfolio available date'
+				})
 			}
 
 			bulk_data.forEach((entry, i) =>
@@ -277,10 +277,18 @@ module.exports = function Parser (portfolio, db)
 		var cash_management_ops =
 		[
 			'deposit',
-			'withdraw',
-			'interest',
+			'withdrawal',
+			'income',
 			'fee'
 		]
+
+		var csv_2_op_type =
+		{
+			deposit: 'deposit',
+			withdrawal: 'withdraw',
+			income: 'interest',
+			fee: 'fee'
+		}
 
 		var is_stock = entry.Stock && entry.Amount && isNumber(entry.Price)
 
@@ -310,7 +318,8 @@ module.exports = function Parser (portfolio, db)
 
 		if (cash_management_ops.indexOf(entry.Type) !== -1 && entry.Cash)
 		{
-			if (entry.Type === 'withdraw' || entry.Type === 'fee')
+			if (entry.Type === cash_management_ops[1] ||
+				entry.Type === cash_management_ops[3])
 			{
 				entry.Cash *= -1
 			}
@@ -320,7 +329,7 @@ module.exports = function Parser (portfolio, db)
 				args:
 				[
 					{
-						type: entry.Type,
+						type: csv_2_op_type[entry.Type],
 						cash: entry.Cash,
 						date: entry.date.format()
 					}
@@ -358,7 +367,8 @@ module.exports = function Parser (portfolio, db)
 		throw UploadHistoryError(
 		{
 			reason: `Entry '${entry.Date} - ${entry.Type}' does not match any` +
-			        ` type of operation`
+			        ` type of operation`,
+			entries: [ entry ]
 		})
 	}
 	/* eslint-enable complexity */
