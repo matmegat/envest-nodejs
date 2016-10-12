@@ -21,7 +21,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	var holdings = {}
 
 	var knex = db.knex
-	var table = knexed(knex, 'portfolio')
+	var table = knexed(knex, 'portfolio_prec')
 
 	var raw = knex.raw
 
@@ -212,7 +212,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		var aux = options.aux || noop
 		var raw_select = options.raw_select
 
-		var portfolio_table = knex(raw('portfolio AS P'))
+		var portfolio_table = knex(raw('portfolio_prec AS P'))
 		.transacting(trx)
 
 		if (raw_select)
@@ -245,16 +245,6 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 		)
 		.where(aux)
-		.then(r =>
-		{
-			r.forEach(it =>
-			{
-				// TODO transform to Symbl here, re-use in callers
-				it.price = Number(it.price)
-			})
-
-			return r
-		})
 	}
 
 
@@ -313,7 +303,7 @@ module.exports = function Holdings (db, investor, portfolio)
 					entry =
 					{
 						symbol: symbol,
-						price:  Number(entry.price),
+						price:  entry.price,
 						amount: entry.amount
 					}
 
@@ -503,7 +493,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				return table(trx).insert(batch)
 			}
 		})
-		.catch(Err.fromDb('timed_portfolio_point_unique', DuplicateHoldingEntry))
+		.catch(Err.fromDb('prec_timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
 	var AdminOrOwnerRequired = Err('admin_or_owner_required',

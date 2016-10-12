@@ -8,10 +8,10 @@ CREATE TABLE portfolio
 
   timestamp TIMESTAMP NOT NULL,
 
-  amount INTEGER NOT NULL,
-  price  DECIMAL(12, 2) NOT NULL,
+  amount REAL NOT NULL,
+  price  REAL NOT NULL,
 
-  CONSTRAINT timed_portfolio_symbol_unique
+  CONSTRAINT prec_timed_portfolio_point_unique
     UNIQUE (investor_id, symbol_exchange, symbol_ticker, timestamp)
 );
 
