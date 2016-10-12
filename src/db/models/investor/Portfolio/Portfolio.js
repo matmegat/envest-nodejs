@@ -288,11 +288,23 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.grid.ir = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return Promise.all(
-		[
-			grid_ir(trx, investor_id, 'day'),
-			grid_ir(trx, investor_id, 'intraday')
-		])
+		return grid_ir(trx, investor_id, 'day')
+		.then(it => [ it ])
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				console.error(err.code)
+				console.error(err.message)
+				console.error(err.data)
+			}
+			else
+			{
+				console.error(err.message)
+			}
+
+			return []
+		})
 	})
 
 	function grid (trx, investor_id, resolution)
