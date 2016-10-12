@@ -82,8 +82,9 @@ module.exports = function Holdings (db, investor, portfolio)
 						{
 							if (! options.other)
 							{
-								throw new TypeError(
-									'Cannot get Holdings with Quotes for OTHER'
+								throw new TypeError(`Cannot get `
+									+ `"${quote.symbol.full}" with Quotes `
+									+ `for OTHER`
 								)
 							}
 						}
@@ -91,8 +92,9 @@ module.exports = function Holdings (db, investor, portfolio)
 						{
 							if (! options.soft)
 							{
-								throw new TypeError(
-									'Cannot get Holdings with Quotes, xIgnite failed'
+								throw new TypeError(`Cannot get `
+									+ `"${quote.symbol.full}" with Quotes, `
+									+ `xIgnite failed`
 								)
 							}
 						}
