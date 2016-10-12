@@ -90,9 +90,9 @@ module.exports = function Parser (portfolio, db)
 			if (! portfolio_date.isValid())
 			{
 				throw UploadHistoryError(
-					{
-						reason: 'Unable to get portfolio available date'
-					})
+				{
+					reason: 'Unable to get portfolio available date'
+				})
 			}
 
 			bulk_data.forEach((entry, i) =>
@@ -277,8 +277,8 @@ module.exports = function Parser (portfolio, db)
 		var cash_management_ops =
 		[
 			'deposit',
-			'withdraw',
-			'interest',
+			'withdrawal',
+			'income',
 			'fee'
 		]
 
