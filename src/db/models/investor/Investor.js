@@ -158,7 +158,11 @@ module.exports = function Investor (db)
 		return function (trx, investor_id, value)
 		{
 			expect(investor_id).to.be.number
-			expect(value).ok
+
+			if (! value)
+			{
+				return Promise.resolve(`${field} skipped`)
+			}
 
 			return investor.onboarding
 			.update(trx, admin_id, investor_id, field, value)
