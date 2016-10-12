@@ -21,7 +21,7 @@ exports.up = function (knex)
 
 			table.float('amount').notNullable()
 
-			table.float('price').notNullable()
+			table.double('price').notNullable()
 
 			table.primary(
 				[ 'investor_id', 'symbol_exchange', 'symbol_ticker', 'timestamp' ]
