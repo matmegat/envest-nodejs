@@ -45,5 +45,10 @@
   {
     "secret_key": "sk_test_dwYOVs8ksV5k42u2zcJWQiw4",
     "pub_key": "pk_test_PYBikGVhRueRB0vBKD9JZjvf"
+  },
+
+  "feedback":
+  {
+    "email": "reaper90fang@gmail.com"
   }
 }

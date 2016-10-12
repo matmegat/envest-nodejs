@@ -828,39 +828,5 @@ module.exports = function User (db, app)
 		})
 	})
 
-	var validate_feedback_title = validate.string_field(120)
-	var validate_feedback_text = validate.string_field(1200)
-
-	user.feedback = knexed.transact(
-		knex, (trx, user_id, data) =>
-	{
-		return user.byId(user_id, trx)
-		.then(user =>
-		{
-			var support_email = ''
-			var email_title =
-				`Feedback from ${user.first_name} ${user.last_name} - ${user.email}`
-			var substs =
-			{
-				email_title: [ email_title ],
-			}
-
-			validate.required(data.title, 'title')
-			validate_feedback_title(data.title, 'title')
-
-			validate.required(data.text, 'text')
-			validate_feedback_text(data.text, 'text')
-
-			return mailer.send('default', substs,
-			{
-				to: support_email,
-				subject: email_title,
-				html: `Title: ${data.title}.`
-				+ `<br/><br/>`
-				+ `${data.text}`
-			})
-		})
-	})
-
 	return user
 }

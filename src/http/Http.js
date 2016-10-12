@@ -24,6 +24,8 @@ var Watchlist = require('./api/watchlist/Watchlist')
 
 var Statics = require('./api/statics/Statics')
 
+var Feedback = require('./api/feedback/Feedback')
+
 var Notifications = require('./api/notifications/Notifications')
 
 var Symbols = require('./api/symbols/Symbols')
@@ -118,6 +120,7 @@ module.exports = function Http (app)
 	mount(Subscr(app.db.subscr), 'subscr', 'subscr')
 	mount(Promo(http, app.db.subscr), 'promo', 'promo')
 	mount(Symbols(app.db.symbols), 'symbols', 'symbols')
+	mount(Feedback(app.db, app.cfg.feedback.email), 'feedback', 'feedback')
 
 
 	http.express.use(internalError)

@@ -1,11 +1,14 @@
 post:
-  description: Send feedback from authenticated user
+  description: Send feedback
   parameters:
   - name: payload
     in: body
     schema:
       type: object
       properties:
+        email:
+          type: string
+          description: Email of feedback sender
         title:
           type: string
           description: Title of feedback
@@ -13,6 +16,7 @@ post:
           type: string
           description: Text of feedback
       required:
+      - email
       - title
       - text
   responses:
@@ -23,4 +27,4 @@ post:
       schema:
         $ref: ../../../swagger/Error.yaml
   tags:
-  - users
+  - feedback

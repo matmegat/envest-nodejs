@@ -10,6 +10,7 @@ var Comments = require('./models/Comments')
 var Investor = require('./models/investor/Investor')
 var Notifications = require('./models/notifications/Notifications')
 var Static = require('./models/Static')
+var Feedback = require('./models/Feedback')
 var Pic = require('./models/Pic')
 var NetvestSubsc = require('./models/subscription/NetvestSubsc')
 var Symbols = require('./models/symbols/Symbols')
@@ -73,6 +74,8 @@ module.exports = function name (app)
 
 	db.static = Static(rootpath)
 	db.pic = Pic(db)
+
+	db.feedback = Feedback(app)
 
 	return db
 }

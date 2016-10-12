@@ -170,11 +170,11 @@ paths:
   '/users/change-name':
     $ref: ../api/users/swag/ChangeName.yaml
 
-  '/users/feedback':
-    $ref: ../api/users/swag/Feedback.yaml
-
   '/users/{ids}':
     $ref: ../api/users/swag/UsersRemove.yaml
+
+  '/feedback':
+    $ref: ../api/feedback/swag/Feedback.yaml
 
   '/password/req-reset':
     $ref: ../api/password/swag/ReqReset.yaml
