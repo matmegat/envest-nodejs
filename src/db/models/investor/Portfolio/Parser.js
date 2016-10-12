@@ -358,7 +358,8 @@ module.exports = function Parser (portfolio, db)
 		throw UploadHistoryError(
 		{
 			reason: `Entry '${entry.Date} - ${entry.Type}' does not match any` +
-			        ` type of operation`
+			        ` type of operation`,
+			entries: [ entry ]
 		})
 	}
 	/* eslint-enable complexity */
