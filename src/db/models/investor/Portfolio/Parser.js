@@ -282,6 +282,14 @@ module.exports = function Parser (portfolio, db)
 			'fee'
 		]
 
+		var csv_2_op_type =
+		{
+			deposit: 'deposit',
+			withdrawal: 'withdraw',
+			income: 'interest',
+			fee: 'fee'
+		}
+
 		var is_stock = entry.Stock && entry.Amount && isNumber(entry.Price)
 
 		if (entry.Type === 'onboarding' && entry.Cash)
@@ -310,7 +318,8 @@ module.exports = function Parser (portfolio, db)
 
 		if (cash_management_ops.indexOf(entry.Type) !== -1 && entry.Cash)
 		{
-			if (entry.Type === 'withdraw' || entry.Type === 'fee')
+			if (entry.Type === cash_management_ops[1] ||
+				entry.Type === cash_management_ops[3])
 			{
 				entry.Cash *= -1
 			}
@@ -320,7 +329,7 @@ module.exports = function Parser (portfolio, db)
 				args:
 				[
 					{
-						type: entry.Type,
+						type: csv_2_op_type[entry.Type],
 						cash: entry.Cash,
 						date: entry.date.format()
 					}
