@@ -22,6 +22,13 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio_prec')
+	table.primary_keys =
+	[
+		'investor_id',
+		'symbol_exchange',
+		'symbol_ticker',
+		'timestamp',
+	]
 
 	var raw = knex.raw
 
@@ -507,7 +514,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		expect(symbol_state).an('object')
 
 		return table(trx)
-		.where(symbol_state)
+		.where(pick(symbol_state, table.primary_keys))
 		.del()
 	})
 
