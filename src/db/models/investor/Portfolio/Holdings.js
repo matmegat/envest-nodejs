@@ -505,18 +505,13 @@ module.exports = function Holdings (db, investor, portfolio)
 		.catch(Err.fromDb('prec_timed_portfolio_point_unique', DuplicateHoldingEntry))
 	}
 
+	var DuplicateHoldingEntry = Err('holding_duplicate',
+		'There can be only one Holding entry per timestamp for Investor')
+
+
+	//
 	var AdminOrOwnerRequired = Err('admin_or_owner_required',
 		'Admin Or Owner Required')
-
-	holdings.removeBySymbolState = knexed.transact(knex,
-	(trx, symbol_state) =>
-	{
-		expect(symbol_state).an('object')
-
-		return table(trx)
-		.where(pick(symbol_state, table.primary_keys))
-		.del()
-	})
 
 	holdings.remove = function (whom_id, investor_id, holding_entries)
 	{
@@ -578,8 +573,15 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
-	var DuplicateHoldingEntry = Err('holding_duplicate',
-		'There can be only one Holding entry per timestamp for Investor')
+	holdings.removeBySymbolState = knexed.transact(knex,
+	(trx, symbol_state) =>
+	{
+		expect(symbol_state).an('object')
+
+		return table(trx)
+		.where(pick(symbol_state, table.primary_keys))
+		.del()
+	})
 
 
 	// buy, sell
