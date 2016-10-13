@@ -22,13 +22,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	var knex = db.knex
 	var table = knexed(knex, 'portfolio_prec')
-	table.primary_keys =
-	[
-		'investor_id',
-		'symbol_exchange',
-		'symbol_ticker',
-		'timestamp',
-	]
 
 	var raw = knex.raw
 
@@ -573,15 +566,35 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
-	holdings.removeBySymbolState = knexed.transact(knex,
-	(trx, symbol_state) =>
+	holdings.removeBySymbolState = knexed.transact(
+		knex, (trx, symbol_PK) =>
 	{
-		expect(symbol_state).an('object')
+		symbol_PK = toPK(symbol_PK)
 
 		return table(trx)
-		.where(pick(symbol_state, table.primary_keys))
-		.del()
+		.where(symbol_PK)
+		.delete()
 	})
+
+	function toPK (obj)
+	{
+		expect(obj).an('object')
+
+		obj = pick(obj,
+		[
+			'investor_id',
+			'symbol_exchange',
+			'symbol_ticker',
+			'timestamp'
+		])
+
+		expect(obj).property('investor_id')
+		expect(obj).property('symbol_exchange')
+		expect(obj).property('symbol_ticker')
+		expect(obj).property('timestamp')
+
+		return obj
+	}
 
 
 	// buy, sell
