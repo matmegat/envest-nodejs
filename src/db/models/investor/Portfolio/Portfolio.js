@@ -811,12 +811,21 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.removeTrade = function (trx, post)
 	{
+		expect(post).an('object')
+
+		expect(post).property('data')
+		expect(post.data).property('symbol')
 		var symbol = post.data.symbol
 
-		symbol.symbol_ticker = symbol.ticker
-		symbol.symbol_exchange = symbol.exchange
+		expect(post).property('investor_id')
+		expect(post.investor_id).a('number')
+		var investor_id = post.investor_id
 
-		return portfolio.isDateAvail(trx, post.investor_id, post.timestamp)
+		expect(post).property('timestamp')
+		expect(post.timestamp).a('date')
+		var timestamp = post.timestamp
+
+		return portfolio.isDateAvail(trx, investor_id, timestamp)
 		.then(is_avail =>
 		{
 			if (! is_avail)
@@ -826,7 +835,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(() =>
 		{
-			return holdings.symbolById(trx, symbol, post.investor_id,
+			return holdings.symbolById(trx, symbol, investor_id,
 				null, { with_timestamp: true }
 			)
 		})
@@ -836,7 +845,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(() =>
 		{
-			return brokerage.remove(trx, post.investor_id, post.timestamp)
+			return brokerage.remove(trx, investor_id, timestamp)
 		})
 	}
 
