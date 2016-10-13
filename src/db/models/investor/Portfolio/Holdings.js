@@ -499,7 +499,10 @@ module.exports = function Holdings (db, investor, portfolio)
 				return table(trx).insert(batch)
 			}
 		})
-		.catch(Err.fromDb('prec_timed_portfolio_point_unique', DuplicateHoldingEntry))
+		.catch(Err.fromDb(
+			'prec_timed_portfolio_point_unique',
+			DuplicateHoldingEntry
+		))
 	}
 
 	var DuplicateHoldingEntry = Err('holding_duplicate',
@@ -540,7 +543,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			.then(symbols => symbols.map(Symbl))
 			.then(symbols =>
 			{
-				return Promise.all(symbols.map((symbol) =>
+				return Promise.all(symbols.map(symbol =>
 				{
 					return holdings.ensure(trx, symbol, investor_id)
 					.then(() =>
