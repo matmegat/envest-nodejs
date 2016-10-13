@@ -129,6 +129,49 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
+	function byId (trx, investor_id, for_date, options)
+	{
+		options = extend({}, options)
+
+		var aux = options.aux || noop
+		var raw_select = options.raw_select
+
+		var portfolio_table = knex(raw('portfolio_prec AS P'))
+		.transacting(trx)
+
+		if (raw_select)
+		{
+			portfolio_table.select('*')
+		}
+		else
+		{
+			portfolio_table.select(
+				'symbol_ticker', 'symbol_exchange', 'amount', 'price')
+		}
+
+		return portfolio_table
+		.where('investor_id', investor_id)
+		.where('amount', '!=', 0)
+		.where('timestamp',
+			table(trx).max('timestamp')
+			.where(
+			{
+				investor_id:     raw('P.investor_id'),
+				symbol_exchange: raw('P.symbol_exchange'),
+				symbol_ticker:   raw('P.symbol_ticker'),
+			})
+			.where(function ()
+			{
+				if (for_date)
+				{
+					this.where('timestamp', '<=', for_date)
+				}
+			})
+		)
+		.where(aux)
+	}
+
+
 	var NoSuchHolding = Err('no_such_holding',
 		'Investor does not posess such holding')
 
@@ -212,49 +255,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(oneMaybe)
 		.then(Boolean)
 	})
-
-
-	function byId (trx, investor_id, for_date, options)
-	{
-		options = extend({}, options)
-
-		var aux = options.aux || noop
-		var raw_select = options.raw_select
-
-		var portfolio_table = knex(raw('portfolio_prec AS P'))
-		.transacting(trx)
-
-		if (raw_select)
-		{
-			portfolio_table.select('*')
-		}
-		else
-		{
-			portfolio_table.select(
-				'symbol_ticker', 'symbol_exchange', 'amount', 'price')
-		}
-
-		return portfolio_table
-		.where('investor_id', investor_id)
-		.where('amount', '!=', 0)
-		.where('timestamp',
-			table(trx).max('timestamp')
-			.where(
-			{
-				investor_id:     raw('P.investor_id'),
-				symbol_exchange: raw('P.symbol_exchange'),
-				symbol_ticker:   raw('P.symbol_ticker'),
-			})
-			.where(function ()
-			{
-				if (for_date)
-				{
-					this.where('timestamp', '<=', for_date)
-				}
-			})
-		)
-		.where(aux)
-	}
 
 
 	// grid
