@@ -836,7 +836,7 @@ module.exports = function Portfolio (db, investor)
 		})
 		.then(() =>
 		{
-			return brokerage.removeState(trx, post.investor_id, post.timestamp)
+			return brokerage.remove(trx, post.investor_id, post.timestamp)
 		})
 	}
 

@@ -589,6 +589,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		expect(obj).property('symbol_ticker')
 		expect(obj).property('timestamp')
 
+		expect(obj.timestamp).a('date')
+
 		return obj
 	}
 
