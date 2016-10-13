@@ -37,17 +37,17 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.symbolById = knexed.transact(knex,
 		(trx, symbol, investor_id, for_date, options) =>
 	{
-		options = extend({}, options,
-		{
-			aux: function ()
-			{
-				this.where(symbol.toDb())
-			}
-		})
-
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
+			options = extend({}, options,
+			{
+				aux: function ()
+				{
+					this.where(symbol.toDb())
+				}
+			})
+
 			return byId(trx, investor_id, for_date, options)
 			.then(oneMaybe)
 		})
