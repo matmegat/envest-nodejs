@@ -147,7 +147,7 @@ module.exports = function (db, http)
 		var holdings = rq.body.holdings
 
 		toss(rs,
-			db.investor.portfolio.holdings.remove(whom_id, investor_id, holdings)
+			db.investor.portfolio.holdings.removeBatch(whom_id, investor_id, holdings)
 		)
 	})
 

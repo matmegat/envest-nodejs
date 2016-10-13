@@ -506,7 +506,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	var AdminOrOwnerRequired = Err('admin_or_owner_required',
 		'Admin Or Owner Required')
 
-	holdings.remove = function (whom_id, investor_id, holding_entries)
+	holdings.removeBatch = function (whom_id, investor_id, holding_entries)
 	{
 		return knex.transaction(function (trx)
 		{
@@ -545,20 +545,14 @@ module.exports = function Holdings (db, investor, portfolio)
 					})
 					.then(() =>
 					{
-						return holdings.symbolById(
-							trx, symbol, investor_id, null, { raw_select: true })
+						return holdings.symbolById(trx, symbol, investor_id,
+							null /* for_date */,
+							{ raw_select: true }
+						)
 					})
-					.then(state_to_delete =>
+					.then(holding_pk =>
 					{
-						var holding = pick(state_to_delete,
-						[
-							'investor_id',
-							'symbol_ticker',
-							'symbol_exchange',
-							'timestamp'
-						])
-
-						return holdings.removeBySymbolState(trx, holding)
+						return holdings.remove(trx, holding_pk)
 					})
 				}))
 			})
@@ -566,8 +560,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	}
 
-	holdings.removeBySymbolState = knexed.transact(
-		knex, (trx, symbol_PK) =>
+	holdings.remove = knexed.transact(knex, (trx, symbol_PK) =>
 	{
 		symbol_PK = toPK(symbol_PK)
 
