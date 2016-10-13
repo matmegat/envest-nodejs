@@ -827,7 +827,7 @@ module.exports = function Portfolio (db, investor)
 		.then(() =>
 		{
 			return holdings.symbolById(trx, symbol, post.investor_id,
-				null, { raw_select: true }
+				null, { with_timestamp: true }
 			)
 		})
 		.then(holding_pk =>

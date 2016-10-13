@@ -35,22 +35,22 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 	holdings.symbolById = knexed.transact(knex,
-	(trx, symbol, investor_id, for_date, options) =>
+		(trx, symbol, investor_id, for_date, options) =>
 	{
-		options = extend({}, options)
+		options = extend({}, options,
+		{
+			aux: function ()
+			{
+				this.where(symbol.toDb())
+			}
+		})
 
 		return Symbl.validate(symbol)
 		.then(symbol =>
 		{
-			return byId(trx, investor_id, for_date, {
-				aux: function ()
-				{
-					this.where(symbol.toDb())
-				},
-				raw_select: options.raw_select
-			})
+			return byId(trx, investor_id, for_date, options)
+			.then(oneMaybe)
 		})
-		.then(oneMaybe)
 	})
 
 	holdings.byId.quotes =
@@ -124,22 +124,26 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	function byId (trx, investor_id, for_date, options)
 	{
-		options = extend({}, options)
-
-		var aux = options.aux || noop
-		var raw_select = options.raw_select
+		options = extend(
+		{
+			aux: noop,
+			with_timestamp: false
+		},
+		options)
 
 		var portfolio_table = knex(raw('portfolio_prec AS P'))
 		.transacting(trx)
 
-		if (raw_select)
+		portfolio_table.select(
+			'symbol_ticker',
+			'symbol_exchange',
+			'amount',
+			'price'
+		)
+
+		if (options.with_timestamp)
 		{
-			portfolio_table.select('*')
-		}
-		else
-		{
-			portfolio_table.select(
-				'symbol_ticker', 'symbol_exchange', 'amount', 'price')
+			portfolio_table.select('timestamp')
 		}
 
 		return portfolio_table
@@ -161,7 +165,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				}
 			})
 		)
-		.where(aux)
+		.where(options.aux)
 	}
 
 
@@ -546,8 +550,7 @@ module.exports = function Holdings (db, investor, portfolio)
 					.then(() =>
 					{
 						return holdings.symbolById(trx, symbol, investor_id,
-							null /* for_date */,
-							{ raw_select: true }
+							null, { with_timestamp: true }
 						)
 					})
 					.then(holding_pk =>
