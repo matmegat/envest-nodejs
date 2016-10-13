@@ -283,7 +283,8 @@ module.exports = function User (db, app)
 			.insert({
 				first_name: data.first_name,
 				last_name: data.last_name,
-				email: null
+				email: null,
+				pic: 'default-avatar.png',
 			}
 			, 'id')
 			.then(one)
