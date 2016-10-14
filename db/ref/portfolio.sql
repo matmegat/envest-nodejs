@@ -1,3 +1,17 @@
+CREATE TABLE tradeops
+(
+  investor_id INTEGER NOT NULL
+    REFERENCES investors(user_id),
+
+  timestamp TIMESTAMP NOT NULL,
+
+  aux JSONB NOT NULL,
+
+  CONSTRAINT timed_tradeop_unique
+    UNIQUE (investor_id, timestamp)
+);
+--
+
 CREATE TABLE portfolio
 (
   investor_id INTEGER NOT NULL
