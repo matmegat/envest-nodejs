@@ -1,14 +1,9 @@
 
-var inst = (proto) => Object.create(proto)
-
 var Op = require('./Op')
 
-function TradeOp (op, trade_data)
+var TradeOp = function TradeOp (op, trade_data)
 {
-	var op = inst(OpBase)
-
-	// trade_data
-	// op
+	op.trade_data = trade_data
 
 	return op
 }
@@ -17,12 +12,6 @@ TradeOp.prototype.toDb = () =>
 {
 	return {} // trade_data
 }
-
-TradeOp.prototype.apply = () => {}
-
-TradeOp.prototype.modify = () => {}
-
-TradeOp.prototype.undone = () => {}
 
 TradeOp = Op(TradeOp)
 

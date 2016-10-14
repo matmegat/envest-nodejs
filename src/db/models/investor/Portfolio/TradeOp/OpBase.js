@@ -9,7 +9,7 @@ var OpBase = module.exports = function OpBase (investor_id, timestamp)
 	expect(investor_id).a('number')
 	expect(timestamp).a('date')
 
-	var op = inst(Op)
+	var op = inst(OpBase)
 
 	op.investor_id = investor_id
 	op.timestamp = timestamp
@@ -17,16 +17,16 @@ var OpBase = module.exports = function OpBase (investor_id, timestamp)
 	return op
 }
 
-ObBase.prototype.toDb = () =>
+OpBase.prototype.toDb = () =>
 {
 	return {
-		investor_id: investor_id,
-		timestamp: timestamp
+		investor_id: this.investor_id,
+		timestamp:   this.timestamp
 	}
 }
 
-ObBase.apply = () => {}
-
-ObBase.modify = () => {}
-
-ObBase.undone = () => {}
+OpBase.prototype.equals = (op) =>
+{
+	return (op.investor_id === this.investor_id)
+	    && (op.timestamp   === this.timestamp)
+}
