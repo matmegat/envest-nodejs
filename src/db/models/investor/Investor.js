@@ -100,23 +100,15 @@ module.exports = function Investor (db)
 		.then(investor_entry =>
 		{	// fill other investor data
 			var investor_id = investor_entry.id
-			var admin_id = data.admin_id
+			var fields = investor.onboarding.fields
 
-			var fill_brokerage =   field_filler('brokerage', admin_id)
-			var fill_holdings =    field_filler('holdings', admin_id)
-			var fill_profession =  field_filler('profession', admin_id)
-			var fill_focus =       field_filler('focus', admin_id)
-			var fill_education =   field_filler('education', admin_id)
-			var fill_background =  field_filler('background', admin_id)
-			var fill_hist_return = field_filler('hist_return', admin_id)
-
-			return fill_brokerage(trx, investor_id, data.brokerage)
-			.then(() => fill_holdings(trx, investor_id, data.holdings))
-			.then(() => fill_profession(trx, investor_id, data.profession))
-			.then(() => fill_focus(trx, investor_id, data.focus))
-			.then(() => fill_education(trx, investor_id, data.education))
-			.then(() => fill_background(trx, investor_id, data.background))
-			.then(() => fill_hist_return(trx, investor_id, data.hist_return))
+			return fields.brokerage.set(trx, investor_id, data.brokerage)
+			.then(() => fields.holdings.set(trx, investor_id, data.holdings))
+			.then(() => fields.profession.set(trx, investor_id, data.profession))
+			.then(() => fields.focus.set(trx, investor_id, data.focus))
+			.then(() => fields.education.set(trx, investor_id, data.education))
+			.then(() => fields.background.set(trx, investor_id, data.background))
+			.then(() => fields.hist_return.set(trx, investor_id, data.hist_return))
 			.then(() => investor_entry)
 		})
 		.then((investor_entry) =>
@@ -149,25 +141,6 @@ module.exports = function Investor (db)
 			.then(() => investor_entry)
 		})
 	})
-
-	function field_filler (field, admin_id)
-	{
-		expect(field).to.be.string
-		expect(field).to.be.number
-
-		return function (trx, investor_id, value)
-		{
-			expect(investor_id).to.be.number
-
-			if (! value)
-			{
-				return Promise.resolve(`${field} skipped`)
-			}
-
-			return investor.onboarding
-			.update(trx, admin_id, investor_id, field, value)
-		}
-	}
 
 	var get_pic = require('lodash/fp/get')('profile_pic')
 
