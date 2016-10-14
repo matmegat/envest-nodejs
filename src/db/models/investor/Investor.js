@@ -99,16 +99,26 @@ module.exports = function Investor (db)
 		.then((investor_id) => investor.all.byId(investor_id, trx))
 		.then(investor_entry =>
 		{	// fill other investor data
-			var investor_id = investor_entry.id
-			var fields = investor.onboarding.fields
+			var fields = (field) =>
+			{
+				if (! (field in data) || ! data[field])
+				{
+					return Promise.resolve(`"${field}" skipped`)
+				}
 
-			return fields.brokerage.set(trx, investor_id, data.brokerage)
-			.then(() => fields.holdings.set(trx, investor_id, data.holdings))
-			.then(() => fields.profession.set(trx, investor_id, data.profession))
-			.then(() => fields.focus.set(trx, investor_id, data.focus))
-			.then(() => fields.education.set(trx, investor_id, data.education))
-			.then(() => fields.background.set(trx, investor_id, data.background))
-			.then(() => fields.hist_return.set(trx, investor_id, data.hist_return))
+				return investor
+				.onboarding
+				.fields[field]
+				.set(trx, investor_entry.id, data[field])
+			}
+
+			return fields('brokerage')
+			.then(() => fields('holdings'))
+			.then(() => fields('profession'))
+			.then(() => fields('focus'))
+			.then(() => fields('education'))
+			.then(() => fields('hist_return'))
+			.then(() => fields('annual_return'))
 			.then(() => investor_entry)
 		})
 		.then((investor_entry) =>
