@@ -5,6 +5,8 @@ CREATE TABLE tradeops
 
   timestamp TIMESTAMP NOT NULL,
 
+  type VARCHAR NOT NULL,
+
   aux JSONB NOT NULL,
 
   CONSTRAINT timed_tradeop_unique
