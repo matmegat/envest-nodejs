@@ -95,6 +95,8 @@ module.exports = function Parser (portfolio, db)
 				})
 			}
 
+			portfolio_date.startOf('day')
+
 			bulk_data.forEach((entry, i) =>
 			{
 				entry.date = moment.utc(entry.Date)
