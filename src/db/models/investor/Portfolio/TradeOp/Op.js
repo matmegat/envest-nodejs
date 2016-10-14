@@ -13,9 +13,14 @@ module.exports = function Op (investor_id, timestamp)
 
 	op.toDb = () =>
 	{
+		return op.toPK()
+	}
+
+	op.toPK = () =>
+	{
 		return {
-			investor_id: this.investor_id,
-			timestamp:   this.timestamp
+			investor_id: op.investor_id,
+			timestamp:   op.timestamp
 		}
 	}
 

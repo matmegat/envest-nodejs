@@ -31,6 +31,7 @@ var knexed = require('../../../knexed')
 
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
+var Tradeops  = require('./Tradeops')
 
 var Symbl = require('../../symbols/Symbl')
 
@@ -46,6 +47,7 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
+	var tradeops  = portfolio.tradeops  =  Tradeops(db, portfolio)
 
 	expect(db, 'Portfolio depends on Series').property('symbols')
 	var symbols = db.symbols
