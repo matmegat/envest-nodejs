@@ -17,7 +17,7 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-module.exports = function Investor (db)
+module.exports = function Investor (db, mailer)
 {
 	var investor = {}
 
@@ -126,7 +126,7 @@ module.exports = function Investor (db)
 			var investor_id = investor_entry.id
 
 			return user.emailConfirm(trx, investor_id, data.email)
-			// .then(() => user.password.reqReset(trx, data.email))
+			.then(() => user.password.reqReset(trx, data.email))
 			.then(() =>
 			{
 				/* notification: 'investor created'
@@ -147,6 +147,26 @@ module.exports = function Investor (db)
 				, trx)
 
 				return Promise.all([ n1, n2 ])
+			})
+			.then(() => user.byId(data.admin_id))
+			.then((admin) =>
+			{
+				var substs =
+				{
+					email_title: [ 'Welcome' ]
+				}
+
+				return mailer.send('default', substs,
+				{
+					to: data.email,
+					subject: 'Welcome',
+					html: `Hi, ${data.first_name}.<br><br>`
+					+ `It’s go time.<br><br>`
+					+ `Login to your <a href="http://www.investor.netvest.com" `
+					+ `target="_blank">Investor Panel</a> to start managing `
+					+ `your profile and publications. Let us know if you have `
+					+ `questions <a href="mailto:${admin.email}">${admin.email}</a>.`
+				})
 			})
 			.then(() => investor_entry)
 		})

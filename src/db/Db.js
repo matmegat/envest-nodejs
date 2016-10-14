@@ -65,7 +65,7 @@ module.exports = function name (app)
 
 	db.symbols = Symbols(app.cfg, app.log)
 
-	db.investor = Investor(db)
+	db.investor = Investor(db, app.mail)
 	db.watchlist = Watchlist(db)
 	db.feed = Feed(db)
 
