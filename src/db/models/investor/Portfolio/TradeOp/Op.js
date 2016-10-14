@@ -1,35 +1,23 @@
 
-var assign = Object.assign
+var expect = require('chai').expect
 
-var slice = require('lodash/slice')
-
-var OpBase = require('./OpBase')
-
-module.exports = function Op (C)
+module.exports = function Op (investor_id, timestamp)
 {
-	C.prototype.toDb = $toDb(C.prototype.toDb)
+	expect(investor_id).a('number')
+	expect(timestamp).a('date')
 
-	return function (investor_id, timestamp)
+	var op = {}
+
+	op.investor_id = investor_id
+	op.timestamp = timestamp
+
+	op.toDb = () =>
 	{
-		var aux = slice(arguments, 2)
-
-		var op = OpBase(investor_id, timestamp)
-
-		op = C.apply(null, [ op ].concat(aux))
-
-		op.toDb = op.toDb.bind(op)
-
-		return op
+		return {
+			investor_id: this.investor_id,
+			timestamp:   this.timestamp
+		}
 	}
-}
 
-function $toDb (toDb)
-{
-	return function ()
-	{
-		var base = OpBase.prototype.toDb.call(this)
-		var aux  = toDb.call(this)
-
-		return assign({}, base, aux)
-	}
+	return op
 }
