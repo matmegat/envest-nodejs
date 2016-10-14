@@ -29,9 +29,9 @@ function validator (validate)
 		validate = same
 	}
 
-	return (value, investor_id) =>
+	return (trx, value, investor_id) =>
 	{
-		return new Promise(rs => rs(validate(value, investor_id)))
+		return new Promise(rs => rs(validate(trx, value, investor_id)))
 		.then(value =>
 		{
 			/* to capture validator not returning */
@@ -52,19 +52,19 @@ function setter (field, set)
 {
 	expect(set).a('function')
 
-	return (investor_id, value) =>
+	return (trx, investor_id, value) =>
 	{
-		return field.investor.all.ensure(investor_id)
+		return field.investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			return field.validate(value, investor_id)
+			return field.validate(trx, value, investor_id)
 		})
 		.then(value =>
 		{
-			var queryset = field.investor.table()
+			var queryset = field.investor.table(trx)
 			.where('user_id', investor_id)
 
-			return set(value, queryset, investor_id)
+			return set(trx, value, queryset, investor_id)
 		})
 		.then(noop)
 	}

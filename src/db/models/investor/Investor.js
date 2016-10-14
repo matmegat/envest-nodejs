@@ -17,7 +17,7 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-module.exports = function Investor (db)
+module.exports = function Investor (db, mailer)
 {
 	var investor = {}
 
@@ -98,6 +98,30 @@ module.exports = function Investor (db)
 		})
 		.then(oneMaybe)
 		.then((investor_id) => investor.all.byId(investor_id, trx))
+		.then(investor_entry =>
+		{	// fill other investor data
+			var fields = (field) =>
+			{
+				if (! (field in data) || ! data[field])
+				{
+					return Promise.resolve(`"${field}" skipped`)
+				}
+
+				return investor
+				.onboarding
+				.fields[field]
+				.set(trx, investor_entry.id, data[field])
+			}
+
+			return fields('brokerage')
+			.then(() => fields('holdings'))
+			.then(() => fields('profession'))
+			.then(() => fields('focus'))
+			.then(() => fields('education'))
+			.then(() => fields('hist_return'))
+			.then(() => fields('annual_return'))
+			.then(() => investor_entry)
+		})
 		.then((investor_entry) =>
 		{
 			var investor_id = investor_entry.id
@@ -124,6 +148,26 @@ module.exports = function Investor (db)
 				, trx)
 
 				return Promise.all([ n1, n2 ])
+			})
+			.then(() => user.byId(data.admin_id))
+			.then((admin) =>
+			{
+				var substs =
+				{
+					email_title: [ 'Welcome' ]
+				}
+
+				return mailer.send('default', substs,
+				{
+					to: data.email,
+					subject: 'Welcome',
+					html: `Hi, ${data.first_name}.<br><br>`
+					+ `It’s go time.<br><br>`
+					+ `Login to your <a href="http://www.investor.netvest.com" `
+					+ `target="_blank">Investor Panel</a> to start managing `
+					+ `your profile and publications. Let us know if you have `
+					+ `questions <a href="mailto:${admin.email}">${admin.email}</a>.`
+				})
 			})
 			.then(() => investor_entry)
 		})
@@ -173,9 +217,13 @@ module.exports = function Investor (db)
 		.then(one)
 	})
 
-	investor.getActionMode = function (whom_id, investor_id)
+	investor.getActionMode = knexed.transact(knex, (trx, whom_id, investor_id) =>
 	{
-		return Promise.all([ db.admin.is(whom_id), investor.all.is(whom_id) ])
+		return Promise.all(
+		[
+			db.admin.is(whom_id, trx),
+			investor.all.is(whom_id, trx)
+		])
 		.then(so =>
 		{
 			var is_admin    = so[0]
@@ -194,7 +242,7 @@ module.exports = function Investor (db)
 			}
 			return false
 		})
-	}
+	})
 
 	return investor
 }
