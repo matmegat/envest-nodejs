@@ -7,6 +7,8 @@ var expect = require('chai').expect
 var knexed = require('../../../../knexed')
 var Err = require('../../../../../Err')
 
+var Op = require('./TradeOp/Op')
+
 
 module.exports = function Tradeops (db, portfolio)
 {
@@ -69,12 +71,10 @@ module.exports = function Tradeops (db, portfolio)
 
 	tradeops.undone = (tradeop)
 	{
-		// TODO check tradeop type
+		expect(Op.is(tradeop), 'Op type').true
 		// TODO check equality
 
-		return table()
-		.where(tradeop.toPK())
-		.delete()
+		return tradeops.remove(tradeop.investor_id, tradeop.timestamp)
 	}
 
 	return tradeops

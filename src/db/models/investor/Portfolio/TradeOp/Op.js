@@ -1,12 +1,14 @@
 
 var expect = require('chai').expect
 
-module.exports = function Op (investor_id, timestamp)
+var inst = () => Object.create(Op.prototype)
+
+var Op = module.exports = function Op (investor_id, timestamp)
 {
 	expect(investor_id).a('number')
 	expect(timestamp).a('date')
 
-	var op = {}
+	var op = inst()
 
 	op.investor_id = investor_id
 	op.timestamp = timestamp
@@ -25,4 +27,11 @@ module.exports = function Op (investor_id, timestamp)
 	}
 
 	return op
+}
+
+Op.prototype.tradeop = true
+
+Op.is = (op) =>
+{
+	return Boolean(op.tradeop)
 }
