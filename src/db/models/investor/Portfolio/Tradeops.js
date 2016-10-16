@@ -2,6 +2,8 @@
 
 var assign = Object.assign
 
+var expect = require('chai').expect
+
 var knexed = require('../../../../knexed')
 var Err = require('../../../../../Err')
 
@@ -54,6 +56,26 @@ module.exports = function Tradeops (db, portfolio)
 	var DuplicateEntry = Err('tradeop_duplicate',
 		'There can be only one trading operation per timestamp for Investor')
 
+
+	tradeops.remove = (investor_id, timestamp) =>
+	{
+		expect(timestamp).a('date')
+
+		return table()
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.delete()
+	}
+
+	tradeops.undone = (tradeop)
+	{
+		// TODO check tradeop type
+		// TODO check equality
+
+		return table()
+		.where(tradeop.toPK())
+		.delete()
+	}
 
 	return tradeops
 }
