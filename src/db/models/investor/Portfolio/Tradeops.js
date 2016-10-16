@@ -75,6 +75,15 @@ module.exports = function Tradeops (db, portfolio)
 		.then(load)
 	}
 
+	tradeops.sequence = (from_timestamp) =>
+	{
+		expect(from_timestamp).a('date')
+
+		return table()
+		.where('timestamp', '>', from_timestamp)
+		.then(rows => rows.map(load))
+	}
+
 	function load (row)
 	{
 		return row
