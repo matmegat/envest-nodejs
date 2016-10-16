@@ -20,6 +20,12 @@ module.exports = function Tradeops (db, portfolio)
 
 	var tradeops = {}
 
+	expect(db, 'Tradeops depends on Holdings').property('holdings')
+	var holdings  = portfolio.holdings
+
+	expect(db, 'Tradeops depends on Brokerage').property('brokerage')
+	var brokerage = portfolio.brokerage
+
 	// store
 	tradeops.store = (tradeop, options) =>
 	{
