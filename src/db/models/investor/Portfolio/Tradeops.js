@@ -1,7 +1,5 @@
 
 
-var assign = Object.assign
-
 var expect = require('chai').expect
 
 var knexed = require('../../../../knexed')
@@ -98,7 +96,7 @@ module.exports = function Tradeops (db, portfolio)
 		return byId(investor_id, timestamp).delete()
 	}
 
-	tradeops.undone = (tradeop)
+	tradeops.undone = (tradeop) =>
 	{
 		expect(Op.is(tradeop), 'Op type').true
 		// TODO check equality
@@ -115,7 +113,7 @@ module.exports = function Tradeops (db, portfolio)
 		.where('investor_id', investor_id)
 		.where('timestamp', timestamp)
 	}
-	
+
 
 	return tradeops
 }
