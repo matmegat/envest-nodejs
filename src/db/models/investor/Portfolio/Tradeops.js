@@ -16,6 +16,7 @@ module.exports = function Tradeops (db, portfolio)
 
 	var table = knexed(knex, 'tradeops')
 
+	var one = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
 	var tradeops = {}
@@ -65,14 +66,27 @@ module.exports = function Tradeops (db, portfolio)
 		'There can be only one trading operation per timestamp for Investor')
 
 
+	// restore
+	tradeops.restore = (investor_id, timestamp) =>
+	{
+		return byId(investor_id, timestamp)
+		.select()
+		.then(one)
+		.then(load)
+	}
+
+	function load (row)
+	{
+		return row
+	}
+
+
+	// remove
 	tradeops.remove = (investor_id, timestamp) =>
 	{
 		expect(timestamp).a('date')
 
-		return table()
-		.where('investor_id', investor_id)
-		.where('timestamp', timestamp)
-		.delete()
+		return byId(investor_id, timestamp).delete()
 	}
 
 	tradeops.undone = (tradeop)
@@ -82,6 +96,17 @@ module.exports = function Tradeops (db, portfolio)
 
 		return tradeops.remove(tradeop.investor_id, tradeop.timestamp)
 	}
+
+	function byId (investor_id, timestamp)
+	{
+		expect(investor_id).a('number')
+		expect(timestamp).a('date')
+
+		return table()
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+	}
+	
 
 	return tradeops
 }
