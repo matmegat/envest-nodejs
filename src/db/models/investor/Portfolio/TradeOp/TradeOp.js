@@ -35,7 +35,7 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		return assign(toDb(),
 		{
 			type: op.type,
-			trade_data: op.trade_data
+			data: op.trade_data
 		})
 	})
 
