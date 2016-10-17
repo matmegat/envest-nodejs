@@ -54,6 +54,8 @@ module.exports = function Portfolio (db, investor)
 
 	var knex = db.knex
 
+
+	// get
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
 		return new Promise(rs =>
@@ -183,6 +185,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+
 	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
 	{
 		var now = moment()
@@ -266,6 +269,7 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
+	// grid
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return Promise.all(
@@ -405,7 +409,7 @@ module.exports = function Portfolio (db, investor)
 
 				grid.range = range
 
-				// range.by('days', it =>
+				/* range.by('days', it => */
 				grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
@@ -687,6 +691,7 @@ module.exports = function Portfolio (db, investor)
 	}
 
 
+	// trading
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
 	holdings.dirs = {}
