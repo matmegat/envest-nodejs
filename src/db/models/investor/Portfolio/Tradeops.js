@@ -2,6 +2,8 @@
 
 var expect = require('chai').expect
 
+var invoke = require('lodash/invokeMap')
+
 var knexed = require('../../../knexed')
 var Err = require('../../../../Err')
 
@@ -28,7 +30,14 @@ module.exports = function Tradeops (db, portfolio)
 
 
 	// store
-	tradeops.store = (tradeop, options) =>
+	tradeops.replay = (trx, ops) =>
+	{
+		ops = invoke(ops, 'toDb')
+
+		return table(trx).insert(ops)
+	}
+
+	/*tradeops.store = (tradeop, options) =>
 	{
 		options = (
 		{
@@ -63,7 +72,7 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 	var DuplicateEntry = Err('tradeop_duplicate',
-		'There can be only one trading operation per timestamp for Investor')
+		'There can be only one trading operation per timestamp for Investor')*/
 
 
 	// restore
