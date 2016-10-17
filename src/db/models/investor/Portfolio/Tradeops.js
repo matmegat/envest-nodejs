@@ -11,6 +11,7 @@ var Err = require('../../../../Err')
 
 var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
+var DeleteOp = require('./TradeOp/DeleteOp')
 
 
 module.exports = function Tradeops (db, portfolio)
@@ -56,16 +57,30 @@ module.exports = function Tradeops (db, portfolio)
 
 	function op_merge (tradeop, ops)
 	{
-		if (ops.length)
+		if (DeleteOp.is(tradeop))
 		{
-			if (Op.equals(tradeop, ops[0]))
+			/* apply delete action */
+			var tradeop = tradeop.unwrap()
+
+			if (ops.length && Op.equals(tradeop, ops[0]))
+			{
+				return ops.slice(1)
+			}
+			else
+			{
+				throw new TypeError('attempt_to_remove_nonexistent_op')
+			}
+		}
+		else
+		{
+			if (ops.length && Op.equals(tradeop, ops[0]))
 			{
 				/* first element equals -- modify it */
 				ops = ops.slice(1)
 			}
-		}
 
-		return [ tradeop ].concat(ops)
+			return [ tradeop ].concat(ops)
+		}
 	}
 
 

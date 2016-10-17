@@ -3,7 +3,7 @@ var expect = require('chai').expect
 
 var Op = require('./Op')
 
-module.exports = function DeleteOp (_, _, other_op)
+var DeleteOp = module.exports = function DeleteOp (_, _, other_op)
 {
 	expect(Op.is(other_op)).true
 
@@ -17,5 +17,15 @@ module.exports = function DeleteOp (_, _, other_op)
 		throw new TypeError('delete_op_cannot_be_stored')
 	}
 
+	op.unwrap = () =>
+	{
+		return op.other_op
+	}
+
 	return op
+}
+
+DeleteOp.is = (op) =>
+{
+	return Op.is(op) && (op.type === 'delete')
 }
