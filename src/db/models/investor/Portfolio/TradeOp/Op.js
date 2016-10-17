@@ -8,6 +8,8 @@ var Op = module.exports = function Op (investor_id, timestamp)
 	expect(investor_id).a('number')
 	expect(timestamp).a('date')
 
+	timestamp.setMilliseconds(0)
+
 	var op = inst()
 
 	op.investor_id = investor_id
