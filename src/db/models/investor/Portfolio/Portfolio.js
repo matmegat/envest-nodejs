@@ -705,23 +705,6 @@ module.exports = function Portfolio (db, investor)
 	holdings.dirs.bought = holdings.buy
 	holdings.dirs.sold = holdings.sell
 
-	var PostDateErr =
-		Err('there_is_more_recent_state',
-			'There Is More Recent State')
-
-	portfolio.isDateAvail = function (trx, investor_id, date)
-	{
-		return Promise.all(
-		[
-			holdings.isDateAvail(trx, investor_id, date),
-			brokerage.isDateAvail(trx, investor_id, date)
-		])
-		.then(so =>
-		{
-			return so[0] && so[1]
-		})
-	}
-
 	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return Promise.all(
@@ -777,6 +760,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+	// TODO: remove PostDateErr description from confluence
 
 	portfolio.makeTrade = function (trx, investor_id, type, date, data)
 	{
@@ -786,16 +770,7 @@ module.exports = function Portfolio (db, investor)
 		return portfolio.adjustDate(trx, investor_id, date)
 		.then(for_date =>
 		{
-			return portfolio.isDateAvail(trx, investor_id, for_date)
-			.then(is_avail =>
-			{
-				if (! is_avail)
-				{
-					throw PostDateErr()
-				}
-
-				return Symbl.validate(data.symbol)
-			})
+			return Symbl.validate(data.symbol)
 			.then(symbl =>
 			{
 				symbol = symbl
@@ -839,20 +814,9 @@ module.exports = function Portfolio (db, investor)
 		expect(post.timestamp).a('date')
 		var timestamp = post.timestamp
 
-		return portfolio.isDateAvail(trx, investor_id, timestamp)
-		.then(is_avail =>
-		{
-			if (! is_avail)
-			{
-				throw PostDateErr()
-			}
-		})
-		.then(() =>
-		{
-			return holdings.symbolById(trx, symbol, investor_id,
-				null, { with_timestamp: true }
-			)
-		})
+		return holdings.symbolById(trx, symbol, investor_id,
+			null, { with_timestamp: true }
+		)
 		.then(holding_pk =>
 		{
 			return holdings.remove(trx, holding_pk)

@@ -464,20 +464,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		data.timestamp = moment.utc(data.timestamp).startOf('second').format()
 
-		return portfolio.isDateAvail(trx, investor_id, data.timestamp, symbol)
-		.then(is_avail =>
-		{
-			if (! is_avail)
-			{
-				throw  InvalidHoldingDate(
-				{
-					symbol: symbol.toXign(),
-					reason: 'More actual holding already exist'
-				})
-			}
-
-			return holdings.isExact(trx, investor_id, symbol, data.timestamp)
-		})
+		return holdings.isExact(trx, investor_id, symbol, data.timestamp)
 		.then(is_exact =>
 		{
 			if (is_exact && options.override)
