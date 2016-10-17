@@ -39,7 +39,7 @@ module.exports = function Tradeops (db, portfolio)
 		})
 		.then(ops =>
 		{
-			// +tradeop
+			ops = op_merge(tradeop, ops)
 
 			return PReduce(ops, (memo, current) =>
 			{
@@ -51,6 +51,20 @@ module.exports = function Tradeops (db, portfolio)
 		{
 			return tradeops.replay(trx, ops)
 		})
+	}
+
+	function op_merge (tradeop, ops)
+	{
+		if (ops.length)
+		{
+			if (tradeop.equals(ops[0]))
+			{
+				/* first element equals -- modify it */
+				ops = ops.slice(1)
+			}
+		}
+
+		return [ tradeop ].concat(ops)
 	}
 
 
