@@ -45,11 +45,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		console.log('Non Trade Op')
-		console.log('============')
-		console.log('apply:', op.op_data.type)
-		console.log('timestamp:', op.timestamp.toISOString())
-
 		var is_recalc = recalculate_ops.indexOf(op.op_data.type)
 
 		/* Algo:
@@ -106,8 +101,10 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.undone = (trx, portfolio) =>
 	{
-		// TODO
-		return Promise.resolve()
+		return portfolio.brokerage.table(trx)
+		.where(op.toPK())
+		.where('timestamp', op.timestamp)
+		.delete()
 	}
 
 	return op
