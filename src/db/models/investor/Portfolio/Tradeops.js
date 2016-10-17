@@ -31,6 +31,10 @@ module.exports = function Tradeops (db, portfolio)
 			{
 				return current.undone(trx, portfolio)
 			})
+			.then(() =>
+			{
+				return tradeops.flush(trx, tradeop)
+			})
 			.then(() => ops)
 		})
 		.then(ops =>
@@ -76,7 +80,7 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 
-	tradeops.undone = (trx, tradeop) =>
+	tradeops.flush = (trx, tradeop) =>
 	{
 		return sequential(trx, tradeop)
 		.delete()
