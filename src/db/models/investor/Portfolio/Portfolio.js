@@ -700,17 +700,40 @@ module.exports = function Portfolio (db, investor)
 
 	// TODO rm
 	/*{
-		var TradeOp = require('./TradeOp/TradeOp')
+		var NonTradeOp = require('./TradeOp/NonTradeOp')
 
-		var op = TradeOp(120, new Date,
+		var init_bro_op = NonTradeOp(8838, new Date('2016-01-01'),
 		{
-			dir: 'sold',
-			price: 1,
-			amount: 1,
-			symbol: 'MSFT.XNAS'
+			type: 'init',
+			amount: 50000,
 		})
 
-		portfolio.apply(op)
+		var deposit = NonTradeOp(
+			8838,
+			new Date(1451606400000 + Math.floor(Math.random() * 25115276875)),
+			{ type: 'deposit', amount: 1488 }
+		)
+		var withdraw = NonTradeOp(
+			8838,
+			new Date(1451606400000 + Math.floor(Math.random() * 25115276875)),
+			{ type: 'withdraw', amount: 147 }
+		)
+		var interest = NonTradeOp(
+			8838,
+			new Date(1451606400000 + Math.floor(Math.random() * 25115276875)),
+			{ type: 'interest', amount: 3215 }
+		)
+		var fee = NonTradeOp(
+			8838,
+			new Date(1451606400000 + Math.floor(Math.random() * 25115276875)),
+			{ type: 'fee', amount: 1987 }
+		)
+
+		portfolio.apply(init_bro_op)
+		// .then(() => portfolio.apply(deposit))
+		// .then(() => portfolio.apply(withdraw))
+		// .then(() => portfolio.apply(interest))
+		// .then(() => portfolio.apply(fee))
 	}*/
 
 

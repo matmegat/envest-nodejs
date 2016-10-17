@@ -4,19 +4,22 @@ var assign = Object.assign
 var expect = require('chai').expect
 var wrap   = require('lodash/wrap')
 
-var Op = require('./Op')
+var Op       = require('./Op')
+var validate = require('../../../../validate')
 
 module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 {
 	var non_trade_operations =
 	[
 		'deposit',
-		'withdrawal',
+		'withdraw',
 		'interest',
 		'fee',
 
 		'init',
 	]
+
+	var recalculate_ops = [ 'deposit', 'withdrawal', 'init' ]
 
 	var op = Op(investor_id, timestamp)
 
@@ -25,7 +28,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	expect(op_data).property('type')
 	expect(non_trade_operations).include(op_data.type)
 
-	expect(op_data.amount).to.be.a('number')
+	validate.number.nonNegative(op_data.amount, 'amount')
 
 	op.type = 'nontrade'
 
@@ -44,8 +47,56 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		// TODO
-		return Promise.resolve()
+		console.log('Non Trade Op')
+		console.log('============')
+		console.log('apply:', op.op_data.type)
+		console.log('timestamp:', op.timestamp.toISOString())
+
+		/* setting brokerage value with onboarding method */
+		if (op.op_data.type === 'init')
+		{
+			return portfolio.brokerage.set(
+				trx,
+				op.investor_id,
+				op.op_data.amount,
+				op.timestamp
+			)
+		}
+
+		/* update brokerage */
+
+		var is_recalc = recalculate_ops.indexOf(op.op_data.type)
+
+		/* Algo:
+		* 1.1. Get Brokerage State
+		* 1.2. Get Holdings State ????
+		* 2. Calculate to state for amount
+		* 3. Call setter with options
+		* */
+
+		return portfolio.brokerage.byId(trx, op.investor_id, op.timestamp)
+		.then(brokerage =>
+		{
+			var new_cash = brokerage.cash
+
+			if (op.op_data.type === 'fee' || op.op_data.type === 'withdraw')
+			{
+				new_cash -= op.op_data.amount
+			}
+			else
+			{
+				new_cash += op.op_data.amount
+			}
+
+			return portfolio.brokerage.put(
+				trx,
+				op.investor_id,
+				new_cash,
+				timestamp,
+				null,
+				{ recalculate: is_recalc }
+			)
+		})
 	}
 
 	op.undone = (trx, portfolio) =>

@@ -250,6 +250,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.set = knexed.transact(knex,
 		(trx, investor_id, cash, timestamp) =>
 	{
+		console.log('brokerage.set')
+
 		var init_brokerage = () =>
 		{
 			cash = cash || index_amount_cap
@@ -268,19 +270,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		}
 
 		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			validate.required(cash, 'cash')
-			validate.number(cash, 'cash')
-
-			if (cash < 0)
-			{
-				throw InvalidAmount({ field: 'cash' })
-			}
-
-			validate.required(timestamp, 'timestamp')
-			validate.date(timestamp, 'timestamp')
-		})
 		.then(() => brokerage.isExist(trx, investor_id))
 		.then(is_exist =>
 		{
@@ -306,9 +295,12 @@ module.exports = function Brokerage (db, investor, portfolio)
 		'Invalid amount value for cash, share, price')
 
 
+	brokerage.put = put
 	// eslint-disable-next-line max-params
 	function put (trx, investor_id, new_cash, timestamp, old_holdings, options)
 	{
+		console.log('brokerage.put')
+
 		expect(new_cash).a('number')
 
 		if (old_holdings !== null)
@@ -320,22 +312,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
-		return portfolio.isDateAvail(trx, investor_id, timestamp)
-		.then((is_avail) =>
-		{
-			if (! is_avail)
-			{
-				throw NotActualBrokerage()
-			}
-
-			return Promise.all(
-			[
-				brokerage.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId
-					.quotes(trx, investor_id, timestamp, { other: true }),
-				brokerage.isExact(trx, investor_id, timestamp)
-			])
-		})
+		return Promise.all(
+		[
+			brokerage.byId(trx, investor_id, timestamp),
+			portfolio.holdings.byId
+				.quotes(trx, investor_id, timestamp, { other: true }),
+			brokerage.isExact(trx, investor_id, timestamp)
+		])
 		.then(values =>
 		{
 			var cash       = values[0].cash
