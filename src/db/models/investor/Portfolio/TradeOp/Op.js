@@ -27,17 +27,20 @@ var Op = module.exports = function Op (investor_id, timestamp)
 		}
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	op.apply = (trx, portfolio) =>
 	{
 		return Promise.resolve()
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	op.undone = (trx, portfolio) =>
 	{
 		return Promise.resolve()
 	}
 
-	op.equals = (/* other */) =>
+	// eslint-disable-next-line no-unused-vars
+	op.equals = (other) =>
 	{
 		return false
 	}
