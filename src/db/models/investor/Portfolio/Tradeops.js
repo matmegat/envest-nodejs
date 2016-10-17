@@ -58,7 +58,7 @@ module.exports = function Tradeops (db, portfolio)
 	{
 		if (ops.length)
 		{
-			if (tradeop.equals(ops[0]))
+			if (Op.equals(tradeop, ops[0]))
 			{
 				/* first element equals -- modify it */
 				ops = ops.slice(1)
