@@ -30,8 +30,8 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	op.type = 'nontrade'
 
 	op.op_data = {}
-	op.op_data.type = op.type
-	op.op_data.amount = op.amount
+	op.op_data.type = op_data.type
+	op.op_data.amount = op_data.amount
 
 	op.toDb = wrap(op.toDb, (toDb) =>
 	{
