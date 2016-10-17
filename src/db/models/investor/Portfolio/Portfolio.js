@@ -694,7 +694,7 @@ module.exports = function Portfolio (db, investor)
 	// tradeop
 	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
 	{
-		return tradeops.sequenceFrom(tradeop)
+		return tradeops.sequenceFrom(trx, tradeop)
 		.then(seq =>
 		{
 			console.dir(seq)

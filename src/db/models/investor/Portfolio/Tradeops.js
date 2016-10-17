@@ -67,9 +67,9 @@ module.exports = function Tradeops (db, portfolio)
 
 
 	// restore
-	tradeops.sequenceFrom = (tradeop) =>
+	tradeops.sequenceFrom = (trx, tradeop) =>
 	{
-		return sequential(tradeop)
+		return sequential(trx, tradeop)
 		.then(rows => rows.map(load))
 	}
 
@@ -81,7 +81,7 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 
-	function sequential (tradeop)
+	function sequential (trx, tradeop)
 	{
 		expect(Op.is(tradeop), 'Op type').true
 
@@ -91,9 +91,9 @@ module.exports = function Tradeops (db, portfolio)
 
 
 	// undone
-	tradeops.undone = (tradeop) =>
+	tradeops.undone = (trx, tradeop) =>
 	{
-		return sequential(tradeop)
+		return sequential(trx, tradeop)
 		.delete()
 	}
 
