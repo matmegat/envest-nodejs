@@ -6,6 +6,7 @@ var knexed = require('../../../../knexed')
 var Err = require('../../../../../Err')
 
 var Op = require('./TradeOp/Op')
+var pickOp = require('./TradeOp/pick-Op')
 
 
 module.exports = function Tradeops (db, portfolio)
@@ -84,7 +85,9 @@ module.exports = function Tradeops (db, portfolio)
 
 	function load (row)
 	{
-		return row
+		var C = pickOp(row.type)
+
+		return C(row.investor_id, row.timestamp, row.data)
 	}
 
 
