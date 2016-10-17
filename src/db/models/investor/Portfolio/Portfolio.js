@@ -695,14 +695,28 @@ module.exports = function Portfolio (db, investor)
 	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
 	{
 		return tradeops.sequence(trx, tradeop)
-		.then(seq =>
+		.then(ops =>
 		{
-			console.dir(seq)
+			// reduce
+			// ops undone
+
+			return ops
+		})
+		.then(ops =>
+		{
+			// reduce
+			// ops apply
+
+			return ops
+		})
+		.then(ops =>
+		{
+			return tradeops.replay(ops)
 		})
 	})
 
 	// TODO rm
-	{
+	/*{
 		var TradeOp = require('./TradeOp/TradeOp')
 
 		var op = TradeOp(120, new Date,
@@ -714,7 +728,7 @@ module.exports = function Portfolio (db, investor)
 		})
 
 		portfolio.apply(op)
-	}
+	}*/
 
 
 	// trading

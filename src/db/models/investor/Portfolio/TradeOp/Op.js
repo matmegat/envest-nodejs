@@ -26,6 +26,16 @@ var Op = module.exports = function Op (investor_id, timestamp)
 		}
 	}
 
+	op.apply = (portfolio) =>
+	{
+		return Promise.resolve()
+	}
+
+	op.undone = (portfolio) =>
+	{
+		return Promise.resolve()
+	}
+
 	return op
 }
 

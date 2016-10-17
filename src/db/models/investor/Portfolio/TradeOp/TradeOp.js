@@ -39,5 +39,17 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		})
 	})
 
+	op.apply = (portfolio) =>
+	{
+		// TODO
+		return Promise.resolve()
+	}
+
+	op.undone = (portfolio) =>
+	{
+		// TODO
+		return Promise.resolve()
+	}
+
 	return op
 }
