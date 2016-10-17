@@ -62,7 +62,7 @@ Op.equals = (L, R) =>
 
 	if (L.type !== R.type) { return false }
 	if (L.investor_id !== R.investor_id) { return false }
-	if (L.timestamp !== R.timestamp) { return false }
+	if (L.timestamp.toISOString() != R.timestamp.toISOString()) { return false }
 
 	return L.equals(R)
 }
