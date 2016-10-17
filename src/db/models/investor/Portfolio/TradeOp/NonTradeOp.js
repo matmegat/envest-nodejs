@@ -107,5 +107,10 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		.delete()
 	}
 
+	op.equals = (other) =>
+	{
+		return op.op_data.type === other.op_data.type
+	}
+
 	return op
 }
