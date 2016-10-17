@@ -41,14 +41,14 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		// TODO
-		return Promise.resolve()
+		return portfolio.makeTrade(
+			trx, op.investor_id, null, op.timestamp, op.trade_data)
 	}
 
 	op.undone = (trx, portfolio) =>
 	{
-		// TODO
-		return Promise.resolve()
+		return portfolio.removeTrade(
+			trx, op)
 	}
 
 	op.equals = (other) =>
