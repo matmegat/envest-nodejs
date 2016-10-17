@@ -27,7 +27,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	expect(op_data.amount).to.be.a('number')
 
-	op.type = 'npn-trade'
+	op.type = 'nontrade'
 
 	op.op_data = {}
 	op.op_data.type = op.type
