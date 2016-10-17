@@ -701,7 +701,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			return PReduce(ops, (memo, current) =>
 			{
-				return current.undone(portfolio)
+				return current.undone(trx, portfolio)
 			})
 			.then(() => ops)
 		})
@@ -711,13 +711,13 @@ module.exports = function Portfolio (db, investor)
 
 			return PReduce(ops, (memo, current) =>
 			{
-				return current.apply(portfolio)
+				return current.apply(trx, portfolio)
 			})
 			.then(() => ops)
 		})
 		.then(ops =>
 		{
-			return tradeops.replay(ops)
+			return tradeops.replay(trx, ops)
 		})
 	})
 
