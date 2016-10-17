@@ -67,7 +67,7 @@ module.exports = function Tradeops (db, portfolio)
 
 
 	// restore
-	tradeops.sequenceFrom = (trx, tradeop) =>
+	tradeops.sequence = (trx, tradeop) =>
 	{
 		return sequential(trx, tradeop)
 		.then(rows => rows.map(load))
