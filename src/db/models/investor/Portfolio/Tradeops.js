@@ -35,6 +35,7 @@ module.exports = function Tradeops (db, portfolio)
 		ops = invoke(ops, 'toDb')
 
 		return table(trx).insert(ops)
+		.catch(Err.fromDb('timed_tradeop_unique', DuplicateEntry))
 	}
 
 	/*tradeops.store = (tradeop, options) =>
@@ -69,10 +70,10 @@ module.exports = function Tradeops (db, portfolio)
 				.catch(Err.fromDb('timed_tradeop_unique', DuplicateEntry))
 			}
 		})
-	}
+	}*/
 
 	var DuplicateEntry = Err('tradeop_duplicate',
-		'There can be only one trading operation per timestamp for Investor')*/
+		'There can be only one trading operation per timestamp for Investor')
 
 
 	// restore
