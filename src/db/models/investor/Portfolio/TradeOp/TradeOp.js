@@ -51,5 +51,16 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		return Promise.resolve()
 	}
 
+	op.equals = (other) =>
+	{
+		var dL = op.trade_data
+		var dR = other.trade_data
+
+		if (! Symbl.equals(dL.symbol, dR.symbol)) { return false }
+		if (dL.dir !== dR.dir) { return false }
+
+		return true
+	}
+
 	return op
 }
