@@ -79,7 +79,7 @@ module.exports = function Tradeops (db, portfolio)
 		expect(from_timestamp).a('date')
 
 		return table()
-		.where('timestamp', '>', from_timestamp)
+		.where('timestamp', '>=', from_timestamp)
 		.then(rows => rows.map(load))
 	}
 
