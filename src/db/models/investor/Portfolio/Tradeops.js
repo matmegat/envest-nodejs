@@ -30,7 +30,7 @@ module.exports = function Tradeops (db, portfolio)
 			return PReduce(ops, (memo, current) =>
 			{
 				return current.undone(trx, portfolio)
-			})
+			}, null)
 			.then(() =>
 			{
 				return tradeops.flush(trx, tradeop)
