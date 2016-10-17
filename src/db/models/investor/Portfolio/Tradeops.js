@@ -2,8 +2,8 @@
 
 var expect = require('chai').expect
 
-var knexed = require('../../../../knexed')
-var Err = require('../../../../../Err')
+var knexed = require('../../../knexed')
+var Err = require('../../../../Err')
 
 var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
@@ -20,11 +20,12 @@ module.exports = function Tradeops (db, portfolio)
 
 	var tradeops = {}
 
-	expect(db, 'Tradeops depends on Holdings').property('holdings')
+	expect(portfolio, 'Tradeops depends on Holdings').property('holdings')
 	var holdings  = portfolio.holdings
 
-	expect(db, 'Tradeops depends on Brokerage').property('brokerage')
+	expect(portfolio, 'Tradeops depends on Brokerage').property('brokerage')
 	var brokerage = portfolio.brokerage
+
 
 	// store
 	tradeops.store = (tradeop, options) =>
