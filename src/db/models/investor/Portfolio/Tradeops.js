@@ -69,17 +69,7 @@ module.exports = function Tradeops (db, portfolio)
 	// restore
 	tradeops.sequenceFrom = (tradeop) =>
 	{
-		expect(Op.is(tradeop), 'Op type').true
-
-		return tradeops.sequence(tradeop.timestamp)
-	}
-
-	tradeops.sequence = (from_timestamp) =>
-	{
-		expect(from_timestamp).a('date')
-
-		return table()
-		.where('timestamp', '>=', from_timestamp)
+		return sequential(tradeop)
 		.then(rows => rows.map(load))
 	}
 
@@ -91,23 +81,23 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 
-	// remove
-	tradeops.remove = (investor_id, timestamp) =>
-	{
-		expect(timestamp).a('date')
-
-		return byId(investor_id, timestamp).delete()
-	}
-
-	tradeops.undone = (tradeop) =>
+	function sequential (tradeop)
 	{
 		expect(Op.is(tradeop), 'Op type').true
-		// TODO check equality
 
-		return tradeops.remove(tradeop.investor_id, tradeop.timestamp)
+		return table(trx)
+		.where('timestamp', '>=', tradeop.timestamp)
 	}
 
-	function byId (investor_id, timestamp)
+
+	// undone
+	tradeops.undone = (tradeop) =>
+	{
+		return sequential(tradeop)
+		.delete()
+	}
+
+	/*function byId (investor_id, timestamp)
 	{
 		expect(investor_id).a('number')
 		expect(timestamp).a('date')
@@ -115,7 +105,7 @@ module.exports = function Tradeops (db, portfolio)
 		return table()
 		.where('investor_id', investor_id)
 		.where('timestamp', timestamp)
-	}
+	}*/
 
 
 	return tradeops
