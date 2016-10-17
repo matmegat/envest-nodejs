@@ -77,12 +77,12 @@ function verifier (field, verify)
 		verify = (value) => value != null /* || undefined */
 	}
 
-	return (investor_id) =>
+	return (trx, investor_id) =>
 	{
 		return field.get(investor_id)
 		.then((value) =>
 		{
-			return field.validate(value, investor_id)
+			return field.validate(trx, value, investor_id)
 			.then(() =>
 			{
 				return verify(value, investor_id)

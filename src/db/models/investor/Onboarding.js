@@ -83,7 +83,7 @@ module.exports = function Onboarding (db, investor)
 		})
 	})
 
-	onb.goPublic = function pushLive (whom_id, investor_id)
+	onb.goPublic = knexed.transact(knex, (trx, whom_id, investor_id) =>
 	{
 		return Promise.all(
 		[
@@ -107,7 +107,7 @@ module.exports = function Onboarding (db, investor)
 
 			return Promise.all(_.map(onb.fields, (field) =>
 			{
-				return field.verify(investor_id)
+				return field.verify(trx, investor_id)
 			}))
 		})
 		.then(() => db.user.infoById(investor_id))
@@ -146,7 +146,7 @@ module.exports = function Onboarding (db, investor)
 				admin: [ ':user-id', whom_id ]
 			})
 		})
-	}
+	})
 
 	var PublicChanged = Emitter('pushed_to_public')
 
