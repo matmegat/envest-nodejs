@@ -67,12 +67,11 @@ module.exports = function Tradeops (db, portfolio)
 
 
 	// restore
-	tradeops.restore = (investor_id, timestamp) =>
+	tradeops.sequenceFrom = (tradeop) =>
 	{
-		return byId(investor_id, timestamp)
-		.select()
-		.then(one)
-		.then(load)
+		expect(Op.is(tradeop), 'Op type').true
+
+		return tradeops.sequence(tradeop.timestamp)
 	}
 
 	tradeops.sequence = (from_timestamp) =>
