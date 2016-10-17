@@ -107,7 +107,7 @@ module.exports = function Tradeops (db, portfolio)
 		expect(Op.is(tradeop), 'Op type').true
 
 		return table(trx)
-		.where('investor_id', '=', tradeop.investor_id)
+		.where('investor_id', tradeop.investor_id)
 		.where('timestamp', '>=', tradeop.timestamp)
 	}
 
