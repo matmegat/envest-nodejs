@@ -250,8 +250,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.set = knexed.transact(knex,
 		(trx, investor_id, cash, timestamp) =>
 	{
-		console.log('brokerage.set')
-
 		var init_brokerage = () =>
 		{
 			cash = cash || index_amount_cap
@@ -314,10 +312,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		return Promise.all(
 		[
-			brokerage.byId(trx, investor_id, timestamp),
+			brokerage.byId(trx, investor_id, timestamp, { soft_mode: true }),
 			portfolio.holdings.byId
 				.quotes(trx, investor_id, timestamp, { other: true }),
-			brokerage.isExact(trx, investor_id, timestamp)
+			brokerage.isExact(trx, investor_id, timestamp),
+			brokerage.isExist(trx, investor_id)
 		])
 		.then(values =>
 		{
@@ -327,10 +326,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 			var current_holdings = values[1]
 
 			var is_exact = values[2]
+			var is_exist = values[3]
 
 			if (old_holdings === null)
 			{
 				old_holdings = current_holdings
+			}
+
+			if (! is_exist)
+			{
+				cash = 0
+				multiplier = 0
+				options.recalculate = true
 			}
 
 			if (options.recalculate)
@@ -338,9 +345,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				var previous_allocation
 				 = cash + sumBy(old_holdings, 'real_allocation')
 				previous_allocation *= multiplier
+				previous_allocation = previous_allocation || index_amount_cap
 
 				var current_allocation
 				 = new_cash + sumBy(current_holdings, 'real_allocation')
+				current_allocation = current_allocation || index_amount_cap
 
 				multiplier = (previous_allocation / current_allocation)
 			}
