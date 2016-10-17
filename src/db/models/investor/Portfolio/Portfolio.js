@@ -25,8 +25,6 @@ var min = require('lodash/min')
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
 
-var PReduce = require('bluebird').reduce
-
 var expect = require('chai').expect
 
 var knexed = require('../../../knexed')
@@ -49,7 +47,7 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
-	var tradeops  = portfolio.tradeops  =  Tradeops(db)
+	var tradeops  = portfolio.tradeops  =  Tradeops(db, portfolio)
 
 	expect(db, 'Portfolio depends on Series').property('symbols')
 	var symbols = db.symbols
@@ -696,33 +694,12 @@ module.exports = function Portfolio (db, investor)
 	// tradeop
 	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
 	{
-		return tradeops.sequence(trx, tradeop)
-		.then(ops =>
-		{
-			return PReduce(ops, (memo, current) =>
-			{
-				return current.undone(trx, portfolio)
-			})
-			.then(() => ops)
-		})
-		.then(ops =>
-		{
-			// +tradeop
-
-			return PReduce(ops, (memo, current) =>
-			{
-				return current.apply(trx, portfolio)
-			})
-			.then(() => ops)
-		})
-		.then(ops =>
-		{
-			return tradeops.replay(trx, ops)
-		})
+		return tradeops.apply(trx, tradeop)
 	})
 
+
 	// TODO rm
-	{
+	/*{
 		var TradeOp = require('./TradeOp/TradeOp')
 
 		var op = TradeOp(120, new Date,
@@ -734,7 +711,7 @@ module.exports = function Portfolio (db, investor)
 		})
 
 		portfolio.apply(op)
-	}
+	}*/
 
 
 	// trading
