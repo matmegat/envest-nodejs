@@ -44,7 +44,7 @@ module.exports = function Tradeops (db, portfolio)
 			return PReduce(ops, (memo, current) =>
 			{
 				return current.apply(trx, portfolio)
-			})
+			}, null)
 			.then(() => ops)
 		})
 		.then(ops =>
