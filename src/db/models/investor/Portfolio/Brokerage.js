@@ -155,13 +155,21 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(Boolean)
 	})
 
-	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.isExist = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return table(trx)
 			.where('investor_id', investor_id)
+			.where(function ()
+			{
+				if (timestamp)
+				{
+					this.where('timestamp', '<=', timestamp)
+
+				}
+			})
 		})
 		.then(res => res.length)
 	})
@@ -247,47 +255,47 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var NotActualBrokerage = Err('not_actual_brokerage',
 		'More actual brokerage already exist')
 
-	brokerage.set = knexed.transact(knex,
-		(trx, investor_id, cash, timestamp) =>
-	{
-		var init_brokerage = () =>
-		{
-			cash = cash || index_amount_cap
-			timestamp = moment.utc(timestamp).format()
-
-			var multiplier = index_amount_cap / cash
-
-			return table(trx)
-			.insert(
-			{
-				investor_id: investor_id,
-				cash: cash,
-				timestamp: timestamp,
-				multiplier: multiplier
-			})
-		}
-
-		return investor.all.ensure(investor_id, trx)
-		.then(() => brokerage.isExist(trx, investor_id))
-		.then(is_exist =>
-		{
-			if (! is_exist)
-			{
-				return init_brokerage()
-			}
-			else
-			{
-				return put(
-					trx,               // transaction
-					investor_id,       // investor_id
-					cash,              // new cash to set
-					timestamp,         // timestamp
-					null,              // holdings are the same
-					{ override: true } // override on exact match
-				)
-			}
-		})
-	})
+	// brokerage.set = knexed.transact(knex,
+	// 	(trx, investor_id, cash, timestamp) =>
+	// {
+	// 	var init_brokerage = () =>
+	// 	{
+	// 		cash = cash || index_amount_cap
+	// 		timestamp = moment.utc(timestamp).format()
+    //
+	// 		var multiplier = index_amount_cap / cash
+    //
+	// 		return table(trx)
+	// 		.insert(
+	// 		{
+	// 			investor_id: investor_id,
+	// 			cash: cash,
+	// 			timestamp: timestamp,
+	// 			multiplier: multiplier
+	// 		})
+	// 	}
+    //
+	// 	return investor.all.ensure(investor_id, trx)
+	// 	.then(() => brokerage.isExist(trx, investor_id))
+	// 	.then(is_exist =>
+	// 	{
+	// 		if (! is_exist)
+	// 		{
+	// 			return init_brokerage()
+	// 		}
+	// 		else
+	// 		{
+	// 			return put(
+	// 				trx,               // transaction
+	// 				investor_id,       // investor_id
+	// 				cash,              // new cash to set
+	// 				timestamp,         // timestamp
+	// 				null,              // holdings are the same
+	// 				{ override: true } // override on exact match
+	// 			)
+	// 		}
+	// 	})
+	// })
 
 	var InvalidAmount = Err('invalid_portfolio_amount',
 		'Invalid amount value for cash, share, price')
@@ -297,8 +305,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// eslint-disable-next-line max-params
 	function put (trx, investor_id, new_cash, timestamp, old_holdings, options)
 	{
-		console.log('brokerage.put')
-
 		expect(new_cash).a('number')
 
 		if (old_holdings !== null)
@@ -312,11 +318,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		return Promise.all(
 		[
-			brokerage.byId(trx, investor_id, timestamp, { soft_mode: true }),
+			brokerage.byId(trx, investor_id, timestamp, { soft: true }),
 			portfolio.holdings.byId
 				.quotes(trx, investor_id, timestamp, { other: true }),
 			brokerage.isExact(trx, investor_id, timestamp),
-			brokerage.isExist(trx, investor_id)
+			brokerage.isExist(trx, investor_id, timestamp)
 		])
 		.then(values =>
 		{

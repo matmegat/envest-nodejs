@@ -15,11 +15,9 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		'withdraw',
 		'interest',
 		'fee',
-
-		'init',
 	]
 
-	var recalculate_ops = [ 'deposit', 'withdrawal', 'init' ]
+	var recalculate_ops = [ 'deposit', 'withdrawal', ]
 
 	var op = Op(investor_id, timestamp)
 
@@ -52,19 +50,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		console.log('apply:', op.op_data.type)
 		console.log('timestamp:', op.timestamp.toISOString())
 
-		/* setting brokerage value with onboarding method */
-		if (op.op_data.type === 'init')
-		{
-			return portfolio.brokerage.set(
-				trx,
-				op.investor_id,
-				op.op_data.amount,
-				op.timestamp
-			)
-		}
-
-		/* update brokerage */
-
 		var is_recalc = recalculate_ops.indexOf(op.op_data.type)
 
 		/* Algo:
@@ -74,18 +59,38 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		* 3. Call setter with options
 		* */
 
-		return portfolio.brokerage.byId(trx, op.investor_id, op.timestamp)
-		.then(brokerage =>
+		return Promise.all(
+		[
+			portfolio.brokerage.byId(
+				trx,
+				op.investor_id,
+				op.timestamp,
+				{ soft: true }
+			),
+			portfolio.brokerage.isExist(trx, investor_id, timestamp)
+		])
+		.then(values =>
 		{
+			var brokerage = values[0]
+			var is_exist = values[1]
+
 			var new_cash = brokerage.cash
 
-			if (op.op_data.type === 'fee' || op.op_data.type === 'withdraw')
+			if (is_exist)
 			{
-				new_cash -= op.op_data.amount
+				if (op.op_data.type === 'fee' || op.op_data.type === 'withdraw')
+				{
+					new_cash -= op.op_data.amount
+				}
+				else
+				{
+					new_cash += op.op_data.amount
+				}
 			}
-			else
+			else if (   op.op_data.type === 'deposit'
+				     || op.op_data.type === 'interest')
 			{
-				new_cash += op.op_data.amount
+				new_cash = op.op_data.amount
 			}
 
 			return portfolio.brokerage.put(
