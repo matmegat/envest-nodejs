@@ -73,6 +73,7 @@ module.exports = function Tradeops (db, portfolio)
 		ops = invoke(ops, 'toDb')
 
 		return table(trx).insert(ops)
+		.then(() => ops)
 		.catch(Err.fromDb('timed_tradeop_unique', DuplicateEntry))
 	}
 
