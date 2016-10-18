@@ -202,5 +202,24 @@ module.exports = function (db, http)
 		toss(rs, investors.model.portfolio.grid.ir(rq.params.id))
 	})
 
+	investors.express.get('/:id/operations', authRequired, (rq, rs) =>
+	{
+		var options = {}
+		var investor_id = Number(rq.params.id)
+
+		options.paginator = pick(rq.query,
+		[
+			// 'max_id',
+			// 'since_id',
+		])
+
+		options.filter = pick(rq.query,
+		[
+			'type',
+		])
+
+		toss(rs, investors.model.portfolio.opsList(investor_id, options))
+	})
+
 	return investors
 }

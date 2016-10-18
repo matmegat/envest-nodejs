@@ -698,6 +698,14 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
+	portfolio.opsList = knexed.transact(knex, (trx, investor_id, options) =>
+	{
+		/* Accessible by admin / investor owner only */
+		return investor.all.ensure(investor_id, trx)
+		.then(() => tradeops.byInvestorId(trx, investor_id, options))
+	})
+
+
 	// TODO rm
 	/*{
 		var TradeOp = require('./TradeOp/TradeOp')
