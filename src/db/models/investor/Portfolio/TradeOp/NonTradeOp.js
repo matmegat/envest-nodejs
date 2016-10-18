@@ -97,7 +97,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	{
 		return portfolio.brokerage.table(trx)
 		.where(op.toPK())
-		.where('timestamp', op.timestamp)
 		.delete()
 	}
 
