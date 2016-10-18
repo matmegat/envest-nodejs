@@ -41,6 +41,8 @@ var Err = require('../../../../Err')
 
 var Parser = require('./Parser')
 
+var NonTradeOp = require('./TradeOp/NonTradeOp')
+
 module.exports = function Portfolio (db, investor)
 {
 	var portfolio = {}
@@ -695,7 +697,25 @@ module.exports = function Portfolio (db, investor)
 	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
 	{
 		return tradeops.apply(trx, tradeop)
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				throw err
+			}
+			else
+			{
+				throw PortfolioOperationError(
+				{
+					reason: err.message
+				})
+			}
+		})
 	})
+
+	// TODO: add error list
+	var PortfolioOperationError = Err('portfolio_operation_error',
+	'Portfolio Operation Error')
 
 
 	// trading
@@ -864,33 +884,15 @@ module.exports = function Portfolio (db, investor)
 	}
 
 
-	var val_cash_ops = validate.collection([
-		'deposit',
-		'withdraw',
-		'fee',
-		'interest'
-	])
-
 	portfolio.manageCash = knexed.transact(knex, (trx, investor_id, op) =>
 	{
-		validate.required(op.type, 'type')
-		val_cash_ops(op.type) // 'type'
-
-		validate.required(op.cash, 'cash')
-		validate.number(op.cash, 'cash')
-
-		validate.required(op.date, 'date')
-		validate.date(op.date) // 'date'
-
-		return portfolio.adjustDate(trx, investor_id, op.date)
-		.then(for_date =>
+		var non_trade_op = NonTradeOp(investor_id, moment.utc(op.date).toDate(),
 		{
-			return brokerage.update(trx, investor_id, for_date,
-			{
-				operation: op.type,
-				amount: op.cash
-			})
+			type: op.type,
+			amount: op.cash,
 		})
+
+		return portfolio.apply(non_trade_op)
 		.then(noop)
 	})
 
