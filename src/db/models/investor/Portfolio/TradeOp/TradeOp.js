@@ -49,7 +49,7 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 
 	op.undone = (trx, portfolio) =>
 	{
-		return portfolio.removeTrade(trx, op.toDb())
+		return portfolio.removeTrade(trx, op)
 	}
 
 	op.equals = (other) =>
