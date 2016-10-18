@@ -50,6 +50,22 @@ Filter.by.operator = curry((operator, column) =>
 
 Filter.by.equal = Filter.by.operator('=')
 
+Filter.by.subscription = function (column)
+{
+	return function (queryset, values)
+	{
+		values = values.split(',')
+		values[0] || (values = [null])
+
+		return queryset
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+		.where(column, values)
+	}
+}
 
 Filter.by.id = function (column)
 {

@@ -643,7 +643,7 @@ module.exports = function User (db, app)
 
 	var filter = Filter({
 		query: Filter.by.query([]),
-		subscription: Filter.by.equal('type')
+		subscription: Filter.by.subscription('type')
 	})
 
 	user.byGroup = function (user_group, options)
@@ -653,11 +653,6 @@ module.exports = function User (db, app)
 			'email_confirms',
 			'users.id',
 			'email_confirms.user_id'
-		)
-		.leftJoin(
-			'subscriptions',
-			'users.id',
-			'subscriptions.user_id'
 		)
 
 		queryset = filter(queryset, options.filter)
