@@ -6,6 +6,8 @@ var pick = require('lodash/pick')
 var validate = require('../../validate')
 var sanitize = require('../../../sanitize')
 
+var TradeOp = require('../investor/Portfolio/TradeOp/TradeOp')
+
 module.exports = function Trade (portfolio, symbols)
 {
 	return Type(
@@ -42,7 +44,13 @@ module.exports = function Trade (portfolio, symbols)
 		},
 		remove: (trx, post) =>
 		{
-			return portfolio.removeTrade(trx, post)
+			var investor_id = post.investor_id
+			var timestamp = post.timestamp
+			var trade_data = post.data
+
+			var tradeOp = TradeOp(trx, investor_id, timestamp, trade_data)
+
+			return tradeOp.undone(trx, portfolio)
 		}
 	})
 }

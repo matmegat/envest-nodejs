@@ -135,6 +135,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.transacting(trx)
 
 		portfolio_table.select(
+			'investor_id',
 			'symbol_ticker',
 			'symbol_exchange',
 			'amount',
