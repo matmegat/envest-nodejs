@@ -17,7 +17,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		'fee',
 	]
 
-	var recalculate_ops = [ 'deposit', 'withdrawal', ]
+	var recalculate_ops = [ 'deposit', 'withdraw', ]
 
 	var op = Op(investor_id, timestamp)
 
@@ -45,7 +45,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		var is_recalc = recalculate_ops.indexOf(op.op_data.type)
+		var is_recalc = recalculate_ops.indexOf(op.op_data.type) !== -1
 
 		/* Algo:
 		* 1.1. Get Brokerage State
