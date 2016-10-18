@@ -40,6 +40,7 @@ var Err = require('../../../../Err')
 var Parser = require('./Parser')
 
 var NonTradeOp = require('./TradeOp/NonTradeOp')
+var DeleteOp = require('./TradeOp/DeleteOp')
 
 module.exports = function Portfolio (db, investor)
 {
@@ -700,9 +701,24 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.opsList = knexed.transact(knex, (trx, investor_id, options) =>
 	{
-		/* Accessible by admin / investor owner only */
 		return investor.all.ensure(investor_id, trx)
 		.then(() => tradeops.byInvestorId(trx, investor_id, options))
+	})
+
+	portfolio.removeOp = knexed.transact(knex, (trx, investor_id, timestamp) =>
+	{
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
+		{
+			return tradeops.byId(trx, investor_id, timestamp)
+			.then(op =>
+			{
+				var delete_op = DeleteOp(void 0, void 0, op)
+
+				return portfolio.apply(trx, delete_op)
+			})
+		})
+		.then(noop)
 	})
 
 

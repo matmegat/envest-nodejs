@@ -174,6 +174,18 @@ module.exports = function Tradeops (db, portfolio)
 		})
 	}
 
+	tradeops.byId = (trx, investor_id, timestamp) =>
+	{
+		expect(investor_id).to.be.a('number')
+		expect(timestamp).to.be.a('date')
+
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('timestamp', timestamp)
+		.then(db.helpers.one)
+		.then(load)
+	}
+
 
 	return tradeops
 }
