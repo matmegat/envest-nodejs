@@ -130,15 +130,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	})
 
 
-	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
-	{
-		return table(trx)
-		.where('investor_id', investor_id)
-		.where('timestamp', timestamp)
-		.then(oneMaybe)
-		.then(Boolean)
-	})
-
 	brokerage.isExist = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -257,7 +248,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 			brokerage.byId(trx, investor_id, timestamp, { soft: true }),
 			portfolio.holdings.byId
 				.quotes(trx, investor_id, timestamp, { other: true }),
-			brokerage.isExact(trx, investor_id, timestamp),
 			brokerage.isExist(trx, investor_id, timestamp)
 		])
 		.then(values =>
@@ -267,8 +257,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var current_holdings = values[1]
 
-			var is_exact = values[2]
-			var is_exist = values[3]
+			var is_exist = values[2]
 
 			if (old_holdings === null)
 			{
@@ -309,21 +298,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				batch.timestamp = timestamp
 			}
 
-			if (options.override && is_exact)
-			{
-				return table(trx)
-				.where('investor_id', investor_id)
-				.where('timestamp', timestamp)
-				.update(pick(batch, 'cash', 'multiplier'))
-			}
-			else
-			{
-				return table(trx).insert(batch)
-				.catch(Err.fromDb(
-					'timed_brokerage_point_unique',
-					DuplicateBrokerageEntry
-				))
-			}
+			return table(trx).insert(batch)
+			.catch(Err.fromDb(
+				'timed_brokerage_point_unique',
+				DuplicateBrokerageEntry
+			))
 		})
 	}
 
@@ -352,7 +331,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 				timestamp,
 				old_holdings,
 				{
-					override: true,
 					recalculate: true
 				}
 			)
@@ -379,8 +357,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(brokerage =>
 		{
-			var options = { override: true }
-
 			if (operation in valid_operations)
 			{
 				valid_operations[operation](amount, brokerage)
@@ -397,8 +373,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 				investor_id,       // investor_id
 				cash,              // new cash to set
 				date,              // timestamp
-				null,              // holdings are the same
-				options            // override on exact match
+				null               // holdings are the same
 			)
 		})
 	})
