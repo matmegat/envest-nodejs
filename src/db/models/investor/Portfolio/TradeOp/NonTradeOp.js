@@ -95,9 +95,8 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.undone = (trx, portfolio) =>
 	{
-		return portfolio.brokerage.table(trx)
-		.where(op.toPK())
-		.delete()
+		return portfolio.brokerage
+		.remove(trx, op.investor_id, op.timestamp)
 	}
 
 	op.equals = (other) =>
