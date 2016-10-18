@@ -800,18 +800,8 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.removeTrade = function (trx, post)
 	{
-		expect(post).an('object')
-
-		expect(post).property('data')
-		expect(post.data).property('symbol')
 		var symbol = post.data.symbol
-
-		expect(post).property('investor_id')
-		expect(post.investor_id).a('number')
 		var investor_id = post.investor_id
-
-		expect(post).property('timestamp')
-		expect(post.timestamp).a('date')
 		var timestamp = post.timestamp
 
 		return holdings.symbolById(trx, symbol, investor_id,
