@@ -814,12 +814,8 @@ module.exports = function Portfolio (db, investor)
 		})
 	}
 
-	portfolio.removeTrade = function (trx, post)
+	portfolio.removeTrade = function (trx, investor_id, symbol, timestamp)
 	{
-		var symbol = post.data.symbol
-		var investor_id = post.investor_id
-		var timestamp = post.timestamp
-
 		return holdings.symbolById(trx, symbol, investor_id,
 			null, { with_timestamp: true }
 		)

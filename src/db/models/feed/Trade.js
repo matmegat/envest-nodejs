@@ -40,9 +40,9 @@ module.exports = function Trade (portfolio, symbols)
 
 			return Promise.resolve(data)
 		},
-		remove: (trx, post) =>
+		remove: (trx, investor_id, symbol, timestamp) =>
 		{
-			return portfolio.removeTrade(trx, post)
+			return portfolio.removeTrade(trx, investor_id, symbol, timestamp)
 		}
 	})
 }

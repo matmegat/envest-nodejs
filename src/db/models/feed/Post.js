@@ -203,7 +203,8 @@ module.exports = function Post (db)
 				{
 					var post_type = post.types[res.type]
 
-					return post_type.remove(trx, res)
+					return post_type.remove(
+						trx, res.investor_id, res.symbol, res.timestamp)
 				}
 			})
 			.then(() =>
