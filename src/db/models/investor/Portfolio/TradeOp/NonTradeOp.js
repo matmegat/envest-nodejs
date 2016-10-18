@@ -1,8 +1,9 @@
 
 var assign = Object.assign
 
-var expect = require('chai').expect
-var wrap   = require('lodash/wrap')
+var expect   = require('chai').expect
+var includes = require('lodash/includes')
+var wrap     = require('lodash/wrap')
 
 var Op       = require('./Op')
 var validate = require('../../../../validate')
@@ -45,14 +46,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		var is_recalc = recalculate_ops.indexOf(op.op_data.type) !== -1
-
-		/* Algo:
-		* 1.1. Get Brokerage State
-		* 1.2. Get Holdings State ????
-		* 2. Calculate to state for amount
-		* 3. Call setter with options
-		* */
+		var is_recalc = includes(recalculate_ops, op.op_data.type)
 
 		return Promise.all(
 		[
