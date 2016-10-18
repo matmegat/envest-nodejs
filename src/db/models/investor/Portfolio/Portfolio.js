@@ -35,8 +35,6 @@ var Tradeops  = require('./Tradeops')
 
 var Symbl = require('../../symbols/Symbl')
 
-var validate = require('../../../validate')
-
 var Err = require('../../../../Err')
 
 var Parser = require('./Parser')
