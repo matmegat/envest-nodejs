@@ -7,6 +7,8 @@ var validate = require('../../validate')
 var sanitize = require('../../../sanitize')
 
 var TradeOp = require('../investor/Portfolio/TradeOp/TradeOp')
+var DeleteOp = require('../investor/Portfolio/TradeOp/DeleteOp')
+var tradeops = require('../investor/Portfolio/Tradeops')
 
 module.exports = function Trade (portfolio, symbols)
 {
@@ -49,8 +51,9 @@ module.exports = function Trade (portfolio, symbols)
 			var trade_data = post.data
 
 			var tradeOp = TradeOp(trx, investor_id, timestamp, trade_data)
+			var delOp = DeleteOp(void 0, void 0, tradeOp)
 
-			return tradeOp.undone(trx, portfolio)
+			return tradeops.apply(trx, delOp)
 		}
 	})
 }
