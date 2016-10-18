@@ -1,14 +1,14 @@
 
+var _ = require('lodash')
 var expect = require('chai').expect
+var moment = require('moment')
 
 var Err = require('../../../Err')
-var CannotGoPublic = Err('cannot_go_public',
-	'Investor cannot be pushed to public')
-
+var NonTradeOp = require('./Portfolio/TradeOp/NonTradeOp')
 var validate = require('../../validate')
 
-var _ = require('lodash')
-var moment = require('moment')
+var CannotGoPublic = Err('cannot_go_public',
+	'Investor cannot be pushed to public')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -459,11 +459,7 @@ function Brokerage (investor_model, db)
 			validate.required(value.date, 'brokerage.date')
 
 			decimal(value.amount, 'brokerage.amount')
-
-			if (value.amount < 0)
-			{
-				throw WrongBrokerageFormat({ field: 'brokerage.amount' })
-			}
+			validate.number.nonNegative(value.amount, 'brokerage.amount')
 
 			validate.date(value.date, 'brokerage.date')
 
@@ -476,9 +472,15 @@ function Brokerage (investor_model, db)
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{
-			var portfolio = db.investor.portfolio
+			var timestamp = moment.utc(value.date).toDate()
 
-			return portfolio.brokerage.set(investor_id, value.amount, value.date)
+			var set_brokerage = NonTradeOp(investor_id, timestamp,
+			{
+				type: 'deposit',
+				amount: value.amount
+			})
+
+			return db.investor.portfolio.apply(set_brokerage)
 		},
 		verify: (value) =>
 		{
