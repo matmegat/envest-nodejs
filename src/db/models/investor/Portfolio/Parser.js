@@ -3,6 +3,7 @@ var concat    = require('lodash/concat')
 var every     = require('lodash/every')
 var filter    = require('lodash/filter')
 var flatten   = require('lodash/flatten')
+var includes  = require('lodash/includes')
 var isNumber  = require('lodash/isNumber')
 var groupBy   = require('lodash/groupBy')
 var map       = require('lodash/map')
@@ -79,65 +80,48 @@ module.exports = function Parser (portfolio, db)
 
 	function transform_hist_data (bulk_data, investor_id)
 	{
-		return portfolio.availableDate(investor_id)
-		.then((portfolio_date) =>
+		bulk_data.forEach((entry, i) =>
 		{
-			if (portfolio_date === null)
-			{	// any date is available
-				portfolio_date = moment.utc(0) // Jan 01 1970
+			entry.date = moment.utc(entry.Date)
+			entry.investor_id = investor_id
+
+			if (entry.Stock)
+			{
+				entry.symbol = Symbl(entry.Stock)
 			}
 
-			if (! portfolio_date.isValid())
+			if (entry.Cash)
 			{
-				throw UploadHistoryError(
-				{
-					reason: 'Unable to get portfolio available date'
-				})
+				entry.Cash = Number(entry.Cash)
+				validate.number(entry.Cash, `csv[${i + 1}].Cash`)
 			}
 
-			bulk_data.forEach((entry, i) =>
+			if (entry.Amount)
 			{
-				entry.date = moment.utc(entry.Date)
-				entry.is_valid_date
-				 = entry.date.isValid() && entry.date >= portfolio_date
+				entry.Amount = Number(entry.Amount)
+				validate.number(entry.Amount, `csv[${i + 1}].Amount`)
+			}
 
-				if (entry.Stock)
-				{
-					entry.symbol = Symbl(entry.Stock)
-				}
-
-				if (entry.Cash)
-				{
-					entry.Cash = Number(entry.Cash)
-					validate.number(entry.Cash, `csv[${i + 1}].Cash`)
-				}
-
-				if (entry.Amount)
-				{
-					entry.Amount = Number(entry.Amount)
-					validate.number(entry.Amount, `csv[${i + 1}].Amount`)
-				}
-
-				if (entry.Price)
-				{
-					entry.Price = Number(entry.Price)
-					validate.number(entry.Price, `csv[${i + 1}].Price`)
-				}
-			})
-
-			var options = { soft: true, other: true }
-			return db.symbols.resolveMany(map(bulk_data, 'symbol'), options)
-			.then(symbols =>
+			if (entry.Price)
 			{
-				symbols.forEach((symbol, i) =>
-				{
-					bulk_data[i].symbol = symbol
-					bulk_data[i].is_resolved = symbol !== null
-				})
-
-				return bulk_data
-			})
+				entry.Price = Number(entry.Price)
+				validate.number(entry.Price, `csv[${i + 1}].Price`)
+			}
 		})
+
+		var options = { soft: true, other: true }
+		return db.symbols.resolveMany(map(bulk_data, 'symbol'), options)
+		.then(symbols =>
+		{
+			symbols.forEach((symbol, i) =>
+			{
+				bulk_data[i].symbol = symbol
+				bulk_data[i].is_resolved = symbol !== null
+			})
+
+			return bulk_data
+		})
+		.then(adjust_date)
 	}
 
 	function csv_to_array (csv)
@@ -180,10 +164,10 @@ module.exports = function Parser (portfolio, db)
 
 	var methods =
 	{
-		brokerage: portfolio.brokerage.set, // trx, investor_id, cash, timestamp
 		holdings:  portfolio.holdings.set, // trx, investor_id, holding_entries
 		trade:     portfolio.makeTrade, // trx, investor_id, type, date, data
 		cash:      portfolio.manageCash, // trx, investor_id, op
+		brokerage: portfolio.manageCash, // trx, investor_id, Deposit Op
 	}
 
 	parser.uploadHistoryAs
@@ -197,22 +181,6 @@ module.exports = function Parser (portfolio, db)
 			return db.investor.all.ensure(investor_id)
 			.then(() => csv_to_array(csv))
 			.then(bulk_data => transform_hist_data(bulk_data, investor_id))
-			.then(bulk_data =>
-			{
-				if (! every(bulk_data, { is_valid_date: true }))
-				{
-					var invalid_entries = filter(bulk_data, { is_valid_date: false })
-
-					throw UploadHistoryError(
-					{
-						reason: `${invalid_entries.length} entries are older ` +
-						        `than last portfolio record`,
-						entries: invalid_entries
-					})
-				}
-
-				return adjust_date(bulk_data)
-			})
 			.then(bulk_data =>
 			{
 				return sequential(bulk_data[0], 0, bulk_data)
@@ -296,7 +264,12 @@ module.exports = function Parser (portfolio, db)
 		{
 			return {
 				method: methods.brokerage,
-				args: [entry.Cash, entry.date.format()]
+				args: [
+				{
+					type: cash_management_ops[0],
+					cash: entry.Cash,
+					date: entry.date.format()
+				}]
 			}
 		}
 
@@ -316,14 +289,8 @@ module.exports = function Parser (portfolio, db)
 			}
 		}
 
-		if (cash_management_ops.indexOf(entry.Type) !== -1 && entry.Cash)
+		if (includes(cash_management_ops, entry.Type) && entry.Cash)
 		{
-			if (entry.Type === cash_management_ops[1] ||
-				entry.Type === cash_management_ops[3])
-			{
-				entry.Cash *= -1
-			}
-
 			return {
 				method: methods.cash,
 				args:
