@@ -46,8 +46,6 @@ module.exports = function Trade (portfolio, symbols, db)
 		},
 		remove: (trx, post) =>
 		{
-			var tradeops = Tradeops(db, portfolio)
-
 			var investor_id = post.investor_id
 			var timestamp = post.timestamp
 			var trade_data = post.data
