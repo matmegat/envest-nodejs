@@ -119,7 +119,6 @@ module.exports = function Parser (portfolio, db)
 
 			return bulk_data
 		})
-		.then(adjust_date)
 	}
 
 	function csv_to_array (csv)
@@ -338,30 +337,6 @@ module.exports = function Parser (portfolio, db)
 	}
 	/* eslint-enable complexity */
 
-	function adjust_date (bulk_data)
-	{
-		var minutes_offset = 5
-		var by_date = groupBy(bulk_data, 'date')
-
-		var adjusted_dates = mapValues(by_date, (values) =>
-		{
-			if (values.length > 1)
-			{
-
-				values.forEach((entry, i) =>
-				{
-					entry.date.add(i * minutes_offset, 'minutes')
-				})
-			}
-
-			return values
-		})
-
-		adjusted_dates = values(adjusted_dates)
-		adjusted_dates = flatten(adjusted_dates)
-
-		return orderBy(adjusted_dates, 'date')
-	}
 
 	return parser
 }
