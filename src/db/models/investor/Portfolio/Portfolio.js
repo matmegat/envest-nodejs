@@ -778,11 +778,6 @@ module.exports = function Portfolio (db, investor)
 					throw WrongTradeDir({ dir: dir })
 				}
 
-				if (data.is_delete)
-				{
-					for_date = moment()
-				}
-
 				return holdings.dirs[dir](trx, investor_id, symbol, for_date, data)
 			})
 			.then(sum =>

@@ -29,7 +29,9 @@ module.exports = function Trade (portfolio, symbols, db)
 			})
 			.then(() =>
 			{
-				return portfolio.makeTrade(trx, investor_id, type, date, data)
+				var tradeOp = TradeOp(trx, investor_id, date, data)
+
+				return portfolio.tradeops.apply(trx, tradeOp)
 			})
 			.then(() =>
 			{
