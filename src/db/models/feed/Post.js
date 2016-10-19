@@ -16,7 +16,7 @@ module.exports = function Post (db)
 	var post = {}
 
 	post.types = {}
-	post.types.trade = Trade(db.investor.portfolio, db.symbols, db.feed)
+	post.types.trade = Trade(db.investor.portfolio, db.symbols, db)
 	post.types.watchlist = Watchlist(db)
 	post.types.update = Update(db)
 
