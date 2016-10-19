@@ -40,7 +40,6 @@ var Err = require('../../../../Err')
 var Parser = require('./Parser')
 
 var NonTradeOp = require('./TradeOp/NonTradeOp')
-var DeleteOp = require('./TradeOp/DeleteOp')
 
 module.exports = function Portfolio (db, investor)
 {

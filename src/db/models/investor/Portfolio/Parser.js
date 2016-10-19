@@ -1,7 +1,5 @@
 
 var concat    = require('lodash/concat')
-var every     = require('lodash/every')
-var filter    = require('lodash/filter')
 var flatten   = require('lodash/flatten')
 var includes  = require('lodash/includes')
 var isNumber  = require('lodash/isNumber')

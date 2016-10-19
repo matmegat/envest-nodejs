@@ -1,7 +1,6 @@
 
 var extend = require('lodash/extend')
 var sumBy = require('lodash/sumBy')
-var pick = require('lodash/pick')
 
 var expect = require('chai').expect
 
@@ -18,7 +17,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	var knex = db.knex
 	var one      = db.helpers.one
-	var oneMaybe = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
 
