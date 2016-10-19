@@ -34,7 +34,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		options = extend(
 		{
-			other: false
+			other: false,
+			cache: true
 		},
 		options)
 
@@ -73,10 +74,14 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			})
 			.then(symbols =>
 			{
-				var orig_symbol = symbols[0]
 				var symbol = symbols[1]
 
-				cache.put(orig_symbol, symbol)
+				if (options.cache)
+				{
+					var orig_symbol = symbols[0]
+
+					cache.put(orig_symbol, symbol)
+				}
 
 				return symbol
 			})
