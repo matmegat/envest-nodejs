@@ -71,3 +71,11 @@ Op.equals = (L, R) =>
 
 	return L.equals(R)
 }
+
+Op.sameTime = (L, R) =>
+{
+	expect(Op.is(L)).true
+	expect(Op.is(R)).true
+
+	return L.timestamp.toISOString() === R.timestamp.toISOString()
+}
