@@ -57,6 +57,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			.then(resl =>
 			{
 				var symbol = Symbl(resl.symbol)
+				var orig_symbol = symbol.clone()
 
 				symbol.exchange || (symbol.exchange = resl.exchange)
 
@@ -64,15 +65,18 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 				symbol.company = resl.company
 
-				return symbol
+				return [ orig_symbol, symbol ]
 			},
 			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
 			})
-			.then(symbol =>
+			.then(symbols =>
 			{
-				cache.put(symbol, symbol)
+				var orig_symbol = symbols[0]
+				var symbol = symbols[1]
+
+				cache.put(orig_symbol, symbol)
 
 				return symbol
 			})
