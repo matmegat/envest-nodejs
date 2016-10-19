@@ -6,10 +6,10 @@
 
 var assign = Object.assign
 
-var expect   = require('chai').expect
-var extend   = require('lodash/extend')
-var includes = require('lodash/includes')
-var wrap     = require('lodash/wrap')
+var expect = require('chai').expect
+var extend = require('lodash/extend')
+var omit   = require('lodash/omit')
+var wrap   = require('lodash/wrap')
 
 var Op    = require('./Op')
 var Symbl = require('../../../symbols/Symbl')
@@ -37,10 +37,10 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	op.init_data.type = op_data.type
 	op.init_data.holdings = []
 
-	if (op_data.type === 'brokerge')
+	if (op_data.type === 'brokerage')
 	{
 		expect(op_data.value).to.be.a('number')
-		op.init_data.brokerage = op_data.value
+		op.init_data.value = op_data.value
 	}
 
 	function vrow (holding)
@@ -50,6 +50,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		expect(holding.price).to.be.a('number')
 
 		holding.symbol = Symbl(holding.symbol)
+		holding.date = op.timestamp
 	}
 
 	if (op_data.type === 'holdings')
@@ -57,7 +58,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		expect(op_data.value).to.be.an('array')
 		op_data.value.forEach(vrow)
 
-		op.init_data.holdings = op_data.value
+		op.init_data.holdings = op.init_data.value = op_data.value
 	}
 
 	function apply_brokerage (trx, portfolio)
@@ -65,7 +66,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		return portfolio.brokerage.put(
 			trx,
 			op.investor_id,
-			op.init_data.brokerage,
+			op.init_data.value,
 			op.timestamp,
 			null,
 			{ recalculate: true }
@@ -74,7 +75,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	function apply_holdings (trx, portfolio)
 	{
-		return Promise.resolve('coming soon')
+		return portfolio.holdings.set(trx, op.investor_id, op.init_data.holdings)
 	}
 
 	op.toDb = wrap(op.toDb, toDb =>
@@ -82,7 +83,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		return assign(toDb(),
 		{
 			type: op.type,
-			data: op.init_data
+			data: omit(op.init_data, 'holdings')
 		})
 	})
 
