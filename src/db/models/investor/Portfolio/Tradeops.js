@@ -3,6 +3,7 @@
 var expect = require('chai').expect
 
 var invoke = require('lodash/invokeMap')
+var find   = require('lodash/findIndex')
 
 var PReduce = require('bluebird').reduce
 
@@ -42,6 +43,8 @@ module.exports = function Tradeops (db, portfolio)
 		.then(ops =>
 		{
 			ops = op_merge(tradeop, ops)
+			ops = op_adjust(ops)
+
 
 			return PReduce(ops, (memo, current) =>
 			{
@@ -82,6 +85,46 @@ module.exports = function Tradeops (db, portfolio)
 			}
 
 			return [ tradeop ].concat(ops)
+		}
+	}
+
+	function op_adjust (ops)
+	{
+		if (! ops.length)
+		{
+			return ops
+		}
+
+		var head = ops[0]
+
+		ops = ops.slice(1)
+
+		ops.forEach(op =>
+		{
+			if (Op.sameTime(head, op))
+			{
+				moveForward(head)
+			}
+		})
+
+		var pos_to_insert = find(ops, op =>
+		{
+			return head.timestamp.isBefore(op.timestamp)
+		})
+
+		if (pos_to_insert === -1)
+		{
+			pos_to_insert = ops.length
+		}
+
+		/* insert moved op */
+		ops.splice(pos_to_insert, 0, head)
+
+		return ops
+
+		function moveForward (tradeop)
+		{
+			tradeop.timestamp.add(1, 'm')
 		}
 	}
 
