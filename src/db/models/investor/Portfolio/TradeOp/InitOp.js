@@ -128,7 +128,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 		if (id.type === 'brokerage')
 		{
-			substitution = `${id.brokerage}`
+			substitution = `${id.value}`
 		}
 		if (id.type === 'holdings')
 		{

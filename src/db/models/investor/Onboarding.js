@@ -4,7 +4,7 @@ var expect = require('chai').expect
 var moment = require('moment')
 
 var Err = require('../../../Err')
-var NonTradeOp = require('./Portfolio/TradeOp/NonTradeOp')
+var InitOp = require('./Portfolio/TradeOp/InitOp')
 var validate = require('../../validate')
 
 var CannotGoPublic = Err('cannot_go_public',
@@ -472,12 +472,12 @@ function Brokerage (investor_model, db)
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{
-			var timestamp = moment.utc(value.date).toDate()
+			var timestamp = moment.utc(value.date)
 
-			var set_brokerage = NonTradeOp(investor_id, timestamp,
+			var set_brokerage = InitOp(investor_id, timestamp,
 			{
-				type: 'deposit',
-				amount: value.amount
+				type: 'brokerage',
+				value: value.amount
 			})
 
 			return db.investor.portfolio.apply(set_brokerage)
@@ -531,9 +531,14 @@ function Holdings (investor_model, db)
 
 		validate.required(row.date, `holdings[${i}].date`)
 		validate.date(row.date, `holdings[${i}].date`)
-		if (moment.utc(row.date) > moment.utc())
+		if (moment.utc(row.date) > moment.utc().endOf('day'))
 		{
-			throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+			throw WrongHoldingsFormat(
+			{
+				field: `holdings[${i}].date`,
+				reason: `Can't set holding in future. ` +
+				`Server time is ${moment.utc().format}`
+			})
 		}
 	}
 
@@ -557,7 +562,7 @@ function Holdings (investor_model, db)
 				return holdings
 			})
 		},
-		validate: (value, investor_id) =>
+		validate: (value) =>
 		{
 			try
 			{
@@ -577,30 +582,19 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return db.investor.portfolio.availableDate(investor_id)
-			.then((min_date) =>
-			{
-				if (min_date === null)
-				{
-					min_date = moment.utc(0)
-				}
-
-				value.forEach((row, i) =>
-				{
-					if (moment.utc(row.date) < min_date)
-					{
-						throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
-					}
-				})
-
-				return value
-			})
+			return value
 		},
 		set: (value, investor_queryset, investor_id) =>
 		{
-			var portfolio = db.investor.portfolio
+			var timestamp = moment.utc(value[0].date)
 
-			return portfolio.holdings.set(investor_id, value)
+			var set_holdings = InitOp(investor_id, timestamp,
+			{
+				type: 'holdings',
+				value: value
+			})
+
+			return db.investor.portfolio.apply(set_holdings)
 		}
 	})
 }

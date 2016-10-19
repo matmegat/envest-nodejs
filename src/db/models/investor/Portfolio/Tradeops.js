@@ -167,7 +167,7 @@ module.exports = function Tradeops (db, portfolio)
 
 		return table(trx)
 		.where('investor_id', tradeop.investor_id)
-		.where('timestamp', '>=', tradeop.timestamp)
+		.where('timestamp', '>=', tradeop.timestamp.format())
 	}
 
 
