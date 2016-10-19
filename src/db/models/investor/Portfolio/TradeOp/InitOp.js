@@ -60,9 +60,16 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		op.init_data.holdings = op_data.value
 	}
 
-	function apply_brokerag (trx, portfolio)
+	function apply_brokerage (trx, portfolio)
 	{
-		return Promise.resolve('coming soon')
+		return portfolio.brokerage.put(
+			trx,
+			op.investor_id,
+			op.init_data.brokerage,
+			op.timestamp,
+			null,
+			{ recalculate: true }
+		)
 	}
 
 	function apply_holdings (trx, portfolio)
@@ -83,7 +90,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	{
 		if (op.init_data.type === 'brokerage')
 		{
-			return apply_brokerag(trx, portfolio)
+			return apply_brokerage(trx, portfolio)
 		}
 
 		if (op.init_data.type === 'holdings')
