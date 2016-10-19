@@ -48,36 +48,12 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	{
 		var is_recalc = includes(recalculate_ops, op.op_data.type)
 
-		return Promise.all(
-		[
-			portfolio.brokerage.byId(
-				trx,
-				op.investor_id,
-				op.timestamp,
-				{ soft: true }
-			),
-			portfolio.brokerage.isExist(trx, investor_id, op.timestamp)
-		])
-		.then(values =>
+		return portfolio.brokerage.byId(trx, op.investor_id, op.timestamp)
+		.then(brokerage =>
 		{
-			var brokerage = values[0]
-			var is_exist = values[1]
-
 			var new_cash = brokerage.cash
 
-			if (is_exist)
-			{
-				if (op.op_data.type === 'fee' || op.op_data.type === 'withdraw')
-				{
-					new_cash -= op.op_data.amount
-				}
-				else
-				{
-					new_cash += op.op_data.amount
-				}
-			}
-			else if (   op.op_data.type === 'deposit'
-				     || op.op_data.type === 'interest')
+			if (op.op_data.type === 'deposit' || op.op_data.type === 'interest')
 			{
 				new_cash = op.op_data.amount
 			}
