@@ -736,57 +736,29 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
-	portfolio.adjustDate = knexed.transact(knex, (trx, investor_id, timestamp) =>
-	{
-		expect(timestamp).ok
-		timestamp = moment.utc(timestamp)
-
-		return portfolio.availableDate(trx, investor_id)
-		.then(portfolio_date =>
-		{
-			if (timestamp > portfolio_date)
-			{
-				return timestamp.format()
-			}
-
-			if (timestamp.isSameOrAfter(portfolio_date.clone().startOf('day')))
-			{
-				return portfolio_date.add(5, 'minutes').format()
-			}
-
-			return timestamp.format()
-			// Do Nothing. Will create error 'Wrong Date'
-			// Or, in feature, will insert between to date
-		})
-	})
-
 	portfolio.makeTrade = function (trx, investor_id, type, timestamp, data)
 	{
 		var dir = data.dir
 		var symbol = {}
 
-		return portfolio.adjustDate(trx, investor_id, timestamp)
-		.then(for_date =>
+		return Symbl.validate(data.symbol)
+		.then(symbl =>
 		{
-			return Symbl.validate(data.symbol)
-			.then(symbl =>
-			{
-				symbol = symbl
+			symbol = symbl
 
-				if (! (dir in holdings.dirs))
-				{
-					throw WrongTradeDir({ dir: dir })
-				}
-
-				return holdings.dirs[dir](trx, investor_id, symbol, for_date, data)
-			})
-			.then(sum =>
+			if (! (dir in holdings.dirs))
 			{
-				return brokerage.update(trx, investor_id, for_date,
-				{
-					operation: 'trade',
-					amount: sum
-				})
+				throw WrongTradeDir({ dir: dir })
+			}
+
+			return holdings.dirs[dir](trx, investor_id, symbol, timestamp, data)
+		})
+		.then(sum =>
+		{
+			return brokerage.update(trx, investor_id, timestamp,
+			{
+				operation: 'trade',
+				amount: sum
 			})
 		})
 	}

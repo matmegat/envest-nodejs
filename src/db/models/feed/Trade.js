@@ -8,9 +8,8 @@ var sanitize = require('../../../sanitize')
 
 var TradeOp = require('../investor/Portfolio/TradeOp/TradeOp')
 var DeleteOp = require('../investor/Portfolio/TradeOp/DeleteOp')
-var Tradeops = require('../investor/Portfolio/Tradeops')
 
-module.exports = function Trade (portfolio, symbols, db)
+module.exports = function Trade (portfolio, symbols)
 {
 	return Type(
 	{
