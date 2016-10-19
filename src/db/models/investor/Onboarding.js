@@ -5,6 +5,7 @@ var moment = require('moment')
 
 var Err = require('../../../Err')
 var InitOp = require('./Portfolio/TradeOp/InitOp')
+var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
 
 var CannotGoPublic = Err('cannot_go_public',
@@ -588,11 +589,7 @@ function Holdings (investor_model, db)
 		{
 			var timestamp = moment.utc(value[0].date)
 
-			var set_holdings = InitOp(investor_id, timestamp,
-			{
-				type: 'holdings',
-				value: value
-			})
+			var set_holdings = InitHoldingsOp(investor_id, timestamp, value)
 
 			return db.investor.portfolio.apply(set_holdings)
 		}

@@ -213,7 +213,6 @@ module.exports = function Parser (portfolio, db)
 		{
 			var op_instance = entry_2_data(entry)
 
-			// return data.method.apply(this, concat(trx, investor_id, data.args))
 			return portfolio.tradeops.apply(trx, op_instance)
 			.then(() =>
 			{

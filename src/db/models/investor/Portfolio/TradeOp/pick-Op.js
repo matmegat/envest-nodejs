@@ -4,6 +4,7 @@ var ops =
 	trade: require('./TradeOp'),
 	nontrade: require('./NonTradeOp'),
 	init: require('./InitOp'),
+	'init-holdings': require('./InitHoldingsOp'),
 }
 
 module.exports = function (type)

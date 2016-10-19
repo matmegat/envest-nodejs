@@ -336,42 +336,17 @@ module.exports = function Holdings (db, investor, portfolio)
 	// set
 	holdings.set = knexed.transact(knex, (trx, investor_id, holding_entries) =>
 	{
+		var timestamp = maxBy(holding_entries, 'timestamp').timestamp
+
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
-			validate.array(holding_entries, 'holdings')
-
-			holding_entries.forEach((holding, i) =>
-			{
-				validate.required(holding.symbol, `holdings[${i}].symbol`)
-				validate.empty(holding.symbol, `holdings[${i}].symbol`)
-
-				validate.number(holding.amount, `holdings[${i}].amount`)
-				if (holding.amount === 0)
-				{
-					throw InvalidAmount(
-					{
-						field: `holdings[${i}].amount`,
-						reason: `Should be not equal to zero`
-					})
-				}
-
-				validate.number(holding.price, `holdings[${i}].price`)
-				if (holding.price <= 0)
-				{
-					throw InvalidAmount({ field: `holdings[${i}].price` })
-				}
-
-				validate.required(holding.date, `holdings[${i}].date`)
-				validate.date(holding.date, `holdings[${i}].date`)
-				holding.date = moment.utc(holding.date)
-				if (holding.date > moment.utc())
-				{
-					throw InvalidHoldingDate({ field: `holdings[${i}].date` })
-				}
-				holding.timestamp = holding.date.format()
-			})
-
+			return portfolio.brokerage
+			.isExist(trx, investor_id, timestamp.format())
+		})
+		.then(Err.falsy(InvalidHoldingDate))
+		.then(() =>
+		{
 			var symbols = map(holding_entries, 'symbol')
 
 			return db.symbols.resolveMany(symbols, { other: true })
@@ -379,8 +354,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		.then(symbols => symbols.map(Symbl))
 		.then(symbols =>
 		{
-			var timestamp = maxBy(holding_entries, 'date').timestamp
-
 			var new_holdings = symbols.map((symbol, i) =>
 			{
 				var holding = holding_entries[i]
@@ -390,7 +363,7 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 
 			return holdings.byId.quotes(
-				trx, investor_id, timestamp, { other: true }
+				trx, investor_id, timestamp.format(), { other: true }
 			)
 			.then(previous_holdings =>
 			{
@@ -400,9 +373,9 @@ module.exports = function Holdings (db, investor, portfolio)
 					return portfolio
 					.brokerage
 					.recalculate(
-						trx,              // transaction
-						investor_id,      // investor id
-						timestamp,        // timestamp
+						trx,
+						investor_id,
+						timestamp.format(),
 						previous_holdings // previous state of holdings
 					)
 				})
