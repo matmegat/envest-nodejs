@@ -52,7 +52,7 @@ var Op = module.exports = function Op (investor_id, timestamp)
 
 	op.inspect = () =>
 	{
-		return 'OP'
+		return `OP {${op.investor_id}} (${op.timestamp.format()})`
 	}
 
 	return op

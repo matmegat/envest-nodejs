@@ -106,7 +106,8 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.inspect = () =>
 	{
-		return `NONTRADE ${op.op_data.type} ${op.op_data.amount}`
+		return `NONTRADE {${op.investor_id}} (${op.timestamp.format()})` +
+		` ${op.op_data.type} ${op.op_data.amount}`
 	}
 
 	return op
