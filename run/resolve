@@ -1,5 +1,7 @@
 #! /usr/bin/env node
 
+require('console-ultimate/global').replace()
+
 var rootpath = require('rootpath')
 
 var Config = require('../src/Config')
@@ -19,9 +21,9 @@ if (! symbol)
 }
 
 symbols.resolve(symbol)
-.then(console.log, console.error)
+.then(console.dir, console.error)
 .then(() =>
 {
 	return symbols.quotes(symbol)
 })
-.then(console.log, console.error)
+.then(console.dir, console.error)
