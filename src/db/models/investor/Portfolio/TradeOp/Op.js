@@ -1,6 +1,8 @@
 
 var expect = require('chai').expect
 
+var moment = require('moment')
+
 var inst = () => Object.create(Op.prototype)
 
 var Op = module.exports = function Op (investor_id, timestamp)
@@ -13,7 +15,7 @@ var Op = module.exports = function Op (investor_id, timestamp)
 	var op = inst()
 
 	op.investor_id = investor_id
-	op.timestamp = timestamp
+	op.timestamp = moment(timestamp)
 	op.type = NaN
 
 	op.toDb = () =>
@@ -25,7 +27,7 @@ var Op = module.exports = function Op (investor_id, timestamp)
 	{
 		return {
 			investor_id: op.investor_id,
-			timestamp:   op.timestamp
+			timestamp:   op.timestamp.format()
 		}
 	}
 
