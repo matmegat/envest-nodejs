@@ -1,14 +1,17 @@
 
 var expect = require('chai').expect
 
+var moment = require('moment')
+
 var inst = () => Object.create(Op.prototype)
 
 var Op = module.exports = function Op (investor_id, timestamp)
 {
 	expect(investor_id).a('number')
-	expect(timestamp).a('date')
+	expect(moment.isDate(timestamp) || moment.isMoment(timestamp)).true
 
-	timestamp.setMilliseconds(0)
+	timestamp = moment(timestamp)
+	timestamp.milliseconds(0)
 
 	var op = inst()
 
@@ -25,7 +28,7 @@ var Op = module.exports = function Op (investor_id, timestamp)
 	{
 		return {
 			investor_id: op.investor_id,
-			timestamp:   op.timestamp
+			timestamp:   op.timestamp.format()
 		}
 	}
 
