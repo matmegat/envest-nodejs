@@ -14,7 +14,6 @@ var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
 var DeleteOp = require('./TradeOp/DeleteOp')
 
-
 module.exports = function Tradeops (db, portfolio)
 {
 	var knex = db.knex
