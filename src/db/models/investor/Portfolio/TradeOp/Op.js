@@ -50,6 +50,11 @@ var Op = module.exports = function Op (investor_id, timestamp)
 		return false
 	}
 
+	op.inspect = () =>
+	{
+		return 'OP'
+	}
+
 	return op
 }
 
