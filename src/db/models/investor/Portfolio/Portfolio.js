@@ -698,22 +698,6 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
-	// TODO rm
-	/*{
-		var TradeOp = require('./TradeOp/TradeOp')
-
-		var op = TradeOp(120, new Date,
-		{
-			dir: 'sold',
-			price: 1,
-			amount: 1,
-			symbol: 'MSFT.XNAS'
-		})
-
-		portfolio.apply(op)
-	}*/
-
-
 	// trading
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
