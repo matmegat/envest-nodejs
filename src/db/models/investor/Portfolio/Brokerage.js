@@ -455,7 +455,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 	brokerage.remove = knexed.transact(knex, (trx, investor_id, date) =>
 	{
 		expect(investor_id).a('number')
-		expect(date).a('date')
+		expect(date.toDate()).a('date')
 
 		date = moment(date).startOf('second')
 

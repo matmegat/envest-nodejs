@@ -63,5 +63,13 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		return true
 	}
 
+	op.inspect = () =>
+	{
+		var td = op.trade_data
+
+		return `TRADEOP ${td.dir} ${td.symbol.inspect()}` +
+		` ${td.amount} shares per ${td.price}$`
+	}
+
 	return op
 }

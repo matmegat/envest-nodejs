@@ -3,7 +3,7 @@ var expect = require('chai').expect
 
 var Op = require('./Op')
 
-var DeleteOp = module.exports = function DeleteOp (_, _, other_op)
+var DeleteOp = module.exports = function DeleteOp (other_op)
 {
 	expect(Op.is(other_op)).true
 

@@ -53,9 +53,9 @@ module.exports = function Trade (portfolio, symbols, db)
 			var trade_data = post.data
 
 			var tradeOp = TradeOp(trx, investor_id, timestamp, trade_data)
-			var delOp = DeleteOp(void 0, void 0, tradeOp)
+			var delOp = DeleteOp(tradeOp)
 
-			return tradeops.apply(trx, delOp)
+			return portfolio.tradeops.apply(trx, delOp)
 		}
 	})
 }

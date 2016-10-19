@@ -8,9 +8,10 @@ var inst = () => Object.create(Op.prototype)
 var Op = module.exports = function Op (investor_id, timestamp)
 {
 	expect(investor_id).a('number')
-	expect(timestamp).a('date')
+	expect(moment.isDate(timestamp) || moment.isMoment(timestamp)).true
 
-	timestamp.setMilliseconds(0)
+	timestamp = moment(timestamp)
+	timestamp.milliseconds(0)
 
 	var op = inst()
 
@@ -49,6 +50,11 @@ var Op = module.exports = function Op (investor_id, timestamp)
 		return false
 	}
 
+	op.inspect = () =>
+	{
+		return 'OP'
+	}
+
 	return op
 }
 
@@ -69,4 +75,12 @@ Op.equals = (L, R) =>
 	if (L.timestamp.toISOString() !== R.timestamp.toISOString()) { return false }
 
 	return L.equals(R)
+}
+
+Op.sameTime = (L, R) =>
+{
+	expect(Op.is(L)).true
+	expect(Op.is(R)).true
+
+	return L.timestamp.toISOString() === R.timestamp.toISOString()
 }
