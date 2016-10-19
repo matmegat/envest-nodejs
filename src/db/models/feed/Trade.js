@@ -8,9 +8,9 @@ var sanitize = require('../../../sanitize')
 
 var TradeOp = require('../investor/Portfolio/TradeOp/TradeOp')
 var DeleteOp = require('../investor/Portfolio/TradeOp/DeleteOp')
-var tradeops = require('../investor/Portfolio/Tradeops')
+var Tradeops = require('../investor/Portfolio/Tradeops')
 
-module.exports = function Trade (portfolio, symbols)
+module.exports = function Trade (portfolio, symbols, db)
 {
 	return Type(
 	{
@@ -46,6 +46,8 @@ module.exports = function Trade (portfolio, symbols)
 		},
 		remove: (trx, post) =>
 		{
+			var tradeops = Tradeops(db, portfolio)
+
 			var investor_id = post.investor_id
 			var timestamp = post.timestamp
 			var trade_data = post.data
