@@ -202,34 +202,5 @@ module.exports = function (db, http)
 		toss(rs, investors.model.portfolio.grid.ir(rq.params.id))
 	})
 
-	investors.express.get(
-		'/:id/operations', http.adminOrInvestorRequired, (rq, rs) =>
-	{
-		var options = {}
-		var investor_id = Number(rq.params.id)
-
-		options.paginator = pick(rq.query,
-		[
-			// 'max_id',
-			// 'since_id',
-		])
-
-		options.filter = pick(rq.query,
-		[
-			'type',
-		])
-
-		toss(rs, investors.model.portfolio.opsList(investor_id, options))
-	})
-
-	investors.express.delete(
-		'/:id/operations', http.adminOrInvestorRequired, (rq, rs) =>
-	{
-		var timestamp = new Date(rq.body.timestamp)
-		var investor_id = Number(rq.params.id)
-
-		toss(rs, investors.model.portfolio.removeOp(investor_id, timestamp))
-	})
-
 	return investors
 }

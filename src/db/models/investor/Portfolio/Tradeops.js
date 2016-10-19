@@ -13,10 +13,6 @@ var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
 var DeleteOp = require('./TradeOp/DeleteOp')
 
-var ChunkedPaginator = require('../../../paginator/Chunked')
-var Filter = require('../../../Filter')
-var validate = require('../../../validate')
-
 module.exports = function Tradeops (db, portfolio)
 {
 	var knex = db.knex
@@ -129,61 +125,6 @@ module.exports = function Tradeops (db, portfolio)
 		return table(trx)
 		.where('investor_id', tradeop.investor_id)
 		.where('timestamp', '>=', tradeop.timestamp)
-	}
-
-	var filter = Filter(
-	{
-		type: Filter.by.field('type', validate.collection(
-		[
-			'trade',
-			'nontrade',
-		]))
-	})
-
-	var paginator_chunked = ChunkedPaginator(
-	{
-		table: table,
-		order_column: 'timestamp',
-		real_order_column: 'timestamp',
-		default_direction: 'desc',
-	})
-
-	tradeops.byInvestorId = (trx, investor_id, options) =>
-	{
-		expect(investor_id).to.be.a('number')
-
-		var queryset = table(trx)
-		.where('investor_id', investor_id)
-
-		queryset = filter(queryset, options.filter)
-
-		var count_queryset = queryset.clone()
-
-		return paginator_chunked.paginate(queryset, options.paginator)
-		.then(rows => rows.map(load))
-		.then(operations =>
-		{
-			return db.helpers.count(count_queryset)
-			.then(count =>
-			{
-				return {
-					operations: operations,
-					total: count
-				}
-			})
-		})
-	}
-
-	tradeops.byId = (trx, investor_id, timestamp) =>
-	{
-		expect(investor_id).to.be.a('number')
-		expect(timestamp).to.be.a('date')
-
-		return table(trx)
-		.where('investor_id', investor_id)
-		.where('timestamp', timestamp)
-		.then(db.helpers.one)
-		.then(load)
 	}
 
 
