@@ -56,7 +56,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 				op.timestamp,
 				{ soft: true }
 			),
-			portfolio.brokerage.isExist(trx, investor_id, timestamp)
+			portfolio.brokerage.isExist(trx, investor_id, op.timestamp)
 		])
 		.then(values =>
 		{
@@ -86,7 +86,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 				trx,
 				op.investor_id,
 				new_cash,
-				timestamp,
+				op.timestamp,
 				null,
 				{ recalculate: is_recalc }
 			)

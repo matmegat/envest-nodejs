@@ -777,12 +777,12 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
-	portfolio.makeTrade = function (trx, investor_id, type, date, data)
+	portfolio.makeTrade = function (trx, investor_id, type, timestamp, data)
 	{
 		var dir = data.dir
 		var symbol = {}
 
-		return portfolio.adjustDate(trx, investor_id, date)
+		return portfolio.adjustDate(trx, investor_id, timestamp)
 		.then(for_date =>
 		{
 			return Symbl.validate(data.symbol)
