@@ -28,7 +28,7 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(() =>
 			{
-				var tradeOp = TradeOp(trx, investor_id, date, data)
+				var tradeOp = TradeOp(investor_id, date, data)
 
 				return portfolio.tradeops.apply(trx, tradeOp)
 			})
@@ -51,7 +51,7 @@ module.exports = function Trade (portfolio, symbols)
 			var timestamp = post.timestamp
 			var trade_data = post.data
 
-			var tradeOp = TradeOp(trx, investor_id, timestamp, trade_data)
+			var tradeOp = TradeOp(investor_id, timestamp, trade_data)
 			var delOp = DeleteOp(tradeOp)
 
 			return portfolio.tradeops.apply(trx, delOp)
