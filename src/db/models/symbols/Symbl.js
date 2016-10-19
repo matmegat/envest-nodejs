@@ -2,6 +2,7 @@
 /* eslint-disable max-statements */
 
 var expect = require('chai').expect
+var pick = require('lodash/pick')
 
 var Symbl = module.exports = function Symbl (it)
 {
@@ -73,6 +74,11 @@ var Symbl = module.exports = function Symbl (it)
 				symbol_ticker: s.ticker,
 				symbol_exchange: s.exchange
 			}
+		}
+
+		s.clone = () =>
+		{
+			return Symbl([ s.ticker, s.exchange ])
 		}
 
 		s.isOther = () =>
