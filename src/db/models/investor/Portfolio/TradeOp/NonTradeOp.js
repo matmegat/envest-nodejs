@@ -104,5 +104,10 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		return op.op_data.type === other.op_data.type
 	}
 
+	op.inspect = () =>
+	{
+		return `NONTRADE ${op.op_data.type} ${op.op_data.amount}`
+	}
+
 	return op
 }
