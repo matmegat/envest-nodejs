@@ -1,7 +1,6 @@
 
 var extend = require('lodash/extend')
 var sumBy = require('lodash/sumBy')
-var pick = require('lodash/pick')
 
 var expect = require('chai').expect
 
@@ -18,7 +17,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 	var knex = db.knex
 	var one      = db.helpers.one
-	var oneMaybe = db.helpers.oneMaybe
 
 	var table = knexed(knex, 'brokerage')
 
@@ -117,22 +115,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		.then(it => it.cash)
 	})
 
-	brokerage.isDateAvail =
-		knexed.transact(knex, (trx, investor_id, for_date) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			return table(trx)
-			.where('investor_id', investor_id)
-			.andWhere('timestamp', '>', for_date)
-		})
-		.then(res =>
-		{
-			return ! res.length
-		})
-	})
-
 	brokerage.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.all.ensure(investor_id, trx)
@@ -146,22 +128,20 @@ module.exports = function Brokerage (db, investor, portfolio)
 	})
 
 
-	brokerage.isExact = knexed.transact(knex, (trx, investor_id, timestamp) =>
-	{
-		return table(trx)
-		.where('investor_id', investor_id)
-		.where('timestamp', timestamp)
-		.then(oneMaybe)
-		.then(Boolean)
-	})
-
-	brokerage.isExist = knexed.transact(knex, (trx, investor_id) =>
+	brokerage.isExist = knexed.transact(knex, (trx, investor_id, timestamp) =>
 	{
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
 			return table(trx)
 			.where('investor_id', investor_id)
+			.where(function ()
+			{
+				if (timestamp)
+				{
+					this.where('timestamp', '<=', timestamp)
+				}
+			})
 		})
 		.then(res => res.length)
 	})
@@ -244,68 +224,8 @@ module.exports = function Brokerage (db, investor, portfolio)
 	// init
 	var index_amount_cap = 1e5
 
-	var NotActualBrokerage = Err('not_actual_brokerage',
-		'More actual brokerage already exist')
 
-	brokerage.set = knexed.transact(knex,
-		(trx, investor_id, cash, timestamp) =>
-	{
-		var init_brokerage = () =>
-		{
-			cash = cash || index_amount_cap
-			timestamp = moment.utc(timestamp).format()
-
-			var multiplier = index_amount_cap / cash
-
-			return table(trx)
-			.insert(
-			{
-				investor_id: investor_id,
-				cash: cash,
-				timestamp: timestamp,
-				multiplier: multiplier
-			})
-		}
-
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			validate.required(cash, 'cash')
-			validate.number(cash, 'cash')
-
-			if (cash < 0)
-			{
-				throw InvalidAmount({ field: 'cash' })
-			}
-
-			validate.required(timestamp, 'timestamp')
-			validate.date(timestamp, 'timestamp')
-		})
-		.then(() => brokerage.isExist(trx, investor_id))
-		.then(is_exist =>
-		{
-			if (! is_exist)
-			{
-				return init_brokerage()
-			}
-			else
-			{
-				return put(
-					trx,               // transaction
-					investor_id,       // investor_id
-					cash,              // new cash to set
-					timestamp,         // timestamp
-					null,              // holdings are the same
-					{ override: true } // override on exact match
-				)
-			}
-		})
-	})
-
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
-
-
+	brokerage.put = put
 	// eslint-disable-next-line max-params
 	function put (trx, investor_id, new_cash, timestamp, old_holdings, options)
 	{
@@ -320,22 +240,13 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 		timestamp = moment(timestamp || void 0).startOf('second').utc().format()
 
-		return portfolio.isDateAvail(trx, investor_id, timestamp)
-		.then((is_avail) =>
-		{
-			if (! is_avail)
-			{
-				throw NotActualBrokerage()
-			}
-
-			return Promise.all(
-			[
-				brokerage.byId(trx, investor_id, timestamp),
-				portfolio.holdings.byId
-					.quotes(trx, investor_id, timestamp, { other: true }),
-				brokerage.isExact(trx, investor_id, timestamp)
-			])
-		})
+		return Promise.all(
+		[
+			brokerage.byId(trx, investor_id, timestamp, { soft: true }),
+			portfolio.holdings.byId
+				.quotes(trx, investor_id, timestamp, { other: true }),
+			brokerage.isExist(trx, investor_id, timestamp)
+		])
 		.then(values =>
 		{
 			var cash       = values[0].cash
@@ -343,11 +254,18 @@ module.exports = function Brokerage (db, investor, portfolio)
 
 			var current_holdings = values[1]
 
-			var is_exact = values[2]
+			var is_exist = values[2]
 
 			if (old_holdings === null)
 			{
 				old_holdings = current_holdings
+			}
+
+			if (! is_exist)
+			{
+				cash = 0
+				multiplier = 0
+				options.recalculate = true
 			}
 
 			if (options.recalculate)
@@ -355,9 +273,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				var previous_allocation
 				 = cash + sumBy(old_holdings, 'real_allocation')
 				previous_allocation *= multiplier
+				previous_allocation = previous_allocation || index_amount_cap
 
 				var current_allocation
 				 = new_cash + sumBy(current_holdings, 'real_allocation')
+				current_allocation = current_allocation || index_amount_cap
 
 				multiplier = (previous_allocation / current_allocation)
 			}
@@ -375,21 +295,11 @@ module.exports = function Brokerage (db, investor, portfolio)
 				batch.timestamp = timestamp
 			}
 
-			if (options.override && is_exact)
-			{
-				return table(trx)
-				.where('investor_id', investor_id)
-				.where('timestamp', timestamp)
-				.update(pick(batch, 'cash', 'multiplier'))
-			}
-			else
-			{
-				return table(trx).insert(batch)
-				.catch(Err.fromDb(
-					'timed_brokerage_point_unique',
-					DuplicateBrokerageEntry
-				))
-			}
+			return table(trx).insert(batch)
+			.catch(Err.fromDb(
+				'timed_brokerage_point_unique',
+				DuplicateBrokerageEntry
+			))
 		})
 		.catch(err =>
 		{
@@ -435,7 +345,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 				timestamp,
 				old_holdings,
 				{
-					override: true,
 					recalculate: true
 				}
 			)
@@ -448,7 +357,7 @@ module.exports = function Brokerage (db, investor, portfolio)
 		/* operation with validation procedure:
 		 * data =
 		 * {
-		 *   operation: 'deposit' | 'withdraw' | 'fee' | 'interest' | 'trade'
+		 *   operation: 'trade'
 		 *   amount: number
 		 * }
 		 * */
@@ -462,12 +371,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 		})
 		.then(brokerage =>
 		{
-			var options = { override: true }
-			if (operation === 'deposit' || operation === 'withdraw')
-			{
-				options.recalculate = true
-			}
-
 			if (operation in valid_operations)
 			{
 				valid_operations[operation](amount, brokerage)
@@ -484,30 +387,26 @@ module.exports = function Brokerage (db, investor, portfolio)
 				investor_id,       // investor_id
 				cash,              // new cash to set
 				date,              // timestamp
-				null,              // holdings are the same
-				options            // override on exact match
+				null               // holdings are the same
 			)
 		})
 	})
 
-	brokerage.removeState = knexed.transact(knex, (trx, investor_id, date) =>
+	brokerage.remove = knexed.transact(knex, (trx, investor_id, date) =>
 	{
-		date = moment(date).startOf('second').utc().format()
+		expect(investor_id).a('number')
+		expect(date.toDate()).a('date')
 
 		return table(trx)
 		.where({
 			investor_id: investor_id,
-			timestamp: date
+			timestamp: date.format()
 		})
-		.del()
+		.delete()
 	})
 
 	var valid_operations =
 	{
-		deposit: validate_positive,
-		withdraw: validate_negative,
-		interest: validate_positive,
-		fee: validate_negative,
 		trade: validate_deal
 	}
 
@@ -537,30 +436,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 			// {
 			// 	data: 'Brokerage may not become less than zero'
 			// })
-		}
-	}
-
-	function validate_positive (amount, brokerage)
-	{
-		validate_deal(amount, brokerage)
-		if (amount < 0)
-		{
-			throw InvalidAmount(
-			{
-				data: 'Amount should be positive for this operation'
-			})
-		}
-	}
-
-	function validate_negative (amount, brokerage)
-	{
-		validate_deal(amount, brokerage)
-		if (amount > 0)
-		{
-			throw InvalidAmount(
-			{
-				data: 'Amount should be negative for this operation'
-			})
 		}
 	}
 
