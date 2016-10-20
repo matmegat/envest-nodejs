@@ -189,7 +189,7 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, null),
 			fullValue(trx, investor_id, day_ytd),
 			fullValue(trx, investor_id, day_intraday)
 		])
