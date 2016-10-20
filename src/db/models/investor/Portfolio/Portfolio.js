@@ -803,17 +803,49 @@ module.exports = function Portfolio (db, investor)
 		knex,
 		(trx, whom_id, investor_id, data) =>
 	{
-		return portfolio.manageCash(trx, investor_id, data)
-		.then(() =>
+		return Promise.all(
+		[
+			investor.all.is(whom_id, trx),
+			db.admin.is(whom_id, trx),
+			portfolio.availableDate(trx, investor_id)
+		])
+		.then(values =>
 		{
-			return CashManaged(investor_id,
+			var is_investor = values[0]
+			var is_admin = values[1]
+			var available_from = values[2]
+
+			if (is_admin) { return 'mode:admin' }
+
+			var for_date = moment.utc(data.date)
+			if (is_investor && for_date >= available_from)
 			{
-				admin: [ ':user-id', whom_id ],
-				investor_id: [ ':user-id', investor_id ],
-			})
+				return 'mode:investor'
+			}
+
+			throw InvestorPostDateErr({ available_from: available_from.format() })
+		})
+		.then((mode) =>
+		{
+			return portfolio.manageCash(trx, investor_id, data)
+			.then(() => mode)
+		})
+		.then((mode) =>
+		{
+			if (mode === 'mode:admin')
+			{
+				return CashManaged(investor_id,
+				{
+					admin: [ ':user-id', whom_id ],
+					investor_id: [ ':user-id', investor_id ],
+				})
+			}
 		})
 		.then(noop)
 	})
+
+	var InvestorPostDateErr =
+		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
 
 	extend(portfolio, Parser(portfolio, db))
