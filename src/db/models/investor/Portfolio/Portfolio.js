@@ -806,24 +806,23 @@ module.exports = function Portfolio (db, investor)
 		return Promise.all(
 		[
 			investor.all.is(whom_id, trx),
-			db.admin.is(whom_id, trx),
-			portfolio.availableDate(trx, investor_id)
+			db.admin.is(whom_id, trx)
 		])
 		.then(values =>
 		{
 			var is_investor = values[0]
 			var is_admin = values[1]
-			var available_from = values[2]
+			var min_date = moment().subtract(3, 'days')
 
 			if (is_admin) { return 'mode:admin' }
 
 			var for_date = moment.utc(data.date)
-			if (is_investor && for_date >= available_from)
+			if (is_investor && for_date >= min_date)
 			{
 				return 'mode:investor'
 			}
 
-			throw InvestorPostDateErr({ available_from: available_from.format() })
+			throw InvestorPostDateErr({ available_from: min_date.format() })
 		})
 		.then((mode) =>
 		{
