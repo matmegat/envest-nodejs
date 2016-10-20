@@ -13,10 +13,10 @@ var knexed   = require('../../../knexed')
 var Symbl    = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
-var InitOp         = require('./TradeOp/InitBrokerageOp')
-var InitHoldingsOp = require('./TradeOp/InitHoldingsOp')
-var TradeOp        = require('./TradeOp/TradeOp')
-var NonTradeOp     = require('./TradeOp/NonTradeOp')
+var InitBrokerageOp = require('./TradeOp/InitBrokerageOp')
+var InitHoldingsOp  = require('./TradeOp/InitHoldingsOp')
+var TradeOp         = require('./TradeOp/TradeOp')
+var NonTradeOp      = require('./TradeOp/NonTradeOp')
 
 module.exports = function Parser (portfolio, db)
 {
@@ -253,10 +253,9 @@ module.exports = function Parser (portfolio, db)
 
 		if (entry.Type === 'onboarding' && entry.Cash)
 		{
-			return InitOp(entry.investor_id, entry.date,
+			return InitBrokerageOp(entry.investor_id, entry.date,
 			{
-				type: 'brokerage',
-				value: entry.Cash
+				amount: entry.Cash
 			})
 		}
 

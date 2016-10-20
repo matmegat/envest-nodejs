@@ -4,7 +4,7 @@ var expect = require('chai').expect
 var moment = require('moment')
 
 var Err = require('../../../Err')
-var InitOp = require('./Portfolio/TradeOp/InitBrokerageOp')
+var InitBrokerageOp = require('./Portfolio/TradeOp/InitBrokerageOp')
 var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
 
@@ -475,10 +475,9 @@ function Brokerage (investor_model, db)
 		{
 			var timestamp = moment.utc(value.date)
 
-			var set_brokerage = InitOp(investor_id, timestamp,
+			var set_brokerage = InitBrokerageOp(investor_id, timestamp,
 			{
-				type: 'brokerage',
-				value: value.amount
+				amount: value.amount
 			})
 
 			return db.investor.portfolio.apply(set_brokerage)
