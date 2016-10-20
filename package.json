@@ -62,6 +62,9 @@
     "express-session":
       "^1.13.0",
 
+    "connect-redis":
+      "^3",
+
     "composable-middleware":
       "^0.3",
 
