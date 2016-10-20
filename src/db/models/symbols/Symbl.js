@@ -2,7 +2,6 @@
 /* eslint-disable max-statements */
 
 var expect = require('chai').expect
-var pick = require('lodash/pick')
 
 var Symbl = module.exports = function Symbl (it)
 {
