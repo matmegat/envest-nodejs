@@ -3,7 +3,7 @@ var ops =
 {
 	trade: require('./TradeOp'),
 	nontrade: require('./NonTradeOp'),
-	init: require('./InitOp'),
+	'init-brokerage': require('./InitBrokerageOp'),
 	'init-holdings': require('./InitHoldingsOp'),
 }
 

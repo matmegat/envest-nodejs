@@ -13,7 +13,7 @@ var knexed   = require('../../../knexed')
 var Symbl    = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
-var InitOp         = require('./TradeOp/InitOp')
+var InitOp         = require('./TradeOp/InitBrokerageOp')
 var InitHoldingsOp = require('./TradeOp/InitHoldingsOp')
 var TradeOp        = require('./TradeOp/TradeOp')
 var NonTradeOp     = require('./TradeOp/NonTradeOp')

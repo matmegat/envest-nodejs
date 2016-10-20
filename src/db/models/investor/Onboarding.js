@@ -4,7 +4,7 @@ var expect = require('chai').expect
 var moment = require('moment')
 
 var Err = require('../../../Err')
-var InitOp = require('./Portfolio/TradeOp/InitOp')
+var InitOp = require('./Portfolio/TradeOp/InitBrokerageOp')
 var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
 
