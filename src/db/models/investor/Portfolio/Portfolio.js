@@ -47,10 +47,12 @@ module.exports = function Portfolio (db, investor)
 
 	var brokerage = portfolio.brokerage = Brokerage(db, investor, portfolio)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
-	var tradeops  = portfolio.tradeops  =  Tradeops(db, portfolio)
 
 	expect(db, 'Portfolio depends on Series').property('symbols')
 	var symbols = portfolio.symbols = db.symbols
+
+	var tradeops  = portfolio.tradeops  =  Tradeops(db, portfolio)
+
 
 	var knex = db.knex
 
