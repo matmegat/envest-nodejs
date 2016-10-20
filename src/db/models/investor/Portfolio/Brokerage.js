@@ -140,7 +140,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 				if (timestamp)
 				{
 					this.where('timestamp', '<=', timestamp)
-
 				}
 			})
 		})

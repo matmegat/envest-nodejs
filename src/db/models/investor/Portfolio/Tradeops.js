@@ -22,9 +22,6 @@ module.exports = function Tradeops (db, portfolio)
 
 	var tradeops = {}
 
-	expect(db, 'Tradeops depends on resolving').property('symbols')
-	var symbols = portfolio.symbols
-
 	tradeops.apply = (trx, tradeop) =>
 	{
 		return tradeops.sequence(trx, tradeop)
@@ -43,7 +40,7 @@ module.exports = function Tradeops (db, portfolio)
 		})
 		.then(ops =>
 		{
-			return tradeop.resolve(symbols)
+			return tradeop.resolve(portfolio.symbols)
 			.then(() => ops)
 		})
 		.then(ops =>
@@ -174,7 +171,7 @@ module.exports = function Tradeops (db, portfolio)
 
 		return table(trx)
 		.where('investor_id', tradeop.investor_id)
-		.where('timestamp', '>=', tradeop.timestamp)
+		.where('timestamp', '>=', tradeop.timestamp.format())
 	}
 
 
