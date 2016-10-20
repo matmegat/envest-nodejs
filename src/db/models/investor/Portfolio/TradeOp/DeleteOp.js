@@ -22,6 +22,11 @@ var DeleteOp = module.exports = function DeleteOp (other_op)
 		return op.other_op
 	}
 
+	op.resolve = (symbols) =>
+	{
+		return op.other_op.resolve(symbols)
+	}
+
 	return op
 }
 
