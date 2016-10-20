@@ -1,4 +1,5 @@
 
+
 var knex = require('knex')
 
 var User = require('./models/User')
@@ -16,6 +17,10 @@ var NetvestSubsc = require('./models/subscription/NetvestSubsc')
 var Symbols = require('./models/symbols/Symbols')
 var Watchlist = require('./models/watchlist/Watchlist')
 
+
+var redis = require('ioredis')
+
+
 module.exports = function name (app)
 {
 	var db = {}
@@ -26,10 +31,14 @@ module.exports = function name (app)
 
 	db.helpers = require('./helpers')
 
+
 	db.knex = knex({
 		client: 'pg',
 		connection: conn
 	})
+
+	db.redis = redis(app.cfg.redis)
+
 
 	db.knex.client.pool.on('error', () =>
 	{
@@ -37,6 +46,7 @@ module.exports = function name (app)
 		/* we can't do anything here */
 		process.exit(1)
 	})
+
 
 	db.ready = Promise.resolve()
 	.then(() =>
@@ -48,6 +58,10 @@ module.exports = function name (app)
 		return db.knex('email_confirms')
 		.select()
 		.limit(0)
+	})
+	.then(() =>
+	{
+		return db.redis.ping()
 	})
 	.then(() =>
 	{
