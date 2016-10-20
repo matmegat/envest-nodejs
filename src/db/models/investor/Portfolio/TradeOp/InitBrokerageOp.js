@@ -68,24 +68,8 @@ module.exports = function NonTradeOp (investor_id, timestamp, brokerage)
 
 	op.inspect = () =>
 	{
-		var id = op.init_data
-		var substitution = ''
-
-		if (id.type === 'brokerage')
-		{
-			substitution = `${id.value}`
-		}
-		if (id.type === 'holdings')
-		{
-			id.holdings.forEach((holding) =>
-			{
-				substitution += `${holding.symbol.inspect()}` +
-				` ${holding.amount} shares per ${holding.price}$`
-			})
-		}
-
-		return `INITOP {${op.investor_id}} (${op.timestamp.format()})` +
-		` ${id.type} ${substitution}`
+		return `INIT BROKERAGE {${op.investor_id}} (${op.timestamp.format()})` +
+		` ${op.brokerage.amount}`
 	}
 
 
