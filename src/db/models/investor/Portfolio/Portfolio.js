@@ -55,7 +55,9 @@ module.exports = function Portfolio (db, investor)
 
 
 	var knex = db.knex
+	var raw = knex.raw
 
+	portfolio.feed_table = knexed(knex, 'feed_items')
 
 	// get
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
@@ -843,6 +845,22 @@ module.exports = function Portfolio (db, investor)
 			}
 		})
 		.then(noop)
+	})
+
+	// TODO: remove similar method in feed
+
+	var AlreadyTraded = Err('holging_is_already_traded',
+		'Holding is already traded')
+
+	portfolio.symbols.ensureNotTraded =
+		knexed.transact(knex, (trx, investor_id, symbol) =>
+	{
+		var symbol = pick(symbol, 'ticker', 'exchange')
+
+		return portfolio.feed_table(trx)
+		.where('investor_id', investor_id)
+		.andWhere(raw(`data->'symbol'`), '@>', symbol)
+		.then(Err.emptish.not(() => AlreadyTraded({ symbol: symbol })))
 	})
 
 	var InvestorPostDateErr =
