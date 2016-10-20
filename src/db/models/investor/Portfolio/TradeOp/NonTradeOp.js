@@ -55,7 +55,11 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 			if (op.op_data.type === 'deposit' || op.op_data.type === 'interest')
 			{
-				new_cash = op.op_data.amount
+				new_cash += op.op_data.amount
+			}
+			if (op.op_data.type === 'withdraw' || op.op_data.type === 'fee')
+			{
+				new_cash -= op.op_data.amount
 			}
 
 			return portfolio.brokerage.put(
