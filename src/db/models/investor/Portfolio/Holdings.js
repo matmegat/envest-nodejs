@@ -344,7 +344,16 @@ module.exports = function Holdings (db, investor, portfolio)
 			return portfolio.brokerage
 			.isExist(trx, investor_id, timestamp.format())
 		})
-		.then(Err.falsy(InvalidHoldingDate))
+		.then(is_exist =>
+		{
+			if (! is_exist)
+			{
+				throw InvalidHoldingDate(
+				{
+					reason: `Portfolio doesn't exist for ${timestamp.format()}`
+				})
+			}
+		})
 		.then(() =>
 		{
 			var symbols = map(holding_entries, 'symbol')

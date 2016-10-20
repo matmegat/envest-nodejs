@@ -29,7 +29,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	function validate_holding (h, i)
 	{
 		validate.required(h.symbol, `holdings[${i}].symbol`)
-		Symbl.validate(h.symbol)
 
 		validate.required(h.amount, `holdings[${i}].amount`)
 		validate.number.positive(h.amount, `holdings[${i}].amount`)
@@ -60,7 +59,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
-		console.log(op.inspect())
 		return portfolio.holdings.set(trx, op.investor_id, op.holdings)
 	}
 
