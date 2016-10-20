@@ -121,9 +121,13 @@ module.exports = function (db, http)
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
+		var whom_id = rq.user.id
 		var data = pick(rq.body, 'type', 'cash', 'date')
 
-		toss(rs, investors.model.portfolio.manageCash(investor_id, data))
+		toss(
+			rs,
+			investors.model.portfolio.manageCashAs(whom_id, investor_id, data)
+		)
 	})
 
 	investors.express.post('/cash-as', authRequired, (rq, rs) =>
