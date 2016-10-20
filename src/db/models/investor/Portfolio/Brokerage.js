@@ -380,12 +380,10 @@ module.exports = function Brokerage (db, investor, portfolio)
 		expect(investor_id).a('number')
 		expect(date.toDate()).a('date')
 
-		date = moment(date).startOf('second')
-
 		return table(trx)
 		.where({
 			investor_id: investor_id,
-			timestamp: date.utc().format()
+			timestamp: date.format()
 		})
 		.delete()
 	})

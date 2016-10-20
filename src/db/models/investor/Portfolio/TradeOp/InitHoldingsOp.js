@@ -40,7 +40,6 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 	function transform_holding (h)
 	{
 		h.symbol = Symbl(h.symbol)
-		h.timestamp = op.timestamp
 	}
 
 	op.type = 'init-holdings'
@@ -59,6 +58,10 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.apply = (trx, portfolio) =>
 	{
+		op.holdings.forEach((h) =>
+		{   /* adjust appears before apply -> update timestamp in case */
+			h.timestamp = op.timestamp
+		})
 		return portfolio.holdings.set(trx, op.investor_id, op.holdings)
 	}
 
