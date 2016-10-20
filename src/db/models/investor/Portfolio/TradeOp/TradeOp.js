@@ -52,6 +52,16 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		return portfolio.removeTrade(trx, op)
 	}
 
+	op.resolve = (symbols) =>
+	{
+		return symbols.resolve(op.trade_data.symbol, { other: true })
+		.then(Symbl)
+		.then(symbol =>
+		{
+			op.trade_data.symbol = symbol
+		})
+	}
+
 	op.equals = (other) =>
 	{
 		var dL = op.trade_data

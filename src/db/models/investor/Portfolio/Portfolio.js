@@ -50,7 +50,7 @@ module.exports = function Portfolio (db, investor)
 	var tradeops  = portfolio.tradeops  =  Tradeops(db, portfolio)
 
 	expect(db, 'Portfolio depends on Series').property('symbols')
-	var symbols = db.symbols
+	var symbols = portfolio.symbols = db.symbols
 
 	var knex = db.knex
 

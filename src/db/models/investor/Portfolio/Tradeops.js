@@ -22,6 +22,8 @@ module.exports = function Tradeops (db, portfolio)
 
 	var tradeops = {}
 
+	expect(db, 'Tradeops depends on resolving').property('symbols')
+	var symbols = portfolio.symbols
 
 	tradeops.apply = (trx, tradeop) =>
 	{
@@ -37,6 +39,11 @@ module.exports = function Tradeops (db, portfolio)
 			{
 				return tradeops.flush(trx, tradeop)
 			})
+			.then(() => ops)
+		})
+		.then(ops =>
+		{
+			return tradeop.resolve(symbols)
 			.then(() => ops)
 		})
 		.then(ops =>
