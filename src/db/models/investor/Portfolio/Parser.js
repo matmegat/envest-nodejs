@@ -13,9 +13,10 @@ var knexed   = require('../../../knexed')
 var Symbl    = require('../../symbols/Symbl')
 var validate = require('../../../validate')
 
-var InitOp     = require('./TradeOp/InitOp')
-var TradeOp    = require('./TradeOp/TradeOp')
-var NonTradeOp = require('./TradeOp/NonTradeOp')
+var InitOp         = require('./TradeOp/InitOp')
+var InitHoldingsOp = require('./TradeOp/InitHoldingsOp')
+var TradeOp        = require('./TradeOp/TradeOp')
+var NonTradeOp     = require('./TradeOp/NonTradeOp')
 
 module.exports = function Parser (portfolio, db)
 {
@@ -212,6 +213,7 @@ module.exports = function Parser (portfolio, db)
 		return function sequential_caller (entry, index, origin)
 		{
 			var op_instance = entry_2_data(entry)
+			console.log(`${index + 2} :: ${op_instance.inspect()}`)
 
 			return portfolio.tradeops.apply(trx, op_instance)
 			.then(() =>
@@ -247,7 +249,7 @@ module.exports = function Parser (portfolio, db)
 			fee: 'fee'
 		}
 
-		var is_stock = entry.Stock && entry.Amount && isNumber(entry.Price)
+		var is_stock = entry.symbol && entry.Amount && isNumber(entry.Price)
 
 		if (entry.Type === 'onboarding' && entry.Cash)
 		{
@@ -258,18 +260,16 @@ module.exports = function Parser (portfolio, db)
 			})
 		}
 
-		if (entry.Type === 'onboarding' && is_stock)
+		if (entry.Type === 'onboarding' && is_stock && entry.is_resolved)
 		{
-			return InitOp(entry.investor_id, entry.date,
-			{
-				type: 'holdings',
-				value: [
+			return InitHoldingsOp(entry.investor_id, entry.date,
+			[
 				{
-					symbol: entry.Stock,
+					symbol: entry.symbol,
 					amount: entry.Amount,
 					price: entry.Price,
-				}]
-			})
+				}
+			])
 		}
 
 		if (includes(cash_management_ops, entry.Type) && entry.Cash)
