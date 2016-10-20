@@ -76,6 +76,19 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		.then(() => portfolio.brokerage.remove(trx, op.investor_id, op.timestamp))
 	}
 
+	op.resolve = (symbols) =>
+	{
+		return symbols
+		.resolveMany(op.holdings.map(h => h.symbol), { other: true })
+		.then(resolved_symbols =>
+		{
+			op.holdings.forEach((holding, i) =>
+			{
+				holding.symbol = resolved_symbols[i]
+			})
+		})
+	}
+
 	op.inspect = () =>
 	{
 		var substitution = []

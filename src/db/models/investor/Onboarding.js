@@ -7,7 +7,6 @@ var Err = require('../../../Err')
 var InitOp = require('./Portfolio/TradeOp/InitOp')
 var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
-var Symbl = require('../symbols/Symbl')
 
 var CannotGoPublic = Err('cannot_go_public',
 	'Investor cannot be pushed to public')
@@ -591,19 +590,9 @@ function Holdings (investor_model, db)
 			var timestamp = _.maxBy(value, 'date').date
 			timestamp = moment.utc(timestamp)
 
-			return db.symbols
-			.resolveMany(value.map(h => Symbl(h.symbol)), { other: true })
-			.then(symbols =>
-			{
-				value.forEach((h, i) =>
-				{
-					h.symbol = symbols[i]
-				})
+			var set_holdings = InitHoldingsOp(investor_id, timestamp, value)
 
-				var set_holdings = InitHoldingsOp(investor_id, timestamp, value)
-
-				return db.investor.portfolio.apply(set_holdings)
-			})
+			return db.investor.portfolio.apply(set_holdings)
 		}
 	})
 }
