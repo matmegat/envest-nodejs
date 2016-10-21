@@ -13,6 +13,12 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 
 	validate.array(holdings, 'holdings')
 
+	holdings.forEach((holding, i) =>
+	{
+		validate.required(holding.symbol, `holdings[${i}].symbol`)
+		validate.empty(holding.symbol, `holdings[${i}].symbol`)
+	})
+
 	op.type = 'remove-holdings'
 
 	op.holdings = holdings
@@ -27,14 +33,14 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 		})
 	})
 
-	op.apply = (trx, portfolio) =>
+	op.apply = (trx, db) =>
 	{
 		return Promise.all(op.holdings.map((holding) =>
 		{
-			return portfolio.symbols.ensureNotTraded(trx, investor_id, holding)
+			return db.feed.ensureNotTraded(trx, investor_id, holding)
 			.then(() =>
 			{
-				return portfolio.holdings
+				return db.portfolio.holdings
 				.remove(trx, extend({}, holding.symbol.toDb(),
 				{
 					investor_id: op.investor_id,
@@ -42,11 +48,15 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 				}))
 			})
 		}))
-		.then(() => portfolio.brokerage.remove(trx, op.investor_id, op.timestamp))
+		.then(() => db.portfolio.brokerage.remove(trx, op.investor_id, op.timestamp))
 	}
 
 	op.undone = (trx, portfolio) =>
 	{
+		op.holdings.forEach((h) =>
+		{
+			h.timestamp = op.timestamp
+		})
 		return portfolio.holdings.set(trx, op.investor_id, op.holdings)
 	}
 
