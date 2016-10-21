@@ -10,6 +10,8 @@ module.exports = function Keyspace (prefix)
 	var keyspace = function keyspace (key)
 	{
 		key = slice(arguments)
+		key = flatten(key)
+
 		key = [].concat(prefix, key)
 
 		var key_str = key.join('|')
