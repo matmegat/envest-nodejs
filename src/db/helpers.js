@@ -50,4 +50,50 @@ function ensureNotMultiple (queryset)
 }
 
 
-helpers.Keyspace = require('./Keyspace')
+var Keyspace = helpers.Keyspace = require('./Keyspace')
+
+
+var assign = Object.assign
+var dump = JSON.stringify
+var load = JSON.parse
+
+helpers.cached = function (redis, prefix, options, key_fn, fn)
+{
+	options = assign(
+	{
+		ttl: 60
+	}
+	, options)
+
+	var keyspace = Keyspace(prefix)
+
+	return function ()
+	{
+		var key = key_fn.apply(this, arguments)
+
+		var key_str = keyspace(key)
+
+		return redis.get(key_str)
+		.then(value =>
+		{
+			console.log(value)
+			if (value != null)
+			{
+				console.warn('get', key_str)
+				return load(value)
+			}
+			else
+			{
+				console.log(1)
+				return fn.apply(this, arguments)
+				.then(value =>
+				{
+					console.info('put', key_str)
+					redis.set(key_str, dump(value), 'EX', options.ttl)
+
+					return value
+				})
+			}
+		})
+	}
+}
