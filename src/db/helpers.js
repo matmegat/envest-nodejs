@@ -48,3 +48,6 @@ function ensureNotMultiple (queryset)
 		throw new Error('query cannot return more that 1 entry')
 	}
 }
+
+
+helpers.Keyspace = require('./Keyspace')
