@@ -13,6 +13,7 @@ var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
 var Symbl = require('../../symbols/Symbl')
+var RemoveHoldingsOp = require('./TradeOp/RemoveHoldingsOp')
 
 var moment = require('moment')
 
@@ -457,6 +458,8 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.removeBatch = function (whom_id, investor_id, holding_entries)
 	{
+		var timestamp = moment().utc()
+
 		return knex.transaction(function (trx)
 		{
 			return investor.getActionMode(whom_id, investor_id)
@@ -471,38 +474,10 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 			.then(() =>
 			{
-				validate.array(holding_entries, 'holdings')
+				var remove_holdings = RemoveHoldingsOp(
+					investor_id, timestamp, holding_entries)
 
-				holding_entries.forEach((holding, i) =>
-				{
-					validate.required(holding.symbol, `holdings[${i}].symbol`)
-					validate.empty(holding.symbol, `holdings[${i}].symbol`)
-				})
-
-				return db.symbols.resolveMany(map(holding_entries, 'symbol'),
-					{ other: true })
-			})
-			.then(symbols => symbols.map(Symbl))
-			.then(symbols =>
-			{
-				return Promise.all(symbols.map(symbol =>
-				{
-					return holdings.ensure(trx, symbol, investor_id)
-					.then(() =>
-					{
-						return db.feed.ensureNotTraded(trx, investor_id, symbol)
-					})
-					.then(() =>
-					{
-						return holdings.symbolById(trx, symbol, investor_id,
-							null, { with_timestamp: true }
-						)
-					})
-					.then(holding_pk =>
-					{
-						return holdings.remove(trx, holding_pk)
-					})
-				}))
+				return db.investor.portfolio.apply(remove_holdings)
 			})
 			.then(noop)
 		})

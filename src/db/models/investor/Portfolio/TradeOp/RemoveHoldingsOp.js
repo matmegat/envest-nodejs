@@ -1,7 +1,6 @@
 
 var assign = Object.assign
 
-var extend = require('lodash/extend')
 var wrap = require('lodash/wrap')
 
 var Op = require('./Op')
@@ -40,22 +39,34 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 			return db.feed.ensureNotTraded(trx, investor_id, holding)
 			.then(() =>
 			{
-				return portfolio.holdings
-				.remove(trx, extend({}, holding.symbol.toDb(),
+				return holdings.symbolById(trx, holding, investor_id,
+					null, { with_timestamp: true }
+				)
+			})
+			.then(holding_pk =>
+			{
+				return portfolio.holdings.remove(trx, holding_pk)
+				.then(() =>
 				{
-					investor_id: op.investor_id,
-					timestamp: op.timestamp.toDate()
-				}))
+					db.portfolio.brokerage.remove(
+						trx, op.investor_id, holding_pk.timestamp.toDate()
+					)
+				})
 			})
 		}))
-		.then(() => db.portfolio.brokerage.remove(trx, op.investor_id, op.timestamp))
 	}
 
 	op.undone = (trx, portfolio) =>
 	{
-		op.holdings.forEach((h) =>
+		op.holdings.forEach((holding) =>
 		{
-			h.timestamp = op.timestamp
+			return holdings.symbolById(trx, holding, investor_id,
+				null, { with_timestamp: true }
+			)
+			.then(holding_pk =>
+			{
+				holding.timestamp = holding_pk.timestamp
+			})
 		})
 		return portfolio.holdings.set(trx, op.investor_id, op.holdings)
 	}
