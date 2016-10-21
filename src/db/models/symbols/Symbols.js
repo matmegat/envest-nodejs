@@ -369,10 +369,27 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 	symbols.seriesForPortfolio = (symbol, range) =>
 	{
-		console.log(apidate(range.start), apidate(range.end))
-		console.log(keyspace(symbol, apidate(range.start), apidate(range.end)))
 		return xign.seriesRange(symbol, range.start, range.end)
+
+		// console.log(apidate(range.start), apidate(range.end))
+
+		// var key = keyspace(symbol, apidate(range.start), apidate(range.end))
+		// return db.redis.get(key)
+		/*.then(it =>
+		{
+			console.dir(it)
+
+			return xign.seriesRange(symbol, range.start, range.end)
+		})*/
 	}
+
+	symbols.seriesForPortfolio = db.helpers.cached(
+		db.redis,
+		'portfolio',
+		{ ttl: 60 },
+		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
+		symbols.seriesForPortfolio
+	)
 
 	symbols.seriesForPortfolio.intraday = (symbol, range) =>
 	{
