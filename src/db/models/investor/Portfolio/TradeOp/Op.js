@@ -33,7 +33,7 @@ var Op = module.exports = function Op (investor_id, timestamp)
 	}
 
 	// eslint-disable-next-line no-unused-vars
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio) =>
 	{
 		return Promise.resolve()
 	}

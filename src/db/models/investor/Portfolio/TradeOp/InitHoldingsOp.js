@@ -56,13 +56,13 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		})
 	})
 
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio) =>
 	{
 		op.holdings.forEach((h) =>
 		{   /* adjust appears before apply -> update timestamp in case */
 			h.timestamp = op.timestamp
 		})
-		return db.portfolio.holdings.set(trx, op.investor_id, op.holdings)
+		return portfolio.holdings.set(trx, op.investor_id, op.holdings)
 	}
 
 	op.undone = (trx, portfolio) =>

@@ -44,11 +44,11 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		})
 	})
 
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio) =>
 	{
 		var is_recalc = includes(recalculate_ops, op.op_data.type)
 
-		return db.portfolio.brokerage.byId(trx, op.investor_id, op.timestamp)
+		return portfolio.brokerage.byId(trx, op.investor_id, op.timestamp)
 		.then(brokerage =>
 		{
 			var new_cash = brokerage.cash
@@ -62,7 +62,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 				new_cash -= op.op_data.amount
 			}
 
-			return db.portfolio.brokerage.put(
+			return portfolio.brokerage.put(
 				trx,
 				op.investor_id,
 				new_cash,

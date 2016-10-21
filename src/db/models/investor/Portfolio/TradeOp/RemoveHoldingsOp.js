@@ -33,14 +33,14 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 		})
 	})
 
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio, db) =>
 	{
 		return Promise.all(op.holdings.map((holding) =>
 		{
 			return db.feed.ensureNotTraded(trx, investor_id, holding)
 			.then(() =>
 			{
-				return db.portfolio.holdings
+				return portfolio.holdings
 				.remove(trx, extend({}, holding.symbol.toDb(),
 				{
 					investor_id: op.investor_id,

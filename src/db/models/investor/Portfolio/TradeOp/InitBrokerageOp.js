@@ -37,9 +37,9 @@ module.exports = function NonTradeOp (investor_id, timestamp, brokerage)
 		})
 	})
 
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio) =>
 	{
-		return db.portfolio.brokerage.put(
+		return portfolio.brokerage.put(
 			trx,
 			op.investor_id,
 			op.brokerage.amount,

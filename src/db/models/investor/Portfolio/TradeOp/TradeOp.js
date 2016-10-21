@@ -41,9 +41,9 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 		})
 	})
 
-	op.apply = (trx, db) =>
+	op.apply = (trx, portfolio) =>
 	{
-		return db.portfolio.makeTrade(
+		return portfolio.makeTrade(
 			trx, op.investor_id, op.type, op.timestamp.format(), op.trade_data)
 	}
 
