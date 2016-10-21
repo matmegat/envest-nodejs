@@ -22,7 +22,7 @@ var get = require('lodash/get')
 
 var moment = require('moment')
 
-var Symbols = module.exports = function Symbols (cfg, log)
+var Symbols = module.exports = function Symbols (db, cfg, log)
 {
 	var symbols = {}
 
@@ -363,8 +363,14 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
+
+	var apidate = require('./util').apidate
+	var keyspace = db.helpers.Keyspace('portfolio')
+
 	symbols.seriesForPortfolio = (symbol, range) =>
 	{
+		console.log(apidate(range.start), apidate(range.end))
+		console.log(keyspace(symbol, apidate(range.start), apidate(range.end)))
 		return xign.seriesRange(symbol, range.start, range.end)
 	}
 
