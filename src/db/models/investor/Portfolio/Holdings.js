@@ -601,7 +601,7 @@ module.exports = function Holdings (db, investor, portfolio)
 	holdings.sell = function (trx, investor_id, symbol, date, data)
 	{
 		validate_positive(data.amount, 'amount')
-		validate_positive(data.price, 'price')
+		validate_non_negative(data.price, 'price')
 
 		var amount = data.amount
 		var price  = data.price
