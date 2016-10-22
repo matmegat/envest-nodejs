@@ -382,7 +382,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	}
 
 	symbols.seriesForPortfolio.intraday = db.cache.slip('portfolio.intraday',
-		{ ttl: 60 },
+		{ ttl: Infinity },
 		(symbol) => symbol,
 		symbols.seriesForPortfolio.intraday
 	)

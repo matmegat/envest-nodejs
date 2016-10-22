@@ -89,7 +89,7 @@ helpers.Cache = function (redis)
 					return fn.apply(this, arguments)
 					.then(value =>
 					{
-						redis.set(key_str, dump(value), 'EX', options.ttl)
+						redis_set(redis, key_str, value, options)
 
 						return value
 					})
@@ -104,7 +104,7 @@ helpers.Cache = function (redis)
 
 		options = assign(
 		{
-			ttl: 60,
+			ttl: Infinity,
 			def_fn: () => []
 		}
 		, options)
@@ -135,7 +135,7 @@ helpers.Cache = function (redis)
 					fn.apply(this, arguments)
 					.then(value =>
 					{
-						redis.set(key_str, dump(value), 'EX', options.ttl)
+						redis_set(redis, key_str, value, options)
 
 						console.info(value.length)
 
@@ -146,6 +146,18 @@ helpers.Cache = function (redis)
 				return value
 			})
 		}
+	}
+
+	function redis_set (redis, key_str, value, options)
+	{
+		var args = [ key_str, dump(value) ]
+
+		if (options.ttl < Infinity)
+		{
+			args.push('EX', options.ttl)
+		}
+
+		return redis.set.apply(redis, args)
 	}
 
 	return cache
