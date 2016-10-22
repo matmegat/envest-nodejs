@@ -367,7 +367,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	var apidate = require('./util').apidate
 	var keyspace = db.helpers.Keyspace('portfolio')
 
-	symbols.seriesForPortfolio = db.cache.cached('portfolio', { ttl: 60 },
+	symbols.seriesForPortfolio = db.cache.regular('portfolio', { ttl: 60 },
 		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)

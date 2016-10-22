@@ -61,7 +61,7 @@ helpers.Cache = function (redis)
 {
 	var cache = {}
 
-	cache.cached = function (prefix, options, key_fn, fn)
+	cache.regular = function (prefix, options, key_fn, fn)
 	{
 		var keyspace = Keyspace(prefix)
 
