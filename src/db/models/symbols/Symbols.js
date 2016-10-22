@@ -372,6 +372,10 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
 
+	// console.log(end_m / 5)
+	// console.log(Math.floor(end_m / 5))
+	// console.log(Math.floor(end_m / 5) * 5)
+
 	symbols.seriesForPortfolio.intraday = (symbol, range) =>
 	{
 		return xign.series.intraday(symbol, range.start, range.end)
