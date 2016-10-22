@@ -6,11 +6,15 @@ var rootpath = require('rootpath')
 
 var Config = require('../src/Config')
 var Log = require('../src/Log')
+
 var Symbols = require('../src/db/models/symbols/Symbols')
+
+var db = { helpers: require('../src/db/helpers') }
+
 
 var cfg = Config(rootpath(__dirname, '../cfg'))
 var log = Log()
-var symbols = Symbols(cfg, log)
+var symbols = Symbols(db, cfg, log)
 
 var symbol = process.argv[2]
 
