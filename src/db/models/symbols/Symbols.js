@@ -383,10 +383,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		})*/
 	}
 
-	symbols.seriesForPortfolio = db.helpers.cached(
-		db.redis,
-		'portfolio',
-		{ ttl: 60 },
+	symbols.seriesForPortfolio = db.cache.cached('portfolio', { ttl: 60 },
 		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
 		symbols.seriesForPortfolio
 	)

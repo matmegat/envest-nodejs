@@ -57,43 +57,51 @@ var assign = Object.assign
 var dump = JSON.stringify
 var load = JSON.parse
 
-helpers.cached = function (redis, prefix, options, key_fn, fn)
+helpers.Cache = function (redis)
 {
-	options = assign(
+	var cache = {}
+
+	cache.cached = function (prefix, options, key_fn, fn)
 	{
-		ttl: 60
-	}
-	, options)
+		var keyspace = Keyspace(prefix)
 
-	var keyspace = Keyspace(prefix)
-
-	return function ()
-	{
-		var key = key_fn.apply(this, arguments)
-
-		var key_str = keyspace(key)
-
-		return redis.get(key_str)
-		.then(value =>
+		options = assign(
 		{
-			console.log(value)
-			if (value != null)
-			{
-				console.warn('get', key_str)
-				return load(value)
-			}
-			else
-			{
-				console.log(1)
-				return fn.apply(this, arguments)
-				.then(value =>
-				{
-					console.info('put', key_str)
-					redis.set(key_str, dump(value), 'EX', options.ttl)
+			ttl: 60
+		}
+		, options)
 
-					return value
-				})
-			}
-		})
+		return function ()
+		{
+			var key = key_fn.apply(this, arguments)
+
+			var key_str = keyspace(key)
+
+			return redis.get(key_str)
+			.then(value =>
+			{
+				console.log(value)
+				if (value != null)
+				{
+					console.warn('get', key_str)
+					return load(value)
+				}
+				else
+				{
+					console.log(1)
+					return fn.apply(this, arguments)
+					.then(value =>
+					{
+						console.info('put', key_str)
+						redis.set(key_str, dump(value), 'EX', options.ttl)
+
+						return value
+					})
+				}
+			})
+		}
 	}
+
+	return cache
 }
+

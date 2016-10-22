@@ -38,6 +38,7 @@ module.exports = function name (app)
 	})
 
 	db.redis = redis(app.cfg.redis)
+	db.cache = db.helpers.Cache(db.redis)
 
 
 	db.knex.client.pool.on('error', () =>
