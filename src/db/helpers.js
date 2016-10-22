@@ -80,19 +80,15 @@ helpers.Cache = function (redis)
 			return redis.get(key_str)
 			.then(value =>
 			{
-				console.log(value)
 				if (value != null)
 				{
-					console.warn('get', key_str)
 					return load(value)
 				}
 				else
 				{
-					console.log(1)
 					return fn.apply(this, arguments)
 					.then(value =>
 					{
-						console.info('put', key_str)
 						redis.set(key_str, dump(value), 'EX', options.ttl)
 
 						return value
