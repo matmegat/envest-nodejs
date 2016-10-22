@@ -124,7 +124,6 @@ helpers.Cache = function (redis)
 				}
 				else
 				{
-					console.warn('default')
 					return options.def_fn.apply(this, arguments)
 				}
 			})
@@ -136,10 +135,6 @@ helpers.Cache = function (redis)
 					.then(value =>
 					{
 						redis_set(redis, key_str, value, options)
-
-						console.info(value.length)
-
-						return value
 					})
 				})
 
