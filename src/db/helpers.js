@@ -98,6 +98,56 @@ helpers.Cache = function (redis)
 		}
 	}
 
+	cache.slip = function (prefix, options, key_fn, fn)
+	{
+		var keyspace = Keyspace(prefix)
+
+		options = assign(
+		{
+			ttl: 60,
+			def_fn: () => []
+		}
+		, options)
+
+		return function ()
+		{
+			var key = key_fn.apply(this, arguments)
+
+			var key_str = keyspace(key)
+
+			return redis.get(key_str)
+			.then(value =>
+			{
+				if (value != null)
+				{
+					return load(value)
+				}
+				else
+				{
+					console.warn('default')
+					return options.def_fn.apply(this, arguments)
+				}
+			})
+			.then(value =>
+			{
+				setImmediate(() =>
+				{
+					fn.apply(this, arguments)
+					.then(value =>
+					{
+						redis.set(key_str, dump(value), 'EX', options.ttl)
+
+						console.info(value.length)
+
+						return value
+					})
+				})
+
+				return value
+			})
+		}
+	}
+
 	return cache
 }
 
