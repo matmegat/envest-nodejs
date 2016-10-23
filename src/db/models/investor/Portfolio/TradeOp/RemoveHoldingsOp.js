@@ -3,12 +3,18 @@ var assign = Object.assign
 
 var wrap = require('lodash/wrap')
 
+var moment = require('moment')
+
 var Op = require('./Op')
 var validate = require('../../../../validate')
+var Err = require('../../../../../Err')
 
 module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 {
 	var op = Op(investor_id, timestamp)
+
+	var NoSuchHolding = Err('no_such_holding',
+		'Investor does not posess such holding')
 
 	validate.array(holdings, 'holdings')
 
@@ -39,17 +45,24 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 			return db.feed.ensureNotTraded(trx, investor_id, holding)
 			.then(() =>
 			{
-				return holdings.symbolById(trx, holding, investor_id,
+				return portfolio.holdings.symbolById(trx, holding.symbol, investor_id,
 					null, { with_timestamp: true }
 				)
 			})
 			.then(holding_pk =>
 			{
+				if (! holding_pk)
+				{
+					throw NoSuchHolding()
+				}
+
+				var timestamp = moment(holding_pk.timestamp)
+
 				return portfolio.holdings.remove(trx, holding_pk)
 				.then(() =>
 				{
-					db.portfolio.brokerage.remove(
-						trx, op.investor_id, holding_pk.timestamp.toDate()
+					portfolio.brokerage.remove(
+						trx, op.investor_id, timestamp
 					)
 				})
 			})
@@ -65,6 +78,11 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 			)
 			.then(holding_pk =>
 			{
+				if (! holding_pk)
+				{
+					throw NoSuchHolding()
+				}
+
 				holding.timestamp = holding_pk.timestamp
 			})
 		})
@@ -79,7 +97,7 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 		{
 			op.holdings.forEach((holding, i) =>
 			{
-				holding.symbol = resolved_symbols[i]
+				holding.symbol = resolved_symbols[i].full
 			})
 		})
 	}
