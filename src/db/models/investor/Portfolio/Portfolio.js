@@ -777,7 +777,7 @@ module.exports = function Portfolio (db, investor)
 			timestamp.format(),
 			{
 				with_timestamp: true,
-				is_zero: true,
+				include_zero: true,
 			}
 		)
 		.then(holding_pk =>

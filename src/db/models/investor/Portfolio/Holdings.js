@@ -129,7 +129,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			aux: noop,
 			with_timestamp: false,
-			is_zero: false,
+			include_zero: false,
 		},
 		options)
 
@@ -153,7 +153,7 @@ module.exports = function Holdings (db, investor, portfolio)
 		.where('investor_id', investor_id)
 		.where(function ()
 		{
-			if (! options.is_zero)
+			if (! options.include_zero)
 			{
 				this.where('amount', '!=', 0)
 			}
