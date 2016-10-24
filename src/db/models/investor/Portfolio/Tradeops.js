@@ -31,7 +31,10 @@ module.exports = function Tradeops (db, portfolio)
 		return tradeops.sequence(trx, tradeop)
 		.then(ops =>
 		{
-			return PReduce(ops, (memo, current) =>
+			ops = op_merge(tradeop, ops)
+			ops = op_adjust(ops)
+
+			return PReduce(ops.slice(1), (memo, current) =>
 			{
 				return current.undone(trx, portfolio)
 			}
@@ -49,10 +52,6 @@ module.exports = function Tradeops (db, portfolio)
 		})
 		.then(ops =>
 		{
-			ops = op_merge(tradeop, ops)
-			ops = op_adjust(ops)
-
-
 			return PReduce(ops, (memo, current) =>
 			{
 				return current.apply(trx, portfolio, db)
@@ -125,7 +124,7 @@ module.exports = function Tradeops (db, portfolio)
 		}
 
 		/* insert moved op */
-		ops.splice(pos_to_insert, 0, head)
+		ops.splice(0, pos_to_insert, head)
 
 		return ops
 
