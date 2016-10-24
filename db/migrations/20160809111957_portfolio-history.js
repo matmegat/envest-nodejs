@@ -2,6 +2,8 @@
 var Symbols = require('../../src/db/models/symbols/Symbols')
 var withSeed = require('../with-seed')
 
+var create_view = require('../ref/portfolio-current')
+
 exports.up = (knex) =>
 {
 	// knex.schema.dropTableIfExists('portfolio_symbols')
@@ -59,35 +61,7 @@ exports.up = (knex) =>
 	})
 	.then(() =>
 	{
-		return knex.schema.raw(
-`CREATE VIEW portfolio_current
-(
-  investor_id,
-  symbol_exchange,
-  symbol_ticker,
-  amount,
-  price
-)
-AS SELECT
-  investor_id,
-  symbol_exchange,
-  symbol_ticker,
-  amount,
-  price
-
-FROM
-  portfolio AS P
-
-WHERE amount > 0
-  AND timestamp =
-  (
-    SELECT MAX(timestamp) FROM portfolio
-    WHERE investor_id     = P.investor_id
-      AND symbol_exchange = P.symbol_exchange
-      AND symbol_ticker   = P.symbol_ticker
-  );
-`
-		)
+		return knex.schema.raw(create_view('portfolio'))
 	})
 }
 
