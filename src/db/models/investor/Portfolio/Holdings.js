@@ -128,7 +128,8 @@ module.exports = function Holdings (db, investor, portfolio)
 		options = extend(
 		{
 			aux: noop,
-			with_timestamp: false
+			with_timestamp: false,
+			is_zero: false,
 		},
 		options)
 
@@ -150,7 +151,13 @@ module.exports = function Holdings (db, investor, portfolio)
 
 		return portfolio_table
 		.where('investor_id', investor_id)
-		.where('amount', '!=', 0)
+		.where(function ()
+		{
+			if (! options.is_zero)
+			{
+				this.where('amount', '!=', 0)
+			}
+		})
 		.where('timestamp',
 			table(trx).max('timestamp')
 			.where(

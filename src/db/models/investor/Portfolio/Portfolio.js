@@ -770,8 +770,15 @@ module.exports = function Portfolio (db, investor)
 		var investor_id = post.investor_id
 		var timestamp = post.timestamp
 
-		return holdings.symbolById(trx, symbol, investor_id,
-			null, { with_timestamp: true }
+		return holdings.symbolById(
+			trx,
+			symbol,
+			investor_id,
+			timestamp.format(),
+			{
+				with_timestamp: true,
+				is_zero: true,
+			}
 		)
 		.then(holding_pk =>
 		{
