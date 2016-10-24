@@ -3,6 +3,7 @@ var raw = require('knex').raw
 
 var map = require('lodash/map')
 var curry = require('lodash/curry')
+var indexOf = require('lodash/indexOf')
 
 var moment = require('moment')
 
@@ -55,7 +56,13 @@ Filter.by.subscription = function (column)
 	return function (queryset, values)
 	{
 		values = values.split(',')
-		values[0] || (values = [null])
+		values[0] || (values = ['none'])
+
+		if (indexOf(values, 'none') !== -1)
+		{
+			queryset = queryset
+			.orWhereNull(column)
+		}
 
 		return queryset
 		.leftJoin(
@@ -63,7 +70,7 @@ Filter.by.subscription = function (column)
 			'users.id',
 			'subscriptions.user_id'
 		)
-		.where(column, values)
+		.whereIn(column, values)
 	}
 }
 
