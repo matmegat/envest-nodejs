@@ -31,10 +31,9 @@ module.exports = function Tradeops (db, portfolio)
 		return tradeops.sequence(trx, tradeop)
 		.then(ops =>
 		{
-			ops = op_merge(tradeop, ops)
-			ops = op_adjust(ops)
+			ops = merge.undone(tradeop, ops)
 
-			return PReduce(ops.slice(1), (memo, current) =>
+			return PReduce(ops, (memo, current) =>
 			{
 				return current.undone(trx, portfolio)
 			}
@@ -52,6 +51,8 @@ module.exports = function Tradeops (db, portfolio)
 		})
 		.then(ops =>
 		{
+			ops = merge.apply(tradeop, ops)
+
 			return PReduce(ops, (memo, current) =>
 			{
 				return current.apply(trx, portfolio, db)
@@ -66,12 +67,69 @@ module.exports = function Tradeops (db, portfolio)
 		})
 	}
 
-	function op_merge (tradeop, ops)
+	function op_adjust (trade_op, ops)
 	{
-		if (DeleteOp.is(tradeop))
+		if (! ops.length)
+		{
+			return trade_op
+		}
+
+		ops.forEach(op =>
+		{
+			if (Op.sameTime(trade_op, op))
+			{
+				moveForward(trade_op)
+			}
+		})
+
+		return trade_op
+
+		function moveForward (tradeop)
+		{
+			tradeop.timestamp.add(1, 'm')
+		}
+	}
+
+	var merge = {}
+	merge.undone = function op_undone (trade_op, ops)
+	{
+		if (DeleteOp.is(trade_op))
 		{
 			/* apply delete action */
-			var tradeop = tradeop.unwrap()
+			var tradeop = trade_op.unwrap()
+
+			if (ops.length && Op.equals(tradeop, ops[0]))
+			{
+				return ops
+			}
+			else
+			{
+				throw new TypeError('attempt_to_remove_nonexistent_op')
+			}
+		}
+		else
+		{
+			if (ops.length && Op.equals(trade_op, ops[0]))
+			{
+				/* first element equals -- undone it */
+				return ops
+			}
+			else
+			{
+				/* undone Ops only earlier than tradeop */
+				trade_op = op_adjust(trade_op, ops)
+
+				return ops.filter(op => op.timestamp.isAfter(trade_op.timestamp))
+			}
+		}
+	}
+
+	merge.apply = function op_apply (trade_op, ops)
+	{
+		if (DeleteOp.is(trade_op))
+		{
+			/* apply delete action */
+			var tradeop = trade_op.unwrap()
 
 			if (ops.length && Op.equals(tradeop, ops[0]))
 			{
@@ -84,53 +142,20 @@ module.exports = function Tradeops (db, portfolio)
 		}
 		else
 		{
-			if (ops.length && Op.equals(tradeop, ops[0]))
+			if (ops.length && Op.equals(trade_op, ops[0]))
 			{
 				/* first element equals -- modify it */
 				ops = ops.slice(1)
 			}
-
-			return [ tradeop ].concat(ops)
-		}
-	}
-
-	function op_adjust (ops)
-	{
-		if (! ops.length)
-		{
-			return ops
-		}
-
-		var head = ops[0]
-
-		ops = ops.slice(1)
-
-		ops.forEach(op =>
-		{
-			if (Op.sameTime(head, op))
+			else
 			{
-				moveForward(head)
+				trade_op = op_adjust(trade_op, ops)
 			}
-		})
 
-		var pos_to_insert = find(ops, op =>
-		{
-			return head.timestamp.isBefore(op.timestamp)
-		})
-
-		if (pos_to_insert === -1)
-		{
-			pos_to_insert = ops.length
-		}
-
-		/* insert moved op */
-		ops.splice(0, pos_to_insert, head)
-
-		return ops
-
-		function moveForward (tradeop)
-		{
-			tradeop.timestamp.add(1, 'm')
+			return [ trade_op ].concat(ops.filter(op =>
+			{
+				return op.timestamp.isAfter(trade_op.timestamp)
+			}))
 		}
 	}
 
