@@ -62,7 +62,7 @@ module.exports = function (db, http)
 		toss(rs, choose_model(rq)
 		.then(model =>
 		{
-			return model.fullById(rq.params.id)
+			return model.fullById(Number(rq.params.id))
 		}))
 	})
 
