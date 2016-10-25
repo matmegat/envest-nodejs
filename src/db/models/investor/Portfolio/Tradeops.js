@@ -203,5 +203,25 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 
+	tradeops.availableDate = (trx, investor_id) =>
+	{
+		expect(investor_id).to.be.a('number')
+
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('type', 'init-brokerage')
+		.order('timestamp', 'asc')
+		.then(db.helpers.oneMaybe)
+		.then(row =>
+		{
+			if (! row) { return null }
+
+			var C = pickOp(row.type)
+			var op = C(row.investor_id, row.timestamp, row.data)
+
+			return op.timestamp
+		})
+	}
+
 	return tradeops
 }
