@@ -8,6 +8,7 @@ var PReduce = require('bluebird').reduce
 
 var knexed = require('../../../knexed')
 var Err = require('../../../../Err')
+var validate = require('../../../validate')
 
 var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
@@ -204,7 +205,7 @@ module.exports = function Tradeops (db, portfolio)
 
 	tradeops.availableDate = (trx, investor_id) =>
 	{
-		expect(investor_id).to.be.a('number')
+		validate.number(investor_id, 'investor_id')
 
 		return table(trx)
 		.where('investor_id', investor_id)
