@@ -502,7 +502,10 @@ module.exports = function Holdings (db, investor, portfolio)
 				return table(trx).insert(batch)
 			}
 		})
-		.catch(Err.fromDb('prec_timed_portfolio_point_unique', DuplicateHoldingEntry))
+		.catch(Err.fromDb(
+			'prec_timed_portfolio_point_unique',
+			DuplicateHoldingEntry
+		))
 	}
 
 	var AdminOrOwnerRequired = Err('admin_or_owner_required',
