@@ -10,7 +10,7 @@ var FacebookStrategy = require('passport-facebook-token')
 var BearerStrategy = require('passport-http-bearer')
 
 var Err = require('../Err')
-var AuthRequired = Err('auth_required', 'Auth required for this operation')
+var AuthRequired = require('./auth-required').AuthRequired
 
 module.exports = function (express, db)
 {
