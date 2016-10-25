@@ -708,33 +708,7 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return Promise.all(
-		[
-			holdings.availableDate(trx, investor_id),
-			brokerage.availableDate(trx, investor_id)
-		])
-		.then(r =>
-		{
-			var dates_symbols  = r[0]
-			var date_brokerage = r[1]
-
-			var max_symbols = maxBy(dates_symbols, 'available_from')
-			if (max_symbols)
-			{
-				max_symbols = max_symbols.available_from
-			}
-
-			var max_brokerage = date_brokerage.available_from
-
-			var max_common = null
-			if (max_symbols || max_brokerage)
-			{
-				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
-				max_common = moment.utc(max_common)
-			}
-
-			return max_common
-		})
+		return tradeops.availableDate(trx, investor_id)
 	})
 
 	portfolio.makeTrade = function (trx, investor_id, type, timestamp, data)
