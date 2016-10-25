@@ -16,7 +16,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var brokerage = {}
 
 	var knex = db.knex
-	var one      = db.helpers.one
 
 	var table = knexed(knex, 'brokerage')
 

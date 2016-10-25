@@ -14,9 +14,6 @@ var isEmpty = require('lodash/isEmpty')
 var extend = require('lodash/extend')
 var reduce = require('lodash/reduce')
 
-var max = require('lodash/max')
-var maxBy = require('lodash/maxBy')
-
 var find = require('lodash/find')
 var findLast = require('lodash/findLast')
 
@@ -708,6 +705,7 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
+		investor_id = Number(investor_id)
 		return tradeops.availableDate(trx, investor_id)
 	})
 

@@ -3,7 +3,6 @@
 var expect = require('chai').expect
 
 var invoke = require('lodash/invokeMap')
-var find   = require('lodash/findIndex')
 
 var PReduce = require('bluebird').reduce
 
@@ -210,7 +209,7 @@ module.exports = function Tradeops (db, portfolio)
 		return table(trx)
 		.where('investor_id', investor_id)
 		.where('type', 'init-brokerage')
-		.order('timestamp', 'asc')
+		.orderBy('timestamp', 'asc')
 		.then(db.helpers.oneMaybe)
 		.then(row =>
 		{

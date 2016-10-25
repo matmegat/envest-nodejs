@@ -1,4 +1,5 @@
 
+/* eslint-disable quote-props */
 var ops =
 {
 	trade: require('./TradeOp'),
@@ -6,6 +7,7 @@ var ops =
 	'init-brokerage': require('./InitBrokerageOp'),
 	'init-holdings': require('./InitHoldingsOp'),
 }
+/* eslint-enable quote-props */
 
 module.exports = function (type)
 {

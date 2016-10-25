@@ -6,9 +6,6 @@
 
 var assign = Object.assign
 
-var expect = require('chai').expect
-var extend = require('lodash/extend')
-var omit   = require('lodash/omit')
 var wrap   = require('lodash/wrap')
 
 var Op       = require('./Op')
