@@ -12,5 +12,10 @@
     "password": "0p92qpw913iejyvi"
   },
 
+  "feedback":
+  {
+    "email": "contact@netvest.com"
+  },
+
   "nginx": true
 }
