@@ -80,18 +80,14 @@ module.exports = function Series (token)
 	function transform_series (data)
 	{
 		data = util.unwrap.data(data)
-		console.log('\n', data.Security.Symbol)
 
 		var quotes = orderBy(data.GlobalQuotes, (quote) =>
 		{
 			return new Date(quote.Date)
 		})
 
-		console.log('   DATE   | LST | L.CLOSE')
 		quotes = quotes.map((quote) =>
 		{
-			console.log(quote.Date, quote.Last, quote.LastClose)
-
 			return {
 				timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
 				value:     quote.Last
