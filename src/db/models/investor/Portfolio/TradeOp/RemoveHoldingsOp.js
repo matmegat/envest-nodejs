@@ -45,8 +45,11 @@ module.exports = function RemoveHoldingOp (investor_id, timestamp, holdings)
 			return db.feed.ensureNotTraded(trx, investor_id, holding)
 			.then(() =>
 			{
-				return portfolio.holdings.symbolById(trx, holding.symbol, investor_id,
-					null, { with_timestamp: true }
+				return portfolio.holdings.symbolById(trx,
+					holding.symbol,
+					investor_id,
+					null,
+					{ with_timestamp: true }
 				)
 			})
 			.then(holding_pk =>
