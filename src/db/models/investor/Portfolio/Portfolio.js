@@ -757,7 +757,7 @@ module.exports = function Portfolio (db, investor)
 
 	portfolio.removeTrade = function (trx, post)
 	{
-		var symbol = post.trade_data.symbol
+		var symbol = post.op_data.symbol
 		var investor_id = post.investor_id
 		var timestamp = post.timestamp
 
