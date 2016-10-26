@@ -288,10 +288,27 @@ module.exports = function Brokerage (db, investor, portfolio)
 				DuplicateBrokerageEntry
 			))
 		})
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				throw err
+			}
+			else if (err.message.indexOf('numeric field overflow') !== -1)
+			{
+				throw BrokerageEntryOverflow()
+			}
+			else
+			{
+				throw Error(err.detail)
+			}
+		})
 	}
 
 	var DuplicateBrokerageEntry = Err('brokerage_duplicate',
 		'There can be only one Brokerage entry per timestamp for Investor')
+	var BrokerageEntryOverflow = Err('brokerage_overflow',
+		`Brokerage amount can't go to an absolute value more than 1e10`)
 
 
 	brokerage.recalculate = knexed.transact(knex,

@@ -68,7 +68,10 @@ module.exports = function Update (db)
 			})
 			.then(() =>
 			{
-				data.text = sanitize(data.text)
+				if (data.text)
+				{
+					data.text = sanitize(data.text)
+				}
 
 				return data
 			})

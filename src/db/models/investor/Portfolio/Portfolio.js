@@ -162,7 +162,7 @@ module.exports = function Portfolio (db, investor)
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
-			 + sumBy(holdings, 'allocation')
+			 + sumBy(total_holdings, 'allocation')
 
 			var resp = {
 				total:    total_holdings.length,
@@ -192,7 +192,7 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, null),
 			fullValue(trx, investor_id, day_ytd),
 			fullValue(trx, investor_id, day_intraday)
 		])

@@ -4,6 +4,7 @@ var expect = require('chai').expect
 var moment = require('moment')
 
 var Err = require('../../../Err')
+var knexed = require('../../knexed')
 var InitBrokerageOp = require('./Portfolio/TradeOp/InitBrokerageOp')
 var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
@@ -14,6 +15,8 @@ var CannotGoPublic = Err('cannot_go_public',
 module.exports = function Onboarding (db, investor)
 {
 	var onb = {}
+
+	var knex = db.knex
 
 	onb.fields = {}
 
@@ -34,12 +37,13 @@ module.exports = function Onboarding (db, investor)
 	var FieldEditedI = Emitter('field_edited')
 
 
-	onb.update = function update (whom_id, investor_id, field, value)
+	onb.update = knexed.transact(knex,
+		(trx, whom_id, investor_id, field, value) =>
 	{
 		whom_id = Number(whom_id)
 		investor_id = Number(investor_id)
 
-		return investor.getActionMode(whom_id, investor_id)
+		return investor.getActionMode(trx, whom_id, investor_id)
 		.then(mode =>
 		{
 			if (! mode)
@@ -58,7 +62,7 @@ module.exports = function Onboarding (db, investor)
 		{
 			field = onb.fields[field]
 
-			return field.set(investor_id, value)
+			return field.set(trx, investor_id, value)
 			.then(() => mode) /* pass mode */
 		})
 		.then(mode =>
@@ -68,19 +72,19 @@ module.exports = function Onboarding (db, investor)
 				FieldEditedA({
 					by: 'investor',
 					investor: [ ':user-id', investor_id ]
-				})
+				}, trx)
 			}
 			else
 			{
 				FieldEditedI(investor_id, {
 					by: 'admin',
 					admin: [ ':user-id', whom_id ]
-				})
+				}, trx)
 			}
 		})
-	}
+	})
 
-	onb.goPublic = function pushLive (whom_id, investor_id)
+	onb.goPublic = knexed.transact(knex, (trx, whom_id, investor_id) =>
 	{
 		return Promise.all(
 		[
@@ -104,7 +108,7 @@ module.exports = function Onboarding (db, investor)
 
 			return Promise.all(_.map(onb.fields, (field) =>
 			{
-				return field.verify(investor_id)
+				return field.verify(trx, investor_id)
 			}))
 		})
 		.then(() => db.user.infoById(investor_id))
@@ -143,7 +147,7 @@ module.exports = function Onboarding (db, investor)
 				admin: [ ':user-id', whom_id ]
 			})
 		})
-	}
+	})
 
 	var PublicChanged = Emitter('pushed_to_public')
 
@@ -174,14 +178,14 @@ function Profession (investor)
 			.then(one)
 			.then(rs => rs.profession)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.string(value, 'profession')
 			validate.empty(value, 'profession')
 			validateProfLength(value, 'profession')
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ profession: value })
 		}
@@ -204,7 +208,7 @@ function Focus (investor)
 			.then(one)
 			.then(rs => rs.focus)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.array(value, 'focus')
 			validateFocLength(value, 'focus')
@@ -217,7 +221,7 @@ function Focus (investor)
 			})
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ focus: JSON.stringify(value) })
 		}
@@ -239,7 +243,7 @@ function Education (investor)
 			.then(one)
 			.then(rs => rs.education)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.array(value, 'education')
 			validateEduLength(value, 'education')
@@ -252,7 +256,7 @@ function Education (investor)
 			})
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ education: JSON.stringify(value) })
 		}
@@ -272,14 +276,14 @@ function Background (investor)
 			.then(one)
 			.then(rs => rs.background)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.string(value, 'background')
 			validate.empty(value, 'background')
 			validateBackLength(value, 'background')
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ background: value })
 		}
@@ -329,7 +333,7 @@ function HistReturn (investor)
 			.then(one)
 			.then(rs => rs.historical_returns)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			try
 			{
@@ -351,7 +355,7 @@ function HistReturn (investor)
 
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ historical_returns: JSON.stringify(value) })
 		},
@@ -419,13 +423,13 @@ function AnnualReturn (investor)
 			.then(one)
 			.then(rs => rs.annual_return)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.empty(value, 'annual_return')
 			validate.number(value, 'annual_return')
 			return value
 		},
-		set: (value, queryset) =>
+		set: (trx, value, queryset) =>
 		{
 			return queryset.update({ annual_return: value })
 		}
@@ -454,7 +458,7 @@ function Brokerage (investor_model, db)
 				return value
 			})
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.required(value.amount, 'brokerage.amount')
 			validate.required(value.date, 'brokerage.date')
@@ -471,7 +475,7 @@ function Brokerage (investor_model, db)
 
 			return value
 		},
-		set: (value, investor_queryset, investor_id) =>
+		set: (trx, value, investor_queryset, investor_id) =>
 		{
 			var timestamp = moment.utc(value.date)
 
@@ -480,7 +484,7 @@ function Brokerage (investor_model, db)
 				amount: value.amount
 			})
 
-			return db.investor.portfolio.apply(set_brokerage)
+			return db.investor.portfolio.apply(trx, set_brokerage)
 		},
 		verify: (value) =>
 		{
@@ -562,7 +566,7 @@ function Holdings (investor_model, db)
 				return holdings
 			})
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			try
 			{
@@ -584,14 +588,14 @@ function Holdings (investor_model, db)
 
 			return value
 		},
-		set: (value, investor_queryset, investor_id) =>
+		set: (trx, value, investor_queryset, investor_id) =>
 		{
 			var timestamp = _.maxBy(value, 'date').date
 			timestamp = moment.utc(timestamp)
 
 			var set_holdings = InitHoldingsOp(investor_id, timestamp, value)
 
-			return db.investor.portfolio.apply(set_holdings)
+			return db.investor.portfolio.apply(trx, set_holdings)
 		}
 	})
 }
@@ -611,13 +615,13 @@ function IsPublic (investor)
 			.then(one)
 			.then(rs => rs.is_public)
 		},
-		validate: (value) =>
+		validate: (trx, value) =>
 		{
 			validate.boolean.false(value, 'is_public')
 
 			return value
 		},
-		set: (value, queryset, investor_id) =>
+		set: (trx, value, queryset, investor_id) =>
 		{
 			return investor.featured.is(investor_id)
 			.then(so =>
