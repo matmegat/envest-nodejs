@@ -102,24 +102,28 @@ module.exports = function Investor (db, mailer)
 		{	// fill other investor data
 			var fields = (field) =>
 			{
-				if (! (field in data) || ! data[field])
+				return () =>
 				{
-					return Promise.resolve(`"${field}" skipped`)
-				}
+					if (! (field in data) || ! data[field])
+					{
+						return Promise.resolve(`"${field}" skipped`)
+					}
 
-				return investor
-				.onboarding
-				.fields[field]
-				.set(trx, investor_entry.id, data[field])
+					return investor
+					.onboarding
+					.fields[field]
+					.set(trx, investor_entry.id, data[field])
+				}
 			}
 
-			return fields('brokerage')
-			.then(() => fields('holdings'))
-			.then(() => fields('profession'))
-			.then(() => fields('focus'))
-			.then(() => fields('education'))
-			.then(() => fields('hist_return'))
-			.then(() => fields('annual_return'))
+			return fields('brokerage')()
+			.then(fields('holdings'))
+			.then(fields('profession'))
+			.then(fields('focus'))
+			.then(fields('education'))
+			.then(fields('background'))
+			.then(fields('hist_return'))
+			.then(fields('annual_return'))
 			.then(() => investor_entry)
 		})
 		.then((investor_entry) =>

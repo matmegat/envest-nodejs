@@ -22,7 +22,7 @@
       "http://127.0.0.1",
       "http://localhost",
       "http://nevest.dev",
-      "http://ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
+      "http://ec2-35-161-140-145.us-west-2.compute.amazonaws.com",
       "http://dev.netvest.com"
     ],
     "ports":
@@ -49,6 +49,6 @@
 
   "feedback":
   {
-    "email": "dummy-netvest@gmail.com"
+    "email": "test_user+feedback@weezlabs.com"
   }
 }

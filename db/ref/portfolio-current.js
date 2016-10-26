@@ -19,7 +19,7 @@ AS SELECT
 FROM
   ${base_table} AS P
 
-WHERE amount > 0
+WHERE amount <> 0
   AND timestamp =
   (
     SELECT MAX(timestamp) FROM ${base_table}

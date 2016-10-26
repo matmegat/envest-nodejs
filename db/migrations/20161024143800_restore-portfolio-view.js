@@ -10,7 +10,7 @@ exports.up = function (knex)
 	})
 }
 
-exports.down = function(knex)
+exports.down = function (knex)
 {
 	return knex.schema.raw(`DROP VIEW portfolio_current`)
 	.then(() =>

@@ -87,8 +87,8 @@ module.exports = function Onboarding (db, investor)
 	{
 		return Promise.all(
 		[
-			investor.all.is(investor_id),
-			investor.public.is(investor_id)
+			investor.all.is(investor_id, trx),
+			investor.public.is(investor_id, trx)
 		])
 		.then((so) =>
 		{
@@ -124,7 +124,7 @@ module.exports = function Onboarding (db, investor)
 			validate.string(user.investor.profile_pic, 'profile_pic')
 			validate.empty(user.investor.profile_pic, 'profile_pic')
 
-			return investor.setPublic(investor_id, true, 'user_id')
+			return investor.setPublic(trx, investor_id, true, 'user_id')
 		})
 		.catch((err) =>
 		{
@@ -137,14 +137,14 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_id) =>
 		{
-			return investor.updateStartDate(investor_id, 'user_id')
+			return investor.updateStartDate(trx, investor_id, 'user_id')
 		})
 		.then((investor_id) =>
 		{
 			PublicChanged(investor_id, {
 				by: 'admin',
 				admin: [ ':user-id', whom_id ]
-			})
+			}, trx)
 		})
 	})
 

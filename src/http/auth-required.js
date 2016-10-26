@@ -15,3 +15,5 @@ module.exports = function (rq, rs, next)
 		toss.err(rs, AuthRequired())
 	}
 }
+
+module.exports.AuthRequired = AuthRequired

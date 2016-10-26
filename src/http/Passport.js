@@ -10,6 +10,7 @@ var FacebookStrategy = require('passport-facebook-token')
 var BearerStrategy = require('passport-http-bearer')
 
 var Err = require('../Err')
+var AuthRequired = require('./auth-required').AuthRequired
 
 module.exports = function (express, db)
 {
@@ -87,7 +88,18 @@ function useBearerToken (user)
 		if (decoded && decoded.id)
 		{
 			user.infoById(decoded.id)
-			.then(user => done(null, user), done)
+			.then(user => done(null, user))
+			.catch(err =>
+			{
+				if (Err.is(err) && err.code === 'user_not_found')
+				{
+					return done(AuthRequired())
+				}
+				else
+				{
+					return done(err)
+				}
+			})
 		}
 		else
 		{
