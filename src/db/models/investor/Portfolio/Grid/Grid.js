@@ -94,7 +94,7 @@ module.exports = function Grid (investor, portfolio)
 				/* correct range to trading hours */
 				range = find_market_open(range, superseries, resolution)
 
-				if (0)
+				if (0 && resolution === 'day')
 				{
 					console.dir(grid)
 					console.log('--- holdings:')
@@ -199,16 +199,16 @@ module.exports = function Grid (investor, portfolio)
 
 	function range_from (range, end, resolution)
 	{
-		end = moment(end)
+		end = moment(end).startOf('day').add(1, 'day')
 
 		if (resolution === 'day')
 		{
-			var start = moment(end).subtract(2, 'years')
+			var start = moment(end)
+			.subtract(2, 'years')
 		}
 		else
 		{
 			var start = moment(end)
-			.endOf('day')
 			.subtract(5 + 1, 'days')
 		}
 
