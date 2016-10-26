@@ -199,29 +199,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	holdings.availableDate = knexed.transact(knex, (trx, investor_id) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			return table(trx)
-			.where('investor_id', investor_id)
-			.select('symbol_ticker', 'symbol_exchange')
-			.select(raw('MAX(timestamp) AS available_from'))
-			.groupBy('symbol_ticker', 'symbol_exchange')
-		})
-		.then(r =>
-		{
-			return r.map(entry =>
-			{
-				return {
-					symbol: Symbl([ entry.symbol_ticker, entry.symbol_exchange ]),
-					available_from: entry.available_from
-				}
-			})
-		})
-	})
-
 
 	holdings.isExact =
 		knexed.transact(knex, (trx, investor_id, symbol, timestamp) =>

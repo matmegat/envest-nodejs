@@ -34,6 +34,3 @@ allOf:
           type: array
           items:
             type: string
-        can_delete_trade:
-          type: boolean
-          description: Can corresponding trade operation be deleted

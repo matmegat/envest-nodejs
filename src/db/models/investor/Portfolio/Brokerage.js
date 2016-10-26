@@ -16,7 +16,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	var brokerage = {}
 
 	var knex = db.knex
-	var one      = db.helpers.one
 
 	var table = knexed(knex, 'brokerage')
 
@@ -113,18 +112,6 @@ module.exports = function Brokerage (db, investor, portfolio)
 	{
 		return brokerage.byId(trx, investor_id, for_date)
 		.then(it => it.cash)
-	})
-
-	brokerage.availableDate = knexed.transact(knex, (trx, investor_id) =>
-	{
-		return investor.all.ensure(investor_id, trx)
-		.then(() =>
-		{
-			return table(trx)
-			.where('investor_id', investor_id)
-			.select(raw('MAX(timestamp) AS available_from'))
-		})
-		.then(one)
 	})
 
 

@@ -193,35 +193,6 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then(feed_items =>
 		{
-			var trades = feed_items.filter(item => item.event.type === 'trade')
-			var investor_ids = pick_feed_investors(trades)
-
-			var reqs = investor_ids.map(id =>
-			{
-				return investor.portfolio.availableDate(id)
-				.then(date => [ id, date ])
-			})
-
-			return Promise.all(reqs)
-			.then(_.fromPairs)
-			.then(from_dates =>
-			{
-				feed_items.forEach(item =>
-				{
-					if (item.event.type === 'trade')
-					{
-						var ts = item.timestamp
-						var id = item.investor_id
-
-						item.event.data.can_delete_trade = ts >= from_dates[id]
-					}
-				})
-
-				return feed_items
-			})
-		})
-		.then(feed_items =>
-		{
 			return investor.all.list(
 			{
 				filter: { ids: pick_feed_investors(feed_items).join(',') }

@@ -3,7 +3,7 @@
 var expect = require('chai').expect
 
 var invoke = require('lodash/invokeMap')
-var find   = require('lodash/findIndex')
+var moment = require('moment')
 
 var PReduce = require('bluebird').reduce
 
@@ -67,29 +67,6 @@ module.exports = function Tradeops (db, portfolio)
 		})
 	}
 
-	function op_adjust (trade_op, ops)
-	{
-		if (! ops.length)
-		{
-			return trade_op
-		}
-
-		ops.forEach(op =>
-		{
-			if (Op.sameTime(trade_op, op))
-			{
-				moveForward(trade_op)
-			}
-		})
-
-		return trade_op
-
-		function moveForward (tradeop)
-		{
-			tradeop.timestamp.add(1, 'm')
-		}
-	}
-
 	var merge = {}
 	merge.undone = function op_undone (trade_op, ops)
 	{
@@ -116,19 +93,43 @@ module.exports = function Tradeops (db, portfolio)
 			}
 			else
 			{
-				/* undone Ops only earlier than tradeop */
 				trade_op = op_adjust(trade_op, ops)
 
+				/* undone Ops only later than trade_op */
 				return ops.filter(op => op.timestamp.isAfter(trade_op.timestamp))
 			}
 		}
 	}
 
+	function op_adjust (trade_op, ops)
+	{
+		if (! ops.length)
+		{
+			return trade_op
+		}
+
+		ops.forEach(op =>
+		{
+			if (Op.sameTime(trade_op, op))
+			{
+				moveForward(trade_op)
+			}
+		})
+
+		return trade_op
+
+		function moveForward (tradeop)
+		{
+			tradeop.timestamp.add(1, 'm')
+		}
+	}
+
+
 	merge.apply = function op_apply (trade_op, ops)
 	{
 		if (DeleteOp.is(trade_op))
 		{
-			/* apply delete action */
+			/* do not apply delete action */
 			var tradeop = trade_op.unwrap()
 
 			if (ops.length && Op.equals(tradeop, ops[0]))
@@ -147,15 +148,8 @@ module.exports = function Tradeops (db, portfolio)
 				/* first element equals -- modify it */
 				ops = ops.slice(1)
 			}
-			else
-			{
-				trade_op = op_adjust(trade_op, ops)
-			}
 
-			return [ trade_op ].concat(ops.filter(op =>
-			{
-				return op.timestamp.isAfter(trade_op.timestamp)
-			}))
+			return [ trade_op ].concat(ops)
 		}
 	}
 
@@ -202,6 +196,21 @@ module.exports = function Tradeops (db, portfolio)
 		.where('timestamp', '>=', tradeop.timestamp.format())
 	}
 
+
+	tradeops.availableDate = (trx, investor_id) =>
+	{
+		return table(trx)
+		.where('investor_id', investor_id)
+		.where('type', 'init-brokerage')
+		.orderBy('timestamp', 'asc')
+		.then(db.helpers.oneMaybe)
+		.then(row =>
+		{
+			if (! row) { return null }
+
+			return moment(row.timestamp)
+		})
+	}
 
 	return tradeops
 }
