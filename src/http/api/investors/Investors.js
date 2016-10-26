@@ -78,7 +78,9 @@ module.exports = function (db, http)
 		})
 		.then(so =>
 		{
-			if (so)
+			var is_same = rq.user.id === Number(rq.params.id)
+
+			if (so && is_same)
 			{
 				return investors.model.all
 			}
@@ -93,7 +95,12 @@ module.exports = function (db, http)
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
-		var options = { extended: isPlainObject(rq.user.admin) }
+		var is_same = rq.user.id === Number(rq.params.id)
+		var options =
+		{
+			extended: isPlainObject(rq.user.admin) || is_same
+		}
+
 		toss(rs, db.investor.portfolio.byId(rq.params.id, options))
 	})
 
