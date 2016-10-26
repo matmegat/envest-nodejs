@@ -205,8 +205,6 @@ module.exports = function Tradeops (db, portfolio)
 
 	tradeops.availableDate = (trx, investor_id) =>
 	{
-		validate.number(investor_id, 'investor_id')
-
 		return table(trx)
 		.where('investor_id', investor_id)
 		.where('type', 'init-brokerage')

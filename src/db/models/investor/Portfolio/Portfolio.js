@@ -706,7 +706,10 @@ module.exports = function Portfolio (db, investor)
 	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return investor.all.ensure(investor_id, trx)
-		.then(() => tradeops.availableDate(trx, investor_id))
+		.then(() =>
+		{
+			return tradeops.availableDate(trx, investor_id)
+		})
 	})
 
 	portfolio.makeTrade = function (trx, investor_id, type, timestamp, data)
