@@ -78,7 +78,7 @@ module.exports = function (db, http)
 		})
 		.then(so =>
 		{
-			var is_same = rq.user.id === Number(rq.params.id)
+			var is_same = rq.user && (rq.user.id === Number(rq.params.id))
 
 			if (so || is_same)
 			{
