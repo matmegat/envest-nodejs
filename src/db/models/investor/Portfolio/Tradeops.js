@@ -3,12 +3,12 @@
 var expect = require('chai').expect
 
 var invoke = require('lodash/invokeMap')
+var moment = require('moment')
 
 var PReduce = require('bluebird').reduce
 
 var knexed = require('../../../knexed')
 var Err = require('../../../../Err')
-var validate = require('../../../validate')
 
 var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
@@ -67,29 +67,6 @@ module.exports = function Tradeops (db, portfolio)
 		})
 	}
 
-	function op_adjust (trade_op, ops)
-	{
-		if (! ops.length)
-		{
-			return trade_op
-		}
-
-		ops.forEach(op =>
-		{
-			if (Op.sameTime(trade_op, op))
-			{
-				moveForward(trade_op)
-			}
-		})
-
-		return trade_op
-
-		function moveForward (tradeop)
-		{
-			tradeop.timestamp.add(1, 'm')
-		}
-	}
-
 	var merge = {}
 	merge.undone = function op_undone (trade_op, ops)
 	{
@@ -116,19 +93,43 @@ module.exports = function Tradeops (db, portfolio)
 			}
 			else
 			{
-				/* undone Ops only earlier than tradeop */
 				trade_op = op_adjust(trade_op, ops)
 
+				/* undone Ops only later than trade_op */
 				return ops.filter(op => op.timestamp.isAfter(trade_op.timestamp))
 			}
 		}
 	}
 
+	function op_adjust (trade_op, ops)
+	{
+		if (! ops.length)
+		{
+			return trade_op
+		}
+
+		ops.forEach(op =>
+		{
+			if (Op.sameTime(trade_op, op))
+			{
+				moveForward(trade_op)
+			}
+		})
+
+		return trade_op
+
+		function moveForward (tradeop)
+		{
+			tradeop.timestamp.add(1, 'm')
+		}
+	}
+
+
 	merge.apply = function op_apply (trade_op, ops)
 	{
 		if (DeleteOp.is(trade_op))
 		{
-			/* apply delete action */
+			/* do not apply delete action */
 			var tradeop = trade_op.unwrap()
 
 			if (ops.length && Op.equals(tradeop, ops[0]))
@@ -147,15 +148,8 @@ module.exports = function Tradeops (db, portfolio)
 				/* first element equals -- modify it */
 				ops = ops.slice(1)
 			}
-			else
-			{
-				trade_op = op_adjust(trade_op, ops)
-			}
 
-			return [ trade_op ].concat(ops.filter(op =>
-			{
-				return op.timestamp.isAfter(trade_op.timestamp)
-			}))
+			return [ trade_op ].concat(ops)
 		}
 	}
 
@@ -214,10 +208,7 @@ module.exports = function Tradeops (db, portfolio)
 		{
 			if (! row) { return null }
 
-			var C = pickOp(row.type)
-			var op = C(row.investor_id, row.timestamp, row.data)
-
-			return op.timestamp
+			return moment(row.timestamp)
 		})
 	}
 
