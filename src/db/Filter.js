@@ -3,6 +3,7 @@ var raw = require('knex').raw
 
 var map = require('lodash/map')
 var curry = require('lodash/curry')
+var includes = require('lodash/includes')
 
 var moment = require('moment')
 
@@ -50,6 +51,28 @@ Filter.by.operator = curry((operator, column) =>
 
 Filter.by.equal = Filter.by.operator('=')
 
+Filter.by.subscription = function (column)
+{
+	return function (queryset, values)
+	{
+		values = values.split(',')
+		values[0] || (values = ['none'])
+
+		if (includes(values, 'none'))
+		{
+			queryset = queryset
+			.orWhereNull(column)
+		}
+
+		return queryset
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+		.whereIn(column, values)
+	}
+}
 
 Filter.by.id = function (column)
 {

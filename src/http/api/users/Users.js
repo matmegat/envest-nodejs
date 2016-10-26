@@ -62,7 +62,8 @@ module.exports = function Users (http, user_model)
 
 			options.filter = _.pick(rq.query,
 			[
-				'query'
+				'query',
+				'subscription'
 			])
 
 			options.sorter = _.pick(rq.query,

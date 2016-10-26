@@ -642,7 +642,8 @@ module.exports = function User (db, app)
 	})
 
 	var filter = Filter({
-		query: Filter.by.query([])
+		query: Filter.by.query([]),
+		subscription: Filter.by.subscription('type')
 	})
 
 	user.byGroup = function (user_group, options)
@@ -699,7 +700,7 @@ module.exports = function User (db, app)
 				'admins',
 				'users.id',
 				'admins.user_id'
-			 )
+			)
 			.leftJoin(
 				'investors',
 				'users.id',

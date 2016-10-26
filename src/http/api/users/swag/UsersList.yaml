@@ -13,6 +13,13 @@ get:
     in: query
     type: string
     description: Sorting options [column, desc||asc]
+  - name: subscription
+    in: query
+    type: string
+    description: |
+      Subscription types (described in stripe) separated with a comma
+      Use 'none' word for user without subscription
+      E.g ?subscription=none,trial,premium
 
   responses:
     200:
