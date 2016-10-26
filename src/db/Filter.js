@@ -3,7 +3,7 @@ var raw = require('knex').raw
 
 var map = require('lodash/map')
 var curry = require('lodash/curry')
-var indexOf = require('lodash/indexOf')
+var includes = require('lodash/includes')
 
 var moment = require('moment')
 
@@ -58,7 +58,7 @@ Filter.by.subscription = function (column)
 		values = values.split(',')
 		values[0] || (values = ['none'])
 
-		if (indexOf(values, 'none') !== -1)
+		if (includes(values, 'none'))
 		{
 			queryset = queryset
 			.orWhereNull(column)
