@@ -56,8 +56,16 @@ module.exports = function Watchlist (db)
 
 			return Promise.resolve(data)
 		},
-		remove: () =>
+		remove: (trx, post) =>
 		{
+			var data = post.data
+			var investor_id = post.investor_id
+
+			if (data.dir === 'added')
+			{
+				return db.watchlist.investor.remove(investor_id, data.symbol)
+			}
+			
 			return
 		}
 	})
