@@ -693,7 +693,22 @@ module.exports = function Portfolio (db, investor)
 	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
 	{
 		return tradeops.apply(trx, tradeop)
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				throw PortfolioOpErr({ reason: err })
+			}
+			else
+			{
+				throw PortfolioOpErr({ reason: err.message })
+			}
+		})
 	})
+
+	var PortfolioOpErr = Err('portfolio_operation_err',
+		'Error appeared during munipulating portfilo'
+	)
 
 
 	// trading

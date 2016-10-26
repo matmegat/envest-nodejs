@@ -68,15 +68,17 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 	var merge = {}
+
+	/* prepare ops to be undone */
 	merge.undone = function op_undone (trade_op, ops)
 	{
 		if (DeleteOp.is(trade_op))
 		{
-			/* apply delete action */
 			var tradeop = trade_op.unwrap()
 
 			if (ops.length && Op.equals(tradeop, ops[0]))
 			{
+				/* if tradeop is DeleteOp it should be undone */
 				return ops
 			}
 			else
@@ -88,11 +90,12 @@ module.exports = function Tradeops (db, portfolio)
 		{
 			if (ops.length && Op.equals(trade_op, ops[0]))
 			{
-				/* first element equals -- undone it */
+				/* first element equals (it is a modification) -- undone it */
 				return ops
 			}
 			else
 			{
+				/* NOTE side effect on trade_op */
 				trade_op = op_adjust(trade_op, ops)
 
 				/* undone Ops only later than trade_op */
@@ -125,15 +128,16 @@ module.exports = function Tradeops (db, portfolio)
 	}
 
 
+	/* prepare ops for apply phase */
 	merge.apply = function op_apply (trade_op, ops)
 	{
 		if (DeleteOp.is(trade_op))
 		{
-			/* do not apply delete action */
 			var tradeop = trade_op.unwrap()
 
 			if (ops.length && Op.equals(tradeop, ops[0]))
 			{
+				/* if tradeop is DeleteOp do not apply it */
 				return ops.slice(1)
 			}
 			else
@@ -145,7 +149,7 @@ module.exports = function Tradeops (db, portfolio)
 		{
 			if (ops.length && Op.equals(trade_op, ops[0]))
 			{
-				/* first element equals -- modify it */
+				/* first element equals, slice it (concat later) */
 				ops = ops.slice(1)
 			}
 

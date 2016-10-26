@@ -377,8 +377,6 @@ module.exports = function Holdings (db, investor, portfolio)
 		})
 	})
 
-	var InvalidAmount = Err('invalid_portfolio_amount',
-		'Invalid amount value for cash, share, price')
 	var InvalidHoldingDate = Err('invalid_portfolio_date',
 		'Invalid date value for Portfolio Holdings')
 
