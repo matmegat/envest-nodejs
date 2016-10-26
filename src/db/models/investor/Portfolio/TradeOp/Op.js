@@ -1,14 +1,14 @@
 
-var expect = require('chai').expect
-
 var moment = require('moment')
+
+var validate = require('../../../../validate')
 
 var inst = () => Object.create(Op.prototype)
 
 var Op = module.exports = function Op (investor_id, timestamp)
 {
-	expect(investor_id).a('number')
-	expect(moment.isDate(timestamp) || moment.isMoment(timestamp)).true
+	validate.number(investor_id, 'investor_id')
+	validate.date(timestamp, 'timestamp')
 
 	timestamp = moment(timestamp)
 	timestamp.milliseconds(0)
@@ -73,20 +73,20 @@ Op.is = (op) =>
 
 Op.equals = (L, R) =>
 {
-	expect(Op.is(L)).true
-	expect(Op.is(R)).true
+	validate.boolean(Op.is(L), 'Op.equals parameter 1')
+	validate.boolean(Op.is(R), 'Op.equals parameter 2')
 
 	if (L.type !== R.type) { return false }
 	if (L.investor_id !== R.investor_id) { return false }
-	if (L.timestamp.toISOString() !== R.timestamp.toISOString()) { return false }
+	if (! Op.sameTime(L, R)) { return false }
 
 	return L.equals(R)
 }
 
 Op.sameTime = (L, R) =>
 {
-	expect(Op.is(L)).true
-	expect(Op.is(R)).true
+	validate.boolean(Op.is(L), 'Op.equals parameter 1')
+	validate.boolean(Op.is(R), 'Op.equals parameter 2')
 
 	return L.timestamp.toISOString() === R.timestamp.toISOString()
 }
