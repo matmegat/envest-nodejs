@@ -198,13 +198,13 @@ validate.length = function validate__length (max, min)
 
 var WrongDate = Err('wrong_date_format', 'Wrong Date Format')
 
-validate.date = function validate__date (date)
+validate.date = function validate__date (field, name)
 {
-	var date = moment(date)
+	var date = moment(field)
 
 	if (! date.isValid())
 	{
-		throw WrongDate()
+		throw WrongDate({ field: name })
 	}
 }
 
