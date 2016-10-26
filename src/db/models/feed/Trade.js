@@ -6,6 +6,9 @@ var pick = require('lodash/pick')
 var validate = require('../../validate')
 var sanitize = require('../../../sanitize')
 
+var TradeOp = require('../investor/Portfolio/TradeOp/TradeOp')
+var DeleteOp = require('../investor/Portfolio/TradeOp/DeleteOp')
+
 module.exports = function Trade (portfolio, symbols)
 {
 	return Type(
@@ -25,7 +28,9 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(() =>
 			{
-				return portfolio.makeTrade(trx, investor_id, type, date, data)
+				var tradeOp = TradeOp(investor_id, date, data)
+
+				return portfolio.tradeops.apply(trx, tradeOp)
 			})
 			.then(() =>
 			{
@@ -42,7 +47,14 @@ module.exports = function Trade (portfolio, symbols)
 		},
 		remove: (trx, post) =>
 		{
-			return portfolio.removeTrade(trx, post)
+			var investor_id = post.investor_id
+			var timestamp = post.timestamp
+			var trade_data = post.data
+
+			var tradeOp = TradeOp(investor_id, timestamp, trade_data)
+			var delOp = DeleteOp(tradeOp)
+
+			return portfolio.tradeops.apply(trx, delOp)
 		}
 	})
 }

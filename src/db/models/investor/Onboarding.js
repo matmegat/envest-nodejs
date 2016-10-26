@@ -1,15 +1,16 @@
 
+var _ = require('lodash')
 var expect = require('chai').expect
+var moment = require('moment')
 
 var Err = require('../../../Err')
-var CannotGoPublic = Err('cannot_go_public',
-	'Investor cannot be pushed to public')
 var knexed = require('../../knexed')
-
+var InitBrokerageOp = require('./Portfolio/TradeOp/InitBrokerageOp')
+var InitHoldingsOp = require('./Portfolio/TradeOp/InitHoldingsOp')
 var validate = require('../../validate')
 
-var _ = require('lodash')
-var moment = require('moment')
+var CannotGoPublic = Err('cannot_go_public',
+	'Investor cannot be pushed to public')
 
 module.exports = function Onboarding (db, investor)
 {
@@ -463,11 +464,7 @@ function Brokerage (investor_model, db)
 			validate.required(value.date, 'brokerage.date')
 
 			decimal(value.amount, 'brokerage.amount')
-
-			if (value.amount < 0)
-			{
-				throw WrongBrokerageFormat({ field: 'brokerage.amount' })
-			}
+			validate.number.nonNegative(value.amount, 'brokerage.amount')
 
 			validate.date(value.date, 'brokerage.date')
 
@@ -480,11 +477,14 @@ function Brokerage (investor_model, db)
 		},
 		set: (trx, value, investor_queryset, investor_id) =>
 		{
-			var portfolio = db.investor.portfolio
+			var timestamp = moment.utc(value.date)
 
-			return portfolio
-			.brokerage
-			.set(trx, investor_id, value.amount, value.date)
+			var set_brokerage = InitBrokerageOp(investor_id, timestamp,
+			{
+				amount: value.amount
+			})
+
+			return db.investor.portfolio.apply(trx, set_brokerage)
 		},
 		verify: (value) =>
 		{
@@ -535,9 +535,14 @@ function Holdings (investor_model, db)
 
 		validate.required(row.date, `holdings[${i}].date`)
 		validate.date(row.date, `holdings[${i}].date`)
-		if (moment.utc(row.date) > moment.utc())
+		if (moment.utc(row.date) > moment.utc().endOf('day'))
 		{
-			throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
+			throw WrongHoldingsFormat(
+			{
+				field: `holdings[${i}].date`,
+				reason: `Can't set holding in future. ` +
+				`Server time is ${moment.utc().format}`
+			})
 		}
 	}
 
@@ -561,7 +566,7 @@ function Holdings (investor_model, db)
 				return holdings
 			})
 		},
-		validate: (trx, value, investor_id) =>
+		validate: (trx, value) =>
 		{
 			try
 			{
@@ -581,30 +586,16 @@ function Holdings (investor_model, db)
 				}
 			}
 
-			return db.investor.portfolio.availableDate(trx, investor_id)
-			.then((min_date) =>
-			{
-				if (min_date === null)
-				{
-					min_date = moment.utc(0)
-				}
-
-				value.forEach((row, i) =>
-				{
-					if (moment.utc(row.date) < min_date)
-					{
-						throw WrongHoldingsFormat({ field: `holdings[${i}].date` })
-					}
-				})
-
-				return value
-			})
+			return value
 		},
 		set: (trx, value, investor_queryset, investor_id) =>
 		{
-			var portfolio = db.investor.portfolio
+			var timestamp = _.maxBy(value, 'date').date
+			timestamp = moment.utc(timestamp)
 
-			return portfolio.holdings.set(trx, investor_id, value)
+			var set_holdings = InitHoldingsOp(investor_id, timestamp, value)
+
+			return db.investor.portfolio.apply(trx, set_holdings)
 		}
 	})
 }

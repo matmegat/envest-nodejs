@@ -93,7 +93,7 @@ var Symbl = module.exports = function Symbl (it)
 		}
 	}
 
-	throw WrongFormat({ reason: 'unknown_format' })
+	throw WrongFormat({ reason: 'unknown_format', symbol: it })
 }
 /* eslint-enable */
 
