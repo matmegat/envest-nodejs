@@ -1,4 +1,5 @@
 
+var expect = require('chai').expect
 var moment = require('moment')
 
 var validate = require('../../../../validate')
@@ -73,8 +74,8 @@ Op.is = (op) =>
 
 Op.equals = (L, R) =>
 {
-	validate.boolean(Op.is(L), 'Op.equals parameter 1')
-	validate.boolean(Op.is(R), 'Op.equals parameter 2')
+	expect(Op.is(L)).true
+	expect(Op.is(R)).true
 
 	if (L.type !== R.type) { return false }
 	if (L.investor_id !== R.investor_id) { return false }
@@ -85,8 +86,8 @@ Op.equals = (L, R) =>
 
 Op.sameTime = (L, R) =>
 {
-	validate.boolean(Op.is(L), 'Op.equals parameter 1')
-	validate.boolean(Op.is(R), 'Op.equals parameter 2')
+	expect(Op.is(L)).true
+	expect(Op.is(R)).true
 
 	return L.timestamp.toISOString() === R.timestamp.toISOString()
 }
