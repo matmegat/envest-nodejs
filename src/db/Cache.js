@@ -37,7 +37,10 @@ module.exports = function (redis)
 					return fn.apply(this, arguments)
 					.then(value =>
 					{
-						redis_set(redis, key_str, value, options)
+						setImmediate(() =>
+						{
+							redis_set(redis, key_str, value, options)
+						})
 
 						return value
 					})
