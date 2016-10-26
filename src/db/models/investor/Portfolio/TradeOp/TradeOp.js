@@ -1,50 +1,53 @@
 
 var assign = Object.assign
 
-var expect = require('chai').expect
 var wrap = require('lodash/wrap')
 
 var Op = require('./Op')
 var Symbl = require('../../../symbols/Symbl')
 
-module.exports = function TradeOp (investor_id, timestamp, trade_data)
+var validate = require('../../../../validate')
+
+module.exports = function TradeOp (investor_id, timestamp, op_data)
 {
 	var op = Op(investor_id, timestamp)
 
-	// Remove expects due to trade validation?
+	var trade_operations =
+	[
+		'sold',
+		'bought'
+	]
+	var validate_dir = validate.collection(trade_operations)
 
-	expect(trade_data).an('object')
-
-	expect(trade_data).property('dir')
-	expect([ 'sold', 'bought' ]).include(trade_data.dir)
-
-	expect(trade_data.price).a('number')
-	expect(trade_data.amount).a('number')
-
-	expect(trade_data.symbol).ok
+	validate.object(op_data, 'TradeOp.op_data')
+	validate.required(op_data.dir, 'TradeOp.op_data.dir')
+	validate_dir(op_data.dir, 'TradeOp.op_data.dir')
+	validate.number.nonNegative(op_data.price, 'TradeOp.op_data.price')
+	validate.number.nonNegative(op_data.amount, 'TradeOp.op_data.amount')
+	validate.required(op_data.symbol, 'TradeOp.op_data.symbol')
 
 	op.type = 'trade'
 
-	op.trade_data = {}
+	op.op_data = {}
 
-	op.trade_data.dir = trade_data.dir
-	op.trade_data.price = trade_data.price
-	op.trade_data.amount = trade_data.amount
-	op.trade_data.symbol = Symbl(trade_data.symbol)
+	op.op_data.dir = op_data.dir
+	op.op_data.price = op_data.price
+	op.op_data.amount = op_data.amount
+	op.op_data.symbol = Symbl(op_data.symbol)
 
 	op.toDb = wrap(op.toDb, toDb =>
 	{
 		return assign(toDb(),
 		{
 			type: op.type,
-			data: op.trade_data
+			data: op.op_data
 		})
 	})
 
 	op.apply = (trx, portfolio) =>
 	{
 		return portfolio.makeTrade(
-			trx, op.investor_id, op.type, op.timestamp.format(), op.trade_data)
+			trx, op.investor_id, op.type, op.timestamp.format(), op.op_data)
 	}
 
 	op.undone = (trx, portfolio) =>
@@ -54,18 +57,18 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 
 	op.resolve = (symbols) =>
 	{
-		return symbols.resolve(op.trade_data.symbol, { other: true })
+		return symbols.resolve(op.op_data.symbol, { other: true })
 		.then(Symbl)
 		.then(symbol =>
 		{
-			op.trade_data.symbol = symbol
+			op.op_data.symbol = symbol
 		})
 	}
 
 	op.equals = (other) =>
 	{
-		var dL = op.trade_data
-		var dR = other.trade_data
+		var dL = op.op_data
+		var dR = other.op_data
 
 		if (! Symbl.equals(dL.symbol, dR.symbol)) { return false }
 		if (dL.dir !== dR.dir) { return false }
@@ -75,7 +78,7 @@ module.exports = function TradeOp (investor_id, timestamp, trade_data)
 
 	op.inspect = () =>
 	{
-		var td = op.trade_data
+		var td = op.op_data
 
 		return `TRADEOP {${op.investor_id}} (${op.timestamp.format()})` +
 		` ${td.dir} ${td.symbol.inspect()}` +
