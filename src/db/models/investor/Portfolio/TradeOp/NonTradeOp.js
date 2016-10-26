@@ -1,7 +1,6 @@
 
 var assign = Object.assign
 
-var expect   = require('chai').expect
 var includes = require('lodash/includes')
 var wrap     = require('lodash/wrap')
 
@@ -17,15 +16,16 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		'interest',
 		'fee',
 	]
+	var validate_type = validate.collection(non_trade_operations)
 
 	var recalculate_ops = [ 'deposit', 'withdraw', ]
 
 	var op = Op(investor_id, timestamp)
 
-	expect(op_data).to.be.an('object')
+	validate.object(op_data, 'NonTradeOp.op_data')
 
-	expect(op_data).property('type')
-	expect(non_trade_operations).include(op_data.type)
+	validate.required(op_data.type, 'NonTradeOp.op_data.type')
+	validate_type(op_data.type, 'NonTradeOp.op_data.type')
 
 	validate.number.nonNegative(op_data.amount, 'amount')
 

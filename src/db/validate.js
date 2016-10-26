@@ -1,9 +1,9 @@
 
 var Err = require('../Err')
-var moment = require('moment')
 
 var includes = require('lodash/includes')
 var isEmpty = require('lodash/isEmpty')
+var isObjectLike = require('lodash/isObjectLike')
 var keys = require('lodash/keys')
 var moment = require('moment')
 
@@ -172,6 +172,14 @@ validate.boolean.false = function validate__boolean (field, name)
 	if (field !== false)
 	{
 		throw FieldType({ field: name, type: 'boolean/false' })
+	}
+}
+
+validate.object = function validate__object (field, name)
+{
+	if (! isObjectLike(field))
+	{
+		throw FieldType({ field: name, origin: JSON.stringify(field) })
 	}
 }
 
