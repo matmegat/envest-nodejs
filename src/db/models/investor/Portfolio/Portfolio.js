@@ -701,13 +701,14 @@ module.exports = function Portfolio (db, investor)
 			}
 			else
 			{
+				console.trace(err.stack)
 				throw PortfolioOpErr({ reason: err.message })
 			}
 		})
 	})
 
 	var PortfolioOpErr = Err('portfolio_operation_err',
-		'Error appeared during munipulating portfilo'
+		'Error appeared during munipulating portofilo'
 	)
 
 
