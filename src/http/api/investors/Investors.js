@@ -80,7 +80,7 @@ module.exports = function (db, http)
 		{
 			var is_same = rq.user.id === Number(rq.params.id)
 
-			if (so && is_same)
+			if (so || is_same)
 			{
 				return investors.model.all
 			}
