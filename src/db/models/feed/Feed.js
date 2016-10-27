@@ -193,28 +193,35 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then(feed_items =>
 		{
-			return investor.all.list(
+			return investor.getActionMode(user_id, user_id)
+			.then(mode =>
 			{
-				filter: { ids: pick_feed_investors(feed_items).join(',') }
-			})
-			.then((investors) =>
-			{
-				var response =
-				{
-					feed: feed_items,
-					investors: investors.investors,
-				}
+				mode || (mode = 'mode:user')
+				console.log(mode)
 
-				if (paginator.total)
+				return investor.all.list(
 				{
-					return count(count_queryset)
-					.then(count =>
+					filter: { ids: pick_feed_investors(feed_items).join(',') }
+				})
+				.then((investors) =>
+				{
+					var response =
 					{
-						return paginator.total(response, count)
-					})
-				}
+						feed: feed_items,
+						investors: investors.investors,
+					}
 
-				return response
+					if (paginator.total)
+					{
+						return count(count_queryset)
+						.then(count =>
+						{
+							return paginator.total(response, count)
+						})
+					}
+
+					return response
+				})
 			})
 		})
 	}
