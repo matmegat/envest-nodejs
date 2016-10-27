@@ -59,10 +59,18 @@ module.exports = function name (app)
 		return db.knex('email_confirms')
 		.select()
 		.limit(0)
+		.then(() =>
+		{
+			console.info('DB: postgres `%s`', cfg.pg.database)
+		})
 	})
 	.then(() =>
 	{
 		return db.redis.ping()
+		.then(() =>
+		{
+			console.info('DB: redis `%s`', cfg.redis.db || 0)
+		})
 	})
 	.then(() =>
 	{
