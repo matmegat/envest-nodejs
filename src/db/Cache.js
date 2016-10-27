@@ -52,6 +52,7 @@ module.exports = function (redis)
 	cache.slip = function (prefix, options, key_fn, fn)
 	{
 		var keyspace = Keyspace(prefix)
+		var actualize = actualizer(options, fn)
 
 		options = assign(
 		{
@@ -80,19 +81,29 @@ module.exports = function (redis)
 			})
 			.then(value =>
 			{
-				setImmediate(() =>
-				{
-					fn.apply(this, arguments)
-					.then(value =>
-					{
-						redis_set(key_str, value, options)
-					})
-				})
+				actualize(this, arguments, key_str)
 
 				return value
 			})
 		}
 	}
+
+
+	function actualizer (options, fn)
+	{
+		return (context, args, key_str) =>
+		{
+			setImmediate(() =>
+			{
+				fn.apply(context, args)
+				.then(value =>
+				{
+					redis_set(key_str, value, options)
+				})
+			})
+		}
+	}
+
 
 	function redis_set (key_str, value, options)
 	{
