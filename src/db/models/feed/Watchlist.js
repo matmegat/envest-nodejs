@@ -65,7 +65,7 @@ module.exports = function Watchlist (db)
 			{
 				return db.watchlist.investor.remove(investor_id, data.symbol)
 			}
-			
+
 			return
 		}
 	})
