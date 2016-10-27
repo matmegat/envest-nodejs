@@ -39,7 +39,7 @@ module.exports = function (redis)
 					{
 						setImmediate(() =>
 						{
-							redis_set(redis, key_str, value, options)
+							redis_set(key_str, value, options)
 						})
 
 						return value
@@ -85,7 +85,7 @@ module.exports = function (redis)
 					fn.apply(this, arguments)
 					.then(value =>
 					{
-						redis_set(redis, key_str, value, options)
+						redis_set(key_str, value, options)
 					})
 				})
 
@@ -94,7 +94,7 @@ module.exports = function (redis)
 		}
 	}
 
-	function redis_set (redis, key_str, value, options)
+	function redis_set (key_str, value, options)
 	{
 		var args = [ key_str, dump(value) ]
 
