@@ -164,9 +164,16 @@ module.exports = function Portfolio (db, investor)
 			 = brokerage.cash * brokerage.multiplier
 			 + sumBy(total_holdings, 'allocation')
 
+			var cash_row =
+			{
+				symbol: Symbl('CASH.CASH'),
+				allocation: brokerage.cash * brokerage.multiplier,
+				gain: null
+			}
+
 			var resp = {
 				total:    total_holdings.length,
-				holdings: total_holdings,
+				holdings: [ cash_row ].concat(holdings),
 				full_portfolio:
 				{
 					value: full_value,
