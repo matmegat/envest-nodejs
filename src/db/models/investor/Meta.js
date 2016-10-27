@@ -15,6 +15,7 @@ var ChunkedPaginator = require('../../paginator/Chunked')
 var BookedPaginator = require('../../paginator/Booked')
 
 var Filter = require('../../Filter')
+var Sorter = require('../../Sorter')
 
 var isBoolean = require('../../validate').boolean
 
@@ -42,7 +43,20 @@ module.exports = function Meta (investor, raw, options)
 	meta.NotFound = NotFound
 	meta.WrongInvestorId = WrongInvestorId
 
-	var filter = Filter({
+	var sorter = Sorter(
+	{
+		order_column: 'last_name',
+		allowed_columns:
+		[
+			{ column: 'last_name',  aux: 'COLLATE "C"' },
+			{ column: 'first_name', aux: 'COLLATE "C"' },
+			'email'
+		],
+		fallback_by: 'id'
+	})
+
+	var filter = Filter(
+	{
 		ids: Filter.by.ids('user_id'),
 		symbols: Filter.by.portfolio_symbols('investors.user_id'),
 		is_public: Filter.by.field('is_public', isBoolean),
@@ -80,6 +94,7 @@ module.exports = function Meta (investor, raw, options)
 		'users.first_name',
 		'users.last_name',
 		'users.pic',
+		'users.email',
 		'investors.profile_pic',
 		'investors.profession',
 		'investors.focus',
@@ -142,6 +157,8 @@ module.exports = function Meta (investor, raw, options)
 		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
+
+		queryset = sorter.sort(queryset, options.sorter)
 
 		queryset
 		.select(fields)

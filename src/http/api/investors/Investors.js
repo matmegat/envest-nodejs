@@ -38,6 +38,11 @@ module.exports = function (db, http)
 			'query',
 		])
 
+		options.sorter = pick(rq.query,
+		[
+			'sort'
+		])
+
 		if (rq.user && rq.user.admin && 'is_public' in rq.query)
 		{
 			try
