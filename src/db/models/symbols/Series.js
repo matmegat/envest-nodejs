@@ -90,7 +90,7 @@ module.exports = function Series (token)
 		{
 			return {
 				timestamp: moment.utc(quote.Date, 'M/DD/YYYY').format(),
-				value:     quote.LastClose
+				value:     quote.Last
 			}
 		})
 

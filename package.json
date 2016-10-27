@@ -35,6 +35,9 @@
     "pg":
       "^4.5",
 
+    "ioredis":
+      "^2.4",
+
     "bluebird":
       "^3",
 
@@ -61,6 +64,9 @@
 
     "express-session":
       "^1.13.0",
+
+    "connect-redis":
+      "^3",
 
     "composable-middleware":
       "^0.3",

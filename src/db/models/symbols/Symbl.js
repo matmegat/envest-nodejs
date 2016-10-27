@@ -75,6 +75,11 @@ var Symbl = module.exports = function Symbl (it)
 			}
 		}
 
+		s.clone = () =>
+		{
+			return Symbl([ s.ticker, s.exchange ])
+		}
+
 		s.isOther = () =>
 		{
 			return s.exchange === 'OTHER'

@@ -9,11 +9,13 @@ module.exports = function ResolveCache ()
 
 	model.put = (symbol, data) =>
 	{
+		symbol = Symbl(symbol)
+
 		var key = resolve_key(symbol)
 
 		cache[key] = data
 
-		console.info('cache put', key, data)
+		console.info('PUT cache %s `%s`', symbol, data.company)
 	}
 
 	model.in = (symbol) =>
@@ -25,14 +27,15 @@ module.exports = function ResolveCache ()
 
 	model.get = (symbol) =>
 	{
+		symbol = Symbl(symbol)
+
 		var key = resolve_key(symbol)
 
 		var data = cache[key]
 
-		// eslint-disable-next-line no-undefined
-		if (data !== undefined)
+		if (data !== void 0)
 		{
-			console.info('cache hit', key, data)
+			console.info('HIT cache %s `%s`', symbol, data.company)
 		}
 
 		return data

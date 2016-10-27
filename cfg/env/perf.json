@@ -12,6 +12,11 @@
     "password": "1d2z8yf2hkyy14i3"
   },
 
+  "redis":
+  {
+    "db": 1
+  },
+
   "feedback":
   {
     "email": "contact@netvest.com"

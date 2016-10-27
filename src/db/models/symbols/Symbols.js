@@ -22,7 +22,7 @@ var get = require('lodash/get')
 
 var moment = require('moment')
 
-var Symbols = module.exports = function Symbols (cfg, log)
+var Symbols = module.exports = function Symbols (db, cfg, log)
 {
 	var symbols = {}
 
@@ -34,7 +34,8 @@ var Symbols = module.exports = function Symbols (cfg, log)
 	{
 		options = extend(
 		{
-			other: false
+			other: false,
+			cache: true
 		},
 		options)
 
@@ -57,6 +58,7 @@ var Symbols = module.exports = function Symbols (cfg, log)
 			.then(resl =>
 			{
 				var symbol = Symbl(resl.symbol)
+				var orig_symbol = symbol.clone()
 
 				symbol.exchange || (symbol.exchange = resl.exchange)
 
@@ -64,15 +66,22 @@ var Symbols = module.exports = function Symbols (cfg, log)
 
 				symbol.company = resl.company
 
-				return symbol
+				return [ orig_symbol, symbol ]
 			},
 			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
 			})
-			.then(symbol =>
+			.then(symbols =>
 			{
-				cache.put(symbol, symbol)
+				var symbol = symbols[1]
+
+				if (options.cache)
+				{
+					var orig_symbol = symbols[0]
+
+					cache.put(orig_symbol, symbol)
+				}
 
 				return symbol
 			})
@@ -354,15 +363,20 @@ var Symbols = module.exports = function Symbols (cfg, log)
 		})
 	}
 
-	symbols.seriesForPortfolio = (symbol, range) =>
-	{
-		return xign.seriesRange(symbol, range.start, range.end)
-	}
 
-	symbols.seriesForPortfolio.intraday = (symbol, range) =>
-	{
-		return xign.series.intraday(symbol, range.start, range.end)
-	}
+	var apidate = require('./util').apidate
+
+	symbols.seriesForPortfolio = db.cache.regular('portfolio',
+		{ ttl: 60 * 60 },
+		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
+		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
+	)
+
+	symbols.seriesForPortfolio.intraday = db.cache.slip('portfolio.intraday',
+		{ ttl: Infinity },
+		(symbol) => symbol,
+		(symbol, range) => xign.series.intraday(symbol, range.start, range.end)
+	)
 
 	return symbols
 }

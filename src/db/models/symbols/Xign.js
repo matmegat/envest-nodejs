@@ -100,13 +100,14 @@ module.exports = function Xign (cfg, log)
 			return resl
 			.map(r =>
 			{
-				if (! util.unwrap.isSuccess(r))
+				if (util.unwrap.isSuccess(r))
 				{
-					logger.warn(r)
+					return r
+				}
+				else
+				{
 					return null
 				}
-
-				return r
 			})
 			.map((r, i) =>
 			{

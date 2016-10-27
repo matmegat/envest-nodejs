@@ -12,13 +12,13 @@ module.exports = function Config (root)
 	var dev = root('dev.json')
 	if (exists(dev))
 	{
-		console.info('applying dev config')
+		// console.info('applying dev config')
 
 		cfg = merge({}, cfg, load(dev))
 	}
 
-	console.info('config: env = %s', cfg.env)
-	console.info('config: dev = %s', cfg.dev)
+	// console.info('config: env = %s', cfg.env)
+	// console.info('config: dev = %s', cfg.dev)
 
 	return cfg
 }

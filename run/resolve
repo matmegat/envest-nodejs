@@ -1,14 +1,20 @@
 #! /usr/bin/env node
 
+require('console-ultimate/global').replace()
+
 var rootpath = require('rootpath')
 
 var Config = require('../src/Config')
 var Log = require('../src/Log')
+
 var Symbols = require('../src/db/models/symbols/Symbols')
+
+var db = { helpers: require('../src/db/helpers') }
+
 
 var cfg = Config(rootpath(__dirname, '../cfg'))
 var log = Log()
-var symbols = Symbols(cfg, log)
+var symbols = Symbols(db, cfg, log)
 
 var symbol = process.argv[2]
 
@@ -18,10 +24,10 @@ if (! symbol)
 	process.exit(1)
 }
 
-symbols.resolve(symbol)
-.then(console.log, console.error)
+symbols.resolve(symbol, { cache: false })
+.then(console.dir, console.error)
 .then(() =>
 {
 	return symbols.quotes(symbol)
 })
-.then(console.log, console.error)
+.then(console.dir, console.error)

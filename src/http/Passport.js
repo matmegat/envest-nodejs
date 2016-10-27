@@ -2,6 +2,8 @@
 var session = require('express-session')
 var secret  = 'aoor91xck0'
 
+var RedisStore = require('connect-redis')(session)
+
 var jwt_helpers = require('../jwt-helpers')
 
 var passport = require('passport')
@@ -19,6 +21,7 @@ module.exports = function (express, db)
 
 	express.use(session(
 	{
+		store: new RedisStore({ client: db.redis }),
 		name:  'sid',
 		secret: secret,
 		resave: false,
@@ -38,6 +41,7 @@ module.exports = function (express, db)
 		user.infoById(id)
 		.catch(err =>
 		{
+			// TODO clear redis?
 			if (Err.is(err) && err.code === 'user_not_found')
 			{
 				return false
