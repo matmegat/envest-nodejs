@@ -12,5 +12,10 @@
     "password": "0p92qpw913iejyvi"
   },
 
+  "redis":
+  {
+    "db": 1
+  },
+
   "nginx": true
 }

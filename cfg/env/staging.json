@@ -12,5 +12,10 @@
     "password": "ovjms3lmzf"
   },
 
+  "redis":
+  {
+    "db": 1
+  },
+
   "nginx": true
 }
