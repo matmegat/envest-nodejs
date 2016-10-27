@@ -365,17 +365,12 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 
 	var apidate = require('./util').apidate
-	var keyspace = db.helpers.Keyspace('portfolio')
 
 	symbols.seriesForPortfolio = db.cache.regular('portfolio',
 		{ ttl: 60 * 60 },
 		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
-
-	// console.log(end_m / 5)
-	// console.log(Math.floor(end_m / 5))
-	// console.log(Math.floor(end_m / 5) * 5)
 
 	symbols.seriesForPortfolio.intraday = db.cache.slip('portfolio.intraday',
 		{ ttl: Infinity },

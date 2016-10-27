@@ -40,7 +40,7 @@ module.exports = function Portfolio (db, investor)
 	var holdings  = portfolio.holdings  =  Holdings(db, investor, portfolio)
 
 	expect(db, 'Portfolio depends on Series').property('symbols')
-	var symbols = portfolio.symbols = db.symbols
+	portfolio.symbols = db.symbols
 
 	var grid = Grid(investor, portfolio)
 
