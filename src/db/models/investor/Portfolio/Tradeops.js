@@ -207,12 +207,11 @@ module.exports = function Tradeops (db, portfolio)
 		.where('investor_id', investor_id)
 		.where('type', 'init-brokerage')
 		.orderBy('timestamp', 'asc')
-		.then(db.helpers.oneMaybe)
-		.then(row =>
+		.then(rows =>
 		{
-			if (! row) { return null }
+			if (! rows.length) { return null }
 
-			return moment(row.timestamp)
+			return moment(rows[0].timestamp)
 		})
 	}
 
