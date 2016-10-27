@@ -15,6 +15,7 @@ var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var invoke = require('lodash/invokeMap')
+var find   = require('lodash/find')
 
 var map = require('lodash/fp/map')
 
@@ -196,19 +197,50 @@ var Feed = module.exports = function Feed (db)
 			return investor.getActionMode(user_id, user_id)
 			.then(mode =>
 			{
-				mode || (mode = 'mode:user')
-				console.log(mode)
-
 				return investor.all.list(
 				{
 					filter: { ids: pick_feed_investors(feed_items).join(',') }
 				})
+				.then(investors => investors.investors)
+				.then(investors =>
+				{
+					return Promise.all(investors.map(entry =>
+					{
+						return investor.portfolio.brokerage.byId(entry.id)
+					}))
+					.then(values =>
+					{
+						investors.forEach((investor, i) =>
+						{
+							investor.brokerage = values[i]
+						})
+
+						return investors
+					})
+				})
 				.then((investors) =>
 				{
+					feed_items.forEach(feed_item =>
+					{
+						if (feed_item.event.type !== 'trade') { return void 0 }
+						if (mode === 'mode:admin') { return void 0 }
+						if (mode === 'mode:investor'
+							&& feed_item.investor_id === user_id)
+						{
+							return void 0
+						}
+
+						/* in all other cases - index trade amount */
+						var investor = find(investors,
+							{ id: feed_item.investor_id }
+						)
+						feed_item.event.data.amount *= investor.brokerage.multiplier
+					})
+
 					var response =
 					{
 						feed: feed_items,
-						investors: investors.investors,
+						investors: investors,
 					}
 
 					if (paginator.total)
