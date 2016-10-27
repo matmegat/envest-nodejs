@@ -134,7 +134,7 @@ module.exports = function Post (db)
 			return Promise.resolve()
 			.then(() =>
 			{
-				check_operation_date(date, 30)
+				check_operation_date(date)
 			})
 			.then(() =>
 			{
@@ -199,7 +199,7 @@ module.exports = function Post (db)
 			{
 				if (! whom_id)
 				{
-					check_operation_date(res.timestamp, 30)
+					check_operation_date(res.timestamp)
 				}
 
 				return res
@@ -242,11 +242,11 @@ module.exports = function Post (db)
 		}
 	}
 
-	function check_operation_date (date, count)
+	function check_operation_date (date)
 	{
 		validate.date(date)
 
-		var min_date = moment().subtract(count, 'days')
+		var min_date = moment.utc().startOf('day').subtract(30, 'days')
 
 		if (! moment(date).isSameOrAfter(min_date))
 		{
