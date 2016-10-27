@@ -15,9 +15,15 @@ module.exports = function (redis)
 
 		options = assign(
 		{
-			ttl: 60
+			ttl: 60,
+			actualize: true
 		}
 		, options)
+
+		if (options.actualize)
+		{
+			var actualize = actualizer(options, fn)
+		}
 
 		return function ()
 		{
@@ -30,6 +36,11 @@ module.exports = function (redis)
 			{
 				if (value != null)
 				{
+					if (options.actualize)
+					{
+						actualize(this, arguments, key_str)
+					}
+
 					return load(value)
 				}
 				else
