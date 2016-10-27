@@ -101,14 +101,19 @@ module.exports = function Post (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	post.update = function (investor_id, post_id, date, data)
+	post.update = function (investor_id, post_id, data)
 	{
 		validate_update_fields(post_id)
 
-		return post.create(investor_id, null, date, data, post_id)
+		return db.feed.byIdRaw(post_id)
+		.then(res_post =>
+		{
+			return post.create(
+				res_post.investor_id, null, res_post.timestamp, data, post_id)
+		})
 	}
 
-	post.updateAs = function (whom_id, post_id, date, data)
+	post.updateAs = function (whom_id, post_id, data)
 	{
 		validate_update_fields(post_id)
 
@@ -116,7 +121,7 @@ module.exports = function Post (db)
 		.then(res_post =>
 		{
 			return post.createAs(
-				whom_id, res_post.investor_id, res_post.type, date, data, post_id)
+				whom_id, res_post.investor_id, res_post.type, null, data, post_id)
 		})
 	}
 
@@ -129,14 +134,7 @@ module.exports = function Post (db)
 			return Promise.resolve()
 			.then(() =>
 			{
-				validate.date(date)
-
-				var min_date = moment().subtract(3, 'days')
-
-				if (! moment(date).isSameOrAfter(min_date))
-				{
-					throw InvestorPostDateErr({ date: date, minDate: min_date })
-				}
+				check_operation_date(date, 30)
 			})
 			.then(() =>
 			{
@@ -199,6 +197,15 @@ module.exports = function Post (db)
 			.then(Err.nullish(db.feed.NotFound))
 			.then(res =>
 			{
+				if (! whom_id)
+				{
+					check_operation_date(res.timestamp, 30)
+				}
+
+				return res
+			})
+			.then(res =>
+			{
 				if (! soft_mode)
 				{
 					var post_type = post.types[res.type]
@@ -232,6 +239,18 @@ module.exports = function Post (db)
 		if (! post_id)
 		{
 			throw PostIdRequired()
+		}
+	}
+
+	function check_operation_date (date, count)
+	{
+		validate.date(date)
+
+		var min_date = moment().subtract(count, 'days')
+
+		if (! moment(date).isSameOrAfter(min_date))
+		{
+			throw InvestorPostDateErr({ date: date, minDate: min_date })
 		}
 	}
 
