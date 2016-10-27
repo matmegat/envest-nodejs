@@ -15,6 +15,8 @@ var Err = require('../../../../Err')
 var Symbl = require('../../symbols/Symbl')
 var RemoveHoldingsOp = require('./TradeOp/RemoveHoldingsOp')
 
+var XignCommonErr = Err('xignite_error', 'xIgnite failed')
+
 var moment = require('moment')
 
 module.exports = function Holdings (db, investor, portfolio)
@@ -83,20 +85,22 @@ module.exports = function Holdings (db, investor, portfolio)
 						{
 							if (! options.other)
 							{
-								throw new TypeError(`Cannot get `
-									+ `"${quote.symbol.full}" with Quotes `
-									+ `for OTHER`
-								)
+								throw XignCommonErr(
+								{
+									reason: `Cannot get "${quote.symbol.full}" `
+									+ `with Quotes for OTHER`
+								})
 							}
 						}
 						else
 						{
 							if (! options.soft)
 							{
-								throw new TypeError(`Cannot get `
-									+ `"${quote.symbol.full}" with Quotes, `
-									+ `xIgnite failed`
-								)
+								throw XignCommonErr(
+								{
+									reason: `Cannot get "${quote.symbol.full}" `
+									+ `with Quotes, xIgnite failed`
+								})
 							}
 						}
 					}
