@@ -372,8 +372,8 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
 
-	symbols.seriesForPortfolio.intraday = db.cache.slip('portfolio.intraday',
-		{ ttl: Infinity },
+	symbols.seriesForPortfolio.intraday = db.cache.regular('portfolio.intraday',
+		{ ttl: 60 * 15 },
 		(symbol) => symbol,
 		(symbol, range) => xign.series.intraday(symbol, range.start, range.end)
 	)
