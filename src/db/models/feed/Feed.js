@@ -205,6 +205,11 @@ var Feed = module.exports = function Feed (db)
 				.then(investors => investors.investors)
 				.then(investors =>
 				{
+					if (mode === 'mode:admin')
+					{
+						return investors
+					}
+
 					return Promise.all(investors.map(entry =>
 					{
 						return investor.portfolio.brokerage.byId(entry.id)
@@ -221,22 +226,10 @@ var Feed = module.exports = function Feed (db)
 				})
 				.then((investors) =>
 				{
-					feed_items.forEach(feed_item =>
+					if (mode !== 'mode:admin')
 					{
-						if (feed_item.event.type !== 'trade') { return void 0 }
-						if (mode === 'mode:admin') { return void 0 }
-						if (mode === 'mode:investor'
-							&& feed_item.investor_id === user_id)
-						{
-							return void 0
-						}
-
-						/* in all other cases - index trade amount */
-						var investor = find(investors,
-							{ id: feed_item.investor_id }
-						)
-						feed_item.event.data.amount *= investor.brokerage.multiplier
-					})
+						feed_items = index_feed(feed_items, investors, user_id)
+					}
 
 					var response =
 					{
@@ -308,6 +301,26 @@ var Feed = module.exports = function Feed (db)
 		ids = _.map(feed_items, 'investor_id')
 		ids = _.uniq(ids)
 		return ids
+	}
+
+	function index_feed (items, investors, user_id)
+	{
+		expect(items).to.be.an('array')
+		expect(investors).to.be.an('array')
+		expect(user_id).to.be.a('number')
+
+		items.forEach(item =>
+		{
+			if (item.event.type === 'trade' &&
+				item.investor_id !== user_id)
+			{
+				var involved_investor = find(investors, { id: item.investor_id })
+
+				item.event.data.amount *= involved_investor.brokerage.multiplier
+			}
+		})
+
+		return items
 	}
 
 
