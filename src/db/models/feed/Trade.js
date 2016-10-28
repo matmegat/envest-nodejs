@@ -15,7 +15,7 @@ module.exports = function Trade (portfolio, symbols)
 	{
 		validate: validate_trade,
 		validate_update: validate_trade_adds,
-		set: (trx, investor_id, type, date, data) =>
+		set: (trx, investor_id, type, timestamp, data) =>
 		{
 			return symbols.resolve(data.symbol, { other: true })
 			.then(symbl =>
@@ -28,18 +28,18 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(() =>
 			{
-				var tradeOp = TradeOp(investor_id, date, data)
+				var tradeop = TradeOp(investor_id, timestamp, data)
 
-				return portfolio.tradeops.apply(trx, tradeOp)
+				return portfolio.tradeops.apply(trx, tradeop)
 			})
-			.then(() =>
+			.then(tradeop =>
 			{
 				data.text = sanitize(data.text)
 
-				return data
+				return [ tradeop.timestamp, data ]
 			})
 		},
-		update: (trx, investor_id, type, date, data) =>
+		update: (trx, investor_id, type, timestamp, data) =>
 		{
 			data.text = sanitize(data.text)
 

@@ -94,6 +94,13 @@ module.exports = function Post (db)
 		})
 		.then(data =>
 		{
+			if (Array.isArray(data))
+			{
+				/* handle changing timestamp of Trade */
+				date = data[0]
+				data = data[1]
+			}
+
 			return db.feed.upsert(trx, investor_id, type, date, data, post_id)
 		})
 	}

@@ -31,6 +31,7 @@ module.exports = function Tradeops (db, portfolio)
 		return tradeops.sequence(trx, tradeop)
 		.then(ops =>
 		{
+			/* NOTE side effect on tradeop */
 			ops = merge.undone(tradeop, ops)
 
 			return PReduce(ops, (memo, current) =>
@@ -63,7 +64,10 @@ module.exports = function Tradeops (db, portfolio)
 		.then(ops =>
 		{
 			return tradeops.replay(trx, ops)
-			.then(() => ops)
+		})
+		.then(() =>
+		{
+			return tradeop
 		})
 	}
 
