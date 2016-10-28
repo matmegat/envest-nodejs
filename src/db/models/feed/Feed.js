@@ -81,7 +81,7 @@ var Feed = module.exports = function Feed (db)
 
 	feed.byId = function (id, user_id)
 	{
-		var queryset = feed.feed_table()
+		var queryset = feed.feed_table().select('feed_items.*')
 
 		return feed.validateFeedId(id)
 		.then(() => update_queryset(queryset, user_id))
@@ -108,6 +108,7 @@ var Feed = module.exports = function Feed (db)
 				.then(it => it[0])
 			})
 		})
+		.then((feed_item) => index_feed_item(feed_item, user_id))
 		.then((feed_item) =>
 		{
 			return comments.count(feed_item.id)
@@ -117,6 +118,25 @@ var Feed = module.exports = function Feed (db)
 
 				return feed_item
 			})
+		})
+	}
+
+	function index_feed_item (item, user_id)
+	{
+		expect(item).to.be.an('object')
+		expect(user_id).to.be.a('number')
+
+		if (item.event.type !== 'trade' || item.investor.id === user_id)
+		{
+			return Promise.resolve(item)
+		}
+
+		return investor.portfolio.brokerage.byId(item.investor.id)
+		.then(brokerage =>
+		{
+			item.event.data.amount *= brokerage.multiplier
+
+			return item
 		})
 	}
 
