@@ -16,6 +16,7 @@ var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var invoke = require('lodash/invokeMap')
 var find   = require('lodash/find')
+var omit   = require('lodash/omit')
 
 var map = require('lodash/fp/map')
 
@@ -240,7 +241,7 @@ var Feed = module.exports = function Feed (db)
 					var response =
 					{
 						feed: feed_items,
-						investors: investors,
+						investors: investors.map(entry => omit(entry, 'brokerage')),
 					}
 
 					if (paginator.total)
