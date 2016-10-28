@@ -15,6 +15,8 @@ var NotFound = Err('feed_not_found', 'Feed item not found')
 var WrongFeedId = Err('wrong_feed_id', 'Wrong feed id')
 
 var invoke = require('lodash/invokeMap')
+var find   = require('lodash/find')
+var omit   = require('lodash/omit')
 
 var map = require('lodash/fp/map')
 
@@ -79,7 +81,7 @@ var Feed = module.exports = function Feed (db)
 
 	feed.byId = function (id, user_id)
 	{
-		var queryset = feed.feed_table()
+		var queryset = feed.feed_table().select('feed_items.*')
 
 		return feed.validateFeedId(id)
 		.then(() => update_queryset(queryset, user_id))
@@ -106,6 +108,7 @@ var Feed = module.exports = function Feed (db)
 				.then(it => it[0])
 			})
 		})
+		.then((feed_item) => index_feed_item(feed_item, user_id))
 		.then((feed_item) =>
 		{
 			return comments.count(feed_item.id)
@@ -115,6 +118,25 @@ var Feed = module.exports = function Feed (db)
 
 				return feed_item
 			})
+		})
+	}
+
+	function index_feed_item (item, user_id)
+	{
+		expect(item).to.be.an('object')
+		expect(user_id).to.be.a('number')
+
+		if (item.event.type !== 'trade' || item.investor.id === user_id)
+		{
+			return Promise.resolve(item)
+		}
+
+		return investor.portfolio.brokerage.byId(item.investor.id)
+		.then(brokerage =>
+		{
+			item.event.data.amount *= brokerage.multiplier
+
+			return item
 		})
 	}
 
@@ -193,28 +215,59 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then(feed_items =>
 		{
-			return investor.all.list(
+			return investor.getActionMode(user_id, user_id)
+			.then(mode =>
 			{
-				filter: { ids: pick_feed_investors(feed_items).join(',') }
-			})
-			.then((investors) =>
-			{
-				var response =
+				return investor.all.list(
 				{
-					feed: feed_items,
-					investors: investors.investors,
-				}
-
-				if (paginator.total)
+					filter: { ids: pick_feed_investors(feed_items).join(',') }
+				})
+				.then(investors => investors.investors)
+				.then(investors =>
 				{
-					return count(count_queryset)
-					.then(count =>
+					if (mode === 'mode:admin')
 					{
-						return paginator.total(response, count)
-					})
-				}
+						return investors
+					}
 
-				return response
+					return Promise.all(investors.map(entry =>
+					{
+						return investor.portfolio.brokerage.byId(entry.id)
+					}))
+					.then(values =>
+					{
+						investors.forEach((investor, i) =>
+						{
+							investor.brokerage = values[i]
+						})
+
+						return investors
+					})
+				})
+				.then((investors) =>
+				{
+					if (mode !== 'mode:admin')
+					{
+						feed_items = index_feed(feed_items, investors, user_id)
+					}
+
+					var response =
+					{
+						feed: feed_items,
+						investors: investors.map(entry => omit(entry, 'brokerage')),
+					}
+
+					if (paginator.total)
+					{
+						return count(count_queryset)
+						.then(count =>
+						{
+							return paginator.total(response, count)
+						})
+					}
+
+					return response
+				})
 			})
 		})
 	}
@@ -268,6 +321,26 @@ var Feed = module.exports = function Feed (db)
 		ids = _.map(feed_items, 'investor_id')
 		ids = _.uniq(ids)
 		return ids
+	}
+
+	function index_feed (items, investors, user_id)
+	{
+		expect(items).to.be.an('array')
+		expect(investors).to.be.an('array')
+		expect(user_id).to.be.a('number')
+
+		items.forEach(item =>
+		{
+			if (item.event.type === 'trade' &&
+				item.investor_id !== user_id)
+			{
+				var involved_investor = find(investors, { id: item.investor_id })
+
+				item.event.data.amount *= involved_investor.brokerage.multiplier
+			}
+		})
+
+		return items
 	}
 
 
