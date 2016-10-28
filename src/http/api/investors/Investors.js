@@ -142,7 +142,7 @@ module.exports = function (db, http)
 		)
 	})
 
-	investors.express.post('/cash-as', authRequired, (rq, rs) =>
+	investors.express.post('/cash-as', http.adminRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.body.target_user_id
