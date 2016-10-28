@@ -33,7 +33,7 @@ module.exports = function Series (token)
 				IdentifierType: 'Symbol',
 				Identifier: symbol,
 
-				AdjustmentMethod: 'SplitandProportionalDividend',
+				AdjustmentMethod: 'SplitAndProportionalCashDividend',
 
 				EndDate: end_date,
 				PeriodType: 'Day',
