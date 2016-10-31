@@ -8,6 +8,7 @@ var validateId = require('../../id').validate
 
 var lwip = require('lwip')
 var round = require('lodash/round')
+var min = require('lodash/min')
 
 module.exports = function (db)
 {
@@ -104,6 +105,12 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
+				return resize_img(file)
+			})
+			.then(buffer =>
+			{
+				file.buffer = buffer
+
 				return static.store(file)
 			})
 			.then(hash =>
@@ -158,6 +165,12 @@ module.exports = function (db)
 			return validate_img(file, validations)
 			.then(() =>
 			{
+				return resize_img(file)
+			})
+			.then(buffer =>
+			{
+				file.buffer = buffer
+
 				return static.store(file)
 			})
 			.then(hash =>
@@ -199,6 +212,63 @@ module.exports = function (db)
 	}
 
 	return pic
+}
+
+function get_scale (image)
+{
+	var max_width = 1800
+	var max_height = 1800
+
+	var scale_width = max_width / image.width()
+	var scale_height = max_height / image.height()
+
+	if (scale_width >= 1 && scale_height >= 1)
+	{
+		return false
+	}
+
+	return min([scale_width, scale_height])
+}
+
+var ResizeErr = Err('resize_err', 'Resize Error')
+
+function resize_img (img)
+{
+	expect(img).an('object')
+	expect(img.buffer).ok
+	expect(img.mimetype).ok
+
+	return new Promise((rs, rj) =>
+	{
+		lwip.open(img.buffer, mime.extension(img.mimetype), (error, image) =>
+		{
+			if (error)
+			{
+				return rj(LwipError(error))
+			}
+			else
+			{
+				var scale_ratio = get_scale(image)
+				var batch = image.batch()
+
+				if (scale_ratio)
+				{
+					batch.scale(scale_ratio)
+				}
+
+				batch
+				.toBuffer(mime.extension(img.mimetype), (err, buffer) =>
+				{
+					if (error)
+					{
+						return rj(ResizeErr(error))
+					}
+
+					return rs(buffer)
+				})
+			}
+		})
+	})
 }
 
 function validate_img (img, settings)
