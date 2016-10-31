@@ -234,39 +234,29 @@ var ResizeErr = Err('resize_err', 'Resize Error')
 
 function resize_img (img)
 {
-	expect(img).an('object')
-	expect(img.buffer).ok
-	expect(img.mimetype).ok
-
-	return new Promise((rs, rj) =>
+	return with_image(img)
+	.then(lwip_image =>
 	{
-		lwip.open(img.buffer, mime.extension(img.mimetype), (error, image) =>
-		{
-			if (error)
-			{
-				return rj(LwipError(error))
-			}
-			else
-			{
-				var scale_ratio = get_scale(image)
-				var batch = image.batch()
+		var scale_ratio = get_scale(lwip_image)
+		var batch = lwip_image.batch()
 
-				if (scale_ratio)
+		if (scale_ratio)
+		{
+			batch.scale(scale_ratio)
+		}
+
+		return new Promise((rs, rj) =>
+		{
+			batch
+			.toBuffer(mime.extension(img.mimetype), (err, buffer) =>
+			{
+				if (err)
 				{
-					batch.scale(scale_ratio)
+					return rj(ResizeErr(err))
 				}
 
-				batch
-				.toBuffer(mime.extension(img.mimetype), (err, buffer) =>
-				{
-					if (error)
-					{
-						return rj(ResizeErr(error))
-					}
-
-					return rs(buffer)
-				})
-			}
+				return rs(buffer)
+			})
 		})
 	})
 }
