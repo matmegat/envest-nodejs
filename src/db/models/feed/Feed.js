@@ -131,12 +131,18 @@ var Feed = module.exports = function Feed (db)
 			return Promise.resolve(item)
 		}
 
-		return investor.portfolio.brokerage.byId(item.investor.id)
-		.then(brokerage =>
+		return db.admin.is(user_id)
+		.then(so =>
 		{
-			item.event.data.amount *= brokerage.multiplier
+			if (so) { return item }
 
-			return item
+			return investor.portfolio.brokerage.byId(item.investor.id)
+			.then(brokerage =>
+			{
+				item.event.data.amount *= brokerage.multiplier
+
+				return item
+			})
 		})
 	}
 
