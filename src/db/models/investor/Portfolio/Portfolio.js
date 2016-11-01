@@ -171,9 +171,11 @@ module.exports = function Portfolio (db, investor)
 				gain: null
 			}
 
+			total_holdings = [ cash_row ].concat(total_holdings)
+
 			var resp = {
 				total:    total_holdings.length,
-				holdings: [ cash_row ].concat(holdings),
+				holdings: total_holdings,
 				full_portfolio:
 				{
 					value: full_value,
