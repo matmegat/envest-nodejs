@@ -437,8 +437,9 @@ module.exports = function Portfolio (db, investor)
 		{
 			if (mode === 'mode:admin') { return mode }
 
-			return db.post.check_operation_date(data.date)
-			.then(() => mode)
+			db.post.check_operation_date(data.date)
+
+			return mode
 		})
 		.then((mode) =>
 		{
