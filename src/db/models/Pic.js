@@ -104,6 +104,12 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
+				return resize_img(file)
+			})
+			.then(buffer =>
+			{
+				file.buffer = buffer
+
 				return static.store(file)
 			})
 			.then(hash =>
@@ -158,6 +164,12 @@ module.exports = function (db)
 			return validate_img(file, validations)
 			.then(() =>
 			{
+				return resize_img(file)
+			})
+			.then(buffer =>
+			{
+				file.buffer = buffer
+
 				return static.store(file)
 			})
 			.then(hash =>
@@ -199,6 +211,53 @@ module.exports = function (db)
 	}
 
 	return pic
+}
+
+function get_scale (image)
+{
+	var max_width = 1800
+	var max_height = 1800
+
+	var scale_width = max_width / image.width()
+	var scale_height = max_height / image.height()
+
+	if (scale_width >= 1 && scale_height >= 1)
+	{
+		return false
+	}
+
+	return Math.min(scale_width, scale_height)
+}
+
+var ResizeErr = Err('resize_err', 'Resize Error')
+
+function resize_img (img)
+{
+	return with_image(img)
+	.then(lwip_image =>
+	{
+		var scale_ratio = get_scale(lwip_image)
+		var batch = lwip_image.batch()
+
+		if (scale_ratio)
+		{
+			batch.scale(scale_ratio)
+		}
+
+		return new Promise((rs, rj) =>
+		{
+			batch
+			.toBuffer(mime.extension(img.mimetype), (err, buffer) =>
+			{
+				if (err)
+				{
+					return rj(ResizeErr(err))
+				}
+
+				return rs(buffer)
+			})
+		})
+	})
 }
 
 function validate_img (img, settings)
