@@ -192,6 +192,19 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	}
 
 
+	symbols.getInfo = (symbol) =>
+	{
+		return Promise.all(
+		[
+			get_last_fundamentals(symbol),
+			xign.quotes([ symbol ]),
+		])
+		.then(so =>
+		{
+			return merge(so[0], so[1][0])
+		})
+	}
+
 	function get_last_fundamentals (symbol)
 	{
 		var funds =
@@ -254,20 +267,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		})
 	}
 
-
-	symbols.getInfo = (symbol) =>
-	{
-		return Promise.all(
-		[
-			// get_historical(symbol),
-			get_last_fundamentals(symbol),
-			xign.quotes([ symbol ]),
-		])
-		.then(so =>
-		{
-			return merge(so[0], so[1][0])
-		})
-	}
 
 	symbols.series = (symbol) =>
 	{
