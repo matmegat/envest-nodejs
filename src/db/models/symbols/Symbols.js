@@ -344,7 +344,8 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 	symbols.seriesForPortfolio = db.cache.regular('portfolio',
 		{ ttl: 60 * 60 },
-		(symbol, range) => [ cache_symbol(symbol), apidate(range.start), apidate(range.end) ],
+		(symbol, range) =>
+			[ cache_symbol(symbol), apidate(range.start), apidate(range.end) ],
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
 
