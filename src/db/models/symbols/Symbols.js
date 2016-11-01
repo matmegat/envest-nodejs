@@ -192,7 +192,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	}
 
 
-	symbols.getInfo = (symbol) =>
+	symbols.detail = (symbol) =>
 	{
 		return Promise.all(
 		[
