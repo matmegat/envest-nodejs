@@ -448,9 +448,6 @@ module.exports = function Portfolio (db, investor)
 		.then(noop)
 	})
 
-	// var InvestorPostDateErr =
-	// 	Err('investor_post_date_exeeded', 'Investor post date exeeded')
-
 
 	extend(portfolio, Parser(portfolio, db))
 
