@@ -161,9 +161,11 @@ module.exports = function Portfolio (db, investor)
 
 			var cash_row =
 			{
-				symbol: Symbl('CASH.CASH'),
+				symbol: Symbl('CASH.CASH').toFull(),
 				allocation: brokerage.cash * brokerage.multiplier,
-				gain: null
+				gain: null,
+				price: 1,
+				amount: 1,
 			}
 
 			total_holdings = [ cash_row ].concat(total_holdings)
