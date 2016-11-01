@@ -57,7 +57,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			.then(resl =>
 			{
 				var symbol = Symbl(resl.symbol)
-				var orig_symbol = symbol.clone()
 
 				symbol.exchange || (symbol.exchange = resl.exchange)
 
