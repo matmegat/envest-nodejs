@@ -89,9 +89,17 @@ var Feed = module.exports = function Feed (db)
 		.then(oneMaybe)
 		.then(Err.nullish(NotFound))
 		.then((feed_item) => transform_items([ feed_item ], user_id))
-		.then((feed_item) => feed_item[0])
+		.then((feed_items) => feed_items[0])
 		.then((feed_item) =>
 		{
+			feed_item.investor = _.pick(feed_item.investor,
+			[
+				'id',
+				'first_name',
+				'last_name',
+				'pic'
+			])
+
 			return comments.count(feed_item.id)
 			.then((count) =>
 			{
@@ -107,7 +115,7 @@ var Feed = module.exports = function Feed (db)
 		expect(item).to.be.an('object')
 		expect(user_id).to.be.a('number')
 
-		if (item.event.type !== 'trade' || item.investor.id === user_id)
+		if (item.event.type !== 'trade' || item.investor_id === user_id)
 		{
 			return Promise.resolve(item)
 		}
@@ -117,7 +125,7 @@ var Feed = module.exports = function Feed (db)
 		{
 			if (so) { return item }
 
-			return investor.portfolio.brokerage.byId(item.investor.id)
+			return investor.portfolio.brokerage.byId(item.investor_id)
 			.then(brokerage =>
 			{
 				item.event.data.amount *= brokerage.multiplier
@@ -136,21 +144,26 @@ var Feed = module.exports = function Feed (db)
 		{
 			transform_event(item)
 
-			return investor.all.byId(item.investor_id)
-			.then(investor_entry =>
-			{
-				item.investor = _.pick(investor_entry,
-				[
-					'id',
-					'first_name',
-					'last_name',
-					'pic'
-				])
-
-				return index_feed_item(item, user_id)
-			})
+			return index_feed_item(item, user_id)
 		}))
 		.then(items => transform_symbols(items, symbols))
+		.then(items =>
+		{
+			return investor.all.list(
+			{
+				filter: { ids: pick_feed_investors(items).join(',') }
+			})
+			.then(investors => investors.investors)
+			.then(investors =>
+			{
+				items.forEach(item =>
+				{
+					item.investor = find(investors, { id: item.investor_id })
+				})
+
+				return items
+			})
+		})
 	}
 
 	feed.validateFeedId = require('../../../id').validate.promise(WrongFeedId)
@@ -227,30 +240,24 @@ var Feed = module.exports = function Feed (db)
 		})
 		.then(feed_items =>
 		{
-			return investor.all.list(
-			{
-				filter: { ids: pick_feed_investors(feed_items).join(',') }
-			})
-			.then(investors => investors.investors)
-			.then((investors) =>
-			{
-				var response =
-				{
-					feed: feed_items,
-					investors: investors.map(entry => omit(entry, 'brokerage')),
-				}
+			var investors = feed_items.map(entry  => entry.investor)
 
-				if (paginator.total)
-				{
-					return count(count_queryset)
-					.then(count =>
-					{
-						return paginator.total(response, count)
-					})
-				}
+			var response =
+			{
+				feed: feed_items.map(entry => omit(entry, 'investor')),
+				investors: investors.map(entry => omit(entry, 'brokerage')),
+			}
 
-				return response
-			})
+			if (paginator.total)
+			{
+				return count(count_queryset)
+				.then(count =>
+				{
+					return paginator.total(response, count)
+				})
+			}
+
+			return response
 		})
 	}
 
