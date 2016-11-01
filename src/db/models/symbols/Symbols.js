@@ -62,19 +62,11 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 				symbol.company = resl.company
 
-				return [ orig_symbol, symbol ]
+				return symbol
 			},
 			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
-			})
-			.then(symbols =>
-			{
-				var symbol = symbols[1]
-
-				// var orig_symbol = symbols[0]
-
-				return symbol
 			})
 		})
 	}
@@ -107,11 +99,11 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	}
 
 	/* cache-first */
-	symbols.resolve.cache = (symbol, options) =>
-	{
-		// TODO
-		return symbols.resolve(symbol, options)
-	}
+	symbols.resolve.cache = db.cache.regular('resolve',
+		{ ttl: 15 * 60 },
+		cache_symbol,
+		symbols.resolve
+	)
 
 
 	symbols.quotes = (symbols, for_date, options) =>
