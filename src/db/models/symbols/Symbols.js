@@ -162,7 +162,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 					})
 					.then(r =>
 					{
-						return symbols.resolve/*.cache*/(r.symbol)
+						return symbols.resolve.cache(r.symbol)
 						.then(symbol =>
 						{
 							r.symbol = symbol
