@@ -12,6 +12,9 @@ var UnknownSymbol
 var OtherSymbol
  = Err('other_special_symbol_not_allowed', 'OTHER symbol not allowed')
 
+var constant = require('lodash/constant')
+var Null = constant(null)
+
 var extend = require('lodash/assign')
 var pick = require('lodash/pick')
 var omit = require('lodash/omit')
@@ -91,7 +94,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			queries = queries
 			.map(query =>
 			{
-				return query.catch(() => null)
+				return query.catch(Null)
 			})
 		}
 
