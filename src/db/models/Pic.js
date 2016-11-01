@@ -8,7 +8,6 @@ var validateId = require('../../id').validate
 
 var lwip = require('lwip')
 var round = require('lodash/round')
-var min = require('lodash/min')
 
 module.exports = function (db)
 {
@@ -227,7 +226,7 @@ function get_scale (image)
 		return false
 	}
 
-	return min([scale_width, scale_height])
+	return Math.min(scale_width, scale_height)
 }
 
 var ResizeErr = Err('resize_err', 'Resize Error')
