@@ -24,7 +24,7 @@ if (! symbol)
 	process.exit(1)
 }
 
-symbols.resolve(symbol, { cache: false })
+symbols.resolve(symbol)
 .then(console.dir, console.error)
 .then(() =>
 {

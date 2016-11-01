@@ -3,7 +3,6 @@ var expect = require('chai').expect
 
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
-var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 
@@ -26,8 +25,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 {
 	var symbols = {}
 
-	var cache = Cache()
-
 	var xign = Xign(cfg.xignite, log)
 
 	symbols.resolve = (symbol, options) =>
@@ -35,7 +32,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		options = extend(
 		{
 			other: false,
-			cache: true
 		},
 		options)
 
@@ -76,12 +72,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			{
 				var symbol = symbols[1]
 
-				if (options.cache)
-				{
-					var orig_symbol = symbols[0]
-
-					cache.put(orig_symbol, symbol)
-				}
+				// var orig_symbol = symbols[0]
 
 				return symbol
 			})
@@ -118,17 +109,8 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	/* cache-first */
 	symbols.resolve.cache = (symbol, options) =>
 	{
-		return new Promise(rs =>
-		{
-			var data = cache.get(symbol)
-
-			if (data)
-			{
-				return rs(data)
-			}
-
-			return rs(symbols.resolve(symbol, options))
-		})
+		// TODO
+		return symbols.resolve(symbol, options)
 	}
 
 
