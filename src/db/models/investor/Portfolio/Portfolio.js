@@ -420,26 +420,14 @@ module.exports = function Portfolio (db, investor)
 		knex,
 		(trx, whom_id, investor_id, data) =>
 	{
-		return Promise.all(
-		[
-			investor.all.is(whom_id, trx),
-			db.admin.is(whom_id, trx)
-		])
-		.then(values =>
+		return investor.all.ensure(investor_id)
+		.then(() => investor.getActionMode(trx, whom_id, investor_id))
+		.then(mode =>
 		{
-			var is_investor = values[0]
-			var is_admin = values[1]
-			var min_date = moment().subtract(3, 'days')
+			if (mode === 'mode:admin') { return mode }
 
-			if (is_admin) { return 'mode:admin' }
-
-			var for_date = moment.utc(data.date)
-			if (is_investor && for_date >= min_date)
-			{
-				return 'mode:investor'
-			}
-
-			throw InvestorPostDateErr({ available_from: min_date.format() })
+			return db.post.check_operation_date(data.date)
+			.then(() => mode)
 		})
 		.then((mode) =>
 		{
@@ -460,8 +448,8 @@ module.exports = function Portfolio (db, investor)
 		.then(noop)
 	})
 
-	var InvestorPostDateErr =
-		Err('investor_post_date_exeeded', 'Investor post date exeeded')
+	// var InvestorPostDateErr =
+	// 	Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
 
 	extend(portfolio, Parser(portfolio, db))

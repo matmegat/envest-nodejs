@@ -141,7 +141,7 @@ module.exports = function Post (db)
 			return Promise.resolve()
 			.then(() =>
 			{
-				check_operation_date(date)
+				post.check_operation_date(date)
 			})
 			.then(() =>
 			{
@@ -206,7 +206,7 @@ module.exports = function Post (db)
 			{
 				if (! whom_id)
 				{
-					check_operation_date(res.timestamp)
+					post.check_operation_date(res.timestamp)
 				}
 
 				return res
@@ -249,7 +249,7 @@ module.exports = function Post (db)
 		}
 	}
 
-	function check_operation_date (date)
+	post.check_operation_date = (date) =>
 	{
 		validate.date(date)
 
