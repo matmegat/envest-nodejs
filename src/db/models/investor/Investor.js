@@ -83,6 +83,8 @@ module.exports = function Investor (db, mailer)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
+		data.email = data.email.toLowerCase()
+
 		return auth.registerWithPass(trx, data)
 		.then(id =>
 		{
@@ -126,7 +128,7 @@ module.exports = function Investor (db, mailer)
 			.then(fields('annual_return'))
 			.then(() => investor_entry)
 		})
-		.then((investor_entry) =>
+		.then(investor_entry =>
 		{
 			var investor_id = investor_entry.id
 
@@ -154,8 +156,9 @@ module.exports = function Investor (db, mailer)
 				return Promise.all([ n1, n2 ])
 			})
 			.then(() => user.byId(data.admin_id))
-			.then((admin) =>
+			.then(admin =>
 			{
+
 				var substs =
 				{
 					email_title: [ 'Welcome' ]
