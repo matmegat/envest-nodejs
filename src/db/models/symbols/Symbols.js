@@ -108,7 +108,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	)
 
 
-	symbols.quotes = (symbols, for_date, options) =>
+	symbols.quotes = (symbol_s, for_date, options) =>
 	{
 		options = extend(
 		{
@@ -117,13 +117,15 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		},
 		options)
 
-		expect(symbols).ok
+		expect(symbol_s).ok
 
-		symbols = [].concat(symbols)
+		symbol_s = [].concat(symbol_s)
 
-		symbols = symbols.map(Symbl)
+		symbol_s = symbol_s.map(Symbl)
 
-		return xign.quotes(invoke(symbols, 'toXign'), for_date)
+		var symbol_s_xign = invoke(symbol_s, 'toXign')
+
+		return xign.quotes(symbol_s_xign, for_date)
 		.then(resl =>
 		{
 			return resl.map((r, i) =>
@@ -134,45 +136,50 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 				}
 				else
 				{
-					var orig_symbol = symbols[i]
-
-					var symbol = orig_symbol.toFull()
-					symbol.company = r.company
-
-					r = omit(r, 'symbol', 'company')
-
-					r.symbol = symbol
-
-					if (r.price != null)
+					return Promise.resolve(symbol_s[i])
+					.then(symbol =>
 					{
-						return r
-					}
+						r = omit(r, 'symbol', 'company')
 
-					if (orig_symbol.isOther())
-					{
-						if (options.other)
+						r.symbol = symbol
+
+						if (r.price != null)
 						{
 							return r
 						}
-						else
+
+						if (symbol.isOther())
 						{
-							throw OtherSymbol()
+							if (options.other)
+							{
+								return r
+							}
+							else
+							{
+								throw OtherSymbol()
+							}
 						}
-					}
-
-					log('XIGN Quotes fallback', orig_symbol.toXign())
-
-					return quotes_fallback_resolve(r, orig_symbol)
-					.catch(err =>
+					})
+					.then(r =>
 					{
-						if (options.soft)
+						return symbols.resolve/*.cache*/(r.symbol)
+						.then(symbol =>
 						{
+							r.symbol = symbol
+
 							return r
-						}
-						else
+						},
+						err =>
 						{
-							throw err
-						}
+							if (options.soft)
+							{
+								return r
+							}
+							else
+							{
+								throw err
+							}
+						})
 					})
 				}
 			})
