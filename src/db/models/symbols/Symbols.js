@@ -350,15 +350,20 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 	symbols.seriesForPortfolio = db.cache.regular('portfolio',
 		{ ttl: 60 * 60 },
-		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
+		(symbol, range) => [ cache_symbol(symbol), apidate(range.start), apidate(range.end) ],
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
 
 	symbols.seriesForPortfolio.intraday = db.cache.regular('portfolio.intraday',
 		{ ttl: 60 * 15 },
-		(symbol) => symbol,
+		cache_symbol,
 		(symbol, range) => xign.series.intraday(symbol, range.start, range.end)
 	)
+
+	function cache_symbol (symbol)
+	{
+		return Symbl(symbol).toXign()
+	}
 
 	return symbols
 }
