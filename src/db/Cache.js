@@ -5,9 +5,15 @@ var assign = Object.assign
 var dump = JSON.stringify
 var load = JSON.parse
 
-module.exports = function (redis)
+module.exports = function (redis, cache_options)
 {
 	var cache = {}
+
+	cache_options = assign(
+	{
+		debug: false
+	}
+	, cache_options)
 
 	cache.regular = function (prefix, options, key_fn, fn)
 	{
@@ -36,6 +42,8 @@ module.exports = function (redis)
 			{
 				if (value != null)
 				{
+					debug_hit(key_str)
+
 					if (options.actualize)
 					{
 						actualize(this, arguments, key_str)
@@ -83,6 +91,8 @@ module.exports = function (redis)
 			{
 				if (value != null)
 				{
+					debug_hit(key_str)
+
 					return load(value)
 				}
 				else
@@ -125,7 +135,34 @@ module.exports = function (redis)
 			args.push('EX', options.ttl)
 		}
 
+		debug_put(key_str)
+
 		return redis.set.apply(redis, args)
+	}
+
+
+	function debug_put (key_str)
+	{
+		process.nextTick(() =>
+		{
+			if (cache_options.debug)
+			{
+				// console.info('PUT cache %s `%s`', symbol, data.company)
+				console.info('PUT cache %s', key_str)
+			}
+		})
+	}
+
+	function debug_hit (key_str)
+	{
+		process.nextTick(() =>
+		{
+			if (cache_options.debug)
+			{
+				// console.info('HIT cache %s `%s`', symbol, data.company)
+				console.info('HIT cache %s', key_str)
+			}
+		})
 	}
 
 	return cache

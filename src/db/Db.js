@@ -38,7 +38,7 @@ module.exports = function name (app)
 	})
 
 	db.redis = redis(app.cfg.redis)
-	db.cache = db.helpers.Cache(db.redis)
+	db.cache = db.helpers.Cache(db.redis, { debug: false })
 
 
 	db.knex.client.pool.on('error', () =>
