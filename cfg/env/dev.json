@@ -2,7 +2,7 @@
   "dev":  true,
   "env": "dev",
 
-  "host": "ec2-52-38-31-214.us-west-2.compute.amazonaws.com",
+  "host": "ec2-35-161-140-145.us-west-2.compute.amazonaws.com",
   "port": 8001,
   "real_port": 8000,
 

@@ -1,14 +1,8 @@
 
-var concat    = require('lodash/concat')
-var every     = require('lodash/every')
-var filter    = require('lodash/filter')
-var flatten   = require('lodash/flatten')
+var includes  = require('lodash/includes')
 var isNumber  = require('lodash/isNumber')
-var groupBy   = require('lodash/groupBy')
 var map       = require('lodash/map')
 var mapValues = require('lodash/mapValues')
-var orderBy   = require('lodash/orderBy')
-var values    = require('lodash/values')
 
 var expect = require('chai').expect
 var moment = require('moment')
@@ -18,6 +12,11 @@ var Err      = require('../../../../Err')
 var knexed   = require('../../../knexed')
 var Symbl    = require('../../symbols/Symbl')
 var validate = require('../../../validate')
+
+var InitBrokerageOp = require('./TradeOp/InitBrokerageOp')
+var InitHoldingsOp  = require('./TradeOp/InitHoldingsOp')
+var TradeOp         = require('./TradeOp/TradeOp')
+var NonTradeOp      = require('./TradeOp/NonTradeOp')
 
 module.exports = function Parser (portfolio, db)
 {
@@ -79,66 +78,46 @@ module.exports = function Parser (portfolio, db)
 
 	function transform_hist_data (bulk_data, investor_id)
 	{
-		return portfolio.availableDate(investor_id)
-		.then((portfolio_date) =>
+		bulk_data.forEach((entry, i) =>
 		{
-			if (portfolio_date === null)
-			{	// any date is available
-				portfolio_date = moment.utc(0) // Jan 01 1970
+			entry.date = moment.utc(entry.Date)
+			entry.investor_id = investor_id
+
+			if (entry.Stock)
+			{
+				entry.symbol = Symbl(entry.Stock)
 			}
 
-			if (! portfolio_date.isValid())
+			if (entry.Cash)
 			{
-				throw UploadHistoryError(
-				{
-					reason: 'Unable to get portfolio available date'
-				})
+				entry.Cash = Number(entry.Cash)
+				validate.number(entry.Cash, `csv[${i + 1}].Cash`)
 			}
 
-			portfolio_date.startOf('day')
-
-			bulk_data.forEach((entry, i) =>
+			if (entry.Amount)
 			{
-				entry.date = moment.utc(entry.Date)
-				entry.is_valid_date
-				 = entry.date.isValid() && entry.date >= portfolio_date
+				entry.Amount = Number(entry.Amount)
+				validate.number(entry.Amount, `csv[${i + 1}].Amount`)
+			}
 
-				if (entry.Stock)
-				{
-					entry.symbol = Symbl(entry.Stock)
-				}
+			if (entry.Price)
+			{
+				entry.Price = Number(entry.Price)
+				validate.number(entry.Price, `csv[${i + 1}].Price`)
+			}
+		})
 
-				if (entry.Cash)
-				{
-					entry.Cash = Number(entry.Cash)
-					validate.number(entry.Cash, `csv[${i + 1}].Cash`)
-				}
-
-				if (entry.Amount)
-				{
-					entry.Amount = Number(entry.Amount)
-					validate.number(entry.Amount, `csv[${i + 1}].Amount`)
-				}
-
-				if (entry.Price)
-				{
-					entry.Price = Number(entry.Price)
-					validate.number(entry.Price, `csv[${i + 1}].Price`)
-				}
+		var options = { soft: true, other: true }
+		return db.symbols.resolveMany(map(bulk_data, 'symbol'), options)
+		.then(symbols =>
+		{
+			symbols.forEach((symbol, i) =>
+			{
+				bulk_data[i].symbol = symbol
+				bulk_data[i].is_resolved = symbol !== null
 			})
 
-			var options = { soft: true, other: true }
-			return db.symbols.resolveMany(map(bulk_data, 'symbol'), options)
-			.then(symbols =>
-			{
-				symbols.forEach((symbol, i) =>
-				{
-					bulk_data[i].symbol = symbol
-					bulk_data[i].is_resolved = symbol !== null
-				})
-
-				return bulk_data
-			})
+			return bulk_data
 		})
 	}
 
@@ -180,13 +159,6 @@ module.exports = function Parser (portfolio, db)
 		})
 	}
 
-	var methods =
-	{
-		brokerage: portfolio.brokerage.set, // trx, investor_id, cash, timestamp
-		holdings:  portfolio.holdings.set, // trx, investor_id, holding_entries
-		trade:     portfolio.makeTrade, // trx, investor_id, type, date, data
-		cash:      portfolio.manageCash, // trx, investor_id, op
-	}
 
 	parser.uploadHistoryAs
 		= knexed.transact(knex, (trx, investor_id, whom_id, csv) =>
@@ -194,27 +166,11 @@ module.exports = function Parser (portfolio, db)
 		return ensure_can_upload(whom_id, investor_id)
 		.then(mode =>
 		{
-			var sequential = sequential_operation(trx, investor_id)
+			var sequential = sequential_operation(trx)
 
 			return db.investor.all.ensure(investor_id)
 			.then(() => csv_to_array(csv))
 			.then(bulk_data => transform_hist_data(bulk_data, investor_id))
-			.then(bulk_data =>
-			{
-				if (! every(bulk_data, { is_valid_date: true }))
-				{
-					var invalid_entries = filter(bulk_data, { is_valid_date: false })
-
-					throw UploadHistoryError(
-					{
-						reason: `${invalid_entries.length} entries are older ` +
-						        `than last portfolio record`,
-						entries: invalid_entries
-					})
-				}
-
-				return adjust_date(bulk_data)
-			})
 			.then(bulk_data =>
 			{
 				return sequential(bulk_data[0], 0, bulk_data)
@@ -252,13 +208,14 @@ module.exports = function Parser (portfolio, db)
 		})
 	})
 
-	function sequential_operation (trx, investor_id)
+	function sequential_operation (trx)
 	{
 		return function sequential_caller (entry, index, origin)
 		{
-			var data = entry_2_data(entry)
+			var op_instance = entry_2_data(entry)
+			console.log(`${index + 2} :: ${op_instance.inspect()}`)
 
-			return data.method.apply(this, concat(trx, investor_id, data.args))
+			return portfolio.tradeops.apply(trx, op_instance)
 			.then(() =>
 			{
 				if ( ++ index < origin.length)
@@ -292,51 +249,35 @@ module.exports = function Parser (portfolio, db)
 			fee: 'fee'
 		}
 
-		var is_stock = entry.Stock && entry.Amount && isNumber(entry.Price)
+		var is_stock = entry.symbol && entry.Amount && isNumber(entry.Price)
 
 		if (entry.Type === 'onboarding' && entry.Cash)
 		{
-			return {
-				method: methods.brokerage,
-				args: [entry.Cash, entry.date.format()]
-			}
-		}
-
-		if (entry.Type === 'onboarding' && is_stock)
-		{
-			return {
-				method: methods.holdings,
-				args:
-				[
-					[{
-						symbol: entry.Stock,
-						amount: entry.Amount,
-						price:  entry.Price,
-						date:   entry.date.format()
-					}]
-				]
-			}
-		}
-
-		if (cash_management_ops.indexOf(entry.Type) !== -1 && entry.Cash)
-		{
-			if (entry.Type === cash_management_ops[1] ||
-				entry.Type === cash_management_ops[3])
+			return InitBrokerageOp(entry.investor_id, entry.date,
 			{
-				entry.Cash *= -1
-			}
+				amount: entry.Cash
+			})
+		}
 
-			return {
-				method: methods.cash,
-				args:
-				[
-					{
-						type: csv_2_op_type[entry.Type],
-						cash: entry.Cash,
-						date: entry.date.format()
-					}
-				]
-			}
+		if (entry.Type === 'onboarding' && is_stock && entry.is_resolved)
+		{
+			return InitHoldingsOp(entry.investor_id, entry.date,
+			[
+				{
+					symbol: entry.symbol,
+					amount: entry.Amount,
+					price: entry.Price,
+				}
+			])
+		}
+
+		if (includes(cash_management_ops, entry.Type) && entry.Cash)
+		{
+			return NonTradeOp(entry.investor_id, entry.date,
+			{
+				type: csv_2_op_type[entry.Type],
+				amount: entry.Cash,
+			})
 		}
 
 		if ((entry.Type === 'bought' || entry.Type === 'sold') && is_stock)
@@ -350,20 +291,13 @@ module.exports = function Parser (portfolio, db)
 				})
 			}
 
-			return {
-				method: methods.trade,
-				args:
-				[
-					'trade',
-					entry.date.format(),
-					{
-						dir: entry.Type,
-						symbol: entry.symbol,
-						amount: entry.Amount,
-						price: entry.Price
-					}
-				]
-			}
+			return TradeOp(entry.investor_id, entry.date,
+			{
+				dir: entry.Type,
+				symbol: entry.symbol,
+				amount: entry.Amount,
+				price: entry.Price
+			})
 		}
 
 		throw UploadHistoryError(
@@ -375,30 +309,6 @@ module.exports = function Parser (portfolio, db)
 	}
 	/* eslint-enable complexity */
 
-	function adjust_date (bulk_data)
-	{
-		var minutes_offset = 5
-		var by_date = groupBy(bulk_data, 'date')
-
-		var adjusted_dates = mapValues(by_date, (values) =>
-		{
-			if (values.length > 1)
-			{
-
-				values.forEach((entry, i) =>
-				{
-					entry.date.add(i * minutes_offset, 'minutes')
-				})
-			}
-
-			return values
-		})
-
-		adjusted_dates = values(adjusted_dates)
-		adjusted_dates = flatten(adjusted_dates)
-
-		return orderBy(adjusted_dates, 'date')
-	}
 
 	return parser
 }

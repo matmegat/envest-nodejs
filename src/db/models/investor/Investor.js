@@ -83,6 +83,8 @@ module.exports = function Investor (db, mailer)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
+		data.email = data.email.toLowerCase()
+
 		return auth.registerWithPass(trx, data)
 		.then(id =>
 		{
@@ -102,27 +104,31 @@ module.exports = function Investor (db, mailer)
 		{	// fill other investor data
 			var fields = (field) =>
 			{
-				if (! (field in data) || ! data[field])
+				return () =>
 				{
-					return Promise.resolve(`"${field}" skipped`)
-				}
+					if (! (field in data) || ! data[field])
+					{
+						return Promise.resolve(`"${field}" skipped`)
+					}
 
-				return investor
-				.onboarding
-				.fields[field]
-				.set(trx, investor_entry.id, data[field])
+					return investor
+					.onboarding
+					.fields[field]
+					.set(trx, investor_entry.id, data[field])
+				}
 			}
 
-			return fields('brokerage')
-			.then(() => fields('holdings'))
-			.then(() => fields('profession'))
-			.then(() => fields('focus'))
-			.then(() => fields('education'))
-			.then(() => fields('hist_return'))
-			.then(() => fields('annual_return'))
+			return fields('brokerage')()
+			.then(fields('holdings'))
+			.then(fields('profession'))
+			.then(fields('focus'))
+			.then(fields('education'))
+			.then(fields('background'))
+			.then(fields('hist_return'))
+			.then(fields('annual_return'))
 			.then(() => investor_entry)
 		})
-		.then((investor_entry) =>
+		.then(investor_entry =>
 		{
 			var investor_id = investor_entry.id
 
@@ -150,8 +156,9 @@ module.exports = function Investor (db, mailer)
 				return Promise.all([ n1, n2 ])
 			})
 			.then(() => user.byId(data.admin_id))
-			.then((admin) =>
+			.then(admin =>
 			{
+
 				var substs =
 				{
 					email_title: [ 'Welcome' ]

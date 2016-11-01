@@ -6,13 +6,10 @@ var noop = require('lodash/noop')
 
 var reduce = require('lodash/reduce')
 
-var max = require('lodash/max')
-var maxBy = require('lodash/maxBy')
 var sumBy = require('lodash/sumBy')
 var orderBy = require('lodash/orderBy')
 
 var round = require('lodash/round')
-
 
 var moment = require('moment')
 
@@ -22,15 +19,18 @@ var knexed = require('../../../knexed')
 
 var Brokerage = require('./Brokerage')
 var Holdings  = require('./Holdings')
+
+var Tradeops  = require('./Tradeops')
+
 var Grid = require('./Grid/Grid')
 
 var Symbl = require('../../symbols/Symbl')
 
-var validate = require('../../../validate')
-
 var Err = require('../../../../Err')
 
 var Parser = require('./Parser')
+
+var NonTradeOp = require('./TradeOp/NonTradeOp')
 
 module.exports = function Portfolio (db, investor)
 {
@@ -42,10 +42,13 @@ module.exports = function Portfolio (db, investor)
 	expect(db, 'Portfolio depends on Series').property('symbols')
 	portfolio.symbols = db.symbols
 
+	var tradeops  = portfolio.tradeops = Tradeops(db, portfolio)
+
 	var grid = Grid(investor, portfolio)
 
 	var knex = db.knex
 
+	// get
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
 	{
 		return new Promise(rs =>
@@ -154,7 +157,18 @@ module.exports = function Portfolio (db, investor)
 
 			var full_value
 			 = brokerage.cash * brokerage.multiplier
-			 + sumBy(holdings, 'allocation')
+			 + sumBy(total_holdings, 'allocation')
+
+			var cash_row =
+			{
+				symbol: Symbl('CASH.CASH').toFull(),
+				allocation: brokerage.cash * brokerage.multiplier,
+				gain: null,
+				price: 1,
+				amount: 1,
+			}
+
+			total_holdings = [ cash_row ].concat(total_holdings)
 
 			var resp = {
 				total:    total_holdings.length,
@@ -175,6 +189,7 @@ module.exports = function Portfolio (db, investor)
 		})
 	})
 
+
 	portfolio.gain = knexed.transact(knex, (trx, investor_id) =>
 	{
 		var now = moment()
@@ -183,7 +198,7 @@ module.exports = function Portfolio (db, investor)
 
 		return Promise.all(
 		[
-			fullValue(trx, investor_id, now),
+			fullValue(trx, investor_id, null),
 			fullValue(trx, investor_id, day_ytd),
 			fullValue(trx, investor_id, day_intraday)
 		])
@@ -258,6 +273,7 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
+	// grid
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
 		return Promise.all(
@@ -302,190 +318,108 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
+	// tradeop
+	portfolio.apply = knexed.transact(knex, (trx, tradeop) =>
+	{
+		return tradeops.apply(trx, tradeop)
+		.catch(err =>
+		{
+			if (Err.is(err))
+			{
+				throw PortfolioOpErr({ reason: err })
+			}
+			else
+			{
+				console.trace(err.stack)
+				throw PortfolioOpErr({ reason: err.message })
+			}
+		})
+	})
 
+	var PortfolioOpErr = Err('portfolio_operation_err',
+		'Error appeared during munipulating portofilo'
+	)
+
+
+	// trading
 	var WrongTradeDir = Err('wrong_trade_dir', 'Wrong Trade Dir')
 
 	holdings.dirs = {}
 	holdings.dirs.bought = holdings.buy
 	holdings.dirs.sold = holdings.sell
 
-	var PostDateErr =
-		Err('there_is_more_recent_state',
-			'There Is More Recent State')
-
-	portfolio.isDateAvail = function (trx, investor_id, date)
-	{
-		return Promise.all(
-		[
-			holdings.isDateAvail(trx, investor_id, date),
-			brokerage.isDateAvail(trx, investor_id, date)
-		])
-		.then(so =>
-		{
-			return so[0] && so[1]
-		})
-	}
-
 	portfolio.availableDate = knexed.transact(knex, (trx, investor_id) =>
 	{
-		return Promise.all(
-		[
-			holdings.availableDate(trx, investor_id),
-			brokerage.availableDate(trx, investor_id)
-		])
-		.then(r =>
+		return investor.all.ensure(investor_id, trx)
+		.then(() =>
 		{
-			var dates_symbols  = r[0]
-			var date_brokerage = r[1]
-
-			var max_symbols = maxBy(dates_symbols, 'available_from')
-			if (max_symbols)
-			{
-				max_symbols = max_symbols.available_from
-			}
-
-			var max_brokerage = date_brokerage.available_from
-
-			var max_common = null
-			if (max_symbols || max_brokerage)
-			{
-				max_common = max([ max_symbols || -1, max_brokerage || -1 ])
-				max_common = moment.utc(max_common)
-			}
-
-			return max_common
+			return tradeops.availableDate(trx, investor_id)
 		})
 	})
 
-	portfolio.adjustDate = knexed.transact(knex, (trx, investor_id, timestamp) =>
-	{
-		expect(timestamp).ok
-		timestamp = moment.utc(timestamp)
-
-		return portfolio.availableDate(trx, investor_id)
-		.then(portfolio_date =>
-		{
-			if (timestamp > portfolio_date)
-			{
-				return timestamp.format()
-			}
-
-			if (timestamp.isSameOrAfter(portfolio_date.clone().startOf('day')))
-			{
-				return portfolio_date.add(5, 'minutes').format()
-			}
-
-			return timestamp.format()
-			// Do Nothing. Will create error 'Wrong Date'
-			// Or, in feature, will insert between to date
-		})
-	})
-
-
-	portfolio.makeTrade = function (trx, investor_id, type, date, data)
+	portfolio.makeTrade = function (trx, investor_id, type, timestamp, data)
 	{
 		var dir = data.dir
 		var symbol = {}
 
-		return portfolio.adjustDate(trx, investor_id, date)
-		.then(for_date =>
+		return Symbl.validate(data.symbol)
+		.then(symbl =>
 		{
-			return portfolio.isDateAvail(trx, investor_id, for_date)
-			.then(is_avail =>
+			symbol = symbl
+
+			if (! (dir in holdings.dirs))
 			{
-				if (! is_avail)
-				{
-					throw PostDateErr()
-				}
+				throw WrongTradeDir({ dir: dir })
+			}
 
-				return Symbl.validate(data.symbol)
-			})
-			.then(symbl =>
+			return holdings.dirs[dir](trx, investor_id, symbol, timestamp, data)
+		})
+		.then(sum =>
+		{
+			return brokerage.update(trx, investor_id, timestamp,
 			{
-				symbol = symbl
-
-				if (! (dir in holdings.dirs))
-				{
-					throw WrongTradeDir({ dir: dir })
-				}
-
-				if (data.is_delete)
-				{
-					for_date = moment()
-				}
-
-				return holdings.dirs[dir](trx, investor_id, symbol, for_date, data)
-			})
-			.then(sum =>
-			{
-				return brokerage.update(trx, investor_id, for_date,
-				{
-					operation: 'trade',
-					amount: sum
-				})
+				operation: 'trade',
+				amount: sum
 			})
 		})
 	}
 
 	portfolio.removeTrade = function (trx, post)
 	{
-		var symbol = post.data.symbol
+		var symbol = post.op_data.symbol
+		var investor_id = post.investor_id
+		var timestamp = post.timestamp
 
-		symbol.symbol_ticker = symbol.ticker
-		symbol.symbol_exchange = symbol.exchange
-
-		return portfolio.isDateAvail(trx, post.investor_id, post.timestamp)
-		.then(is_avail =>
-		{
-			if (! is_avail)
+		return holdings.symbolById(
+			trx,
+			symbol,
+			investor_id,
+			timestamp.format(),
 			{
-				throw PostDateErr()
+				with_timestamp: true,
+				include_zero: true,
 			}
+		)
+		.then(holding_pk =>
+		{
+			return holdings.remove(trx, holding_pk)
 		})
 		.then(() =>
 		{
-			return holdings.symbolById(trx, symbol, post.investor_id, null, {
-				raw_select: true
-			})
-		})
-		.then(symbol_state =>
-		{
-			return holdings.removeBySymbolState(trx, symbol_state)
-		})
-		.then(() =>
-		{
-			return brokerage.removeState(trx, post.investor_id, post.timestamp)
+			return brokerage.remove(trx, investor_id, timestamp)
 		})
 	}
 
 
-	var val_cash_ops = validate.collection([
-		'deposit',
-		'withdraw',
-		'fee',
-		'interest'
-	])
-
 	portfolio.manageCash = knexed.transact(knex, (trx, investor_id, op) =>
 	{
-		validate.required(op.type, 'type')
-		val_cash_ops(op.type) // 'type'
-
-		validate.required(op.cash, 'cash')
-		validate.number(op.cash, 'cash')
-
-		validate.required(op.date, 'date')
-		validate.date(op.date) // 'date'
-
-		return portfolio.adjustDate(trx, investor_id, op.date)
-		.then(for_date =>
+		var non_trade_op = NonTradeOp(investor_id, moment.utc(op.date).toDate(),
 		{
-			return brokerage.update(trx, investor_id, for_date,
-			{
-				operation: op.type,
-				amount: op.cash
-			})
+			type: op.type,
+			amount: op.cash,
 		})
+
+		return portfolio.apply(non_trade_op)
 		.then(noop)
 	})
 
@@ -497,14 +431,31 @@ module.exports = function Portfolio (db, investor)
 		knex,
 		(trx, whom_id, investor_id, data) =>
 	{
-		return portfolio.manageCash(trx, investor_id, data)
-		.then(() =>
+		return investor.all.ensure(investor_id)
+		.then(() => investor.getActionMode(trx, whom_id, investor_id))
+		.then(mode =>
 		{
-			return CashManaged(investor_id,
+			if (mode === 'mode:admin') { return mode }
+
+			db.post.check_operation_date(data.date)
+
+			return mode
+		})
+		.then((mode) =>
+		{
+			return portfolio.manageCash(trx, investor_id, data)
+			.then(() => mode)
+		})
+		.then((mode) =>
+		{
+			if (mode === 'mode:admin')
 			{
-				admin: [ ':user-id', whom_id ],
-				investor_id: [ ':user-id', investor_id ],
-			})
+				return CashManaged(investor_id,
+				{
+					admin: [ ':user-id', whom_id ],
+					investor_id: [ ':user-id', investor_id ],
+				})
+			}
 		})
 		.then(noop)
 	})

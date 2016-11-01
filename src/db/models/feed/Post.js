@@ -16,7 +16,7 @@ module.exports = function Post (db)
 	var post = {}
 
 	post.types = {}
-	post.types.trade = Trade(db.investor.portfolio, db.symbols, db.feed)
+	post.types.trade = Trade(db.investor.portfolio, db.symbols, db)
 	post.types.watchlist = Watchlist(db)
 	post.types.update = Update(db)
 
@@ -94,6 +94,13 @@ module.exports = function Post (db)
 		})
 		.then(data =>
 		{
+			if (Array.isArray(data))
+			{
+				/* handle changing timestamp of Trade */
+				date = data[0]
+				data = data[1]
+			}
+
 			return db.feed.upsert(trx, investor_id, type, date, data, post_id)
 		})
 	}
@@ -101,14 +108,19 @@ module.exports = function Post (db)
 	var InvestorPostDateErr =
 		Err('investor_post_date_exeeded', 'Investor post date exeeded')
 
-	post.update = function (investor_id, post_id, date, data)
+	post.update = function (investor_id, post_id, data)
 	{
 		validate_update_fields(post_id)
 
-		return post.create(investor_id, null, date, data, post_id)
+		return db.feed.byIdRaw(post_id)
+		.then(res_post =>
+		{
+			return post.create(
+				res_post.investor_id, null, res_post.timestamp, data, post_id)
+		})
 	}
 
-	post.updateAs = function (whom_id, post_id, date, data)
+	post.updateAs = function (whom_id, post_id, data)
 	{
 		validate_update_fields(post_id)
 
@@ -116,7 +128,7 @@ module.exports = function Post (db)
 		.then(res_post =>
 		{
 			return post.createAs(
-				whom_id, res_post.investor_id, res_post.type, date, data, post_id)
+				whom_id, res_post.investor_id, res_post.type, null, data, post_id)
 		})
 	}
 
@@ -124,19 +136,12 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = moment(date || void 0).startOf('second').utc().format()
+			date = moment(date || void 0).startOf('second').utc()
 
 			return Promise.resolve()
 			.then(() =>
 			{
-				validate.date(date)
-
-				var min_date = moment().subtract(3, 'days')
-
-				if (! moment(date).isSameOrAfter(min_date))
-				{
-					throw InvestorPostDateErr({ date: date, minDate: min_date })
-				}
+				post.check_operation_date(date)
 			})
 			.then(() =>
 			{
@@ -158,7 +163,7 @@ module.exports = function Post (db)
 	{
 		return knex.transaction(function (trx)
 		{
-			date = moment(date || void 0).startOf('second').utc().format()
+			date = moment(date || void 0).startOf('second').utc()
 
 			return Promise.resolve()
 			.then(() =>
@@ -199,6 +204,15 @@ module.exports = function Post (db)
 			.then(Err.nullish(db.feed.NotFound))
 			.then(res =>
 			{
+				if (! whom_id)
+				{
+					post.check_operation_date(res.timestamp)
+				}
+
+				return res
+			})
+			.then(res =>
+			{
 				if (! soft_mode)
 				{
 					var post_type = post.types[res.type]
@@ -232,6 +246,18 @@ module.exports = function Post (db)
 		if (! post_id)
 		{
 			throw PostIdRequired()
+		}
+	}
+
+	post.check_operation_date = (date) =>
+	{
+		validate.date(date)
+
+		var min_date = moment.utc().startOf('day').subtract(30, 'days')
+
+		if (! moment(date).isSameOrAfter(min_date))
+		{
+			throw InvestorPostDateErr({ date: date, minDate: min_date })
 		}
 	}
 

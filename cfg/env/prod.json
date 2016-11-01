@@ -17,5 +17,10 @@
     "db": 1
   },
 
+  "feedback":
+  {
+    "email": "contact@netvest.com"
+  },
+
   "nginx": true
 }

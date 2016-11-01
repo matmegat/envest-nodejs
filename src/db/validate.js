@@ -1,9 +1,9 @@
 
 var Err = require('../Err')
-var moment = require('moment')
 
 var includes = require('lodash/includes')
 var isEmpty = require('lodash/isEmpty')
+var isObjectLike = require('lodash/isObjectLike')
 var keys = require('lodash/keys')
 var moment = require('moment')
 
@@ -175,6 +175,14 @@ validate.boolean.false = function validate__boolean (field, name)
 	}
 }
 
+validate.object = function validate__object (field, name)
+{
+	if (! isObjectLike(field))
+	{
+		throw FieldType({ field: name, origin: JSON.stringify(field) })
+	}
+}
+
 
 var FieldLength = Err('field_wrong_length', 'Field cannot supercede length')
 
@@ -198,13 +206,13 @@ validate.length = function validate__length (max, min)
 
 var WrongDate = Err('wrong_date_format', 'Wrong Date Format')
 
-validate.date = function validate__date (date)
+validate.date = function validate__date (field, name)
 {
-	var date = moment(date)
+	var date = moment(field)
 
 	if (! date.isValid())
 	{
-		throw WrongDate()
+		throw WrongDate({ field: name })
 	}
 }
 

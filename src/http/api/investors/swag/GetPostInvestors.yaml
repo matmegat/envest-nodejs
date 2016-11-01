@@ -16,6 +16,10 @@ get:
     description: |
       Get feed items greater than *since_id* (non inclusive) with applied sorting
       [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: sort
+    in: query
+    type: string
+    description: Sorting options [first_name||last_name||email, desc||asc]
   - name: page
     in: query
     type: integer

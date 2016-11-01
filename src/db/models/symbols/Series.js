@@ -16,6 +16,7 @@ module.exports = function Series (token)
 
 	expect(token).a('string')
 
+	/* Adjust = SplitandProportionalDividend, correct */
 	series.series = (symbol, end_date, periods) =>
 	{
 		end_date = util.apidate(end_date)
@@ -32,7 +33,7 @@ module.exports = function Series (token)
 				IdentifierType: 'Symbol',
 				Identifier: symbol,
 
-				AdjustmentMethod: 'SplitOnly',
+				AdjustmentMethod: 'SplitAndProportionalCashDividend',
 
 				EndDate: end_date,
 				PeriodType: 'Day',

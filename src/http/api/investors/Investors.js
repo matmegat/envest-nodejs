@@ -38,6 +38,11 @@ module.exports = function (db, http)
 			'query',
 		])
 
+		options.sorter = pick(rq.query,
+		[
+			'sort'
+		])
+
 		if (rq.user && rq.user.admin && 'is_public' in rq.query)
 		{
 			try
@@ -62,7 +67,7 @@ module.exports = function (db, http)
 		toss(rs, choose_model(rq)
 		.then(model =>
 		{
-			return model.fullById(rq.params.id)
+			return model.fullById(Number(rq.params.id))
 		}))
 	})
 
@@ -78,7 +83,9 @@ module.exports = function (db, http)
 		})
 		.then(so =>
 		{
-			if (so)
+			var is_same = rq.user && (rq.user.id === Number(rq.params.id))
+
+			if (so || is_same)
 			{
 				return investors.model.all
 			}
@@ -93,7 +100,12 @@ module.exports = function (db, http)
 	// auth required
 	investors.express.get('/:id/portfolio', authRequired, (rq, rs) =>
 	{
-		var options = { extended: isPlainObject(rq.user.admin) }
+		var is_same = rq.user.id === Number(rq.params.id)
+		var options =
+		{
+			extended: isPlainObject(rq.user.admin) || is_same
+		}
+
 		toss(rs, db.investor.portfolio.byId(rq.params.id, options))
 	})
 
@@ -121,12 +133,16 @@ module.exports = function (db, http)
 	investors.express.post('/cash', authRequired, (rq, rs) =>
 	{
 		var investor_id = rq.user.id
+		var whom_id = rq.user.id
 		var data = pick(rq.body, 'type', 'cash', 'date')
 
-		toss(rs, investors.model.portfolio.manageCash(investor_id, data))
+		toss(
+			rs,
+			investors.model.portfolio.manageCashAs(whom_id, investor_id, data)
+		)
 	})
 
-	investors.express.post('/cash-as', authRequired, (rq, rs) =>
+	investors.express.post('/cash-as', http.adminRequired, (rq, rs) =>
 	{
 		var whom_id = rq.user.id
 		var investor_id = rq.body.target_user_id
@@ -146,8 +162,8 @@ module.exports = function (db, http)
 		var investor_id = rq.body.target_user_id
 		var holdings = rq.body.holdings
 
-		toss(rs,
-			db.investor.portfolio.holdings.remove(whom_id, investor_id, holdings)
+		toss(rs, db.investor.portfolio.holdings
+			.removeBatch(whom_id, investor_id, holdings)
 		)
 	})
 
