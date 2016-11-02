@@ -274,6 +274,7 @@ module.exports = function Portfolio (db, investor)
 
 
 	// involved symbols
+	// TODO maybe not in use
 	portfolio.allSymbolsInvolved = () =>
 	{
 		return holdings.allSymbolsInvolved()
