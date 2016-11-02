@@ -17,7 +17,7 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-module.exports = function Investor (db, mailer)
+module.exports = function Investor (db, mailer, heat)
 {
 	var investor = {}
 
@@ -101,7 +101,8 @@ module.exports = function Investor (db, mailer)
 		.then(oneMaybe)
 		.then((investor_id) => investor.all.byId(investor_id, trx))
 		.then(investor_entry =>
-		{	// fill other investor data
+		{
+			// fill other investor data
 			var fields = (field) =>
 			{
 				return () =>
@@ -175,6 +176,10 @@ module.exports = function Investor (db, mailer)
 					+ `your profile and publications. Let us know if you have `
 					+ `questions <a href="mailto:${admin.email}">${admin.email}</a>.`
 				})
+			})
+			.then(() =>
+			{
+				heat.lookForInvestor(investor_id)
 			})
 			.then(() => investor_entry)
 		})

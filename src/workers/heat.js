@@ -3,7 +3,7 @@ var B = require('bluebird')
 
 var random = require('lodash/random')
 
-module.exports = function heat (app)
+module.exports = function (app)
 {
 	var db = app.db
 
@@ -12,16 +12,22 @@ module.exports = function heat (app)
 	{
 		if (! ids.length) { return }
 
-		ids.forEach(investor_id =>
-		{
-			random_delay()
-			.then(recurring(() =>
-			{
-				// console.warn(investor_id)
-				return db.investor.portfolio.grid(investor_id)
-			}))
-		})
+		ids.forEach(look_for_investor)
 	})
+
+	var heat = {}
+
+	var look_for_investor = heat.lookForInvestor = (investor_id) =>
+	{
+		random_delay()
+		.then(recurring(() =>
+		{
+			// console.warn(investor_id)
+			return db.investor.portfolio.grid(investor_id)
+		}))
+	}
+
+	return heat
 }
 
 function recurring (fn)

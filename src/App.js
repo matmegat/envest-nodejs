@@ -7,7 +7,7 @@ var Db = require('./db/Db')
 var Http = require('./http/Http')
 var Mailer = require('./Mailer')
 
-var heat = require('./workers/heat')
+var Heat = require('./workers/heat')
 
 module.exports = function App ()
 {
@@ -41,7 +41,7 @@ module.exports = function App ()
 
 	app.ready.then(() =>
 	{
-		heat(app)
+		app.heat = Heat(app)
 	})
 
 	return app
