@@ -33,17 +33,18 @@ function recurring (fn)
 
 	var re = () =>
 	{
-		console.info('start task')
+		// console.info('start task')
+
 		B.try(fn)
 		.catch(error =>
 		{
 			console.error('ERROR occured during recurring task')
 			console.error(error)
 		})
-		.then(() =>
+		/*.then(() =>
 		{
 			console.info('delay %s', options.delay)
-		})
+		})*/
 		.delay(options.delay)
 		.then(re)
 	}
