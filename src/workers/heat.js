@@ -26,7 +26,7 @@ module.exports = function heat (app)
 
 function recurring (fn)
 {
-	options =
+	var options =
 	{
 		delay: 60 * 15 * 1000
 	}
