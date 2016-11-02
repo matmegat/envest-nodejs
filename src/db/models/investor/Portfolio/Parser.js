@@ -163,6 +163,7 @@ module.exports = function Parser (portfolio, db)
 	parser.uploadHistoryAs
 		= knexed.transact(knex, (trx, investor_id, whom_id, csv) =>
 	{
+		console.time('uploadHistoryAs')
 		return ensure_can_upload(whom_id, investor_id)
 		.then(mode =>
 		{
@@ -173,6 +174,7 @@ module.exports = function Parser (portfolio, db)
 			.then(bulk_data => transform_hist_data(bulk_data, investor_id))
 			.then(bulk_data =>
 			{
+				console.time('sequential')
 				return sequential(bulk_data[0], 0, bulk_data)
 			})
 			.catch(err =>
@@ -188,6 +190,7 @@ module.exports = function Parser (portfolio, db)
 			})
 			.then(added_amount =>
 			{
+				console.time.end('sequential')
 				if (mode === 'mode:admin')
 				{
 					csvUploadedI(investor_id, {
@@ -206,19 +209,23 @@ module.exports = function Parser (portfolio, db)
 				return { processed: added_amount }
 			})
 		})
+		.then(it => { console.time.end('uploadHistoryAs'); return it })
 	})
 
 	function sequential_operation (trx)
 	{
 		return function sequential_caller (entry, index, origin)
 		{
+			console.time(`sequential ${index}`)
 			var op_instance = entry_2_data(entry)
 			console.log(`${index + 2} :: ${op_instance.inspect()}`)
 
 			return portfolio.tradeops.apply(trx, op_instance)
 			.then(() =>
 			{
-				if ( ++ index < origin.length)
+				console.time.end(`sequential ${index}`)
+
+				if (++ index < origin.length)
 				{
 					return sequential_caller(origin[index], index, origin)
 				}
