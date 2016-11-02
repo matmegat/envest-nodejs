@@ -276,6 +276,8 @@ module.exports = function User (db, app)
 
 	user.create = function (trx, data)
 	{
+		data.email = data.email.toLowerCase()
+
 		return ensureEmailNotExists(data.email, trx)
 		.then(() =>
 		{

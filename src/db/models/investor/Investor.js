@@ -83,8 +83,6 @@ module.exports = function Investor (db, mailer, heat)
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
-		data.email = data.email.toLowerCase()
-
 		return auth.registerWithPass(trx, data)
 		.then(id =>
 		{
