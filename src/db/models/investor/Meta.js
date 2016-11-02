@@ -218,7 +218,11 @@ module.exports = function Meta (investor, raw, options)
 		})
 	})
 
+	meta.ids = () =>
+	{
+		return table().select('user_id as id')
+		.then(rows => rows.map(row => Number(row.id)))
+	}
+
 	return meta
 }
-
-

@@ -3,7 +3,6 @@ var expect = require('chai').expect
 
 var Xign = require('./Xign')
 var Symbl = require('./Symbl')
-var Cache = require('./ResolveCache')
 
 var Err = require('../../../Err')
 
@@ -12,6 +11,9 @@ var UnknownSymbol
 
 var OtherSymbol
  = Err('other_special_symbol_not_allowed', 'OTHER symbol not allowed')
+
+var constant = require('lodash/constant')
+var Null = constant(null)
 
 var extend = require('lodash/assign')
 var pick = require('lodash/pick')
@@ -26,8 +28,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 {
 	var symbols = {}
 
-	var cache = Cache()
-
 	var xign = Xign(cfg.xignite, log)
 
 	symbols.resolve = (symbol, options) =>
@@ -35,7 +35,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		options = extend(
 		{
 			other: false,
-			cache: true
 		},
 		options)
 
@@ -58,7 +57,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			.then(resl =>
 			{
 				var symbol = Symbl(resl.symbol)
-				var orig_symbol = symbol.clone()
 
 				symbol.exchange || (symbol.exchange = resl.exchange)
 
@@ -66,24 +64,11 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 				symbol.company = resl.company
 
-				return [ orig_symbol, symbol ]
+				return symbol
 			},
 			() =>
 			{
 				throw UnknownSymbol({ symbol: symbol })
-			})
-			.then(symbols =>
-			{
-				var symbol = symbols[1]
-
-				if (options.cache)
-				{
-					var orig_symbol = symbols[0]
-
-					cache.put(orig_symbol, symbol)
-				}
-
-				return symbol
 			})
 		})
 	}
@@ -108,7 +93,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			queries = queries
 			.map(query =>
 			{
-				return query.catch(() => null)
+				return query.catch(Null)
 			})
 		}
 
@@ -116,23 +101,14 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 	}
 
 	/* cache-first */
-	symbols.resolve.cache = (symbol, options) =>
-	{
-		return new Promise(rs =>
-		{
-			var data = cache.get(symbol)
-
-			if (data)
-			{
-				return rs(data)
-			}
-
-			return rs(symbols.resolve(symbol, options))
-		})
-	}
+	symbols.resolve.cache = db.cache.regular('resolve',
+		{ ttl: 15 * 60 },
+		cache_symbol,
+		symbols.resolve
+	)
 
 
-	symbols.quotes = (symbols, for_date, options) =>
+	symbols.quotes = (symbol_s, for_date, options) =>
 	{
 		options = extend(
 		{
@@ -141,13 +117,15 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		},
 		options)
 
-		expect(symbols).ok
+		expect(symbol_s).ok
 
-		symbols = [].concat(symbols)
+		symbol_s = [].concat(symbol_s)
 
-		symbols = symbols.map(Symbl)
+		symbol_s = symbol_s.map(Symbl)
 
-		return xign.quotes(invoke(symbols, 'toXign'), for_date)
+		var symbol_s_xign = invoke(symbol_s, 'toXign')
+
+		return xign.quotes(symbol_s_xign, for_date)
 		.then(resl =>
 		{
 			return resl.map((r, i) =>
@@ -158,45 +136,50 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 				}
 				else
 				{
-					var orig_symbol = symbols[i]
-
-					var symbol = orig_symbol.toFull()
-					symbol.company = r.company
-
-					r = omit(r, 'symbol', 'company')
-
-					r.symbol = symbol
-
-					if (r.price != null)
+					return Promise.resolve(symbol_s[i])
+					.then(symbol =>
 					{
-						return r
-					}
+						r = omit(r, 'symbol', 'company')
 
-					if (orig_symbol.isOther())
-					{
-						if (options.other)
+						r.symbol = symbol
+
+						if (r.price != null)
 						{
 							return r
 						}
-						else
+
+						if (symbol.isOther())
 						{
-							throw OtherSymbol()
+							if (options.other)
+							{
+								return r
+							}
+							else
+							{
+								throw OtherSymbol()
+							}
 						}
-					}
-
-					log('XIGN Quotes fallback', orig_symbol.toXign())
-
-					return quotes_fallback_resolve(r, orig_symbol)
-					.catch(err =>
+					})
+					.then(r =>
 					{
-						if (options.soft)
+						return symbols.resolve.cache(r.symbol)
+						.then(symbol =>
 						{
+							r.symbol = symbol
+
 							return r
-						}
-						else
+						},
+						err =>
 						{
-							throw err
-						}
+							if (options.soft)
+							{
+								return r
+							}
+							else
+							{
+								throw err
+							}
+						})
 					})
 				}
 			})
@@ -204,17 +187,19 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		.then(it => Promise.all(it)) /* ridiculous wrapper */
 	}
 
-	function quotes_fallback_resolve (r, symbol)
-	{
-		return symbols.resolve.cache(symbol)
-		.then(symbol =>
-		{
-			r.symbol = symbol
 
-			return r
+	symbols.detail = (symbol) =>
+	{
+		return Promise.all(
+		[
+			get_last_fundamentals(symbol),
+			xign.quotes([ symbol ]),
+		])
+		.then(so =>
+		{
+			return merge(so[0], so[1][0])
 		})
 	}
-
 
 	function get_last_fundamentals (symbol)
 	{
@@ -278,20 +263,6 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		})
 	}
 
-
-	symbols.getInfo = (symbol) =>
-	{
-		return Promise.all(
-		[
-			// get_historical(symbol),
-			get_last_fundamentals(symbol),
-			xign.quotes([ symbol ]),
-		])
-		.then(so =>
-		{
-			return merge(so[0], so[1][0])
-		})
-	}
 
 	symbols.series = (symbol) =>
 	{
@@ -368,15 +339,21 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 	symbols.seriesForPortfolio = db.cache.regular('portfolio',
 		{ ttl: 60 * 60 },
-		(symbol, range) => [ symbol, apidate(range.start), apidate(range.end) ],
+		(symbol, range) =>
+			[ cache_symbol(symbol), apidate(range.start), apidate(range.end) ],
 		(symbol, range) =>   xign.seriesRange(symbol, range.start, range.end)
 	)
 
-	symbols.seriesForPortfolio.intraday = db.cache.slip('portfolio.intraday',
-		{ ttl: Infinity },
-		(symbol) => symbol,
+	symbols.seriesForPortfolio.intraday = db.cache.regular('portfolio.intraday',
+		{ ttl: 60 * 15 },
+		cache_symbol,
 		(symbol, range) => xign.series.intraday(symbol, range.start, range.end)
 	)
+
+	function cache_symbol (symbol)
+	{
+		return Symbl(symbol).toXign()
+	}
 
 	return symbols
 }

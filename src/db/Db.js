@@ -38,7 +38,7 @@ module.exports = function name (app)
 	})
 
 	db.redis = redis(app.cfg.redis)
-	db.cache = db.helpers.Cache(db.redis)
+	db.cache = db.helpers.Cache(db.redis, { debug: false })
 
 
 	db.knex.client.pool.on('error', () =>
@@ -89,7 +89,7 @@ module.exports = function name (app)
 
 	db.symbols = Symbols(db, app.cfg, app.log)
 
-	db.investor = Investor(db, app.mail)
+	db.investor = Investor(db, app.mail, app.heat)
 	db.watchlist = Watchlist(db)
 	db.feed = Feed(db)
 

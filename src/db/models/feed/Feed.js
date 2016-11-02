@@ -505,10 +505,7 @@ Feed.symbolsInvolved = (items) =>
 	symbols = flatten(symbols)
 	symbols = compact(symbols)
 
-	symbols = symbols.map(symbol =>
-	{
-		return Symbl([ symbol.ticker, symbol.exchange ])
-	})
+	symbols = symbols.map(Symbl)
 
 	symbols = uniqBy(symbols, symbol => symbol.toXign())
 

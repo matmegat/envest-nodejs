@@ -5,9 +5,15 @@ var assign = Object.assign
 var dump = JSON.stringify
 var load = JSON.parse
 
-module.exports = function (redis)
+module.exports = function (redis, cache_options)
 {
 	var cache = {}
+
+	cache_options = assign(
+	{
+		debug: false
+	}
+	, cache_options)
 
 	cache.regular = function (prefix, options, key_fn, fn)
 	{
@@ -15,9 +21,15 @@ module.exports = function (redis)
 
 		options = assign(
 		{
-			ttl: 60
+			ttl: 60,
+			actualize: true
 		}
 		, options)
+
+		if (options.actualize)
+		{
+			var actualize = actualizer(options, fn)
+		}
 
 		return function ()
 		{
@@ -30,6 +42,13 @@ module.exports = function (redis)
 			{
 				if (value != null)
 				{
+					debug_hit(key_str)
+
+					if (options.actualize)
+					{
+						actualize(this, arguments, key_str)
+					}
+
 					return load(value)
 				}
 				else
@@ -39,7 +58,7 @@ module.exports = function (redis)
 					{
 						setImmediate(() =>
 						{
-							redis_set(redis, key_str, value, options)
+							redis_set(key_str, value, options)
 						})
 
 						return value
@@ -52,6 +71,7 @@ module.exports = function (redis)
 	cache.slip = function (prefix, options, key_fn, fn)
 	{
 		var keyspace = Keyspace(prefix)
+		var actualize = actualizer(options, fn)
 
 		options = assign(
 		{
@@ -71,6 +91,8 @@ module.exports = function (redis)
 			{
 				if (value != null)
 				{
+					debug_hit(key_str)
+
 					return load(value)
 				}
 				else
@@ -80,21 +102,31 @@ module.exports = function (redis)
 			})
 			.then(value =>
 			{
-				setImmediate(() =>
-				{
-					fn.apply(this, arguments)
-					.then(value =>
-					{
-						redis_set(redis, key_str, value, options)
-					})
-				})
+				actualize(this, arguments, key_str)
 
 				return value
 			})
 		}
 	}
 
-	function redis_set (redis, key_str, value, options)
+
+	function actualizer (options, fn)
+	{
+		return (context, args, key_str) =>
+		{
+			setImmediate(() =>
+			{
+				fn.apply(context, args)
+				.then(value =>
+				{
+					redis_set(key_str, value, options)
+				})
+			})
+		}
+	}
+
+
+	function redis_set (key_str, value, options)
 	{
 		var args = [ key_str, dump(value) ]
 
@@ -103,7 +135,34 @@ module.exports = function (redis)
 			args.push('EX', options.ttl)
 		}
 
+		debug_put(key_str)
+
 		return redis.set.apply(redis, args)
+	}
+
+
+	function debug_put (key_str)
+	{
+		process.nextTick(() =>
+		{
+			if (cache_options.debug)
+			{
+				// console.info('PUT cache %s `%s`', symbol, data.company)
+				console.info('PUT cache %s', key_str)
+			}
+		})
+	}
+
+	function debug_hit (key_str)
+	{
+		process.nextTick(() =>
+		{
+			if (cache_options.debug)
+			{
+				// console.info('HIT cache %s `%s`', symbol, data.company)
+				console.info('HIT cache %s', key_str)
+			}
+		})
 	}
 
 	return cache

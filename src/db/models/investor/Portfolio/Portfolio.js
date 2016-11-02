@@ -273,6 +273,14 @@ module.exports = function Portfolio (db, investor)
 	})
 
 
+	// involved symbols
+	// TODO maybe not in use
+	portfolio.allSymbolsInvolved = () =>
+	{
+		return holdings.allSymbolsInvolved()
+	}
+
+
 	// grid
 	portfolio.grid = knexed.transact(knex, (trx, investor_id) =>
 	{
