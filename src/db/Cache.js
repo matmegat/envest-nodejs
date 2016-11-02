@@ -33,37 +33,53 @@ module.exports = function (redis, cache_options)
 
 		return function ()
 		{
-			var key = key_fn.apply(this, arguments)
+			// var key = key_fn.apply(this, arguments)
+            //
+			// var key_str = keyspace(key)
 
-			var key_str = keyspace(key)
-
-			return redis.get(key_str)
-			.then(value =>
+			return Promise.resolve((rs, rj) =>
 			{
-				if (value != null)
+				try
 				{
-					debug_hit(key_str)
-
-					if (options.actualize)
-					{
-						actualize(this, arguments, key_str)
-					}
-
-					return load(value)
+					var key = key_fn.apply(this, arguments)
+					rs(key)
 				}
-				else
+				catch (e)
 				{
-					return fn.apply(this, arguments)
-					.then(value =>
+					rj(e)
+				}
+			})
+			.then(keyspace)
+			.then(key_str =>
+			{
+				return redis.get(key_str)
+				.then(value =>
+				{
+					if (value != null)
 					{
-						setImmediate(() =>
+						debug_hit(key_str)
+
+						if (options.actualize)
 						{
-							redis_set(key_str, value, options)
-						})
+							actualize(this, arguments, key_str)
+						}
 
-						return value
-					})
-				}
+						return load(value)
+					}
+					else
+					{
+						return fn.apply(this, arguments)
+						.then(value =>
+						{
+							setImmediate(() =>
+							{
+								redis_set(key_str, value, options)
+							})
+
+							return value
+						})
+					}
+				})
 			})
 		}
 	}
