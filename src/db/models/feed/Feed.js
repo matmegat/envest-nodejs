@@ -222,6 +222,7 @@ var Feed = module.exports = function Feed (db)
 
 			return paginator.paginate(queryset, options.paginator)
 		})
+		.then((feed_items) => transform_items(feed_items, user_id))
 		.then((feed_items) =>
 		{
 			var feed_ids = pick_feed_ids(feed_items)
@@ -235,7 +236,7 @@ var Feed = module.exports = function Feed (db)
 					item.comments = counts[item.id]
 				})
 
-				return transform_items(feed_items, user_id)
+				return feed_items
 			})
 		})
 		.then(feed_items =>
