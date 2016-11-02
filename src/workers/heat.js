@@ -14,9 +14,13 @@ module.exports = function heat (app)
 
 		var task = recurring(() =>
 		{
-			console.log(1)
+			return app.db.investor.all.ids()
+			.then(ids =>
+			{
+				console.log(ids)
+			})
 
-			return Promise.resolve()
+			// return Promise.resolve()
 			//app.db.symbols.seriesForPortfolio(symbol)
 		})
 
