@@ -17,7 +17,7 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
-module.exports = function Investor (db, mailer, heat)
+module.exports = function Investor (db, mailer, app)
 {
 	var investor = {}
 
@@ -177,7 +177,7 @@ module.exports = function Investor (db, mailer, heat)
 			})
 			.then(() =>
 			{
-				heat.lookForInvestor(investor_id)
+				app.heat.lookForInvestor(investor_id)
 			})
 			.then(() => investor_entry)
 		})
