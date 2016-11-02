@@ -7,6 +7,8 @@ var Db = require('./db/Db')
 var Http = require('./http/Http')
 var Mailer = require('./Mailer')
 
+var heat = require('./workers/heat')
+
 module.exports = function App ()
 {
 	var app = {}
@@ -20,7 +22,7 @@ module.exports = function App ()
 	app.db   = Db(app)
 	app.http = Http(app)
 
-	Promise.all(
+	app.ready = Promise.all(
 	[
 		app.db.ready,
 		app.http.ready
@@ -35,6 +37,11 @@ module.exports = function App ()
 		console.error('NetVest backend init error:')
 		console.error(error)
 		process.exit(1)
+	})
+
+	app.ready.then(() =>
+	{
+		heat(app)
 	})
 
 	return app
