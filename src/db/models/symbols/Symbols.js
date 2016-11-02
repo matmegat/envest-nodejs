@@ -150,15 +150,13 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 
 						if (symbol.isOther())
 						{
-							if (options.other)
-							{
-								return r
-							}
-							else
+							if (! options.other)
 							{
 								throw OtherSymbol()
 							}
 						}
+
+						return r
 					})
 					.then(r =>
 					{
