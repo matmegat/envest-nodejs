@@ -3,25 +3,22 @@ var moment = require('moment')
 
 module.exports = function heat (app)
 {
-	app.db.investor.portfolio.allSymbolsInvolved()
-	.then(symbols =>
+	var db = app.db
+
+	db.investor.all.ids()
+	.then(ids =>
 	{
-		if (! symbols.length) { return }
+		if (! ids.length) { return }
 
-		var symbol = symbols[0]
+		var investor_id = ids[0]
 
-		console.log(symbol)
+		investor_id = 120
+
+		console.log(investor_id)
 
 		var task = recurring(() =>
 		{
-			return app.db.investor.all.ids()
-			.then(ids =>
-			{
-				console.log(ids)
-			})
-
-			// return Promise.resolve()
-			//app.db.symbols.seriesForPortfolio(symbol)
+			return db.investor.portfolio.grid(investor_id)
 		})
 
 		task()
