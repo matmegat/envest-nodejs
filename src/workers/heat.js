@@ -1,5 +1,7 @@
 
-var moment = require('moment')
+var B = require('bluebird')
+
+var random = require('lodash/random')
 
 module.exports = function heat (app)
 {
@@ -10,18 +12,15 @@ module.exports = function heat (app)
 	{
 		if (! ids.length) { return }
 
-		var investor_id = ids[0]
-
-		investor_id = 120
-
-		console.log(investor_id)
-
-		var task = recurring(() =>
+		ids.forEach(investor_id =>
 		{
-			return db.investor.portfolio.grid(investor_id)
+			random_delay()
+			.then(recurring(() =>
+			{
+				console.warn(investor_id)
+				return db.investor.portfolio.grid(investor_id)
+			}))
 		})
-
-		task()
 	})
 }
 
@@ -35,7 +34,7 @@ function recurring (fn)
 	var re = () =>
 	{
 		console.info('start task')
-		capture(fn)
+		B.try(fn)
 		.catch(error =>
 		{
 			console.error('ERROR occured during recurring task')
@@ -44,17 +43,16 @@ function recurring (fn)
 		.then(() =>
 		{
 			console.info('delay %s', options.delay)
-			setTimeout(re, options.delay)
 		})
+		.delay(options.delay)
+		.then(re)
 	}
 
 	return re
 }
 
-function capture (fn)
+function random_delay ()
 {
-	return new Promise(rs =>
-	{
-		rs(fn())
-	})
+	return B.delay(random(0, 15))
+	.then(s => s * 1000)
 }
