@@ -69,14 +69,14 @@ module.exports = function Onboarding (db, investor)
 		{
 			if (mode === 'mode:investor')
 			{
-				FieldEditedA({
+				return FieldEditedA({
 					by: 'investor',
 					investor: [ ':user-id', investor_id ]
-				}, trx)
+				})
 			}
 			else
 			{
-				FieldEditedI(investor_id, {
+				return FieldEditedI(investor_id, {
 					by: 'admin',
 					admin: [ ':user-id', whom_id ]
 				}, trx)
