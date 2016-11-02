@@ -132,3 +132,8 @@ Symbl.equals = (L, R) =>
 	return (L.ticker   === R.ticker)
 	    && (L.exchange === R.exchange)
 }
+
+Symbl.fromDb = (row) =>
+{
+	return Symbl([ row.symbol_ticker, row.symbol_exchange ])
+}

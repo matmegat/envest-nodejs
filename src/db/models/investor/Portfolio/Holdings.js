@@ -216,6 +216,17 @@ module.exports = function Holdings (db, investor, portfolio)
 	})
 
 
+	// involved symbols
+	holdings.allSymbolsInvolved = () =>
+	{
+		return table()
+		.distinct()
+		.select('symbol_ticker')
+		.select('symbol_exchange')
+		.then(rows => rows.map(Symbl.fromDb))
+	}
+
+
 	// grid
 	var groupBy = require('lodash/groupBy')
 	var orderBy = require('lodash/orderBy')
@@ -265,8 +276,7 @@ module.exports = function Holdings (db, investor, portfolio)
 
 				day.forEach(entry =>
 				{
-					var symbol
-					 = Symbl([ entry.symbol_ticker, entry.symbol_exchange ])
+					var symbol = Symbl.fromDb(entry)
 
 					entry =
 					{
