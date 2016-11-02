@@ -17,7 +17,7 @@ module.exports = function heat (app)
 			random_delay()
 			.then(recurring(() =>
 			{
-				console.warn(investor_id)
+				// console.warn(investor_id)
 				return db.investor.portfolio.grid(investor_id)
 			}))
 		})
