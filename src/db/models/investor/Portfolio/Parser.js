@@ -188,24 +188,22 @@ module.exports = function Parser (portfolio, db)
 			})
 			.then(added_amount =>
 			{
-				var response = { processed: added_amount }
-
 				if (mode === 'mode:admin')
 				{
-					return csvUploadedI(investor_id, {
+					csvUploadedI(investor_id, {
 						by: 'admin',
 						admin: [ ':user-id', whom_id ]
-					}, trx)
-					.then(() => response)
+					})
 				}
 				else
 				{
-					return csvUploadedA({
+					csvUploadedA({
 						by: 'investor',
 						investor: [ ':user-id', investor_id ]
-					}, trx)
-					.then(() => response)
+					})
 				}
+
+				return { processed: added_amount }
 			})
 		})
 	})
