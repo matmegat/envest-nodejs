@@ -91,10 +91,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 		if (options.soft)
 		{
 			queries = queries
-			.map(query =>
-			{
-				return query.catch(Null)
-			})
+			.map(query => query.catch(Null))
 		}
 
 		return Promise.all(queries)
