@@ -172,6 +172,8 @@ module.exports = function Grid (investor, portfolio)
 					}
 				)
 
+				var find_series_value2 = CursorSuperseries(grid.superseries)
+
 				console.time('grid_iterator '+resolution)
 				return grid_iterator(range, resolution, it =>
 				{
@@ -188,7 +190,8 @@ module.exports = function Grid (investor, portfolio)
 						forOwn(c_holdings, holding =>
 						{
 							var price
-							 = find_series_value(grid.superseries, holding, iso)
+							// = find_series_value(grid.superseries, holding, iso)
+							 = find_series_value2(holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -438,8 +441,8 @@ module.exports = function Grid (investor, portfolio)
 			{
 				current_index = index // + 1
 
-				if (name == 'brokerage day') console.info(name, current_index)
-				if (name == 'brokerage intraday') console.warn(name, current_index)
+				// if (name == 'brokerage day') console.info(name, current_index)
+				// if (name == 'brokerage intraday') console.warn(name, current_index)
 			}
 
 			return lense_fn(value)
@@ -489,6 +492,52 @@ module.exports = function Grid (investor, portfolio)
 			return null // NO trades at all
 		}
 	}*/
+
+	function CursorSuperseries (superseries)
+	{
+		superseries = mapValues(superseries, (series, symbol) =>
+		{
+			// TODO exclude OTHER
+
+			return Cursor('series ' + symbol,
+				series,
+				(tick, day) =>
+				{
+					/* ISO dates are sortable */
+					var ts = moment(tick.timestamp).toISOString()
+					return ts <= day
+				},
+				entry =>
+				{
+					if (entry)
+					{
+						return entry.value
+					}
+					else
+					{
+						console.warn(
+							'XIGN error, no data for Investor Chart {%s, %s}',
+							symbol, day
+						)
+
+						return 0
+					}
+				}
+			)
+		})
+
+		return (holding, ts) =>
+		{
+			var symbol = holding.symbol
+
+			if (symbol.isOther())
+			{
+				return holding.price
+			}
+
+			return superseries[symbol](ts)
+		}
+	}
 
 	function find_series_value (series, holding, day)
 	{
