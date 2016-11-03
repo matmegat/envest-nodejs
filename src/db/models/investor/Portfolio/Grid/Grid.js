@@ -86,12 +86,12 @@ module.exports = function Grid (investor, portfolio)
 
 			range = range_from(range, moment(), resolution)
 
-			// console.time('grid_series '+resolution)
+			console.time('grid_series '+resolution)
 			return grid_series(grid.holdings.involved, range, resolution)
 			// eslint-disable-next-line max-statements
 			.then(superseries =>
 			{
-				// console.time.end('grid_series '+resolution)
+				console.time.end('grid_series '+resolution)
 
 				/* pick single last trading day */
 				range = range_correct_day(range, superseries, resolution)
@@ -172,7 +172,7 @@ module.exports = function Grid (investor, portfolio)
 					}
 				)
 
-				var find_series_value2 = CursorSuperseries(grid.superseries)
+				var find_series_value = CursorSuperseries(grid.superseries)
 
 				console.time('grid_iterator '+resolution)
 				return grid_iterator(range, resolution, it =>
@@ -189,9 +189,7 @@ module.exports = function Grid (investor, portfolio)
 					{
 						forOwn(c_holdings, holding =>
 						{
-							var price
-							// = find_series_value(grid.superseries, holding, iso)
-							 = find_series_value2(holding, iso)
+							var price = find_series_value(holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -395,9 +393,9 @@ module.exports = function Grid (investor, portfolio)
 			{
 				return B.try(() =>
 				{
-					// console.time('iter ' + resolution + ' ' + String(current))
+					console.time('iter ' + resolution + ' ' + Number(current))
 					fn(current)
-					// console.time.end('iter ' + resolution + ' ' + String(current))
+					console.time.end('iter ' + resolution + ' ' + Number(current))
 
 					incr()
 				})
@@ -439,10 +437,7 @@ module.exports = function Grid (investor, portfolio)
 
 			if (value != null)
 			{
-				current_index = index // + 1
-
-				// if (name == 'brokerage day') console.info(name, current_index)
-				// if (name == 'brokerage intraday') console.warn(name, current_index)
+				current_index = index // +1 will cause data gaps
 			}
 
 			return lense_fn(value)
@@ -460,7 +455,7 @@ module.exports = function Grid (investor, portfolio)
 			if (! pred(value, ts)) { break }
 		}
 
-		return index - 1
+		return (index - 1)
 	}
 
 	/*function find_brokerage (brokerage, date)
@@ -539,7 +534,7 @@ module.exports = function Grid (investor, portfolio)
 		}
 	}
 
-	function find_series_value (series, holding, day)
+	/*function find_series_value (series, holding, day)
 	{
 		var symbol = holding.symbol
 
@@ -550,7 +545,7 @@ module.exports = function Grid (investor, portfolio)
 
 		series = series[symbol]
 
-		/* ISO dates are sortable */
+		/* ISO dates are sortable * /
 		var entry = findLast(series, tick =>
 		{
 			var ts = moment(tick.timestamp).toISOString()
@@ -570,7 +565,7 @@ module.exports = function Grid (investor, portfolio)
 
 			return 0
 		}
-	}
+	}*/
 
 	return grid
 }
