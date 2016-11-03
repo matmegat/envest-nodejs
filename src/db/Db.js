@@ -34,7 +34,12 @@ module.exports = function name (app)
 
 	db.knex = knex({
 		client: 'pg',
-		connection: conn
+		connection: conn,
+		pool:
+		{
+			min: 2,
+			max: 10
+		},
 	})
 
 	db.redis = redis(app.cfg.redis)
