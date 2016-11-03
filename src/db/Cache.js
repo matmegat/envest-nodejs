@@ -1,5 +1,6 @@
 
 var Keyspace = require('./Keyspace')
+var B = require('bluebird')
 
 var assign = Object.assign
 var dump = JSON.stringify
@@ -33,23 +34,12 @@ module.exports = function (redis, cache_options)
 
 		return function ()
 		{
-			// var key = key_fn.apply(this, arguments)
-            //
-			// var key_str = keyspace(key)
-
-			return Promise.resolve((rs, rj) =>
+			return B.Promise.try(() =>
 			{
-				try
-				{
-					var key = key_fn.apply(this, arguments)
-					rs(key)
-				}
-				catch (e)
-				{
-					rj(e)
-				}
+				var key = key_fn.apply(this, arguments)
+
+				return keyspace(key)
 			})
-			.then(keyspace)
 			.then(key_str =>
 			{
 				return redis.get(key_str)
