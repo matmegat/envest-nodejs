@@ -440,7 +440,7 @@ module.exports = function Grid (investor, portfolio)
 				current_index = index // +1 will cause data gaps
 			}
 
-			return lense_fn(value)
+			return lense_fn(value, ts)
 		}
 	}
 
@@ -502,7 +502,7 @@ module.exports = function Grid (investor, portfolio)
 					var ts = moment(tick.timestamp).toISOString()
 					return ts <= day
 				},
-				entry =>
+				(entry, day) =>
 				{
 					if (entry)
 					{
