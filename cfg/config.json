@@ -23,7 +23,7 @@
 
   "cache":
   {
-    "debug": true,
+    "debug": false,
     "heat": false
   },
 
