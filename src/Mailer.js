@@ -14,11 +14,11 @@ module.exports = function Mailer (cfg)
 
 	var defaults =
 	{
-		subject: 'NetVest Mailer',
-		// text: 'NetVest Mailer',
-		// html: 'NetVest Mailer',
+		subject: 'Netvest Mailer',
+		// text: 'Netvest Mailer',
+		// html: 'Netvest Mailer',
 		from: 'netvest.mailer@gmail.com',
-		fromname: 'NetVest'
+		fromname: 'Netvest'
 	}
 
 	var templates =
