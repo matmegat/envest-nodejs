@@ -149,11 +149,11 @@ module.exports = function Post (db)
 			})
 			.then(upserted_post =>
 			{
-				PostCreated(investor_id,
+				return PostCreated(investor_id,
 				{
 					investor: [ ':user-id', investor_id ],
 					post_id: upserted_post.id
-				})
+				}, trx)
 			})
 		})
 	}
@@ -178,19 +178,19 @@ module.exports = function Post (db)
 			{
 				if (post_id)
 				{
-					PostUpdated(upserted_post.investor_id,
+					return PostUpdated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
-					})
+					}, trx)
 				}
 				else
 				{
-					PostCreated(upserted_post.investor_id,
+					return PostCreated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
-					})
+					}, trx)
 				}
 			})
 		})
@@ -228,11 +228,11 @@ module.exports = function Post (db)
 			{
 				if (whom_id)
 				{
-					PostDeleted(investor_id,
+					return PostDeleted(investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: post_id
-					})
+					}, trx)
 				}
 			})
 		})

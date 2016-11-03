@@ -45,7 +45,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 			{
 				if (! options.other)
 				{
-					throw OtherSymbol()
+					throw OtherSymbol({ symbol: symbol.toFull() })
 				}
 				else
 				{
@@ -157,7 +157,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 					})
 					.then(r =>
 					{
-						return symbols.resolve.cache(r.symbol)
+						return symbols.resolve.cache(r.symbol, pick(options, 'other'))
 						.then(symbol =>
 						{
 							r.symbol = symbol

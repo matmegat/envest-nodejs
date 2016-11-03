@@ -427,7 +427,7 @@ module.exports = function Portfolio (db, investor)
 			amount: op.cash,
 		})
 
-		return portfolio.apply(non_trade_op)
+		return portfolio.apply(trx, non_trade_op)
 		.then(noop)
 	})
 
@@ -462,7 +462,7 @@ module.exports = function Portfolio (db, investor)
 				{
 					admin: [ ':user-id', whom_id ],
 					investor_id: [ ':user-id', investor_id ],
-				})
+				}, trx)
 			}
 		})
 		.then(noop)

@@ -80,7 +80,7 @@ module.exports = function Featured (db, investor)
 			return NewFeaturedInvestor(
 			{
 				investor: [ ':user-id', investor_id ]
-			})
+			}, trx)
 		})
 	})
 

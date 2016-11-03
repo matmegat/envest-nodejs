@@ -819,7 +819,7 @@ module.exports = function User (db, app)
 				return NameChangedI(user_id,
 				{
 					admin: [ ':user-id', whom_id ]
-				})
+				}, trx)
 			}
 			else
 			{
@@ -827,7 +827,7 @@ module.exports = function User (db, app)
 				{
 					user: [ ':user-id', user_id ],
 					admin: [ ':user-id', whom_id ]
-				})
+				}, trx)
 			}
 		})
 	})

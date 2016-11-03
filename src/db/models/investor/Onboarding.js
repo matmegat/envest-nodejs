@@ -72,7 +72,7 @@ module.exports = function Onboarding (db, investor)
 				return FieldEditedA({
 					by: 'investor',
 					investor: [ ':user-id', investor_id ]
-				})
+				}, trx)
 			}
 			else
 			{
@@ -142,7 +142,7 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then((investor_id) =>
 		{
-			PublicChanged(investor_id, {
+			return PublicChanged(investor_id, {
 				by: 'admin',
 				admin: [ ':user-id', whom_id ]
 			}, trx)
