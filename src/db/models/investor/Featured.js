@@ -77,7 +77,7 @@ module.exports = function Featured (db, investor)
 		))
 		.then(() =>
 		{
-			return NewFeaturedInvestor(
+			NewFeaturedInvestor(
 			{
 				investor: [ ':user-id', investor_id ]
 			})

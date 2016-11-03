@@ -186,7 +186,7 @@ module.exports = function Post (db)
 				}
 				else
 				{
-					PostCreated(upserted_post.investor_id,
+					return PostCreated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
