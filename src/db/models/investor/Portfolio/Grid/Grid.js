@@ -132,8 +132,6 @@ module.exports = function Grid (investor, portfolio)
 			{
 				var chart = []
 
-				console.time('grid_iterator '+resolution)
-
 				var find_brokerage = Cursor(grid.brokerage.datadays,
 					(entry, date) =>
 					{
@@ -153,6 +151,26 @@ module.exports = function Grid (investor, portfolio)
 					}
 				)
 
+				var find_holding_day = Cursor(grid.holdings.datadays,
+					(entry, date) =>
+					{
+						/* ISO dates are sortable */
+						return entry[0] <= date
+					},
+					entry =>
+					{
+						if (entry)
+						{
+							return entry[1]
+						}
+						else
+						{
+							return null // NO trades at all
+						}
+					}
+				)
+
+				console.time('grid_iterator '+resolution)
 				return grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
@@ -161,8 +179,7 @@ module.exports = function Grid (investor, portfolio)
 
 					var total = c_brokerage.cash * c_brokerage.multiplier
 
-					var c_holdings
-					 = find_holding_day(grid.holdings.datadays, iso)
+					var c_holdings = find_holding_day(iso)
 
 					if (c_holdings)
 					{
@@ -417,12 +434,8 @@ module.exports = function Grid (investor, portfolio)
 			if (index != null)
 			{
 				var value = sequence[index]
-				console.warn(ts)
-				console.warn(index)
-				console.warn(value)
 
 				current_index = index + 1
-				console.info(current_index)
 
 				return lense_fn(value)
 			}
@@ -469,9 +482,9 @@ module.exports = function Grid (investor, portfolio)
 		}
 	}*/
 
-	function find_holding_day (holdings, date)
+	/*function find_holding_day (holdings, date)
 	{
-		/* ISO dates are sortable */
+		/* ISO dates are sortable * /
 		var entry = findLast(holdings, entry => entry[0] <= date)
 
 		if (entry)
@@ -482,7 +495,7 @@ module.exports = function Grid (investor, portfolio)
 		{
 			return null // NO trades at all
 		}
-	}
+	}*/
 
 	function find_series_value (series, holding, day)
 	{
