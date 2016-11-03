@@ -19,6 +19,7 @@ module.exports = function Post (db)
 	post.types.trade = Trade(db.investor.portfolio, db.symbols, db)
 	post.types.watchlist = Watchlist(db)
 	post.types.update = Update(db)
+	post.types.update = Update(db)
 
 	var knex = db.knex
 
@@ -149,11 +150,11 @@ module.exports = function Post (db)
 			})
 			.then(upserted_post =>
 			{
-				return PostCreated(investor_id,
+				PostCreated(investor_id,
 				{
 					investor: [ ':user-id', investor_id ],
 					post_id: upserted_post.id
-				}, trx)
+				})
 			})
 		})
 	}
@@ -178,11 +179,11 @@ module.exports = function Post (db)
 			{
 				if (post_id)
 				{
-					return PostUpdated(upserted_post.investor_id,
+					PostUpdated(upserted_post.investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
-					}, trx)
+					})
 				}
 				else
 				{
@@ -190,7 +191,7 @@ module.exports = function Post (db)
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
-					}, trx)
+					})
 				}
 			})
 		})
@@ -228,11 +229,11 @@ module.exports = function Post (db)
 			{
 				if (whom_id)
 				{
-					return PostDeleted(investor_id,
+					PostDeleted(investor_id,
 					{
 						admin: [ ':user-id', whom_id ],
 						post_id: post_id
-					}, trx)
+					})
 				}
 			})
 		})
