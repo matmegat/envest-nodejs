@@ -49,10 +49,10 @@ module.exports = function Auth (db, mailer)
 				return mailer.send('default', substs,
 				{
 					to: userdata.email,
-					subject: 'Welcome to NetVest',
+					subject: 'Welcome to Netvest',
 					html: `Hi, ${userdata.first_name} ${userdata.last_name}.` +
 						`<br/><br/>` +
-						`Welcome to NetVest.<br/>` +
+						`Welcome to Netvest.<br/>` +
 						`Check our <a href="http://www.netvest.com">` +
 						`website</a>, iOS and Android applications.`
 				})
