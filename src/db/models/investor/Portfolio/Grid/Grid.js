@@ -120,9 +120,12 @@ module.exports = function Grid (investor, portfolio)
 					}
 				}
 
-				var chart = []
-
 				grid.range = range
+				grid.superseries = superseries
+			})
+			.then(() =>
+			{
+				var chart = []
 
 				// range.by('days', it =>
 				grid_iterator(range, resolution, it =>
@@ -142,7 +145,7 @@ module.exports = function Grid (investor, portfolio)
 						forOwn(c_holdings, holding =>
 						{
 							var price
-							 = find_series_value(superseries, holding, iso)
+							 = find_series_value(grid.superseries, holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -158,7 +161,7 @@ module.exports = function Grid (investor, portfolio)
 
 				if (resolution === 'intraday')
 				{
-					var utc_offset = mapValues(superseries, series =>
+					var utc_offset = mapValues(grid.superseries, series =>
 					{
 						return get(series, '0.utcOffset', null)
 					})
