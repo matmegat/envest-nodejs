@@ -60,7 +60,7 @@ module.exports = function Grid (investor, portfolio)
 
 	var grid_ir = grid.ir = function grid_ir (trx, investor_id, resolution)
 	{
-		console.time('grid '+resolution)
+		// console.time('grid '+resolution)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -86,12 +86,12 @@ module.exports = function Grid (investor, portfolio)
 
 			range = range_from(range, moment(), resolution)
 
-			console.time('grid_series '+resolution)
+			// console.time('grid_series '+resolution)
 			return grid_series(grid.holdings.involved, range, resolution)
 			// eslint-disable-next-line max-statements
 			.then(superseries =>
 			{
-				console.time.end('grid_series '+resolution)
+				// console.time.end('grid_series '+resolution)
 
 				/* pick single last trading day */
 				range = range_correct_day(range, superseries, resolution)
@@ -174,7 +174,7 @@ module.exports = function Grid (investor, portfolio)
 
 				var find_series_value = CursorSuperseries(grid.superseries)
 
-				console.time('grid_iterator '+resolution)
+				// console.time('grid_iterator '+resolution)
 				return grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
@@ -204,7 +204,7 @@ module.exports = function Grid (investor, portfolio)
 				})
 				.then(() =>
 				{
-					console.time.end('grid_iterator '+resolution)
+					// console.time.end('grid_iterator '+resolution)
 
 					if (resolution === 'intraday')
 					{
@@ -226,8 +226,8 @@ module.exports = function Grid (investor, portfolio)
 				})
 			})
 		})
-		.then(it => { console.time.end('grid '+resolution); return it },
-		      it => { console.time.end('grid '+resolution); throw  it })
+		//.then(it => { console.time.end('grid '+resolution); return it },
+		//      it => { console.time.end('grid '+resolution); throw  it })
 	}
 
 	function max_range (brokerage, holdings)
