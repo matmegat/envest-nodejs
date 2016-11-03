@@ -34,11 +34,16 @@ module.exports = function name (app)
 
 	db.knex = knex({
 		client: 'pg',
-		connection: conn
+		connection: conn,
+		pool:
+		{
+			min: 2,
+			max: 10
+		},
 	})
 
 	db.redis = redis(app.cfg.redis)
-	db.cache = db.helpers.Cache(db.redis, { debug: false })
+	db.cache = db.helpers.Cache(db.redis, app.cfg.cache)
 
 
 	db.knex.client.pool.on('error', () =>

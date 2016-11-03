@@ -287,7 +287,7 @@ module.exports = function Portfolio (db, investor)
 		return Promise.all(
 		[
 			grid(trx, investor_id, 'day'),
-			grid(trx, investor_id, 'intraday')
+			grid(trx, investor_id, 'intraday'),
 		])
 		.then(points =>
 		{

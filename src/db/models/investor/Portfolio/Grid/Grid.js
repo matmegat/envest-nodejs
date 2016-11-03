@@ -3,6 +3,7 @@
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
 
+var B = require('bluebird')
 
 var get = require('lodash/get')
 var values = require('lodash/values')
@@ -59,6 +60,7 @@ module.exports = function Grid (investor, portfolio)
 
 	var grid_ir = grid.ir = function grid_ir (trx, investor_id, resolution)
 	{
+		// console.time('grid '+resolution)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -84,10 +86,13 @@ module.exports = function Grid (investor, portfolio)
 
 			range = range_from(range, moment(), resolution)
 
+			// console.time('grid_series '+resolution)
 			return grid_series(grid.holdings.involved, range, resolution)
 			// eslint-disable-next-line max-statements
 			.then(superseries =>
 			{
+				// console.time.end('grid_series '+resolution)
+
 				/* pick single last trading day */
 				range = range_correct_day(range, superseries, resolution)
 
@@ -120,29 +125,71 @@ module.exports = function Grid (investor, portfolio)
 					}
 				}
 
+				grid.range = range
+				grid.superseries = superseries
+			})
+			.then(() =>
+			{
 				var chart = []
 
-				grid.range = range
+				var find_brokerage = Cursor('brokerage ' + resolution,
+					grid.brokerage.datadays,
+					(entry, date) =>
+					{
+						/* ISO dates are sortable */
+						return entry[0] <= date
+					},
+					entry =>
+					{
+						if (entry)
+						{
+							return entry[1]
+						}
+						else
+						{
+							throw TypeError('brokerage_error')
+						}
+					}
+				)
 
-				// range.by('days', it =>
-				grid_iterator(range, resolution, it =>
+				var find_holding_day = Cursor('holdings ' + resolution,
+					grid.holdings.datadays,
+					(entry, date) =>
+					{
+						/* ISO dates are sortable */
+						return entry[0] <= date
+					},
+					entry =>
+					{
+						if (entry)
+						{
+							return entry[1]
+						}
+						else
+						{
+							return null // NO trades at all
+						}
+					}
+				)
+
+				var find_series_value = CursorSuperseries(grid.superseries)
+
+				// console.time('grid_iterator '+resolution)
+				return grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
 
-					var c_brokerage
-					 = find_brokerage(grid.brokerage.datadays, iso)
+					var c_brokerage = find_brokerage(iso)
 
 					var total = c_brokerage.cash * c_brokerage.multiplier
 
-					var c_holdings
-					 = find_holding_day(grid.holdings.datadays, iso)
+					var c_holdings = find_holding_day(iso)
 
 					if (c_holdings)
 					{
 						forOwn(c_holdings, holding =>
 						{
-							var price
-							 = find_series_value(superseries, holding, iso)
+							var price = find_series_value(holding, iso)
 
 							var wealth
 							 = price * holding.amount * c_brokerage.multiplier
@@ -155,26 +202,32 @@ module.exports = function Grid (investor, portfolio)
 
 					chart.push([ moment(iso).utc().format(), total ])
 				})
-
-				if (resolution === 'intraday')
+				.then(() =>
 				{
-					var utc_offset = mapValues(superseries, series =>
+					// console.time.end('grid_iterator '+resolution)
+
+					if (resolution === 'intraday')
 					{
-						return get(series, '0.utcOffset', null)
-					})
+						var utc_offset = mapValues(grid.superseries, series =>
+						{
+							return get(series, '0.utcOffset', null)
+						})
 
-					utc_offset = values(utc_offset)
+						utc_offset = values(utc_offset)
 
-					utc_offset = min(utc_offset)
+						utc_offset = min(utc_offset)
 
-					chart.utc_offset = utc_offset
-				}
+						chart.utc_offset = utc_offset
+					}
 
-				grid.chart = chart
+					grid.chart = chart
 
-				return grid
+					return grid
+				})
 			})
 		})
+		//.then(it => { console.time.end('grid '+resolution); return it },
+		//      it => { console.time.end('grid '+resolution); throw  it })
 	}
 
 	function max_range (brokerage, holdings)
@@ -322,29 +375,92 @@ module.exports = function Grid (investor, portfolio)
 
 	function grid_iterator (range, resolution, fn)
 	{
+		// SYNC:
+		// return range.by('days', fn)
+
 		if (resolution === 'day')
 		{
-			return range.by('days', fn)
+			var incr = () => { current.add(1, 'day') }
 		}
 		else
 		{
-			// return range.by('m', fn)
+			var incr = () => { current.add(5, 'minutes') }
+		}
 
-			// optimize to interval 5m instead of 1m:
-			var next = moment(range.start)
-
-			while (next <= range.end)
+		function next (current, incr, fn)
+		{
+			if (current <= range.end)
 			{
-				fn(next)
+				return B.try(() =>
+				{
+					// console.time('iter ' + resolution + ' ' + Number(current))
+					fn(current)
+					// console.time.end('iter ' + resolution + ' ' + Number(current))
 
-				next.add(5, 'minutes')
+					incr()
+				})
+				.delay(0)
+				.then(() =>
+				{
+					return next(current, incr, fn)
+				})
 			}
+			else
+			{
+				return Promise.resolve()
+			}
+		}
+
+		var current = moment(range.start)
+
+		return next(current, incr, fn)
+
+		// SYNC:
+		/*while (current <= range.end)
+		{
+			console.time('iter ' + resolution + String(current))
+			fn(current)
+			console.time.end('iter ' + resolution + String(current))
+
+			incr()
+		}*/
+	}
+
+	function Cursor (name, sequence, border_pred, lense_fn)
+	{
+		var current_index = 0
+
+		return (ts) =>
+		{
+			var index = border_find_index(sequence, current_index, border_pred, ts)
+			var value = sequence[index]
+
+			if (value != null)
+			{
+				current_index = index // +1 will cause data gaps
+			}
+
+			return lense_fn(value, ts)
 		}
 	}
 
-	function find_brokerage (brokerage, date)
+	function border_find_index (sequence, from_index, pred, ts)
 	{
-		/* ISO dates are sortable */
+		var L = sequence.length
+
+		for (var index = from_index; index < L; index++)
+		{
+			var value = sequence[index]
+
+			if (! pred(value, ts)) { break }
+		}
+
+		return (index - 1)
+	}
+
+	/*function find_brokerage (brokerage, date)
+	{
+		/* ISO dates are sortable * /
 		var entry = findLast(brokerage, entry => entry[0] <= date)
 
 		if (entry)
@@ -355,11 +471,11 @@ module.exports = function Grid (investor, portfolio)
 		{
 			throw TypeError('brokerage_error')
 		}
-	}
+	}*/
 
-	function find_holding_day (holdings, date)
+	/*function find_holding_day (holdings, date)
 	{
-		/* ISO dates are sortable */
+		/* ISO dates are sortable * /
 		var entry = findLast(holdings, entry => entry[0] <= date)
 
 		if (entry)
@@ -370,9 +486,55 @@ module.exports = function Grid (investor, portfolio)
 		{
 			return null // NO trades at all
 		}
+	}*/
+
+	function CursorSuperseries (superseries)
+	{
+		superseries = mapValues(superseries, (series, symbol) =>
+		{
+			// TODO exclude OTHER
+
+			return Cursor('series ' + symbol,
+				series,
+				(tick, day) =>
+				{
+					/* ISO dates are sortable */
+					var ts = moment(tick.timestamp).toISOString()
+					return ts <= day
+				},
+				(entry, day) =>
+				{
+					if (entry)
+					{
+						return entry.value
+					}
+					else
+					{
+						console.warn(
+							'XIGN error, no data for Investor Chart {%s, %s}',
+							symbol, day
+						)
+
+						return 0
+					}
+				}
+			)
+		})
+
+		return (holding, ts) =>
+		{
+			var symbol = holding.symbol
+
+			if (symbol.isOther())
+			{
+				return holding.price
+			}
+
+			return superseries[symbol](ts)
+		}
 	}
 
-	function find_series_value (series, holding, day)
+	/*function find_series_value (series, holding, day)
 	{
 		var symbol = holding.symbol
 
@@ -383,7 +545,7 @@ module.exports = function Grid (investor, portfolio)
 
 		series = series[symbol]
 
-		/* ISO dates are sortable */
+		/* ISO dates are sortable * /
 		var entry = findLast(series, tick =>
 		{
 			var ts = moment(tick.timestamp).toISOString()
@@ -403,7 +565,7 @@ module.exports = function Grid (investor, portfolio)
 
 			return 0
 		}
-	}
+	}*/
 
 	return grid
 }

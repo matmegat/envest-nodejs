@@ -21,6 +21,12 @@
     "db": 0
   },
 
+  "cache":
+  {
+    "debug": false,
+    "heat": false
+  },
+
   "cors":
   {
     "hosts":
