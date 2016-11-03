@@ -132,7 +132,8 @@ module.exports = function Grid (investor, portfolio)
 			{
 				var chart = []
 
-				var find_brokerage = Cursor(grid.brokerage.datadays,
+				var find_brokerage = Cursor('brokerage ' + resolution,
+					grid.brokerage.datadays,
 					(entry, date) =>
 					{
 						/* ISO dates are sortable */
@@ -151,7 +152,8 @@ module.exports = function Grid (investor, portfolio)
 					}
 				)
 
-				var find_holding_day = Cursor(grid.holdings.datadays,
+				var find_holding_day = Cursor('holdings ' + resolution,
+					grid.holdings.datadays,
 					(entry, date) =>
 					{
 						/* ISO dates are sortable */
@@ -423,26 +425,24 @@ module.exports = function Grid (investor, portfolio)
 		}*/
 	}
 
-	function Cursor (sequence, border_pred, lense_fn)
+	function Cursor (name, sequence, border_pred, lense_fn)
 	{
 		var current_index = 0
 
 		return (ts) =>
 		{
 			var index = border_find_index(sequence, current_index, border_pred, ts)
+			var value = sequence[index]
 
-			if (index != null)
+			if (value != null)
 			{
-				var value = sequence[index]
+				current_index = index // + 1
 
-				current_index = index + 1
+				if (name == 'brokerage day') console.info(name, current_index)
+				if (name == 'brokerage intraday') console.warn(name, current_index)
+			}
 
-				return lense_fn(value)
-			}
-			else
-			{
-				return lense_fn(null)
-			}
+			return lense_fn(value)
 		}
 	}
 
@@ -457,14 +457,7 @@ module.exports = function Grid (investor, portfolio)
 			if (! pred(value, ts)) { break }
 		}
 
-		if (index === 0)
-		{
-			return 0
-		}
-		else
-		{
-			return index - 1
-		}
+		return index - 1
 	}
 
 	/*function find_brokerage (brokerage, date)
