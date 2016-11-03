@@ -380,11 +380,17 @@ module.exports = function Grid (investor, portfolio)
 
 		if (resolution === 'day')
 		{
-			var incr = () => { current.add(1, 'day') }
+			var incr = () =>
+			{
+				current.add(1, 'day')
+			}
 		}
 		else
 		{
-			var incr = () => { current.add(5, 'minutes') }
+			var incr = () =>
+			{
+				current.add(5, 'minutes')
+			}
 		}
 
 		function next (current, incr, fn)
@@ -448,11 +454,14 @@ module.exports = function Grid (investor, portfolio)
 	{
 		var L = sequence.length
 
-		for (var index = from_index; index < L; index++)
+		for (var index = from_index; index < L; index ++)
 		{
 			var value = sequence[index]
 
-			if (! pred(value, ts)) { break }
+			if (! pred(value, ts))
+			{
+				break
+			}
 		}
 
 		return (index - 1)
