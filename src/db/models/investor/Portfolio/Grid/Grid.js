@@ -393,9 +393,9 @@ module.exports = function Grid (investor, portfolio)
 			{
 				return B.try(() =>
 				{
-					console.time('iter ' + resolution + ' ' + Number(current))
+					// console.time('iter ' + resolution + ' ' + Number(current))
 					fn(current)
-					console.time.end('iter ' + resolution + ' ' + Number(current))
+					// console.time.end('iter ' + resolution + ' ' + Number(current))
 
 					incr()
 				})
