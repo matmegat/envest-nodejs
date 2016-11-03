@@ -508,7 +508,7 @@ module.exports = function Grid (investor, portfolio)
 				(tick, day) =>
 				{
 					/* ISO dates are sortable */
-					var ts = moment(tick.timestamp).toISOString()
+					var ts = (new Date(tick.timestamp)).toISOString()
 					return ts <= day
 				},
 				(entry, day) =>
