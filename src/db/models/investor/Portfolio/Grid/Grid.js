@@ -325,23 +325,25 @@ module.exports = function Grid (investor, portfolio)
 
 	function grid_iterator (range, resolution, fn)
 	{
+		// SYNC:
+		// return range.by('days', fn)
+
 		if (resolution === 'day')
 		{
-			return range.by('days', fn)
+			var incr = () => { next.add(1, 'day') }
 		}
 		else
 		{
-			// return range.by('m', fn)
+			var incr = () => { next.add(5, 'minutes') }
+		}
 
-			// optimize to interval 5m instead of 1m:
-			var next = moment(range.start)
+		var next = moment(range.start)
 
-			while (next <= range.end)
-			{
-				fn(next)
+		while (next <= range.end)
+		{
+			fn(next)
 
-				next.add(5, 'minutes')
-			}
+			incr()
 		}
 	}
 
