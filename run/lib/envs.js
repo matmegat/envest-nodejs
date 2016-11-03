@@ -18,7 +18,7 @@ module.exports =
 	},
 	prod:
 	{
-		remote: 'ec2-52-42-79-12.us-west-2.compute.amazonaws.com',
+		remote: 'ec2-52-25-63-85.us-west-2.compute.amazonaws.com',
 		confirm: true
 	},
 	perf:
