@@ -3,6 +3,7 @@
 var moment = require('moment')
 var MRange = require('moment-range/lib/moment-range')
 
+var B = require('bluebird')
 
 var get = require('lodash/get')
 var values = require('lodash/values')
@@ -128,7 +129,8 @@ module.exports = function Grid (investor, portfolio)
 				var chart = []
 
 				// range.by('days', it =>
-				grid_iterator(range, resolution, it =>
+
+				return grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
 
@@ -158,24 +160,28 @@ module.exports = function Grid (investor, portfolio)
 
 					chart.push([ moment(iso).utc().format(), total ])
 				})
-
-				if (resolution === 'intraday')
+				.then(() =>
 				{
-					var utc_offset = mapValues(grid.superseries, series =>
+					console.time.end('grid_iterator '+resolution)
+
+					if (resolution === 'intraday')
 					{
-						return get(series, '0.utcOffset', null)
-					})
+						var utc_offset = mapValues(grid.superseries, series =>
+						{
+							return get(series, '0.utcOffset', null)
+						})
 
-					utc_offset = values(utc_offset)
+						utc_offset = values(utc_offset)
 
-					utc_offset = min(utc_offset)
+						utc_offset = min(utc_offset)
 
-					chart.utc_offset = utc_offset
-				}
+						chart.utc_offset = utc_offset
+					}
 
-				grid.chart = chart
+					grid.chart = chart
 
-				return grid
+					return grid
+				})
 			})
 		})
 	}
@@ -330,21 +336,50 @@ module.exports = function Grid (investor, portfolio)
 
 		if (resolution === 'day')
 		{
-			var incr = () => { next.add(1, 'day') }
+			var incr = () => { current.add(1, 'day') }
 		}
 		else
 		{
-			var incr = () => { next.add(5, 'minutes') }
+			var incr = () => { current.add(5, 'minutes') }
 		}
 
-		var next = moment(range.start)
-
-		while (next <= range.end)
+		function next (current, incr, fn)
 		{
-			fn(next)
+			if (current <= range.end)
+			{
+				return B.try(() =>
+				{
+					console.time('iter ' + resolution + ' ' + String(current))
+					fn(current)
+					console.time.end('iter ' + resolution + ' ' + String(current))
+
+					incr()
+				})
+				.delay(0)
+				.then(() =>
+				{
+					return next(current, incr, fn)
+				})
+			}
+			else
+			{
+				return Promise.resolve()
+			}
+		}
+
+		var current = moment(range.start)
+
+		return next(current, incr, fn)
+
+		// SYNC:
+		/*while (current <= range.end)
+		{
+			console.time('iter ' + resolution + String(current))
+			fn(current)
+			console.time.end('iter ' + resolution + String(current))
 
 			incr()
-		}
+		}*/
 	}
 
 	function find_brokerage (brokerage, date)
