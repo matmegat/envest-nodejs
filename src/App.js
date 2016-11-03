@@ -39,10 +39,10 @@ module.exports = function App ()
 		process.exit(1)
 	})
 
-	// app.ready.then(() =>
-	// {
-	// 	app.heat = Heat(app)
-	// })
+	app.ready.then(() =>
+	{
+		app.heat = Heat(app)
+	})
 
 	return app
 }
