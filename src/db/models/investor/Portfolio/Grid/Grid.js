@@ -60,6 +60,7 @@ module.exports = function Grid (investor, portfolio)
 
 	var grid_ir = grid.ir = function grid_ir (trx, investor_id, resolution)
 	{
+		console.time('grid '+resolution)
 		return investor.all.ensure(investor_id, trx)
 		.then(() =>
 		{
@@ -85,10 +86,13 @@ module.exports = function Grid (investor, portfolio)
 
 			range = range_from(range, moment(), resolution)
 
+			// console.time('grid_series '+resolution)
 			return grid_series(grid.holdings.involved, range, resolution)
 			// eslint-disable-next-line max-statements
 			.then(superseries =>
 			{
+				// console.time.end('grid_series '+resolution)
+
 				/* pick single last trading day */
 				range = range_correct_day(range, superseries, resolution)
 
@@ -128,14 +132,32 @@ module.exports = function Grid (investor, portfolio)
 			{
 				var chart = []
 
-				// range.by('days', it =>
+				console.time('grid_iterator '+resolution)
+
+				var find_brokerage = Cursor(grid.brokerage.datadays,
+					(entry, date) =>
+					{
+						/* ISO dates are sortable */
+						return entry[0] <= date
+					},
+					entry =>
+					{
+						if (entry)
+						{
+							return entry[1]
+						}
+						else
+						{
+							throw TypeError('brokerage_error')
+						}
+					}
+				)
 
 				return grid_iterator(range, resolution, it =>
 				{
 					var iso = it.toISOString()
 
-					var c_brokerage
-					 = find_brokerage(grid.brokerage.datadays, iso)
+					var c_brokerage = find_brokerage(iso)
 
 					var total = c_brokerage.cash * c_brokerage.multiplier
 
@@ -184,6 +206,8 @@ module.exports = function Grid (investor, portfolio)
 				})
 			})
 		})
+		.then(it => { console.time.end('grid '+resolution); return it },
+		      it => { console.time.end('grid '+resolution); throw  it })
 	}
 
 	function max_range (brokerage, holdings)
@@ -349,9 +373,9 @@ module.exports = function Grid (investor, portfolio)
 			{
 				return B.try(() =>
 				{
-					console.time('iter ' + resolution + ' ' + String(current))
+					// console.time('iter ' + resolution + ' ' + String(current))
 					fn(current)
-					console.time.end('iter ' + resolution + ' ' + String(current))
+					// console.time.end('iter ' + resolution + ' ' + String(current))
 
 					incr()
 				})
@@ -382,9 +406,57 @@ module.exports = function Grid (investor, portfolio)
 		}*/
 	}
 
-	function find_brokerage (brokerage, date)
+	function Cursor (sequence, border_pred, lense_fn)
 	{
-		/* ISO dates are sortable */
+		var current_index = 0
+
+		return (ts) =>
+		{
+			var index = border_find_index(sequence, current_index, border_pred, ts)
+
+			if (index != null)
+			{
+				var value = sequence[index]
+				console.warn(ts)
+				console.warn(index)
+				console.warn(value)
+
+				current_index = index + 1
+				console.info(current_index)
+
+				return lense_fn(value)
+			}
+			else
+			{
+				return lense_fn(null)
+			}
+		}
+	}
+
+	function border_find_index (sequence, from_index, pred, ts)
+	{
+		var L = sequence.length
+
+		for (var index = from_index; index < L; index++)
+		{
+			var value = sequence[index]
+
+			if (! pred(value, ts)) { break }
+		}
+
+		if (index === 0)
+		{
+			return 0
+		}
+		else
+		{
+			return index - 1
+		}
+	}
+
+	/*function find_brokerage (brokerage, date)
+	{
+		/* ISO dates are sortable * /
 		var entry = findLast(brokerage, entry => entry[0] <= date)
 
 		if (entry)
@@ -395,7 +467,7 @@ module.exports = function Grid (investor, portfolio)
 		{
 			throw TypeError('brokerage_error')
 		}
-	}
+	}*/
 
 	function find_holding_day (holdings, date)
 	{
