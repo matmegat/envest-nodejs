@@ -227,7 +227,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	return ssh(
 		f( '"cd %s;'
 		 + ' npm install --production --no-optional;'
-		 + 'sudo npm run restart;'
+		 + 'npm run restart;'
 		 + 'sudo nginx -s reload || true;"', remote_rootpath()
 	))
 }))
