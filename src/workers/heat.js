@@ -68,6 +68,6 @@ function recurring (fn)
 
 function random_delay ()
 {
-	return B.delay(random(0, 15))
+	return B.delay(random(0, 15) * 60 * 1000)
 	.then(s => s * 1000)
 }

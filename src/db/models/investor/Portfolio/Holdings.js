@@ -474,7 +474,7 @@ module.exports = function Holdings (db, investor, portfolio)
 				var remove_holdings = RemoveHoldingsOp(
 					investor_id, timestamp, holding_entries)
 
-				return db.investor.portfolio.apply(remove_holdings)
+				return db.investor.portfolio.apply(trx, remove_holdings)
 			})
 			.then(noop)
 		})

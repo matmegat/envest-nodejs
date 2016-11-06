@@ -816,14 +816,14 @@ module.exports = function User (db, app)
 		{
 			if (is_investor)
 			{
-				return NameChangedI(user_id,
+				NameChangedI(user_id,
 				{
 					admin: [ ':user-id', whom_id ]
 				})
 			}
 			else
 			{
-				return NameChangedU(
+				NameChangedU(
 				{
 					user: [ ':user-id', user_id ],
 					admin: [ ':user-id', whom_id ]
