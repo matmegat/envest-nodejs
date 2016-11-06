@@ -7,9 +7,9 @@
 
   "scripts":
   {
-    "start": "forever start --uid netv -l \"$PWD/var/netv.forever.log\" --append .",
-    "stop":  "forever  stop \"$PWD\"",
-    "restart": "npm stop 2> /dev/null || true; npm start",
+    "start": "pm2 start . --name netvest",
+    "stop":  "pm2 stop  .",
+    "restart": "npm start",
     "start-node": "node .",
 
     "dev": "nodemon --ext js,yaml --watch src/ .",
@@ -23,8 +23,8 @@
 
   "dependencies":
   {
-    "forever":
-      "^0.15",
+    "pm2":
+      "^2.1",
 
     "express":
       "^4.13",
