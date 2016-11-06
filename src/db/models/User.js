@@ -609,9 +609,9 @@ module.exports = function User (db, app)
 					email_title: [ 'Confirm Email' ]
 				}
 
-				if (app.cfg.real_port !== 80)
+				if (app.cfg.port_nginx !== 80)
 				{
-					host += `:${app.cfg.real_port}`
+					host += `:${app.cfg.port_nginx}`
 				}
 
 				if (for_admin)
