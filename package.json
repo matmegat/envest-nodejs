@@ -7,7 +7,7 @@
 
   "scripts":
   {
-    "start": "pm2 start . --name netvest",
+    "start": "pm2 start . --name \"$(run/env)\"",
     "stop":  "pm2 stop  .",
     "restart": "npm start",
     "start-node": "node .",
