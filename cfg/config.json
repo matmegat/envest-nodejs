@@ -24,7 +24,7 @@
   "cache":
   {
     "debug": false,
-    "heat": false
+    "heat": true
   },
 
   "cors":
