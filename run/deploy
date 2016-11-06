@@ -185,13 +185,12 @@ get_env.confirm(remote_config, env) /* @shortcut */
 		var render = require('mustache').render
 
 		var template = read(rootpath('cfg/env/_nginx.conf'))
-		var port = config.port
 
 		var rendered = render(template,
 		{
 			env:  env,
-			port: port,
-			port_nginx: port - 1
+			port: config.port,
+			port_nginx: config.port_nginx
 		})
 
 		var tmp_f = tmp('netvest-deploy-nginx.conf')
