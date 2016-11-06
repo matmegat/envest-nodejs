@@ -3,7 +3,7 @@
   "env": "perf",
 
   "host": "ec2-52-11-126-122.us-west-2.compute.amazonaws.com",
-  "port": 81,
+  "port": 1081,
   "port_nginx": 80,
 
   "pg":
