@@ -9,9 +9,8 @@
   {
     "start": "pm2 start . --name \"$(cat ENV)\"",
     "stop":  "pm2 stop  .",
-    "restart": "npm start",
-    "start-node": "node .",
 
+    "start-node": "node .",
     "dev": "nodemon --ext js,yaml --watch src/ .",
 
     "st": "eslint src/ run/ db/",
