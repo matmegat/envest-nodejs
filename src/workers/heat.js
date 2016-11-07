@@ -17,7 +17,8 @@ module.exports = function (app)
 			random_delay()
 			.then(() =>
 			{
-				console.info('heating investor `%s` for the first time', investor_id)
+				console.info(
+					'heating investor `%s` for the first time', investor_id)
 			})
 			.then(recurring(() =>
 			{
@@ -51,11 +52,11 @@ function recurring (fn)
 	var re = () =>
 	{
 		B.try(fn)
-		.catch(error =>
+		/*.catch(error =>
 		{
-			// console.error('ERROR occured during recurring task')
-			// console.error(error)
-		})
+			console.error('ERROR occured during recurring task')
+			console.error(error)
+		})*/
 		.delay(options.delay)
 		.then(re)
 	}
