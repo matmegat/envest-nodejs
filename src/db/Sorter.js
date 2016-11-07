@@ -51,7 +51,17 @@ module.exports = function Sorter (sorter_options)
 
 		dir = ' ' + dir.toUpperCase()
 
-		var raw = column + aux + dir
+		var order_column_func = sorter_options.order_column_func
+		var raw
+
+		if (order_column_func)
+		{
+			raw = order_column_func + '(' + column + ')' + aux + dir
+		}
+		else
+		{
+			raw = column + aux + dir
+		}
 
 		queryset.orderByRaw(raw)
 
