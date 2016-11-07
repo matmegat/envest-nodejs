@@ -242,6 +242,7 @@ var Feed = module.exports = function Feed (db)
 		.then(feed_items =>
 		{
 			var investors = feed_items.map(entry  => entry.investor)
+			investors = _.uniqBy(investors, 'id')
 
 			var response =
 			{
