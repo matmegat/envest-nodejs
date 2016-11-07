@@ -17,7 +17,7 @@ var AmbiguousAttach = Err('ambiguous_attach',
 
 module.exports = function Update (db)
 {
-	var validate_symbols_length = validate.length(6, 1)
+	var validate_symbols_length = validate.length(6)
 	var val_points_length = validate.length(Infinity, 1)
 
 	return Type(
