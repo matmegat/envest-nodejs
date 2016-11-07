@@ -1,8 +1,0 @@
-#! /usr/bin/env node
-
-var rootpath = require('rootpath')
-
-var Config = require('../src/Config')
-var cfg = Config(rootpath(__dirname, '../cfg'))
-
-process.stdout.write(cfg.env)

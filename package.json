@@ -7,7 +7,7 @@
 
   "scripts":
   {
-    "start": "pm2 start . --name \"$(run/env)\"",
+    "start": "pm2 start . --name \"$(cat ENV)\"",
     "stop":  "pm2 stop  .",
     "restart": "npm start",
     "start-node": "node .",
