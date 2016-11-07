@@ -7,11 +7,10 @@
 
   "scripts":
   {
-    "start": "forever start --uid netv -l \"$PWD/var/netv.forever.log\" --append .",
-    "stop":  "forever  stop \"$PWD\"",
-    "restart": "npm stop 2> /dev/null || true; npm start",
-    "start-node": "node .",
+    "start": "pm2 start . --name \"$(cat ENV)\"",
+    "stop":  "pm2 stop  .",
 
+    "start-node": "node .",
     "dev": "nodemon --ext js,yaml --watch src/ .",
 
     "st": "eslint src/ run/ db/",
@@ -23,8 +22,8 @@
 
   "dependencies":
   {
-    "forever":
-      "^0.15",
+    "pm2":
+      "^2.1",
 
     "express":
       "^4.13",

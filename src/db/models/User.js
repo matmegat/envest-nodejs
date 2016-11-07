@@ -25,6 +25,8 @@ var Filter = require('../Filter')
 
 var validateMany = require('../../id').validateMany
 
+var host_compose = require('../../host-compose')
+
 var moment = require('moment')
 
 module.exports = function User (db, app)
@@ -602,16 +604,12 @@ module.exports = function User (db, app)
 			})
 			.then(user_item =>
 			{
-				var host = `${app.cfg.host}`
+				var host = host_compose(app.cfg)
+
 				var mail_content = {}
 				var substs =
 				{
 					email_title: [ 'Confirm Email' ]
-				}
-
-				if (app.cfg.real_port !== 80)
-				{
-					host += `:${app.cfg.real_port}`
 				}
 
 				if (for_admin)

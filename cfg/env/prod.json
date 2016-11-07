@@ -3,8 +3,8 @@
   "env": "prod",
 
   "host": "ec2-52-25-63-85.us-west-2.compute.amazonaws.com",
-  "port": 81,
-  "real_port": 80,
+  "port": 1081,
+  "port_nginx": 80,
 
   "pg":
   {

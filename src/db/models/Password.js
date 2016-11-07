@@ -7,6 +7,8 @@ var Err = require('../../Err')
 var cr_helpers = require('../../crypto-helpers')
 var validate_email = require('../validate').email
 
+var host_compose = require('../../host-compose')
+
 module.exports = function Password (db, user, app)
 {
 	var password = {}
@@ -134,11 +136,7 @@ module.exports = function Password (db, user, app)
 				return password_upsert(where, data)
 				.then(() =>
 				{
-					var host = `${app.cfg.host}`
-					if (app.cfg.real_port !== 80)
-					{
-						host += `:${app.cfg.real_port}`
-					}
+					var host = host_compose(app.cfg)
 
 					var substs =
 					{
