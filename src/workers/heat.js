@@ -15,9 +15,12 @@ module.exports = function (app)
 		var look_for_investor = heat.lookForInvestor = (investor_id) =>
 		{
 			random_delay()
+			.then(() =>
+			{
+				console.info('heating investor `%s` for the first time', investor_id)
+			})
 			.then(recurring(() =>
 			{
-				// console.warn(investor_id)
 				return db.investor.portfolio.grid(investor_id)
 			}))
 		}
@@ -47,18 +50,12 @@ function recurring (fn)
 
 	var re = () =>
 	{
-		// console.info('start task')
-
 		B.try(fn)
 		.catch(error =>
 		{
-			console.error('ERROR occured during recurring task')
-			console.error(error)
+			// console.error('ERROR occured during recurring task')
+			// console.error(error)
 		})
-		/*.then(() =>
-		{
-			console.info('delay %s', options.delay)
-		})*/
 		.delay(options.delay)
 		.then(re)
 	}
