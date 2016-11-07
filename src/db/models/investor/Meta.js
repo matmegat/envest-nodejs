@@ -52,6 +52,7 @@ module.exports = function Meta (investor, raw, options)
 			{ column: 'first_name', aux: 'COLLATE "C"' },
 			'email'
 		],
+		order_column_func: 'upper',
 		fallback_by: 'id'
 	})
 
