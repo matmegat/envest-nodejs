@@ -489,6 +489,37 @@ module.exports = function User (db, app)
 		})
 	}
 
+	user.countBySubscriptions = function ()
+	{
+		return user.users_table()
+		.select(
+			knex.raw(`COALESCE(type, 'none') AS subscription`),
+			knex.raw(`COUNT(users.id) AS users`)
+		)
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+		.groupBy('type')
+	}
+
+	user.countByEmailConfirms = function ()
+	{
+		return user.users_table()
+		.select(
+			knex.raw(`
+				COUNT(email) as confirmed_users,
+				COUNT(*) - COUNT(email) as unconfirmed_users`)
+		)
+		.leftJoin(
+			'email_confirms',
+			'users.id',
+			'email_confirms.user_id'
+		)
+		.then(oneMaybe)
+	}
+
 	function createFacebookUser (data, trx)
 	{
 		return user.auth_facebook(trx)
