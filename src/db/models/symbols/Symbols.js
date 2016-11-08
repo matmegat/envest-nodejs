@@ -28,7 +28,7 @@ var Symbols = module.exports = function Symbols (db, cfg, log)
 {
 	var symbols = {}
 
-	var xign = Xign(cfg.xignite, log)
+	var xign = Xign(cfg.xignite, log, db.cache)
 
 	symbols.resolve = (symbol, options) =>
 	{
