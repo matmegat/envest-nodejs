@@ -53,7 +53,8 @@ module.exports = function Meta (investor, raw, options)
 			'email'
 		],
 		order_column_func: 'upper',
-		fallback_by: 'id'
+		fallback_by: 'id',
+		default_direction: 'asc'
 	})
 
 	var filter = Filter(
