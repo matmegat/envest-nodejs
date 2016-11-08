@@ -489,7 +489,7 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.countBySubscriptions = function ()
+	user.countBySubscriptions = () =>
 	{
 		return user.users_table()
 		.select(
@@ -504,7 +504,7 @@ module.exports = function User (db, app)
 		.groupBy('type')
 	}
 
-	user.countByEmailConfirms = function ()
+	user.countByEmailConfirms = () =>
 	{
 		return user.users_table()
 		.select(
