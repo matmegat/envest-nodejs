@@ -50,52 +50,12 @@ module.exports = function Xign (cfg, log)
 
 		if (! for_date)
 		{
-			/* today */
-
-			var uri = format(
-			{
-				protocol: 'https:',
-				host: 'globalquotes.xignite.com',
-
-				pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
-
-				query:
-				{
-					IdentifierType: 'Symbol',
-					Identifiers: symbols.join(','),
-
-					_Token: token
-				}
-			})
+			return quotes_now.cache(symbols)
 		}
 		else
 		{
-			/* historical */
-
-			var uri = format(
-			{
-				protocol: 'https:',
-				host: 'xignite.com',
-
-				pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotes',
-
-				query:
-				{
-					IdentifierType: 'Symbol',
-					Identifiers: symbols.join(','),
-
-					AsOfDate: util.apidate(for_date),
-
-					AdjustmentMethod: 'None',
-
-					_Token: token
-				}
-			})
+			return quotes_for_date.cache(symbols, for_date)
 		}
-
-		return request(uri)
-		.then(util.unwrap.data)
-		.then(resl => quotes_unwrap(resl, symbols))
 	}
 
 	function quotes_unwrap (resl, symbols)
@@ -156,6 +116,66 @@ module.exports = function Xign (cfg, log)
 
 			return struct
 		})
+	}
+
+	var quotes_now = (symbols) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https:',
+			host: 'globalquotes.xignite.com',
+
+			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbols.join(','),
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(resl  => quotes_unwrap(resl, symbols))
+	}
+
+	quotes_now.cache = (symbols) =>
+	{
+		return quotes_now(symbols)
+	}
+
+	var quotes_for_date = (symbols, for_date) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https:',
+			host: 'xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotes',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbols.join(','),
+
+				AsOfDate: util.apidate(for_date),
+
+				AdjustmentMethod: 'None',
+
+				_Token: token
+			}
+		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(resl => quotes_unwrap(resl, symbols))
+	}
+
+	quotes_for_date.cache = (symbols, for_date) =>
+	{
+		return quotes_for_date(symbols, for_date)
 	}
 
 	X.resolve = (symbol) =>
