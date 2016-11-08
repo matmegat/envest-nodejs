@@ -124,10 +124,6 @@ function rev ()
 
 
 get_env.confirm(remote_config, env) /* @shortcut */
-.then(so =>
-{
-	return rev()
-})
 .then(() =>
 {
 	var tmp_env = tmp('netvest-ENV')
@@ -135,6 +131,10 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	write(tmp_env, env)
 
 	return scp(tmp_env, target('ENV'))
+})
+.then(so =>
+{
+	return rev()
 })
 .then(fullrev =>
 {
@@ -234,7 +234,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 {
 	return ssh(
 		f( '"cd %s;'
-		 + ' npm install --production --no-optional;'
+		 + 'npm install --production --no-optional;'
 		 + 'npm start;'
 		 + 'sudo nginx -s reload || true;"', remote_rootpath()
 	))
