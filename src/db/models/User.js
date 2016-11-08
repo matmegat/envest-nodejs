@@ -552,14 +552,14 @@ module.exports = function User (db, app)
 
 			return {
 				to: user.email,
-				subject: 'Confirm Email',
+				subject: 'Reset Password',
 				html: `Hi, ${user.first_name} ${user.last_name}.`
 				+ `<br/><br/>`
 				+ `You've been chosen as admin.<br/>`
-				+ `Please tap the link to confirm email: `
-				+ `<a href="http://${host}/confirm-email?code=`
+				+ `Please tap the link to reset password: `
+				+ `<a href="http://${host}/reset-password?code=`
 				+ `${code.toUpperCase()}" target="_blank">`
-				+ `Confirm Email</a><br>`
+				+ `Reset Password</a><br>`
 				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
 			}
 		}
@@ -614,6 +614,11 @@ module.exports = function User (db, app)
 
 				if (for_admin)
 				{
+					substs =
+					{
+						email_title: [ 'Reset Password' ]
+					}
+
 					mail_content = email_templates.admin(host, user_item, code)
 				}
 				else
