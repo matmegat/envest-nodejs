@@ -95,64 +95,66 @@ module.exports = function Xign (cfg, log)
 
 		return request(uri)
 		.then(util.unwrap.data)
-		.then(resl =>
+		.then(resl => quotes_unwrap(resl, symbols))
+	}
+
+	function quotes_unwrap (resl, symbols)
+	{
+		return resl
+		.map(r =>
 		{
-			return resl
-			.map(r =>
+			if (util.unwrap.isSuccess(r))
 			{
-				if (util.unwrap.isSuccess(r))
-				{
-					return r
-				}
-				else
-				{
-					return null
-				}
-			})
-			.map((r, i) =>
+				return r
+			}
+			else
 			{
-				var struct =
+				return null
+			}
+		})
+		.map((r, i) =>
+		{
+			var struct =
+			{
+				symbol: symbols[i],
+				price:  null,
+				gain:   null,
+
+				prev_close: null,
+				low: null,
+				high: null,
+				volume: null,
+				last: null,
+				percent_change_from_open: null,
+				one_year_low: null,
+				one_year_high: null,
+				currency: null,
+			}
+
+			if (r)
+			{
+				extend(struct,
 				{
-					symbol: symbols[i],
-					price:  null,
-					gain:   null,
+					symbol:   symbols[i],
+					currency: r.Currency,
+					price:    r.Last,
+					company:  r.Security.Name,
 
-					prev_close: null,
-					low: null,
-					high: null,
-					volume: null,
-					last: null,
-					percent_change_from_open: null,
-					one_year_low: null,
-					one_year_high: null,
-					currency: null,
-				}
+					prev_close: r.PreviousClose,
+					low: r.Low,
+					high: r.High,
+					volume: r.Volume,
+					last: r.Last,
+					one_year_low: r.Low52Weeks,
+					one_year_high: r.High52Weeks,
+				})
 
-				if (r)
-				{
-					extend(struct,
-					{
-						symbol:   symbols[i],
-						currency: r.Currency,
-						price:    r.Last,
-						company:  r.Security.Name,
+				struct.gain = struct.percent_change_from_open
+				// eslint-disable-next-line id-length
+				= r.PercentChangeFromPreviousClose || 0
+			}
 
-						prev_close: r.PreviousClose,
-						low: r.Low,
-						high: r.High,
-						volume: r.Volume,
-						last: r.Last,
-						one_year_low: r.Low52Weeks,
-						one_year_high: r.High52Weeks,
-					})
-
-					struct.gain = struct.percent_change_from_open
-					// eslint-disable-next-line id-length
-					 = r.PercentChangeFromPreviousClose || 0
-				}
-
-				return struct
-			})
+			return struct
 		})
 	}
 
