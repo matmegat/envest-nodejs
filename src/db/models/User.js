@@ -491,7 +491,7 @@ module.exports = function User (db, app)
 
 	user.countBySubscriptions = () =>
 	{
-		return user.users_table()
+		var queryset = user.users_table()
 		.select(
 			knex.raw(`COALESCE(type, 'none') AS subscription`),
 			knex.raw(`COUNT(users.id) AS users`)
@@ -502,11 +502,13 @@ module.exports = function User (db, app)
 			'subscriptions.user_id'
 		)
 		.groupBy('type')
+
+		return get_only_users(queryset)
 	}
 
 	user.countByEmailConfirms = () =>
 	{
-		return user.users_table()
+		var queryset = user.users_table()
 		.select(
 			knex.raw(`
 				COUNT(email) as confirmed_users,
@@ -517,7 +519,26 @@ module.exports = function User (db, app)
 			'users.id',
 			'email_confirms.user_id'
 		)
+
+		return get_only_users(queryset)
 		.then(oneMaybe)
+	}
+
+	function get_only_users (queryset)
+	{
+		return queryset
+		.leftJoin(
+			'investors',
+			'users.id',
+			'investors.user_id'
+		)
+		.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+		)
+		.whereNull('investors.user_id')
+		.whereNull('admins.user_id')
 	}
 
 	function createFacebookUser (data, trx)

@@ -16,7 +16,6 @@ var Pic = require('./models/Pic')
 var NetvestSubsc = require('./models/subscription/NetvestSubsc')
 var Symbols = require('./models/symbols/Symbols')
 var Watchlist = require('./models/watchlist/Watchlist')
-var Statistics = require('./models/Statistics')
 
 
 var redis = require('ioredis')
@@ -105,8 +104,6 @@ module.exports = function name (app)
 	db.pic = Pic(db)
 
 	db.feedback = Feedback(app)
-
-	db.statistics = Statistics(db)
 
 	return db
 }
