@@ -133,19 +133,16 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		.then(() => true)
 		.catch(() =>
 		{
+			/* WORKAROUND:
+			    check for 30-trial period
+			    even if no Stripe involved, see NET-1675
+			*/
 			return db.user.byId(user_id)
 			.then(user =>
 			{
 				var trial_end = moment(user.created_at).add(1, 'month')
 
-				if (moment().isBefore(trial_end))
-				{
-					return true
-				}
-				else
-				{
-					return false
-				}
+				return moment().isBefore(trial_end)
 			})
 		})
 	}
