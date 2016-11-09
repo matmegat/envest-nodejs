@@ -109,7 +109,10 @@ var SymbolList = module.exports = function SymbolList (table, symbols)
 
 	function quotes (entries)
 	{
-		return symbols.quotes(map(entries, 'symbol'))
+		return Promise.all(entries.map(entry =>
+		{
+			return symbols.quotes(entry.symbol).then(it => it[0])
+		}))
 		.then(quotes =>
 		{
 			return map(quotes, (r, i) =>
