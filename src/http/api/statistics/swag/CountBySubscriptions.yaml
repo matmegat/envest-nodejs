@@ -1,0 +1,25 @@
+get:
+  description:
+    Get count of users of each subscription type
+  responses:
+    200:
+      description: Array of object with subscription title and count of users
+      schema:
+        type: array
+        items:
+          type: object
+          title: Subscription
+          properties:
+            subscription:
+              type: string
+            users:
+              type: integer
+          required:
+          - subscription
+          - users
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - statistics

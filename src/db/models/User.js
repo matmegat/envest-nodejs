@@ -489,6 +489,58 @@ module.exports = function User (db, app)
 		})
 	}
 
+	user.countBySubscriptions = () =>
+	{
+		var queryset = user.users_table()
+		.select(
+			knex.raw(`COALESCE(type, 'none') AS subscription`),
+			knex.raw(`COUNT(users.id) AS users`)
+		)
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+		.groupBy('type')
+
+		return get_only_users(queryset)
+	}
+
+	user.countByEmailConfirms = () =>
+	{
+		var queryset = user.users_table()
+		.select(
+			knex.raw(`
+				COUNT(email) as confirmed_users,
+				COUNT(*) - COUNT(email) as unconfirmed_users`)
+		)
+		.leftJoin(
+			'email_confirms',
+			'users.id',
+			'email_confirms.user_id'
+		)
+
+		return get_only_users(queryset)
+		.then(oneMaybe)
+	}
+
+	function get_only_users (queryset)
+	{
+		return queryset
+		.leftJoin(
+			'investors',
+			'users.id',
+			'investors.user_id'
+		)
+		.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+		)
+		.whereNull('investors.user_id')
+		.whereNull('admins.user_id')
+	}
+
 	function createFacebookUser (data, trx)
 	{
 		return user.auth_facebook(trx)

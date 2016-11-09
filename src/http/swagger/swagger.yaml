@@ -212,6 +212,12 @@ paths:
   '/symbols/{symbol}':
     $ref: ../api/symbols/swag/Get-SymbolInfo.yaml
 
+  '/statistics/subscriptions':
+    $ref: ../api/statistics/swag/CountBySubscriptions.yaml
+
+  '/statistics/users-confirmed':
+    $ref: ../api/statistics/swag/CountByEmailConfirms.yaml
+
 definitions:
 
   Feed:

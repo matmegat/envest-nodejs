@@ -1,0 +1,25 @@
+get:
+  description:
+    Get count of confirmed and unconfirmed users
+  responses:
+    200:
+      description: Object with statistics
+      schema:
+        type: object
+        title: Object with statistics model
+        properties:
+          confirmed_users:
+            type: integer
+            description: Count of confirmed users
+          unconfirmed_users:
+            type: integer
+            description: Count of unconfirmed_users
+        required:
+        - confirmed_users
+        - unconfirmed_users
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - statistics

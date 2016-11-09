@@ -16,6 +16,7 @@ var Password = require('./api/password/Password')
 var Users = require('./api/users/Users')
 var Subscr = require('./api/subscr/Subscr')
 var Promo = require('./api/promo/Promo')
+var Statistics = require('./api/statistics/Statistics')
 
 var Feed = require('./api/feed/Feed')
 var Comments = require('./api/comments/Comments')
@@ -121,6 +122,7 @@ module.exports = function Http (app)
 	mount(Promo(http, app.db.subscr), 'promo', 'promo')
 	mount(Symbols(app.db.symbols), 'symbols', 'symbols')
 	mount(Feedback(app.db, app.cfg.feedback.email), 'feedback', 'feedback')
+	mount(Statistics(app.db, http), 'statistics', 'statistics')
 
 
 	http.express.use(internalError)
