@@ -12,7 +12,7 @@ var util = require('./util')
 var moment = require('moment')
 
 
-module.exports = function Xign (cfg, log)
+module.exports = function Xign (cfg, log, cache)
 {
 	expect(cfg).property('token')
 
@@ -50,110 +50,166 @@ module.exports = function Xign (cfg, log)
 
 		if (! for_date)
 		{
-			/* today */
-
-			var uri = format(
-			{
-				protocol: 'https:',
-				host: 'globalquotes.xignite.com',
-
-				pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
-
-				query:
-				{
-					IdentifierType: 'Symbol',
-					Identifiers: symbols.join(','),
-
-					_Token: token
-				}
-			})
+			return quotes_now.cache(symbols)
 		}
 		else
 		{
-			/* historical */
-
-			var uri = format(
-			{
-				protocol: 'https:',
-				host: 'xignite.com',
-
-				pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotes',
-
-				query:
-				{
-					IdentifierType: 'Symbol',
-					Identifiers: symbols.join(','),
-
-					AsOfDate: util.apidate(for_date),
-
-					AdjustmentMethod: 'None',
-
-					_Token: token
-				}
-			})
+			return quotes_for_date.cache(symbols, for_date)
 		}
+	}
+
+	function quotes_unwrap (resl, symbols)
+	{
+		return resl
+		.map(r =>
+		{
+			if (util.unwrap.isSuccess(r))
+			{
+				return r
+			}
+			else
+			{
+				return null
+			}
+		})
+		.map((r, i) =>
+		{
+			var struct =
+			{
+				symbol: symbols[i],
+				price:  null,
+				gain:   null,
+
+				prev_close: null,
+				low: null,
+				high: null,
+				volume: null,
+				last: null,
+				percent_change_from_open: null,
+				one_year_low: null,
+				one_year_high: null,
+				currency: null,
+			}
+
+			if (r)
+			{
+				extend(struct,
+				{
+					symbol:   symbols[i],
+					currency: r.Currency,
+					price:    r.Last,
+					company:  r.Security.Name,
+
+					prev_close: r.PreviousClose,
+					low: r.Low,
+					high: r.High,
+					volume: r.Volume,
+					last: r.Last,
+					one_year_low: r.Low52Weeks,
+					one_year_high: r.High52Weeks,
+				})
+
+				struct.gain = struct.percent_change_from_open
+				// eslint-disable-next-line id-length
+				= r.PercentChangeFromPreviousClose || 0
+			}
+
+			return struct
+		})
+	}
+
+	var quotes_now = (symbols) =>
+	{
+		var uri = format(
+		{
+			protocol: 'https:',
+			host: 'globalquotes.xignite.com',
+
+			pathname: '/v3/xGlobalQuotes.json/GetGlobalDelayedQuotes',
+
+			query:
+			{
+				IdentifierType: 'Symbol',
+				Identifiers: symbols.join(','),
+
+				_Token: token
+			}
+		})
 
 		return request(uri)
 		.then(util.unwrap.data)
-		.then(resl =>
+		.then(resl  => quotes_unwrap(resl, symbols))
+	}
+
+	quotes_now.cache = (symbols) =>
+	{
+		var now = moment.utc() // will be used by quotes_key_fn only
+
+		var cache_fn = cache.regular(`quotes_for_date`,
+			{ ttl: 60 },
+			quotes_key_fn,
+			quotes_now
+		)
+
+		return cache_fn(symbols, now)
+	}
+
+	var quotes_for_date = (symbols, for_date) =>
+	{
+		var uri = format(
 		{
-			return resl
-			.map(r =>
+			protocol: 'https:',
+			host: 'xignite.com',
+
+			pathname: '/xGlobalHistorical.json/GetGlobalHistoricalQuotes',
+
+			query:
 			{
-				if (util.unwrap.isSuccess(r))
-				{
-					return r
-				}
-				else
-				{
-					return null
-				}
-			})
-			.map((r, i) =>
-			{
-				var struct =
-				{
-					symbol: symbols[i],
-					price:  null,
-					gain:   null,
+				IdentifierType: 'Symbol',
+				Identifiers: symbols.join(','),
 
-					prev_close: null,
-					low: null,
-					high: null,
-					volume: null,
-					last: null,
-					percent_change_from_open: null,
-					one_year_low: null,
-					one_year_high: null,
-					currency: null,
-				}
+				AsOfDate: util.apidate(for_date),
 
-				if (r)
-				{
-					extend(struct,
-					{
-						symbol:   symbols[i],
-						currency: r.Currency,
-						price:    r.Last,
-						company:  r.Security.Name,
+				AdjustmentMethod: 'None',
 
-						prev_close: r.PreviousClose,
-						low: r.Low,
-						high: r.High,
-						volume: r.Volume,
-						last: r.Last,
-						one_year_low: r.Low52Weeks,
-						one_year_high: r.High52Weeks,
-					})
-
-					struct.gain = struct.percent_change_from_open
-					// eslint-disable-next-line id-length
-					 = r.PercentChangeFromPreviousClose || 0
-				}
-
-				return struct
-			})
+				_Token: token
+			}
 		})
+
+		return request(uri)
+		.then(util.unwrap.data)
+		.then(resl => quotes_unwrap(resl, symbols))
+	}
+
+	quotes_for_date.cache = (symbols, for_date) =>
+	{
+		var options = { ttl: 60 * 5 } // 5 minutes
+		var today = moment.utc().startOf('day')
+		if (moment.utc(for_date).isBefore(today))
+		{
+			options.ttl = 60 * 60 * 24 // 1 day
+		}
+
+		var cache_fn = cache.regular('quotes_for_date',
+			options,
+			quotes_key_fn,
+			quotes_for_date
+		)
+
+		return cache_fn(symbols, for_date)
+	}
+
+	function quotes_key_fn (symbols, for_date)
+	{
+		var ts = moment.utc(for_date).format('YYYY-MM-DDTkk:mm')
+
+		var today = moment.utc().startOf('day')
+		if (moment.utc(for_date).isBefore(today))
+		{
+			ts = moment.utc(for_date).format('YYYY-MM-DD')
+		}
+
+		return `${ts}|${symbols.join(',')}`
 	}
 
 	X.resolve = (symbol) =>

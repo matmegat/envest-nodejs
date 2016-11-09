@@ -71,10 +71,15 @@ module.exports = function Holdings (db, investor, portfolio)
 		{
 			var symbols = holdings.map(holding =>
 			{
-				return [ holding.symbol_ticker, holding.symbol_exchange ]
+				return `${holding.symbol_ticker}.${holding.symbol_exchange}`
 			})
 
-			return db.symbols.quotes(symbols, for_date, options)
+			return Promise.all(symbols.map(s =>
+			{
+				return db.symbols
+				.quotes(s, for_date, options)
+				.then(it => it[0])
+			}))
 			.then(quotes =>
 			{
 				return quotes.map((quote, i) =>
