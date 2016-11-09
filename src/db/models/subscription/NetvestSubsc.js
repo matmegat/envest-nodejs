@@ -130,7 +130,24 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	{
 		return netvest_subscr
 		.getSubscription(user_id)
-		.then(() => true, () => false)
+		.then(() => true)
+		.catch(() =>
+		{
+			return db.user.byId(user_id)
+			.then(user =>
+			{
+				var trial_end = moment(user.created_at).add(1, 'month')
+
+				if (moment().isBefore(trial_end))
+				{
+					return true
+				}
+				else
+				{
+					return false
+				}
+			})
+		})
 	}
 
 	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
