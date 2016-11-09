@@ -39,7 +39,7 @@ module.exports = function Update (db)
 					])
 				})
 
-				data.text = sanitize(data.text)
+				data.text = sanitize.sanitize(data.text)
 
 				return data
 			})
@@ -70,7 +70,7 @@ module.exports = function Update (db)
 			{
 				if (data.text)
 				{
-					data.text = sanitize(data.text)
+					data.text = sanitize.sanitize(data.text)
 				}
 
 				return data
@@ -97,7 +97,7 @@ module.exports = function Update (db)
 		{
 			if ('text' in data)
 			{
-				validate.nullish(data.text, 'text')
+				validate.nullish(sanitize.text(data.text), 'text')
 				validate.text_field(data.text, 'text')
 			}
 
@@ -146,7 +146,7 @@ module.exports = function Update (db)
 		return new Promise(rs =>
 		{
 			validate.required(data.text, 'text')
-			validate.text_field(data.text, 'text')
+			validate.text_field(sanitize.text(data.text), 'text')
 
 			validate.required(data.title, 'title')
 			validate.title_field(data.title, 'title')

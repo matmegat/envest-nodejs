@@ -34,14 +34,14 @@ module.exports = function Trade (portfolio, symbols)
 			})
 			.then(tradeop =>
 			{
-				data.text = sanitize(data.text)
+				data.text = sanitize.sanitize(data.text)
 
 				return [ tradeop.timestamp, data ]
 			})
 		},
 		update: (trx, investor_id, type, timestamp, data) =>
 		{
-			data.text = sanitize(data.text)
+			data.text = sanitize.sanitize(data.text)
 
 			return Promise.resolve(data)
 		},
@@ -85,7 +85,7 @@ function validate_trade_adds (data)
 		if ('text' in data_update)
 		{
 			validate.nullish(data_update.text, 'text')
-			validate.text_field(data_update.text, 'text')
+			validate.text_field(sanitize.text(data_update.text), 'text')
 		}
 
 		if ('risk' in data_update)
@@ -125,7 +125,7 @@ function validate_trade (data)
 		validate_trade_dir(data.dir)
 
 		validate.required(data.text, 'text')
-		validate.text_field(data.text, 'text')
+		validate.text_field(sanitize.text(data.text), 'text')
 
 		validate.required(data.symbol, 'symbol')
 		validate.empty(data.symbol, 'symbol')
