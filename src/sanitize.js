@@ -1,18 +1,18 @@
 
 var sanitizeHTML = require('sanitize-html')
 
-module.exports = function sanitize (string)
+module.exports =
 {
-	return sanitizeHTML(string,
+	sanitize: (string) => sanitizeHTML(string,
 	{
 		allowedTags:
-		[
-			'ol', 'ul', 'li',
-			'a',
-			'i', 'em',
-			'b', 'strong',
-			'u', 'p', 'br'
-		],
+			[
+				'ol', 'ul', 'li',
+				'a',
+				'i', 'em',
+				'b', 'strong',
+				'u', 'p', 'br'
+			],
 		allowedAttributes:
 		{
 			a: [ 'href' ]
@@ -22,5 +22,11 @@ module.exports = function sanitize (string)
 		{
 			lowerCaseTags: true
 		}
+	}),
+
+	text: (string) => sanitizeHTML(string,
+	{
+		allowedTags: [],
+		allowedAttributes: []
 	})
 }
