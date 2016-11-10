@@ -133,11 +133,8 @@ module.exports = function Admin (db)
 		})
 		.then(id =>
 		{
-			return user.newEmailUpdate(trx,
-			{
-				user_id: id,
-				new_email: userdata.email
-			}, true)
+			return user.emailConfirm(trx, id, userdata.email)
+			.then(() => user.password.reqReset(trx, userdata.email))
 		})
 		.then(noop)
 	})
