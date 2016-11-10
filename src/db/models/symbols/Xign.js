@@ -170,18 +170,11 @@ module.exports = function Xign (cfg, log, cache)
 
 	/* Cached implementation */
 
-	quotes_now.cache = (symbols) =>
-	{
-		var now = moment.utc() // will be used by quotes_key_fn only
-
-		var cache_fn = cache.regular(`quotes_for_date`,
-			{ ttl: 60 },
-			quotes_key_fn,
-			quotes_now
-		)
-
-		return cache_fn(symbols, now)
-	}
+	quotes_now.cache = cache.regular(`quotes_current`,
+		{ ttl: 60 },
+		(symbols) => symbols,
+		quotes_now
+	)
 
 	quotes_for_date.cache = (symbols, for_date) =>
 	{
