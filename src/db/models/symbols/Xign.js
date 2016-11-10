@@ -185,21 +185,26 @@ module.exports = function Xign (cfg, log, cache)
 
 	quotes_for_date.cache = (symbols, for_date) =>
 	{
-		var options = { ttl: 60 * 5 } // 5 minutes
 		var today = moment.utc().startOf('day')
 		if (moment.utc(for_date).isBefore(today))
 		{
-			options.ttl = 60 * 60 * 24 // 1 day
+			return day_quotes_cache_fn(symbols, for_date)
 		}
 
-		var cache_fn = cache.regular('quotes_for_date',
-			options,
-			quotes_key_fn,
-			quotes_for_date
-		)
-
-		return cache_fn(symbols, for_date)
+		return quotes_cache_fn(symbols, for_date)
 	}
+
+	var day_quotes_cache_fn = cache.regular('quotes_for_date',
+		{ ttl: 60 * 60 * 24 },	// 1 day
+		quotes_key_fn,
+		quotes_for_date
+	)
+
+	var quotes_cache_fn = cache.regular('quotes_for_date',
+		{ ttl: 60 * 5 },		// 5 min
+		quotes_key_fn,
+		quotes_for_date
+	)
 
 	function quotes_key_fn (symbols, for_date)
 	{
