@@ -216,7 +216,7 @@ module.exports = function Xign (cfg, log, cache)
 			ts = moment.utc(for_date).format('YYYY-MM-DD')
 		}
 
-		return `${ts}|${symbols.join(',')}`
+		return [ ts ].concat(symbols)
 	}
 
 	X.resolve = (symbol) =>
