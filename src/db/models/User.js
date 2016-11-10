@@ -721,6 +721,7 @@ module.exports = function User (db, app)
 			'users.pic',
 			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 		)
+		.groupBy('users.id', 'email_confirms.new_email')
 
 		options.paginator = extend({}, options.paginator,
 		{
