@@ -58,66 +58,6 @@ module.exports = function Xign (cfg, log, cache)
 		}
 	}
 
-	function quotes_unwrap (resl, symbols)
-	{
-		return resl
-		.map(r =>
-		{
-			if (util.unwrap.isSuccess(r))
-			{
-				return r
-			}
-			else
-			{
-				return null
-			}
-		})
-		.map((r, i) =>
-		{
-			var struct =
-			{
-				symbol: symbols[i],
-				price:  null,
-				gain:   null,
-
-				prev_close: null,
-				low: null,
-				high: null,
-				volume: null,
-				last: null,
-				percent_change_from_open: null,
-				one_year_low: null,
-				one_year_high: null,
-				currency: null,
-			}
-
-			if (r)
-			{
-				extend(struct,
-				{
-					symbol:   symbols[i],
-					currency: r.Currency,
-					price:    r.Last,
-					company:  r.Security.Name,
-
-					prev_close: r.PreviousClose,
-					low: r.Low,
-					high: r.High,
-					volume: r.Volume,
-					last: r.Last,
-					one_year_low: r.Low52Weeks,
-					one_year_high: r.High52Weeks,
-				})
-
-				struct.gain = struct.percent_change_from_open
-				// eslint-disable-next-line id-length
-				= r.PercentChangeFromPreviousClose || 0
-			}
-
-			return struct
-		})
-	}
-
 	var quotes_now = (symbols) =>
 	{
 		var uri = format(
@@ -139,19 +79,6 @@ module.exports = function Xign (cfg, log, cache)
 		return request(uri)
 		.then(util.unwrap.data)
 		.then(resl  => quotes_unwrap(resl, symbols))
-	}
-
-	quotes_now.cache = (symbols) =>
-	{
-		var now = moment.utc() // will be used by quotes_key_fn only
-
-		var cache_fn = cache.regular(`quotes_for_date`,
-			{ ttl: 60 },
-			quotes_key_fn,
-			quotes_now
-		)
-
-		return cache_fn(symbols, now)
 	}
 
 	var quotes_for_date = (symbols, for_date) =>
@@ -179,6 +106,81 @@ module.exports = function Xign (cfg, log, cache)
 		return request(uri)
 		.then(util.unwrap.data)
 		.then(resl => quotes_unwrap(resl, symbols))
+	}
+
+	function quotes_unwrap (resl, symbols)
+	{
+		return resl
+			.map(r =>
+			{
+				if (util.unwrap.isSuccess(r))
+				{
+					return r
+				}
+				else
+				{
+					return null
+				}
+			})
+			.map((r, i) =>
+			{
+				var struct =
+				{
+					symbol: symbols[i],
+					price:  null,
+					gain:   null,
+
+					prev_close: null,
+					low: null,
+					high: null,
+					volume: null,
+					last: null,
+					percent_change_from_open: null,
+					one_year_low: null,
+					one_year_high: null,
+					currency: null,
+				}
+
+				if (r)
+				{
+					extend(struct,
+						{
+							symbol:   symbols[i],
+							currency: r.Currency,
+							price:    r.Last,
+							company:  r.Security.Name,
+
+							prev_close: r.PreviousClose,
+							low: r.Low,
+							high: r.High,
+							volume: r.Volume,
+							last: r.Last,
+							one_year_low: r.Low52Weeks,
+							one_year_high: r.High52Weeks,
+						})
+
+					struct.gain = struct.percent_change_from_open
+						// eslint-disable-next-line id-length
+						= r.PercentChangeFromPreviousClose || 0
+				}
+
+				return struct
+			})
+	}
+
+	/* Cached implementation */
+
+	quotes_now.cache = (symbols) =>
+	{
+		var now = moment.utc() // will be used by quotes_key_fn only
+
+		var cache_fn = cache.regular(`quotes_for_date`,
+			{ ttl: 60 },
+			quotes_key_fn,
+			quotes_now
+		)
+
+		return cache_fn(symbols, now)
 	}
 
 	quotes_for_date.cache = (symbols, for_date) =>
