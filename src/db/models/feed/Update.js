@@ -97,8 +97,8 @@ module.exports = function Update (db)
 		{
 			if ('text' in data)
 			{
-				validate.nullish(sanitize.text(data.text), 'text')
-				validate.text_field(data.text, 'text')
+				validate.nullish(data.text, 'text')
+				validate.text_field(sanitize.text(data.text), 'text')
 			}
 
 			if ('title' in data)
