@@ -595,29 +595,10 @@ module.exports = function User (db, app)
 				+ `Confirm Email</a><br>`
 				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
 			}
-		},
-		admin: function (host, user, code)
-		{
-			expect('host').to.be.a('string')
-			expect('email').to.be.a('string')
-			expect('code').to.be.a('string')
-
-			return {
-				to: user.email,
-				subject: 'Confirm Email',
-				html: `Hi, ${user.first_name} ${user.last_name}.`
-				+ `<br/><br/>`
-				+ `You've been chosen as admin.<br/>`
-				+ `Please tap the link to confirm email: `
-				+ `<a href="http://${host}/confirm-email?code=`
-				+ `${code.toUpperCase()}" target="_blank">`
-				+ `Confirm Email</a><br>`
-				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
-			}
 		}
 	}
 
-	user.newEmailUpdate = function (trx, data, for_admin)
+	user.newEmailUpdate = function (trx, data)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
 
@@ -664,14 +645,7 @@ module.exports = function User (db, app)
 					email_title: [ 'Confirm Email' ]
 				}
 
-				if (for_admin)
-				{
-					mail_content = email_templates.admin(host, user_item, code)
-				}
-				else
-				{
-					mail_content = email_templates.user(host, user_item, code)
-				}
+				mail_content = email_templates.user(host, user_item, code)
 
 				return mailer.send('default', substs, mail_content)
 				.then(() => user_item.id, console.err)
