@@ -29,17 +29,17 @@ module.exports = function Subscr (subscr_model)
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
 		{
-			subscr.model.stripe.subscriptions.retrieve(
-				subscription.stripe_subscriber_id,
-				(err, subscription_obj) =>
+			subscr.model.stripe.customers.retrieve(
+				subscription.stripe_customer_id,
+				(err, customer) =>
 				{
 					if (err)
 					{
 						return toss.err(rs, err)
 					}
 
-					// this is to retreive full subscription object
-					subscription.meta = subscription_obj
+					subscription.discount = customer.discount
+					subscription.subscription = customer.subscriptions.data[0]
 					toss(rs, subscription)
 				}
 			)
