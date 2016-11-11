@@ -149,11 +149,24 @@ module.exports = function Post (db)
 			})
 			.then(upserted_post =>
 			{
-				PostCreated(investor_id,
+				var investor_id = upserted_post.investor_id
+
+				if (post_id)
 				{
-					investor: [ ':user-id', investor_id ],
-					post_id: upserted_post.id
-				})
+					PostUpdated(investor_id,
+					{
+						investor: [ ':user-id', investor_id ],
+						post_id: upserted_post.id
+					})
+				}
+				else
+				{
+					PostCreated(investor_id,
+					{
+						investor: [ ':user-id', investor_id ],
+						post_id: upserted_post.id
+					})
+				}
 			})
 		})
 	}
