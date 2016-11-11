@@ -131,7 +131,10 @@
       "1.13.0",
 
     "csv-parse":
-      "^1.1"
+      "^1.1",
+
+    "mandrill-api":
+      "^1.0"
   },
 
   "devDependencies":
