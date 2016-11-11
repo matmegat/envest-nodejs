@@ -288,7 +288,7 @@ validate.string_field = function validate__string_field (maxlength)
 
 validate.text_field = function validate__text_field (string, field_name)
 {
-	var validate_field = validate.string_field(2000)
+	var validate_field = validate.string_field(10000)
 
 	validate_field(string, field_name)
 }
