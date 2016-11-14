@@ -22,25 +22,29 @@ module.exports = function Abuse (db, comments, Emitter)
 	{
 		return comments.byId(comment_id)
 		.then(Err.nullish(comments.CommentNotFound))
-		.then((comment_items) =>
+		.then(comment =>
 		{
-			if (comment_items.user_id === user_id)
+			if (comment.user_id === user_id)
 			{
 				throw YourComments()
 			}
 
 			return abuse.table()
-			.insert({
+			.insert(
+			{
 				user_id: user_id,
 				comment_id: comment_id
 			})
-			.then(noop)
+			.then(() =>
+			{
+				return CommentReport(
+				{
+					comment_id: comment.id,
+					feed_id:    comment.feed_id
+				})
+			})
 		})
 		.catch(Err.fromDb('abuse_comments_pkey', AbuseExist))
-		.then(() =>
-		{
-			return CommentReport({ comment_id: comment_id })
-		})
 	}
 
 	return abuse
