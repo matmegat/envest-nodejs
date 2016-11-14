@@ -197,7 +197,9 @@ module.exports = function Comments (db)
 		})
 		.then(() =>
 		{
-			return remove_by_id(id)
+			return comments.table()
+			.where('id', id)
+			.delete()
 		})
 		.then(noop)
 	}
@@ -217,13 +219,6 @@ module.exports = function Comments (db)
 				.then(Err.emptish(AdminOwnerRequired))
 			}
 		})
-	}
-
-	function remove_by_id (id)
-	{
-		return comments.table()
-		.where('id', id)
-		.del()
 	}
 
 	return comments
