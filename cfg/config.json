@@ -58,6 +58,11 @@
     "key": "IRsds6YbxE_bx1YHxpr1uw"
   },
 
+  "email_substs":
+  {
+
+  },
+
   "stripe":
   {
     "secret_key": "sk_test_dwYOVs8ksV5k42u2zcJWQiw4",
