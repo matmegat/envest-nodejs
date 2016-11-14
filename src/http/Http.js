@@ -50,7 +50,7 @@ module.exports = function Http (app)
 	setErrorMode(app.cfg, http.express)
 
 	http.express.use(cookie_parser())
-	http.express.use(body_parser.json())
+	http.express.use(body_parser.json({ limit: '256kb' }))
 
 	CrossOrigin(app.cfg, http.express)
 
