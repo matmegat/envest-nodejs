@@ -6,8 +6,6 @@ var YourComments
   = Err('is_your_comment', 'It is impossible to abuse your comments')
 
 
-var noop = require('lodash/noop')
-
 module.exports = function Abuse (db, comments, Emitter)
 {
 	var abuse = {}
