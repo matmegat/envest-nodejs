@@ -321,7 +321,7 @@ validate.name = function validate__name (name, field_name)
 	*/
 	var re = XRegExp.build(`^ {{word}} (\\s {{word}})* $`,
 	{
-		word: XRegExp(`\\pL+ ([' -] \\pL+)* \\.?`, 'x')
+		word: XRegExp(`\\pL+ (['-] \\pL+)* \\.?`, 'x')
 	},
 	'x')
 
