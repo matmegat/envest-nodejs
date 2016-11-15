@@ -9,11 +9,14 @@ var validate_email = require('../validate').email
 
 var host_compose = require('../../host-compose')
 
+var extend = require('lodash/extend')
+var noop = require('lodash/noop')
+
 module.exports = function Password (db, user, app)
 {
 	var password = {}
 
-	var mailer = app.mail
+	var mailer = app.mmail
 
 	var knex = db.knex
 
@@ -140,25 +143,21 @@ module.exports = function Password (db, user, app)
 
 					var substs =
 					{
-						email_title: [ 'Reset Password' ]
+						first_name: user.first_name,
+						host: host,
+						code: code
 					}
 
-					return mailer.send('default', substs,
-					{
-						to: email,
-						subject: `Reset Password`,
-						html: `Hi, ${user.first_name} ${user.last_name}.`
-						+ `<br/><br/>`
-						+ `Please tap the link to reset password: `
-						+ `<a href="http://${host}/reset-password?code=`
-						+ `${code.toUpperCase()}" target="_blank">`
-						+ `Reset Password</a><br>`
-						+ `Your password reset code: `
-						+ `<strong>${code.toUpperCase()}</strong>`
-					})
+					var data = extend(
+						{ to: user.email },
+						mailer.templates.resetPassword(substs)
+					)
+
+					return mailer.send('default', data, substs)
 				})
 			})
 		})
+		.then(noop)
 	})
 
 	var ResetCodeNotFound = Err('reset_code_not_found', 'Reset code not found')
