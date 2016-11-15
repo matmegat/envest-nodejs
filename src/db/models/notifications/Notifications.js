@@ -176,7 +176,7 @@ module.exports = function Notifications (db)
 
 	notifications.setViewed = function (recipient_id, viewed_ids)
 	{
-		return validateViewedIds(viewed_ids)
+		return validate_viewed(viewed_ids)
 		.then(() =>
 		{
 			return notifications.table()
@@ -187,9 +187,10 @@ module.exports = function Notifications (db)
 		})
 	}
 
+
 	var WrongViewedId = Err('wrong_viewed_id', 'Wrong viewed id')
 
-	function validateViewedIds (viewed_ids)
+	function validate_viewed (viewed_ids)
 	{
 		return new Promise(rs =>
 		{
