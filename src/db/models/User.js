@@ -722,19 +722,7 @@ module.exports = function User (db, app)
 	{
 		if (user.groups.isUser(group))
 		{
-			return user.users_table()
-			.leftJoin(
-				'admins',
-				'users.id',
-				'admins.user_id'
-			)
-			.leftJoin(
-				'investors',
-				'users.id',
-				'investors.user_id'
-			)
-			.whereNull('admins.user_id')
-			.whereNull('investors.user_id')
+			return get_only_users(user.users_table())
 		}
 		else if (user.groups.isAdmin(group))
 		{

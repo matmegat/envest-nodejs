@@ -71,6 +71,7 @@ Filter.by.subscription = function (column)
 			'subscriptions.user_id'
 		)
 		.whereIn(column, values)
+		.groupBy('type')
 	}
 }
 
