@@ -141,12 +141,12 @@ module.exports = function Password (db, user, app)
 				{
 					var host = host_compose(app.cfg)
 
-					var substs =
+					var substs = extend({}, mailer.substs_defaults,
 					{
 						first_name: user.first_name,
 						host: host,
 						password_code: code
-					}
+					})
 
 					var data = extend(
 						{ to: user.email },

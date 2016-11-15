@@ -374,13 +374,12 @@ module.exports = function User (db, app)
 
 					users.forEach(entry =>
 					{
-						var substs =
+						var substs = extend({}, mailer.substs_defaults,
 						{
 							user_email: entry.email,
 							first_name: entry.first_name,
 							reason_text: 'DELETED',
-							contact_email: 'contact@netvest.com'
-						}
+						})
 
 						var deleted_data = mailer.templates.userDeleted(substs)
 
