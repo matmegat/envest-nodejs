@@ -33,7 +33,7 @@ module.exports = function (db)
 
 	fns[':user-id'] = (args, total) =>
 	{
-		return find(total, [ 'id', args[0] ])
+		return find(total, [ 'id', args[0] ]) || null
 	}
 
 

@@ -57,6 +57,7 @@ function recurring (fn)
 			console.error('ERROR occured during recurring task')
 			console.error(error)
 		})*/
+		.catch(noop)
 		.delay(options.delay)
 		.then(re)
 	}

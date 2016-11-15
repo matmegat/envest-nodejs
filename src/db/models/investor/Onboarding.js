@@ -60,26 +60,32 @@ module.exports = function Onboarding (db, investor)
 		})
 		.then(mode =>
 		{
-			field = onb.fields[field]
+			var field_model = onb.fields[field]
 
-			return field.set(trx, investor_id, value)
+			return field_model.set(trx, investor_id, value)
 			.then(() => mode) /* pass mode */
 		})
 		.then(mode =>
 		{
 			if (mode === 'mode:investor')
 			{
-				return FieldEditedA({
+				return FieldEditedA(
+				{
 					by: 'investor',
-					investor: [ ':user-id', investor_id ]
-				}, trx)
+					investor: [ ':user-id', investor_id ],
+					field: field
+				}
+				, trx)
 			}
 			else
 			{
-				return FieldEditedI(investor_id, {
+				return FieldEditedI(investor_id,
+				{
 					by: 'admin',
-					admin: [ ':user-id', whom_id ]
-				}, trx)
+					admin: [ ':user-id', whom_id ],
+					field: field
+				}
+				, trx)
 			}
 		})
 	})

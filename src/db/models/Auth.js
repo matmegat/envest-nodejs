@@ -43,10 +43,11 @@ module.exports = function Auth (db, mailer)
 			{
 				var substs =
 				{
-					email_title: [ 'Welcome' ],
+					email_title: [ 'Welcome to Netvest' ],
+					first_name: [ userdata.first_name ],
 				}
 
-				return mailer.send('default', substs,
+				return mailer.send('user_welcome', substs,
 				{
 					to: userdata.email,
 					subject: 'Welcome to Netvest',

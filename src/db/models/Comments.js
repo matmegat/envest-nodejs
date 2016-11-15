@@ -24,16 +24,18 @@ module.exports = function Comments (db)
 	expect(db, 'Comments depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
 
-	var paginator = Paginator({ order_column: 'comments.id' })
-
 	expect(db, 'Comments depends on User').property('user')
 	var user = db.user
 
 	expect(db, 'Comments depends on Admin').property('admin')
 	var admin = db.admin
 
+
 	comments.table = () => knex('comments')
 	comments.abuse = Abuse(db, comments, Emitter)
+
+	var paginator = Paginator({ order_column: 'comments.id' })
+
 
 	comments.list = function (options)
 	{
@@ -197,7 +199,9 @@ module.exports = function Comments (db)
 		})
 		.then(() =>
 		{
-			return remove_by_id(id)
+			return comments.table()
+			.where('id', id)
+			.delete()
 		})
 		.then(noop)
 	}
@@ -217,13 +221,6 @@ module.exports = function Comments (db)
 				.then(Err.emptish(AdminOwnerRequired))
 			}
 		})
-	}
-
-	function remove_by_id (id)
-	{
-		return comments.table()
-		.where('id', id)
-		.del()
 	}
 
 	return comments
