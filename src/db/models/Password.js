@@ -145,7 +145,7 @@ module.exports = function Password (db, user, app)
 					{
 						first_name: user.first_name,
 						host: host,
-						code: code
+						password_code: code
 					}
 
 					var data = extend(

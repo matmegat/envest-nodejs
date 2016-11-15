@@ -621,7 +621,7 @@ module.exports = function User (db, app)
 				{
 					first_name: user_item.first_name,
 					host: host,
-					code: code
+					confirm_code: code
 				}
 
 				var data = extend(
