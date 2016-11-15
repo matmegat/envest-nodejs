@@ -6,6 +6,8 @@ var Mandrill = require('mandrill-api/mandrill')
 var Err = require('./Err')
 var MandrillError = Err('mandrill_error', 'Mandrill error.')
 
+var templates = require('./EmailTemplates')
+
 var default_message =
 {
 	subject: 'Netvest Mailer',
@@ -95,6 +97,8 @@ module.exports = function Mailer (cfg)
 			})
 		})
 	}
+
+	mailer.templates = templates
 
 	return mailer
 }
