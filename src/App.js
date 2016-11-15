@@ -6,7 +6,7 @@ var Log = require('./Log')
 var Db = require('./db/Db')
 var Http = require('./http/Http')
 var Mailer = require('./Mailer')
-var MMailer = require('./MailerMandrill')
+var MMailer = require('./mailer/MailerMandrill')
 
 var Heat = require('./workers/heat')
 

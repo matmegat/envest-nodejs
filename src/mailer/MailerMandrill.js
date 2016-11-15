@@ -3,7 +3,7 @@ var _ = require('lodash')
 var expect = require('chai').expect
 var Mandrill = require('mandrill-api/mandrill')
 
-var Err = require('./Err')
+var Err = require('../Err')
 var MandrillError = Err('mandrill_error', 'Mandrill error.')
 
 var templates = require('./EmailTemplates')
