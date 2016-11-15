@@ -4,8 +4,6 @@ var Err = require('../../Err')
 var expect = require('chai').expect
 var mime = require('mime')
 
-var validateId = require('../../id').validate
-
 var lwip = require('lwip')
 var round = require('lodash/round')
 
@@ -68,7 +66,9 @@ module.exports = function (db)
 
 	var static = db.static
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
+
 	var WrongID = Err('wrong_id', 'Wrong ID')
+	var validate_id = require('../../id').validate(WrongID)
 
 	function update_on_model (getter, setter, emitter, validations)
 	{
@@ -82,8 +82,6 @@ module.exports = function (db)
 			{
 				if (target_user_id)
 				{
-					var validate_id = validateId(WrongID)
-
 					validate_id(target_user_id)
 
 					return ensure_can_upload(id, target_user_id)
@@ -198,7 +196,7 @@ module.exports = function (db)
 			}
 			else if (is_investor)
 			{
-				if (! (whom_id === target_user_id))
+				if (whom_id !== target_user_id)
 				{
 					throw AdminOrOwnerRequired()
 				}
