@@ -347,14 +347,59 @@ module.exports = function User (db, app)
 		.then(() =>
 		{
 			return user.users_table(trx)
+			.select(
+				'first_name',
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email')
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
 			.whereIn('id', ids)
-			.del()
+			.then(users =>
+			{
+				return user.users_table(trx)
+				.whereIn('id', ids)
+				.del()
+				.catch(Err.fromDb(
+					'featured_investor_investor_id_foreign',
+					RemoveFeatured)
+				)
+				.then(Err.falsy(user.NotFound))
+				.then(() =>
+				{
+					var email_queue = []
+
+					users.forEach(entry =>
+					{
+						var substs =
+						{
+							user_email: entry.email,
+							first_name: entry.first_name,
+							reason_text: 'DELETED',
+							contact_email: 'contact@netvest.com'
+						}
+
+						var deleted_data = mailer.templates.userDeleted(substs)
+
+						email_queue.push(mailer.send(
+							'default',
+							extend({ to: entry.email }, deleted_data.user),
+							substs)
+						)
+						email_queue.push(mailer.send(
+							'default',
+							extend({ to: substs.contact_email }, deleted_data.admin),
+							substs)
+						)
+					})
+
+					return Promise.all(email_queue)
+				})
+			})
 		})
-		.catch(Err.fromDb(
-			'featured_investor_investor_id_foreign',
-			RemoveFeatured)
-		)
-		.then(Err.falsy(user.NotFound))
 		.then(noop)
 	})
 

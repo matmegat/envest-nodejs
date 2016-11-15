@@ -49,5 +49,26 @@ module.exports =
 			+ `Invest on,<br>`
 			+ `Team Netvest`
 		}
+	},
+
+	userDeleted: (substitutions) =>
+	{
+		return {
+			admin:
+			{
+				subject: `You have deleted a user.`,
+				html: `The user <strong><em>${substitutions.user_email}</em>`
+				+ `</strong> has successfully been deleted.<br><br>`
+				+ `Team Netvest`
+			},
+			user:
+			{
+				subject: `Goodbye, ${substitutions.first_name}.`,
+				html: `Goodbye, ${substitutions.first_name}.<br><br>`
+				+ `We know you "${substitutions.reason_text}", but if you `
+				+ `change your mind, ${substitutions.contact_email} `
+				+ `we’ll be here.`
+			}
+		}
 	}
 }
