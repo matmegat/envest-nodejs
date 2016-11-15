@@ -33,7 +33,7 @@ module.exports = function User (db, app)
 {
 	var user = {}
 
-	var mailer = app.mail
+	var mailer = app.mmail
 
 	var knex = db.knex
 
@@ -576,28 +576,6 @@ module.exports = function User (db, app)
 		.del()
 	}
 
-	var email_templates =
-	{
-		user: function (host, user, code)
-		{
-			expect('host').to.be.a('string')
-			expect('email').to.be.a('string')
-			expect('code').to.be.a('string')
-
-			return {
-				to: user.email,
-				subject: 'Confirm Email',
-				html: `Hi, ${user.first_name} ${user.last_name}.`
-				+ `<br/><br/>`
-				+ `Please tap the link to confirm email: `
-				+ `<a href="http://${host}/confirm-email?code=`
-				+ `${code.toUpperCase()}" target="_blank">`
-				+ `Confirm Email</a><br>`
-				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
-			}
-		}
-	}
-
 	user.newEmailUpdate = function (trx, data)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
@@ -639,16 +617,19 @@ module.exports = function User (db, app)
 			{
 				var host = host_compose(app.cfg)
 
-				var mail_content = {}
 				var substs =
 				{
-					email_title: [ 'Confirm Email' ]
+					first_name: user_item.first_name,
+					host: host,
+					code: code
 				}
 
-				mail_content = email_templates.user(host, user_item, code)
+				var data = extend(
+					{ to: user_item.email },
+					mailer.templates.emailConfirm(substs)
+				)
 
-				return mailer.send('default', substs, mail_content)
-				.then(() => user_item.id, console.err)
+				return mailer.send('default', data, substs)
 			})
 		})
 	}
