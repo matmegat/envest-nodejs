@@ -70,5 +70,25 @@ module.exports =
 				+ `we’ll be here.`
 			}
 		}
+	},
+
+	userWelcome: (substitutions) =>
+	{
+		return {
+			subject: 'Welcome to Netvest',
+			html: `Hi, ${substitutions.first_name},<br><br>`
+			+ `Thank you for joining the Netvest beta testing period. We are ex`
+			+ `cited to hear your feedback and impressions of the Netvest exper`
+			+ `ience. If you have not already done so, please download the app `
+			+ `on <a href="${substitutions.ios_beta_app}">iOS</a> or `
+			+ `<a href="${substitutions.android_beta_app}">Android</a> to get s`
+			+ `tarted. You will receive a separate email containing a user guid`
+			+ `e with directions for app installation and launch.<br><br>`
+			+ `If you have any questions, please `
+			+ `<a href="mailto:${substitutions.contact_email}">reach out</a>.`
+			+ `<br><br>`
+			+ `Thank you!<br>`
+			+ `Team Netvest`
+		}
 	}
 }
