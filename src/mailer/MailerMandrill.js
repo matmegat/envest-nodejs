@@ -41,6 +41,7 @@ module.exports = function Mailer (cfg)
 		contact_email: 'contact@netvest.com',
 		ios_beta_app: 'https://rink.hockeyapp.net/apps/dcb637f7a19541a4a00ec7dfbbfc7cca/app_versions/232',
 		android_beta_app: 'https://rink.hockeyapp.net/apps/95edc0834f3e484baad85ddd3148d777/app_versions/193',
+		investor_panel_link: 'api.netvest.com/admin/',
 	}
 	/* eslint-enable */
 

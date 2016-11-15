@@ -90,5 +90,22 @@ module.exports =
 			+ `Thank you!<br>`
 			+ `Team Netvest`
 		}
+	},
+
+	investorWelcome: (substitutions) =>
+	{
+		return {
+			subject: 'Welcome to Netvest',
+			html: `Hi, ${substitutions.first_name}.<br><br>`
+			+ `Your Netvest author account is now live. Click `
+			+ `<a href="http://${substitutions.host}/admin/">here</a> to manage`
+			+ ` your profile, log portfolio activity, and post blogs. On your `
+			+ `first visit, you’ll be asked to set a password for your account.`
+			+ ` Keep your password in a secure place.<br><br>`
+			+ `If you have any questions, please `
+			+ `<a href="mailto:claudette@netvest.com">reach out</a>.<br><br>`
+			+ `Thank you!<br>`
+			+ `Team Netvest`
+		}
 	}
 }

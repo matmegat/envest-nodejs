@@ -17,6 +17,8 @@ var Meta = require('./Meta')
 var Portfolio = require('./Portfolio')
 var Featured = require('./Featured')
 
+var host_compose = require('../../../host-compose')
+
 module.exports = function Investor (db, mailer, app)
 {
 	var investor = {}
@@ -154,26 +156,22 @@ module.exports = function Investor (db, mailer, app)
 
 				return Promise.all([ n1, n2 ])
 			})
-			.then(() => user.byId(data.admin_id))
-			.then(admin =>
+			.then(() =>
 			{
-
-				var substs =
+				var host = host_compose(app.cfg)
+				var substs = extend({}, mailer.substs_defaults,
 				{
-					email_title: [ 'Welcome' ]
-				}
-
-				return mailer.send('default', substs,
-				{
-					to: data.email,
-					subject: 'Welcome',
-					html: `Hi, ${data.first_name}.<br><br>`
-					+ `It’s go time.<br><br>`
-					+ `Login to your <a href="http://www.investor.netvest.com" `
-					+ `target="_blank">Investor Panel</a> to start managing `
-					+ `your profile and publications. Let us know if you have `
-					+ `questions <a href="mailto:${admin.email}">${admin.email}</a>.`
+					email_title: 'Welcome to Netvest',
+					first_name: data.first_name,
+					host: host,
 				})
+
+				var email_data = extend(
+					{ to: data.email },
+					mailer.templates.investorWelcome(substs)
+				)
+
+				return mailer.send('default', email_data, substs)
 			})
 			.then(() =>
 			{
