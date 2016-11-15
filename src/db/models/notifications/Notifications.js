@@ -45,7 +45,7 @@ module.exports = function Notifications (db)
 				emit.recipient_id = target_or_event
 				emit.event        = event
 
-				return notifications.create(emit, trx)
+				return create(emit, trx)
 			}
 			else /* group */
 			{
@@ -57,12 +57,12 @@ module.exports = function Notifications (db)
 				/* shift */
 				trx = event
 
-				return notifications.createBroadcast(emit, trx)
+				return create_broadcast(emit, trx)
 			}
 		}
 	}
 
-	notifications.create = function (data, trx)
+	function create (data, trx)
 	{
 		return validateNotification(data)
 		.then((data) =>
@@ -77,7 +77,7 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	notifications.createBroadcast = function (data, trx)
+	function create_broadcast (data, trx)
 	{
 		return validateNotification(data)
 		.then(() =>
