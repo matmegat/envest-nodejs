@@ -38,7 +38,7 @@ module.exports = function Notifications (db)
 				type: type
 			}
 
-			if (! options.group) /* single*/
+			if (! options.group) /* single */
 			{
 				expect(target_or_event).a('number')
 
