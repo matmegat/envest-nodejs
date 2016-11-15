@@ -142,7 +142,8 @@ module.exports = function Investor (db, mailer, app)
 
 				var n1 = emits.NewAdmin(
 				{
-					investor: [ ':user-id', investor_id ]
+					investor: [ ':user-id', investor_id ],
+					admin:    [ ':user-id', data.admin_id ]
 				}
 				, trx)
 
