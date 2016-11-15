@@ -64,7 +64,7 @@ module.exports = function Notifications (db)
 
 	function create (data, trx)
 	{
-		return validateNotification(data)
+		return validate_notification(data)
 		.then((data) =>
 		{
 			return notifications.table(trx)
@@ -79,7 +79,7 @@ module.exports = function Notifications (db)
 
 	function create_broadcast (data, trx)
 	{
-		return validateNotification(data)
+		return validate_notification(data)
 		.then(() =>
 		{
 			var query_group = get_query_group(data)
@@ -90,18 +90,15 @@ module.exports = function Notifications (db)
 		})
 	}
 
+
 	var WrongRecipientId = Err('wrong_recipient_id', 'Wrong recipient id')
 
-	function validateNotification (data)
+	function validate_notification (data)
 	{
 		return new Promise(rs =>
 		{
-			validate.required(data.type, 'type')
-			validate.empty(data.type, 'type')
-
-			validate.required(data.event, 'event')
-			validate.empty(data.type, 'event')
-			// validate.json(data.event, 'event')
+			expect(data.type).ok
+			expect(data.event).ok
 
 			if (data.recipient_id)
 			{
