@@ -72,10 +72,13 @@ module.exports = function (db)
 
 	function update_on_model (getter, setter, emitter, validations)
 	{
-		return (file, id, target_user_id) =>
+		return (file, whom_id, target_user_id) =>
 		{
 			var new_pic
 			var old_pic
+
+			var id = whom_id
+			var is_admin = false
 
 			return Promise.resolve()
 			.then(() =>
@@ -84,12 +87,13 @@ module.exports = function (db)
 				{
 					validate_id(target_user_id)
 
-					return ensure_can_upload(id, target_user_id)
+					return ensure_can_upload(whom_id, target_user_id)
 					.then(mode =>
 					{
 						if (mode === 'mode:admin')
 						{
 							id = target_user_id
+							is_admin = true
 						}
 
 						return db.investor.all.ensure(id)
@@ -144,7 +148,17 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				emitter(id, { user: [ ':user-id', id ] })
+				var notify_data =
+				{
+					user: [ ':user-id', id ]
+				}
+
+				if (is_admin)
+				{
+					notify_data.admin = [ ':user-id', whom_id ]
+				}
+
+				emitter(id, notify_data)
 			})
 			.then(() =>
 			{
