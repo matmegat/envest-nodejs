@@ -30,4 +30,24 @@ module.exports =
 			+ `Team Netvest`
 		}
 	},
+
+	trialExpired: (substitutions) =>
+	{
+		return {
+			subject: `What did you decide, ${substitutions.first_name}?`,
+			html: `We knew this day would come eventually: your Netvest trial `
+			+ `membership has ended.<br><br>`
+			+ `Want to keep the Netvestors around for the good and bad markets?`
+			+ ` Just log into your account on our `
+			+ `<a href="${substitutions.website_link}">website</a> and follow `
+			+ `the instructions to keep your membership. It’s only $25 a month,`
+			+ `and we make it easy to cancel anytime.<br><br>`
+			+ `Not convinced yet? Do us a solid and tell us why before you `
+			+ `leave. We’re always looking for ways to improve.<br>`
+			+ `<a href="${substitutions.feedback_link}">Share your thoughts</a>`
+			+ `<br><br>`
+			+ `Invest on,<br>`
+			+ `Team Netvest`
+		}
+	}
 }
