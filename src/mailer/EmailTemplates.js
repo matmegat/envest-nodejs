@@ -107,5 +107,13 @@ module.exports =
 			+ `Thank you!<br>`
 			+ `Team Netvest`
 		}
+	},
+
+	feedback: (substitutions) =>
+	{
+		return {
+			subject: `Feedback from ${substitutions.user_email}`,
+			html: `${substitutions.feedback_text}`
+		}
 	}
 }
