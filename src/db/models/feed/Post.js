@@ -155,6 +155,7 @@ module.exports = function Post (db)
 				{
 					PostUpdated(investor_id,
 					{
+						by: 'investor',
 						investor: [ ':user-id', investor_id ],
 						post_id: upserted_post.id
 					})
@@ -163,6 +164,7 @@ module.exports = function Post (db)
 				{
 					PostCreated(investor_id,
 					{
+						by: 'investor',
 						investor: [ ':user-id', investor_id ],
 						post_id: upserted_post.id
 					})
@@ -193,6 +195,7 @@ module.exports = function Post (db)
 				{
 					PostUpdated(upserted_post.investor_id,
 					{
+						by: 'admin',
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
 					})
@@ -201,6 +204,7 @@ module.exports = function Post (db)
 				{
 					return PostCreated(upserted_post.investor_id,
 					{
+						by: 'admin',
 						admin: [ ':user-id', whom_id ],
 						post_id: upserted_post.id
 					})
@@ -243,6 +247,7 @@ module.exports = function Post (db)
 				{
 					PostDeleted(investor_id,
 					{
+						by: 'admin',
 						admin: [ ':user-id', whom_id ],
 						post_id: post_id
 					})
