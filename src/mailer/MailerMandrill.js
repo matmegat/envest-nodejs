@@ -83,24 +83,12 @@ module.exports = function Mailer (cfg)
 			mandrill_client.messages.sendTemplate(
 			{
 				template_name: template,
-				template_content: [
-					{
-						name: 'email_title',
-						content: `Content from 'template_content'`
-					}
-				],
+				template_content: [],
 				message: message,
 			},
-			(result) =>
-			{
-				console.log('SUCCESS', result)
-				rs(result)
-			},
-			(err) =>
-			{
-				console.error('ERROR', err)
-				rj(MandrillError({ reason: err }))
-			})
+			(res) => rs(res),
+			(err) => rj(MandrillError({ reason: err }))
+			)
 		})
 	}
 
