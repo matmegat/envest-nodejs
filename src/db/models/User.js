@@ -134,21 +134,21 @@ module.exports = function User (db, app)
 				'admins.user_id AS admin_user_id',
 				'admins.parent AS parent',
 				'admins.can_intro AS can_intro',
-				knex.raw(`(select end_time
-					from subscriptions where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1)`),
-				knex.raw(`(select start_time
-					from subscriptions where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1)`),
-				knex.raw(`COALESCE(
-					(select type
-					from subscriptions
-					where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1),
-					'standard') AS type`),
+				// knex.raw(`(select end_time
+				// 	from subscriptions where user_id = users.id
+				// 	and end_time > current_timestamp
+				// 	ORDER BY end_time DESC limit 1)`),
+				// knex.raw(`(select start_time
+				// 	from subscriptions where user_id = users.id
+				// 	and end_time > current_timestamp
+				// 	ORDER BY end_time DESC limit 1)`),
+				// knex.raw(`COALESCE(
+				// 	(select type
+				// 	from subscriptions
+				// 	where user_id = users.id
+				// 	and end_time > current_timestamp
+				// 	ORDER BY end_time DESC limit 1),
+				// 	'standard') AS type`),
 				knex.raw(`(select * from featured_investor
 					where investor_id = users.id)
 					is not null  as is_featured`)
@@ -193,13 +193,6 @@ module.exports = function User (db, app)
 				'created_at'
 			])
 
-			user_data.subscription = pick(result,
-			[
-				'type',
-				'start_time',
-				'end_time'
-			])
-
 			if (result.investor_user_id)
 			{
 				user_data.investor = pick(result,
@@ -224,8 +217,15 @@ module.exports = function User (db, app)
 				])
 			}
 
-			return get_total_payment_days(id)
-			.then((total_payment_days) =>
+			return db.subscr.getType(id)
+			.then(subscription =>
+			{
+				user_data.subscription = subscription
+
+				return get_total_payment_days(id)
+				
+			})
+			.then(total_payment_days =>
 			{
 				user_data
 				.subscription

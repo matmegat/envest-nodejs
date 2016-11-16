@@ -147,6 +147,45 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.getType = (user_id) =>
+	{
+		return netvest_subscr
+		.getSubscription(user_id)
+		.then(subscription =>
+		{
+			return {
+				type: 'premium',
+				start_time: subscription.start_time,
+				end_time: subscription.end_time
+			}
+		})
+		.catch(() =>
+		{
+			return db.user.byId(user_id)
+			.then(user =>
+			{
+				var trial_end = moment(user.created_at).add(1, 'month')
+
+				if (moment().isBefore(trial_end))
+				{
+					return {
+						type: 'trial',
+						start_time: user.created_at,
+						end_time: trial_end
+					}
+				}
+				else
+				{
+					return {
+						type: 'standard',
+						start_time: user.created_at,
+						end_time: trial_end
+					}
+				}
+			})
+		})
+	}
+
 	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
 	{
 		return netvest_subscr.table()
