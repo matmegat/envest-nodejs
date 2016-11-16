@@ -175,6 +175,9 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 	var config = merge({}, base, cenv)
 
+	/* exceptions */
+	config.cors = cenv.cors || base.cors
+
 	var tmp_f = tmp('netvest-deploy-config.json')
 	dump(tmp_f, config)
 
