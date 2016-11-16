@@ -55,13 +55,32 @@ Filter.by.subscription = function (column)
 {
 	return function (queryset, values)
 	{
-		values = values.split(',')
-		values[0] || (values = ['none'])
+		var validate_subs = validate.collection(['trial', 'standard', 'premium'])
 
-		if (includes(values, 'none'))
+		values = values.split(',')
+		values[0] || (values = ['standard'])
+
+		values.forEach(item =>
+		{
+			validate_subs(item)
+		})
+
+		if (includes(values, 'trial'))
 		{
 			queryset = queryset
-			.orWhereNull(column)
+			.where('created_at', '>', moment().subtract(1, 'month'))
+		}
+
+		if (includes(values, 'standard'))
+		{
+			queryset = queryset
+			.where('created_at', '<=', moment().subtract(1, 'month'))
+		}
+
+		if (includes(values, 'premium'))
+		{
+			queryset = queryset
+			.whereNotNull('subscriptions.user_id')
 		}
 
 		return queryset
@@ -70,7 +89,6 @@ Filter.by.subscription = function (column)
 			'users.id',
 			'subscriptions.user_id'
 		)
-		.whereIn(column, values)
 		.groupBy('type')
 	}
 }
