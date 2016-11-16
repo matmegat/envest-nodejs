@@ -17,6 +17,25 @@
     "db": 1
   },
 
+  "cors":
+  {
+    "hosts":
+    [
+      "http://127.0.0.1",
+      "http://localhost",
+      "http://nevest.dev",
+      "http://ec2-35-161-140-145.us-west-2.compute.amazonaws.com",
+      "http://dev.netvest.com",
+      "http://www.netvest.com",
+      "http://staging.netvest.com",
+      "http://netvest.com"
+    ],
+    "ports":
+    [
+      80, 8080, 8081
+    ]
+  },
+
   "feedback":
   {
     "email": "contact@netvest.com"
