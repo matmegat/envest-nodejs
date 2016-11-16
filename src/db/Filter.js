@@ -51,24 +51,25 @@ Filter.by.operator = curry((operator, column) =>
 
 Filter.by.equal = Filter.by.operator('=')
 
+var validate_subs = validate.collection(['trial', 'standard', 'premium'])
+
 Filter.by.subscription = function (column)
 {
 	return function (queryset, value)
 	{
-		var validate_subs = validate.collection(['trial', 'standard', 'premium'])
-
 		validate_subs(value)
 
 		if (value === 'trial')
 		{
 			queryset = queryset
-			.andWhere('created_at', '>', moment().subtract(1, 'month'))
+			.where('created_at', '>', moment().subtract(1, 'month'))
 		}
 
 		if (value === 'standard')
 		{
 			queryset = queryset
-			.andWhere('created_at', '<=', moment().subtract(1, 'month'))
+			.where('created_at', '<=', moment().subtract(1, 'month'))
+			.whereNull('subscriptions.user_id')
 		}
 
 		if (value === 'premium')

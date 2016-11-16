@@ -126,6 +126,20 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
+	{
+		return netvest_subscr.table()
+		.where('stripe_subscriber_id', subscription_id)
+		.update({
+			end_time: moment(next_period_end * 1000)
+		})
+		.then(result =>
+		{
+			return { success: result === 1 }
+		})
+	}
+
+
 	netvest_subscr.isAble = (user_id) =>
 	{
 		return netvest_subscr
@@ -183,19 +197,6 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 					}
 				}
 			})
-		})
-	}
-
-	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
-	{
-		return netvest_subscr.table()
-		.where('stripe_subscriber_id', subscription_id)
-		.update({
-			end_time: moment(next_period_end * 1000)
-		})
-		.then(result =>
-		{
-			return { success: result === 1 }
 		})
 	}
 
