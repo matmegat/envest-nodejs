@@ -31,25 +31,9 @@ module.exports = function Mailer (cfg)
 		default: 'Common_Template'
 	}
 
-	/* eslint-disable max-len */
-	var substs_defaults =
-	{
-		confirm_link: 'netvest.com',
-		password_link: 'netvest.com',
-		website_link: 'netvest.com',
-		feedback_link: 'netvest.com',
-		contact_email: 'contact@netvest.com',
-		ios_beta_app: 'https://rink.hockeyapp.net/apps/dcb637f7a19541a4a00ec7dfbbfc7cca/app_versions/232',
-		android_beta_app: 'https://rink.hockeyapp.net/apps/95edc0834f3e484baad85ddd3148d777/app_versions/193',
-		itunes_link: 'http://www.apple.com/lae/itunes/',
-		play_market_link: 'https://play.google.com/store/apps',
-		investor_panel_link: 'api.netvest.com/admin/',
-	}
-	/* eslint-enable */
-
 	var mandrill_client = new Mandrill.Mandrill(cfg.key)
 
-	mailer.substs_defaults = substs_defaults
+	mailer.substs_defaults = cfg.defaults
 
 	mailer.send = (template, data, substs) =>
 	{
@@ -67,7 +51,7 @@ module.exports = function Mailer (cfg)
 		}
 
 		substs = _.extend({},
-			substs_defaults,
+			mailer.substs_defaults,
 			substs,
 			{ email_html: data.html, email_text: data.text }
 		)
