@@ -843,6 +843,7 @@ module.exports = function User (db, app)
 			{
 				NameChangedI(user_id,
 				{
+					by: 'admin',
 					admin: [ ':user-id', whom_id ]
 				})
 			}
@@ -850,6 +851,7 @@ module.exports = function User (db, app)
 			{
 				NameChangedU(
 				{
+					by: 'admin',
 					user: [ ':user-id', user_id ],
 					admin: [ ':user-id', whom_id ]
 				})
