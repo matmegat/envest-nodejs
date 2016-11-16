@@ -124,28 +124,6 @@ module.exports = function Http (app)
 	mount(Feedback(app.db, app.cfg.feedback.email), 'feedback', 'feedback')
 	mount(Statistics(app.db, http), 'statistics', 'statistics')
 
-	http.express.get('/test', (rq, rs, next) =>
-	{
-		var toss = require('./toss')
-
-		var substs =
-		{
-			email_title: 'email_title',
-		}
-
-		toss(rs, app.mmail.send('default',
-		{
-			to: 'vzlydnev@distillery.com',
-			subject: `${new Date().toISOString()} | Netvest`,
-			html: `Hi, ${rq.user.first_name}.<br><br>`
-			+ `It’s go time.<br><br>`
-			+ `Login to your <a href="http://www.investor.netvest.com" `
-			+ `target="_blank">Investor Panel</a> to start managing `
-			+ `your profile and publications. Let us know if you have `
-			+ `questions <a href="mailto:">$>dffd</a>.`
-		}, substs))
-	})
-
 	http.express.use(internalError)
 
 	app.swagger = Swagger(app, http.express)
