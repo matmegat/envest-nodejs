@@ -25,7 +25,11 @@ module.exports = function Post (db)
 	var Emitter = db.notifications.Emitter
 
 	var PostCreated = Emitter('post_created')
+	var PostCreatedA = Emitter('post_created', { group: 'admins' })
+
 	var PostUpdated = Emitter('post_updated')
+	var PostUpdatedA = Emitter('post_updated', { group: 'admins' })
+
 	var PostDeleted = Emitter('post_deleted')
 
 	var WrongPostType = Err('wrong_feed_post_type', 'Wrong Feed Post Type')
@@ -153,7 +157,7 @@ module.exports = function Post (db)
 
 				if (post_id)
 				{
-					PostUpdated(investor_id,
+					PostUpdatedA(
 					{
 						by: 'investor',
 						investor: [ ':user-id', investor_id ],
@@ -162,7 +166,7 @@ module.exports = function Post (db)
 				}
 				else
 				{
-					PostCreated(investor_id,
+					PostCreatedA(
 					{
 						by: 'investor',
 						investor: [ ':user-id', investor_id ],
