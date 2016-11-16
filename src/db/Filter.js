@@ -53,31 +53,25 @@ Filter.by.equal = Filter.by.operator('=')
 
 Filter.by.subscription = function (column)
 {
-	return function (queryset, values)
+	return function (queryset, value)
 	{
 		var validate_subs = validate.collection(['trial', 'standard', 'premium'])
 
-		values = values.split(',')
-		values[0] || (values = ['standard'])
+		validate_subs(value)
 
-		values.forEach(item =>
-		{
-			validate_subs(item)
-		})
-
-		if (includes(values, 'trial'))
+		if (value === 'trial')
 		{
 			queryset = queryset
-			.where('created_at', '>', moment().subtract(1, 'month'))
+			.andWhere('created_at', '>', moment().subtract(1, 'month'))
 		}
 
-		if (includes(values, 'standard'))
+		if (value === 'standard')
 		{
 			queryset = queryset
-			.where('created_at', '<=', moment().subtract(1, 'month'))
+			.andWhere('created_at', '<=', moment().subtract(1, 'month'))
 		}
 
-		if (includes(values, 'premium'))
+		if (value === 'premium')
 		{
 			queryset = queryset
 			.whereNotNull('subscriptions.user_id')
@@ -89,7 +83,6 @@ Filter.by.subscription = function (column)
 			'users.id',
 			'subscriptions.user_id'
 		)
-		.groupBy('type')
 	}
 }
 

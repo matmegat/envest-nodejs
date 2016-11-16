@@ -703,7 +703,7 @@ module.exports = function User (db, app)
 		})
 
 		return paginator.paginate(queryset, options.paginator)
-		.then((users) =>
+		.then(users =>
 		{
 			var response =
 			{
