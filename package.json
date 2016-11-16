@@ -70,9 +70,6 @@
     "composable-middleware":
       "^0.3",
 
-    "sendgrid":
-      "^2",
-
     "passport":
       "^0.3.2",
 
