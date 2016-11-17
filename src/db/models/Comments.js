@@ -85,7 +85,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var NewFeedComment = Emitter('new_feed_comment')
+	var NewFeedComment = Emitter('new_feed_comment', { same_id: 'user' })
 	var validate_comment_length = validate.length(1200)
 
 	comments.create = function (data)

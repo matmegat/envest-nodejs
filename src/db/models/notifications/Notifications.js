@@ -31,6 +31,8 @@ module.exports = function Notifications (db)
 	{
 		options = extend({}, options)
 
+		var same_id = SameId(options.same_id)
+
 		return function NotificationEmit (target_or_event, event, trx)
 		{
 			var emit =
@@ -41,9 +43,12 @@ module.exports = function Notifications (db)
 			if (! options.group) /* single */
 			{
 				expect(target_or_event).a('number')
+				var recipient_id = target_or_event
 
-				emit.recipient_id = target_or_event
+				emit.recipient_id = recipient_id
 				emit.event        = event
+
+				console.log(recipient_id, same_id(event))
 
 				return create(emit, trx)
 			}
@@ -199,6 +204,33 @@ module.exports = function Notifications (db)
 
 			return rs()
 		})
+	}
+
+
+	var Null = require('lodash/constant')(null)
+
+	function SameId (same_fn)
+	{
+		if (typeof same_fn === 'function')
+		{
+			return same_fn
+		}
+		else if (same_fn == null)
+		{
+			return Null
+		}
+		else if (typeof same_fn === 'string')
+		{
+			return (event) =>
+			{
+				var field = event[same_fn]
+
+				expect(field).an('array')
+				expect(field[0]).equal(':user-id')
+
+				return field[1]
+			}
+		}
 	}
 
 	return notifications
