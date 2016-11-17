@@ -145,11 +145,7 @@ module.exports = function Meta (investor, raw, options)
 		real_order_column: 'last_name',
 		default_direction: 'asc'
 	})
-	var paginator_booked = BookedPaginator(
-	{
-		order_column: 'last_name',
-		default_direction: 'asc'
-	})
+	var paginator_booked = BookedPaginator()
 
 	meta.list = function (options)
 	{
