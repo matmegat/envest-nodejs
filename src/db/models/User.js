@@ -492,16 +492,27 @@ module.exports = function User (db, app)
 	user.countBySubscriptions = () =>
 	{
 		var queryset = user.users_table()
-		.select(
-			knex.raw(`COALESCE(type, 'none') AS subscription`),
-			knex.raw(`COUNT(users.id) AS users`)
-		)
 		.leftJoin(
 			'subscriptions',
 			'users.id',
 			'subscriptions.user_id'
 		)
-		.groupBy('type')
+
+		queryset = queryset
+		.count('* as trial')
+		.from('users')
+		.where('created_at', '>', moment().subtract(1, 'month'))
+
+		queryset = queryset
+		.count('* as standard')
+		.from('users')
+		.where('created_at', '<=', moment().subtract(1, 'month'))
+		.whereNull('subscriptions.user_id')
+
+		queryset = queryset
+		.count('* as premium')
+		.from('users')
+		.whereNotNull('subscriptions.user_id')
 
 		return get_only_users(queryset)
 	}
