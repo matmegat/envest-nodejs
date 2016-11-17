@@ -67,7 +67,7 @@ module.exports = function Notifications (db)
 				/* shift */
 				trx = event
 
-				return create_broadcast(emit, trx)
+				return create_broadcast(emit, same_id(emit.event), trx)
 			}
 		}
 	}
@@ -87,12 +87,17 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	function create_broadcast (data, trx)
+	function create_broadcast (data, self_id, trx)
 	{
 		return validate_notification(data)
 		.then(() =>
 		{
 			var query_group = get_query_group(data)
+
+			if (self_id != null)
+			{
+				query_group.where('user_id', '<>', self_id)
+			}
 
 			return notifications.table(trx)
 			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
@@ -118,6 +123,7 @@ module.exports = function Notifications (db)
 			return rs(data)
 		})
 	}
+
 
 	var WrongUserGroup = Err('wrong_user_group', 'Wrong user group')
 
