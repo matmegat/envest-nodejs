@@ -112,11 +112,17 @@ module.exports = function Comments (db)
 			return db.feed.byId(data.feed_id, data.user_id)
 			.then(feed_item =>
 			{
-				return NewFeedComment(feed_item.investor.id,
+				var target_id = feed_item.investor.id
+				var emitter_id = data.user_id
+
+				if (target_id !== emitter_id)
 				{
-					feed_id: feed_item.id,
-					comment_id: comment_id
-				})
+					NewFeedComment(target_id,
+					{
+						feed_id: feed_item.id,
+						comment_id: comment_id
+					})
+				}
 			})
 		})
 	}
