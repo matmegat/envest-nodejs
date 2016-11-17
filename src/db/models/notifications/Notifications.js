@@ -161,9 +161,12 @@ module.exports = function Notifications (db)
 		}
 	}
 
+
 	notifications.list = function (options)
 	{
-		var queryset = byUserId(options.user_id)
+		var queryset = notifications.table()
+		.where('recipient_id', options.user_id)
+		.andWhere('is_viewed', false)
 
 		return paginator.paginate(queryset, options)
 		.then(seq =>
@@ -183,30 +186,10 @@ module.exports = function Notifications (db)
 		})
 	}
 
-	function byUserId (user_id)
-	{
-		return notifications.table()
-		.where('recipient_id', user_id)
-		.andWhere('is_viewed', false)
-	}
-
-	notifications.setViewed = function (recipient_id, viewed_ids)
-	{
-		return validate_viewed(viewed_ids)
-		.then(() =>
-		{
-			return notifications.table()
-			.update('is_viewed', true)
-			.whereIn('id', viewed_ids)
-			.andWhere('recipient_id', recipient_id)
-			.then(noop)
-		})
-	}
-
 
 	var WrongViewedId = Err('wrong_viewed_id', 'Wrong viewed id')
 
-	function validate_viewed (viewed_ids)
+	notifications.setViewed = function (recipient_id, viewed_ids)
 	{
 		return new Promise(rs =>
 		{
@@ -214,6 +197,14 @@ module.exports = function Notifications (db)
 			viewed_ids.forEach(validateId(WrongViewedId))
 
 			return rs()
+		})
+		.then(() =>
+		{
+			return notifications.table()
+			.update('is_viewed', true)
+			.whereIn('id', viewed_ids)
+			.andWhere('recipient_id', recipient_id)
+			.then(noop)
 		})
 	}
 
