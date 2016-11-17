@@ -68,6 +68,7 @@ Filter.by.subscription = function (column)
 					`created_at > ?`,
 					[moment().subtract(1, 'month')]
 				)
+				this.whereNull('subscriptions.user_id')
 			})
 		}
 

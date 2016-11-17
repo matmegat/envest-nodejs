@@ -492,13 +492,6 @@ module.exports = function User (db, app)
 	user.countBySubscriptions = () =>
 	{
 		var queryset = user.users_table()
-		.leftJoin(
-			'subscriptions',
-			'users.id',
-			'subscriptions.user_id'
-		)
-
-		// queryset = get_only_users(queryset)
 
 		return queryset
 		.distinct(
@@ -506,7 +499,16 @@ module.exports = function User (db, app)
 				(
 					SELECT COUNT(*)
 					FROM users
+					LEFT JOIN investors
+					ON users.id = investors.user_id
+					LEFT JOIN admins
+					ON users.id = admins.user_id
+					LEFT JOIN subscriptions
+					ON users.id = subscriptions.user_id
 					WHERE created_at > ?
+					AND subscriptions.user_id IS NULL
+					AND investors.user_id IS NULL
+					AND admins.user_id IS NULL
 				)
 				AS trial`, moment().subtract(1, 'month')
 			),
@@ -514,8 +516,16 @@ module.exports = function User (db, app)
 				(
 					SELECT COUNT(*)
 					FROM users
+					LEFT JOIN investors
+					ON users.id = investors.user_id
+					LEFT JOIN admins
+					ON users.id = admins.user_id
+					LEFT JOIN subscriptions
+					ON users.id = subscriptions.user_id
 					WHERE created_at <= ?
 					AND subscriptions.user_id IS NULL
+					AND investors.user_id IS NULL
+					AND admins.user_id IS NULL
 				)
 				AS standard`, moment().subtract(1, 'month')
 			),
@@ -523,7 +533,15 @@ module.exports = function User (db, app)
 				(
 					SELECT COUNT(*)
 					FROM users
+					LEFT JOIN investors
+					ON users.id = investors.user_id
+					LEFT JOIN admins
+					ON users.id = admins.user_id
+					LEFT JOIN subscriptions
+					ON users.id = subscriptions.user_id
 					WHERE subscriptions.user_id IS NOT NULL
+					AND investors.user_id IS NULL
+					AND admins.user_id IS NULL
 				)
 				AS premium`
 			)
