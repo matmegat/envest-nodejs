@@ -39,7 +39,6 @@ module.exports = function User (db, app)
 
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
-	var count = db.helpers.count
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')

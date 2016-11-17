@@ -1,8 +1,5 @@
 
 var extend = require('lodash/extend')
-var curry = require('lodash/curry')
-
-var count = require('../../db/helpers').count
 
 var toId = require('../../id').toId
 
@@ -11,6 +8,7 @@ var Err = require('../../Err')
 var WrongPageNumber = Err('wrong_page_number', 'Wrong Page Number')
 
 var defaults = require('./options')
+var Total = require('./Total')
 
 module.exports = function Paginator__Booked (paginator_options)
 {
@@ -45,26 +43,7 @@ module.exports = function Paginator__Booked (paginator_options)
 		return queryset
 	}
 
-	paginator.total = curry((count_queryset, response) =>
-	{
-		return count(count_queryset)
-		.then(total =>
-		{
-			response.total = total
-			response.pages = Math.ceil(total / paginator_options.limit)
-
-			return response
-		})
-	})
-
-	paginator.total.decorate = curry((name, count_queryset, response) =>
-	{
-		var response_alt = {}
-
-		response_alt[name] = response
-
-		return paginator.total(count_queryset, response_alt)
-	})
+	paginator.total = Total(paginator_options)
 
 	return paginator
 }

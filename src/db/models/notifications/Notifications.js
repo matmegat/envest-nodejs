@@ -22,7 +22,6 @@ module.exports = function Notifications (db)
 	var evaluate = Evaluate(db)
 
 	var knex = db.knex
-	var helpers = db.helpers
 
 	var paginator = Paginator()
 
