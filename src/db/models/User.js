@@ -833,9 +833,9 @@ module.exports = function User (db, app)
 
 			return change_name(trx, user_id, credentials)
 		})
-		.then(id =>
+		.then(() =>
 		{
-			return db.investor.all.is(id, trx)
+			return db.investor.all.is(user_id, trx)
 		})
 		.then(is_investor =>
 		{
@@ -847,15 +847,13 @@ module.exports = function User (db, app)
 					admin: [ ':user-id', whom_id ]
 				})
 			}
-			else
+
+			NameChangedU(
 			{
-				NameChangedU(
-				{
-					by: 'admin',
-					user: [ ':user-id', user_id ],
-					admin: [ ':user-id', whom_id ]
-				})
-			}
+				by: 'admin',
+				user: [ ':user-id', user_id ],
+				admin: [ ':user-id', whom_id ]
+			})
 		})
 	})
 
