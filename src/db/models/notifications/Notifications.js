@@ -214,15 +214,7 @@ module.exports = function Notifications (db)
 				return seq
 			})
 		})
-		.then(notifications =>
-		{
-			var response =
-			{
-				notifications: notifications
-			}
-
-			return paginator.total(count_queryset, response)
-		})
+		.then(paginator.total.decorate('notifications', count_queryset))
 	}
 
 

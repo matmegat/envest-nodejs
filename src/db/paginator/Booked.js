@@ -57,5 +57,14 @@ module.exports = function Paginator__Booked (paginator_options)
 		})
 	})
 
+	paginator.total.decorate = curry((name, count_queryset, response) =>
+	{
+		var response_alt = {}
+
+		response_alt[name] = response
+
+		return paginator.total(count_queryset, response_alt)
+	})
+
 	return paginator
 }

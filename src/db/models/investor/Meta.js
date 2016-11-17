@@ -174,15 +174,7 @@ module.exports = function Meta (investor, raw, options)
 
 		return paginator.paginate(queryset, options.paginator)
 		.then(transform_investors(null))
-		.then(investors =>
-		{
-			var response =
-			{
-				investors: investors
-			}
-
-			return paginator.total(count_queryset, response)
-		})
+		.then(paginator.total.decorate('investors', count_queryset))
 	}
 
 	var transform_investors = curry((trx, investors) =>

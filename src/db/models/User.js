@@ -703,15 +703,7 @@ module.exports = function User (db, app)
 		})
 
 		return paginator.paginate(queryset, options.paginator)
-		.then(users =>
-		{
-			var response =
-			{
-				users: users
-			}
-
-			return paginator.total(count_queryset, response)
-		})
+		.then(paginator.total.decorate('users', count_queryset))
 	}
 
 	function users_by_group (group)
