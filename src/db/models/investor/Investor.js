@@ -39,7 +39,11 @@ module.exports = function Investor (db, mailer, app)
 
 	var emits =
 	{
-		NewAdmin:    Emitter('investor_reports', { group: 'admins' }),
+		NewAdmin: Emitter('investor_reports',
+		{
+			group: 'admins',
+			same_id: 'admin'
+		}),
 		NewInvestor: Emitter('investor_reports')
 	}
 
@@ -80,6 +84,7 @@ module.exports = function Investor (db, mailer, app)
 			})
 		})
 	})
+
 
 	investor.create = knexed.transact(knex, (trx, data) =>
 	{
@@ -182,6 +187,7 @@ module.exports = function Investor (db, mailer, app)
 			.then(() => investor_entry)
 		})
 	})
+
 
 	var get_pic = require('lodash/fp/get')('profile_pic')
 
