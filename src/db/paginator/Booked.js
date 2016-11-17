@@ -1,6 +1,8 @@
 
 var extend = require('lodash/extend')
 
+var count = require('../../db/helpers').count
+
 var toId = require('../../id').toId
 
 var validateId = require('../../id').validate
@@ -42,12 +44,16 @@ module.exports = function Paginator__Booked (paginator_options)
 		return queryset
 	}
 
-	paginator.total = function (response, count)
+	paginator.total = function (response, count_queryset)
 	{
-		response.total = count
-		response.pages = Math.ceil(count / paginator_options.limit)
+		return count(count_queryset)
+		.then(total =>
+		{
+			response.total = total
+			response.pages = Math.ceil(total / paginator_options.limit)
 
-		return response
+			return response
+		})
 	}
 
 	return paginator

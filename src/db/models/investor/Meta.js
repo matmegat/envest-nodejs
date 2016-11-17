@@ -174,18 +174,14 @@ module.exports = function Meta (investor, raw, options)
 
 		return paginator.paginate(queryset, options.paginator)
 		.then(transform_investors(null))
-		.then((investors) =>
+		.then(investors =>
 		{
 			var response =
 			{
 				investors: investors
 			}
 
-			return helpers.count(count_queryset)
-			.then((count) =>
-			{
-				return paginator.total(response, count)
-			})
+			return paginator.total(response, count_queryset)
 		})
 	}
 

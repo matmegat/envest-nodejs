@@ -221,11 +221,7 @@ module.exports = function Notifications (db)
 				notifications: notifications
 			}
 
-			return helpers.count(count_queryset)
-			.then((count) =>
-			{
-				return paginator.total(response, count)
-			})
+			return paginator.total(response, count_queryset)
 		})
 	}
 
