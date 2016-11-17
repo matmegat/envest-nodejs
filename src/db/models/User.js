@@ -498,23 +498,36 @@ module.exports = function User (db, app)
 			'subscriptions.user_id'
 		)
 
-		queryset = queryset
-		.count('* as trial')
-		.from('users')
-		.where('created_at', '>', moment().subtract(1, 'month'))
+		// queryset = get_only_users(queryset)
 
-		queryset = queryset
-		.count('* as standard')
-		.from('users')
-		.where('created_at', '<=', moment().subtract(1, 'month'))
-		.whereNull('subscriptions.user_id')
-
-		queryset = queryset
-		.count('* as premium')
-		.from('users')
-		.whereNotNull('subscriptions.user_id')
-
-		return get_only_users(queryset)
+		return queryset
+		.distinct(
+			knex.raw(`
+				(
+					SELECT COUNT(*)
+					FROM users
+					WHERE created_at > ?
+				)
+				AS trial`, moment().subtract(1, 'month')
+			),
+			knex.raw(`
+				(
+					SELECT COUNT(*)
+					FROM users
+					WHERE created_at <= ?
+					AND subscriptions.user_id IS NULL
+				)
+				AS standard`, moment().subtract(1, 'month')
+			),
+			knex.raw(`
+				(
+					SELECT COUNT(*)
+					FROM users
+					WHERE subscriptions.user_id IS NOT NULL
+				)
+				AS premium`
+			)
+		)
 	}
 
 	user.countByEmailConfirms = () =>
