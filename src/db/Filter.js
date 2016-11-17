@@ -62,20 +62,35 @@ Filter.by.subscription = function (column)
 		if (value === 'trial')
 		{
 			queryset = queryset
-			.where('created_at', '>', moment().subtract(1, 'month'))
+			.andWhere(function()
+			{
+				this.whereRaw(
+					`created_at > ?`,
+					[moment().subtract(1, 'month')]
+				)
+			})
 		}
 
 		if (value === 'standard')
 		{
 			queryset = queryset
-			.where('created_at', '<=', moment().subtract(1, 'month'))
-			.whereNull('subscriptions.user_id')
+			.andWhere(function ()
+			{
+				this.whereRaw(
+					`created_at <= ?`,
+					[moment().subtract(1, 'month')]
+				)
+				this.whereNull('subscriptions.user_id')
+			})
 		}
 
 		if (value === 'premium')
 		{
 			queryset = queryset
-			.whereNotNull('subscriptions.user_id')
+			.andWhere(function ()
+			{
+				this.whereNotNull('subscriptions.user_id')
+			})
 		}
 
 		return queryset
