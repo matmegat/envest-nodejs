@@ -54,7 +54,7 @@ module.exports = function Notifications (db)
 				}
 				else
 				{
-					return Ok()
+					return Promise.resolve()
 				}
 			}
 			else /* group */
@@ -162,6 +162,33 @@ module.exports = function Notifications (db)
 	}
 
 
+	var Null = require('lodash/constant')(null)
+
+	function SameId (same_fn)
+	{
+		if (typeof same_fn === 'function')
+		{
+			return same_fn
+		}
+		else if (same_fn == null)
+		{
+			return Null
+		}
+		else if (typeof same_fn === 'string')
+		{
+			return (event) =>
+			{
+				var field = event[same_fn]
+
+				expect(field).an('array')
+				expect(field[0]).equal(':user-id')
+
+				return field[1]
+			}
+		}
+	}
+
+
 	notifications.list = function (options)
 	{
 		var queryset = notifications.table()
@@ -206,39 +233,6 @@ module.exports = function Notifications (db)
 			.andWhere('recipient_id', recipient_id)
 			.then(noop)
 		})
-	}
-
-
-	var Null = require('lodash/constant')(null)
-
-	function SameId (same_fn)
-	{
-		if (typeof same_fn === 'function')
-		{
-			return same_fn
-		}
-		else if (same_fn == null)
-		{
-			return Null
-		}
-		else if (typeof same_fn === 'string')
-		{
-			return (event) =>
-			{
-				var field = event[same_fn]
-
-				expect(field).an('array')
-				expect(field[0]).equal(':user-id')
-
-				return field[1]
-			}
-		}
-	}
-
-
-	function Ok ()
-	{
-		return Promise.resolve()
 	}
 
 
