@@ -120,7 +120,8 @@ module.exports = function Comments (db)
 					NewFeedComment(target_id,
 					{
 						feed_id: feed_item.id,
-						comment_id: comment_id
+						comment_id: comment_id,
+						user: [ ':user-id', emitter_id ]
 					})
 				}
 			})
