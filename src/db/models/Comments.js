@@ -115,15 +115,12 @@ module.exports = function Comments (db)
 				var target_id = feed_item.investor.id
 				var emitter_id = data.user_id
 
-				if (target_id !== emitter_id)
+				NewFeedComment(target_id,
 				{
-					NewFeedComment(target_id,
-					{
-						feed_id: feed_item.id,
-						comment_id: comment_id,
-						user: [ ':user-id', emitter_id ]
-					})
-				}
+					feed_id: feed_item.id,
+					comment_id: comment_id,
+					user: [ ':user-id', emitter_id ]
+				})
 			})
 		})
 	}

@@ -48,9 +48,14 @@ module.exports = function Notifications (db)
 				emit.recipient_id = recipient_id
 				emit.event        = event
 
-				console.log(recipient_id, same_id(event))
-
-				return create(emit, trx)
+				if (recipient_id !== same_id(event))
+				{
+					return create(emit, trx)
+				}
+				else
+				{
+					return Ok()
+				}
 			}
 			else /* group */
 			{
@@ -232,6 +237,13 @@ module.exports = function Notifications (db)
 			}
 		}
 	}
+
+
+	function Ok ()
+	{
+		return Promise.resolve()
+	}
+
 
 	return notifications
 }
