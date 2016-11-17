@@ -16,8 +16,7 @@ module.exports = function (db)
 	{
 		var options = pick(rq.query,
 		[
-			'max_id',
-			'since_id',
+			'page'
 		])
 
 		options.user_id    = rq.user.id

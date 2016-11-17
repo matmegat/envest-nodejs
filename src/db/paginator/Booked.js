@@ -19,7 +19,7 @@ module.exports = function Paginator__Booked (paginator_options)
 	{
 		options = extend({}, paginator_options, options)
 
-		//toId и validateId ипользуются т.к их логика подходит для проверки page
+		// toId и validateId ипользуются т.к их логика подходит для проверки page
 		var page = toId(options.page)
 
 		if (! page)

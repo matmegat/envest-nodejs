@@ -9,7 +9,7 @@ var each = require('lodash/forEach')
 
 var validate   = require('../../validate')
 var validateId = require('../../../id').validate
-var Paginator  = require('../../paginator/Ordered')
+var Paginator  = require('../../paginator/Booked')
 
 var Err = require('../../../Err')
 
@@ -22,6 +22,7 @@ module.exports = function Notifications (db)
 	var evaluate = Evaluate(db)
 
 	var knex = db.knex
+	var helpers = db.helpers
 
 	var paginator = Paginator()
 
@@ -195,6 +196,8 @@ module.exports = function Notifications (db)
 		.where('recipient_id', options.user_id)
 		.andWhere('is_viewed', false)
 
+		var count_queryset = queryset.clone()
+
 		return paginator.paginate(queryset, options)
 		.then(seq =>
 		{
@@ -209,6 +212,19 @@ module.exports = function Notifications (db)
 				})
 
 				return seq
+			})
+		})
+		.then(notifications =>
+		{
+			var response =
+			{
+				notifications: notifications
+			}
+
+			return helpers.count(count_queryset)
+			.then((count) =>
+			{
+				return paginator.total(response, count)
 			})
 		})
 	}
