@@ -150,11 +150,13 @@ module.exports = function (db)
 			{
 				var notify_data =
 				{
+					by: 'investor',
 					user: [ ':user-id', id ]
 				}
 
 				if (is_admin)
 				{
+					notify_data.by = 'admin'
 					notify_data.admin = [ ':user-id', whom_id ]
 				}
 

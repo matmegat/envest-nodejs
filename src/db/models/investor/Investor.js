@@ -135,13 +135,9 @@ module.exports = function Investor (db, mailer, app)
 			.then(() => user.password.reqReset(trx, data.email))
 			.then(() =>
 			{
-				/* notification: 'investor created'
-				 * - to all admins?
-				 * - to created investor?
-				 * */
-
 				var n1 = emits.NewAdmin(
 				{
+					by: 'admin',
 					investor: [ ':user-id', investor_id ],
 					admin:    [ ':user-id', data.admin_id ]
 				}
@@ -149,6 +145,7 @@ module.exports = function Investor (db, mailer, app)
 
 				var n2 = emits.NewInvestor(investor_id,
 				{
+					by: 'admin',
 					admin: [ ':user-id', data.admin_id ]
 				}
 				, trx)
