@@ -710,7 +710,7 @@ module.exports = function User (db, app)
 				users: users
 			}
 
-			return paginator.total(response, count_queryset)
+			return paginator.total(count_queryset, response)
 		})
 	}
 

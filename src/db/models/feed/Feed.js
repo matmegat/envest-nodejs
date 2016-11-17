@@ -252,7 +252,7 @@ var Feed = module.exports = function Feed (db)
 
 			if (paginator.total)
 			{
-				return paginator.total(response, count_queryset)
+				return paginator.total(count_queryset, response)
 			}
 
 			return response

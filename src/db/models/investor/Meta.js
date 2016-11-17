@@ -181,7 +181,7 @@ module.exports = function Meta (investor, raw, options)
 				investors: investors
 			}
 
-			return paginator.total(response, count_queryset)
+			return paginator.total(count_queryset, response)
 		})
 	}
 

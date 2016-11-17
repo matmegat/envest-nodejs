@@ -1,5 +1,6 @@
 
 var extend = require('lodash/extend')
+var curry = require('lodash/curry')
 
 var count = require('../../db/helpers').count
 
@@ -44,7 +45,7 @@ module.exports = function Paginator__Booked (paginator_options)
 		return queryset
 	}
 
-	paginator.total = function (response, count_queryset)
+	paginator.total = curry((count_queryset, response) =>
 	{
 		return count(count_queryset)
 		.then(total =>
@@ -54,7 +55,7 @@ module.exports = function Paginator__Booked (paginator_options)
 
 			return response
 		})
-	}
+	})
 
 	return paginator
 }
