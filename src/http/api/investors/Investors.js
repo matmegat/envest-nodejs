@@ -221,7 +221,15 @@ module.exports = function (db, http)
 	investors.express.get(
 		'/:id/cash-operations/', http.adminRequired, (rq, rs) =>
 	{
-		toss(rs, investors.model.portfolio.getCashOps(Number(rq.params.id)))
+		var options = {}
+
+		options.paginator = pick(rq.query,
+		[
+			'page'
+		])
+
+		toss(rs, investors.model.portfolio.getCashOps(
+			Number(rq.params.id), options))
 	})
 
 	return investors
