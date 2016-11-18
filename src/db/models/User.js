@@ -696,11 +696,6 @@ module.exports = function User (db, app)
 		)
 		.groupBy('users.id', 'email_confirms.new_email')
 
-		options.paginator = extend({}, options.paginator,
-		{
-			real_order_column: 'users.id'
-		})
-
 		return paginator.paginate(queryset, options.paginator)
 		.then(paginator.total.decorate('users', count_queryset))
 	}

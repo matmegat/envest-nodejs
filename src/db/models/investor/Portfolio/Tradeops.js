@@ -241,11 +241,6 @@ module.exports = function Tradeops (db, portfolio)
 
 		var count_queryset = queryset.clone()
 
-		options.paginator = extend({}, options.paginator,
-		{
-			real_order_column: 'tradeops.timestamp',
-		})
-
 		return db.investor.getActionMode(whom_id, investor_id)
 		.then(mode =>
 		{
