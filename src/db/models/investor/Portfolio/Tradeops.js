@@ -265,11 +265,7 @@ module.exports = function Tradeops (db, portfolio)
 				})
 			}
 
-			return count(count_queryset)
-			.then(count =>
-			{
-				return paginator.total(response, count)
-			})
+			return paginator.total(count_queryset, response)
 		})
 	}
 
