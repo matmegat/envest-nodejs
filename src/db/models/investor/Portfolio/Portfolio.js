@@ -30,6 +30,8 @@ var Err = require('../../../../Err')
 
 var Parser = require('./Parser')
 
+var knexed = require('../../../knexed')
+
 var NonTradeOp = require('./TradeOp/NonTradeOp')
 
 module.exports = function Portfolio (db, investor)
@@ -47,6 +49,8 @@ module.exports = function Portfolio (db, investor)
 	var grid = Grid(investor, portfolio)
 
 	var knex = db.knex
+
+	var tradeops_table = knexed(knex, 'tradeops')
 
 	// get
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
@@ -468,6 +472,23 @@ module.exports = function Portfolio (db, investor)
 		.then(noop)
 	})
 
+
+	portfolio.getCashOps = knexed.transact(knex, (trx, investor_id) =>
+	{
+		return tradeops_table()
+		.where('investor_id', investor_id)
+		.then(ops =>
+		{
+			return ops.map(op =>
+			{
+				return {
+					timestamp: op.timestamp,
+					type: op.data.type,
+					amount: op.data.amount
+				}
+			})
+		})
+	})
 
 	extend(portfolio, Parser(portfolio, db))
 

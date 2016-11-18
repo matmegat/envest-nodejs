@@ -218,5 +218,11 @@ module.exports = function (db, http)
 		toss(rs, investors.model.portfolio.grid.ir(rq.params.id))
 	})
 
+	investors.express.get(
+		'/:id/cash-operations/', http.adminRequired, (rq, rs) =>
+	{
+		toss(rs, investors.model.portfolio.getCashOps(Number(rq.params.id)))
+	})
+
 	return investors
 }
