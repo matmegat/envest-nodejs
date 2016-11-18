@@ -10,6 +10,10 @@ properties:
   type:
     type: string
     description: Type of notification
+  target:
+    type: string
+    description: target user or group of notification,
+      values currently in use are `investor` and `admins`
   event:
     type: string
     description: JSON object events
@@ -22,6 +26,7 @@ properties:
 required:
 - id
 - type
+- target
 - event
 - recipient_id
 - is_viewed
