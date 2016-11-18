@@ -30,9 +30,6 @@ var Err = require('../../../../Err')
 
 var Parser = require('./Parser')
 
-var knexed = require('../../../knexed')
-var PaginatorBooked = require('../../../paginator/Booked')
-
 var NonTradeOp = require('./TradeOp/NonTradeOp')
 
 module.exports = function Portfolio (db, investor)
@@ -50,9 +47,6 @@ module.exports = function Portfolio (db, investor)
 	var grid = Grid(investor, portfolio)
 
 	var knex = db.knex
-	var count = db.helpers.count
-
-	var tradeops_table = knexed(knex, 'tradeops')
 
 	// get
 	portfolio.byId = knexed.transact(knex, (trx, investor_id, options) =>
@@ -472,48 +466,6 @@ module.exports = function Portfolio (db, investor)
 			}
 		})
 		.then(noop)
-	})
-
-	var paginator = PaginatorBooked()
-	var AdminOrOwnerRequired =
-		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
-
-	portfolio.getCashOps = knexed.transact(
-		knex, (trx, investor_id, whom_id, options) =>
-	{
-		var queryset = tradeops_table()
-		.where('investor_id', investor_id)
-
-		var count_queryset = queryset.clone()
-
-		options.paginator = extend({}, options.paginator,
-		{
-			real_order_column: 'tradeops.timestamp',
-		})
-
-		
-
-		return paginator.paginate(queryset, options.paginator)
-		.then(ops =>
-		{
-			var response =
-			{
-				cash_ops: ops.map(op =>
-				{
-					return {
-						timestamp: op.timestamp,
-						type: op.data.type,
-						amount: op.data.amount
-					}
-				})
-			}
-
-			return count(count_queryset)
-			.then(count =>
-			{
-				return paginator.total(response, count)
-			})
-		})
 	})
 
 	extend(portfolio, Parser(portfolio, db))

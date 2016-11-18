@@ -228,10 +228,15 @@ module.exports = function (db, http)
 			'page'
 		])
 
+		options.filter = pick(rq.query,
+		[
+			'type'
+		])
+
 		var investor_id = Number(rq.params.id)
 		var whom_id = rq.user.id
 
-		toss(rs, investors.model.portfolio.getCashOps(
+		toss(rs, investors.model.portfolio.tradeops.getCashOps(
 			investor_id, whom_id, options))
 	})
 

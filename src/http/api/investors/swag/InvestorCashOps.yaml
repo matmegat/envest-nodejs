@@ -11,6 +11,10 @@ get:
     in: query
     type: integer
     description: Page number
+  - name: type
+    in: query
+    type: string
+    description: Filter by type [withdraw || fee || interest || deposit]
   responses:
     200:
       description: Investor
