@@ -219,7 +219,7 @@ module.exports = function (db, http)
 	})
 
 	investors.express.get(
-		'/:id/cash-operations/', http.adminOrInvestorRequired, (rq, rs) =>
+		'/:id/cash-operations/', authRequired, (rq, rs) =>
 	{
 		var options = {}
 

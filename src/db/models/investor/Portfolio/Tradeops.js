@@ -246,7 +246,16 @@ module.exports = function Tradeops (db, portfolio)
 			real_order_column: 'tradeops.timestamp',
 		})
 
-		return paginator.paginate(queryset, options.paginator)
+		return db.investor.getActionMode(whom_id, investor_id)
+		.then(mode =>
+		{
+			if (! mode)
+			{
+				throw AdminOrOwnerRequired()
+			}
+
+			return paginator.paginate(queryset, options.paginator)
+		})
 		.then(ops =>
 		{
 			var response =
