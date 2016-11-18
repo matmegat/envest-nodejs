@@ -493,7 +493,7 @@ module.exports = function Portfolio (db, investor)
 		{
 			var response =
 			{
-				ops: ops.map(op =>
+				cash_ops: ops.map(op =>
 				{
 					return {
 						timestamp: op.timestamp,

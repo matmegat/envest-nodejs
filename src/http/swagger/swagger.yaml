@@ -128,6 +128,9 @@ paths:
   '/investors/{investor_id}/upload-history':
     $ref: ../api/investors/swag/Post-UploadCSV.yaml
 
+  '/investors/{investor_id}/cash-operations':
+    $ref: ../api/investors/swag/InvestorCashOps.yaml
+
   '/investors/holdings/remove':
     $ref: ../api/investors/swag/HoldingsRemove.yaml
 

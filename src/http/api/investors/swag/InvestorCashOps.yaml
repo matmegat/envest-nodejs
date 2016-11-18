@@ -1,0 +1,42 @@
+get:
+  description:
+    Get nontrade(cash) operations for investor
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor ID
+    required: true
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  responses:
+    200:
+      description: Investor
+      schema:
+        title: List of investor cash-operations
+        type: array
+        items:
+        - type: object
+          properties:
+            timestamp:
+              type: string
+              format: datetime
+              description: Operation date
+            type:
+              type: string
+              description: Operation type deposit || withdraw || interest || fee
+            amount:
+              type: number
+              description: Operation amount
+          required:
+            - timestamp
+            - type
+            - amount
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors
