@@ -491,16 +491,9 @@ module.exports = function Portfolio (db, investor)
 			real_order_column: 'tradeops.timestamp',
 		})
 
-		return investor.getActionMode(whom_id, investor_id)
-		.then(mode =>
-		{
-			if (! mode)
-			{
-				throw AdminOrOwnerRequired()
-			}
+		
 
-			return paginator.paginate(queryset, options.paginator)
-		})
+		return paginator.paginate(queryset, options.paginator)
 		.then(ops =>
 		{
 			var response =
