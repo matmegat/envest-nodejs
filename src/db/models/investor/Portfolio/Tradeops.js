@@ -2,6 +2,7 @@
 
 var expect = require('chai').expect
 
+var extend = require('lodash/extend')
 var invoke = require('lodash/invokeMap')
 var moment = require('moment')
 
@@ -14,11 +15,15 @@ var Op = require('./TradeOp/Op')
 var pickOp = require('./TradeOp/pick-Op')
 var DeleteOp = require('./TradeOp/DeleteOp')
 
+var PaginatorBooked = require('../../../paginator/Booked')
+var Filter = require('../../../Filter')
+
 module.exports = function Tradeops (db, portfolio)
 {
 	var knex = db.knex
 
 	var table = knexed(knex, 'tradeops')
+	var count = db.helpers.count
 
 	var tradeops = {}
 
@@ -216,6 +221,60 @@ module.exports = function Tradeops (db, portfolio)
 			if (! rows.length) { return null }
 
 			return moment(rows[0].timestamp)
+		})
+	}
+
+	var paginator = PaginatorBooked()
+	var filter = Filter({
+		type: Filter.by.cash_op_type('type')
+	})
+	var AdminOrOwnerRequired =
+		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
+
+	tradeops.getCashOps = (investor_id, whom_id, options) =>
+	{
+		var queryset = table()
+		.where('investor_id', investor_id)
+		.andWhere('type', 'nontrade')
+
+		queryset = filter(queryset, options.filter)
+
+		var count_queryset = queryset.clone()
+
+		options.paginator = extend({}, options.paginator,
+		{
+			real_order_column: 'tradeops.timestamp',
+		})
+
+		return db.investor.getActionMode(whom_id, investor_id)
+		.then(mode =>
+		{
+			if (! mode)
+			{
+				throw AdminOrOwnerRequired()
+			}
+
+			return paginator.paginate(queryset, options.paginator)
+		})
+		.then(ops =>
+		{
+			var response =
+			{
+				cash_ops: ops.map(op =>
+				{
+					return {
+						timestamp: op.timestamp,
+						type: op.data.type,
+						amount: op.data.amount
+					}
+				})
+			}
+
+			return count(count_queryset)
+			.then(count =>
+			{
+				return paginator.total(response, count)
+			})
 		})
 	}
 

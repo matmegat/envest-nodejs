@@ -218,5 +218,27 @@ module.exports = function (db, http)
 		toss(rs, investors.model.portfolio.grid.ir(rq.params.id))
 	})
 
+	investors.express.get(
+		'/:id/cash-operations/', authRequired, (rq, rs) =>
+	{
+		var options = {}
+
+		options.paginator = pick(rq.query,
+		[
+			'page'
+		])
+
+		options.filter = pick(rq.query,
+		[
+			'type'
+		])
+
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+
+		toss(rs, investors.model.portfolio.tradeops.getCashOps(
+			investor_id, whom_id, options))
+	})
+
 	return investors
 }

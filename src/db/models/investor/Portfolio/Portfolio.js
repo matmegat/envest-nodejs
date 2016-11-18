@@ -468,7 +468,6 @@ module.exports = function Portfolio (db, investor)
 		.then(noop)
 	})
 
-
 	extend(portfolio, Parser(portfolio, db))
 
 	return portfolio

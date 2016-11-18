@@ -208,6 +208,20 @@ Filter.by.query = function by_query (raw_joins)
 	}
 }
 
+var validate_cash_ops =
+	validate.collection(['withdraw', 'deposit', 'fee', 'interest'])
+
+Filter.by.cash_op_type = function by_cash_op_type ()
+{
+	return function (queryset, value)
+	{
+		validate_cash_ops(value)
+
+		return queryset
+		.where(raw(`data`), '@>', { type: value })
+	}
+}
+
 
 var Symbl = require('./models/symbols/Symbl')
 
