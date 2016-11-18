@@ -8,6 +8,7 @@ var Err = require('../../Err')
 var WrongPageNumber = Err('wrong_page_number', 'Wrong Page Number')
 
 var defaults = require('./options')
+var Total = require('./Total')
 
 module.exports = function Paginator__Booked (paginator_options)
 {
@@ -19,7 +20,7 @@ module.exports = function Paginator__Booked (paginator_options)
 	{
 		options = extend({}, paginator_options, options)
 
-		//toId и validateId ипользуются т.к их логика подходит для проверки page
+		// toId и validateId ипользуются т.к их логика подходит для проверки page
 		var page = toId(options.page)
 
 		if (! page)
@@ -42,13 +43,7 @@ module.exports = function Paginator__Booked (paginator_options)
 		return queryset
 	}
 
-	paginator.total = function (response, count)
-	{
-		response.total = count
-		response.pages = Math.ceil(count / paginator_options.limit)
-
-		return response
-	}
+	paginator.total = Total(paginator_options)
 
 	return paginator
 }

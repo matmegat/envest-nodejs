@@ -145,11 +145,7 @@ module.exports = function Meta (investor, raw, options)
 		real_order_column: 'last_name',
 		default_direction: 'asc'
 	})
-	var paginator_booked = BookedPaginator(
-	{
-		order_column: 'last_name',
-		default_direction: 'asc'
-	})
+	var paginator_booked = BookedPaginator()
 
 	meta.list = function (options)
 	{
@@ -178,19 +174,7 @@ module.exports = function Meta (investor, raw, options)
 
 		return paginator.paginate(queryset, options.paginator)
 		.then(transform_investors(null))
-		.then((investors) =>
-		{
-			var response =
-			{
-				investors: investors
-			}
-
-			return helpers.count(count_queryset)
-			.then((count) =>
-			{
-				return paginator.total(response, count)
-			})
-		})
+		.then(paginator.total.decorate('investors', count_queryset))
 	}
 
 	var transform_investors = curry((trx, investors) =>

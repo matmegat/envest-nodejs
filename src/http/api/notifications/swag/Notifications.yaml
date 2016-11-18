@@ -1,4 +1,18 @@
-type: array
-title: Notifications
-items:
-- $ref: ./NotificationItem.yaml
+type: object
+title: Paged notifications response
+properties:
+  notifications:
+    type: array
+    title: Notifications
+    items:
+    - $ref: ./NotificationItem.yaml
+  total:
+    type: integer
+    description: Amount of notifications
+  pages:
+    type: integer
+    description: Amount of pages
+required:
+- notifications
+- total
+- pages

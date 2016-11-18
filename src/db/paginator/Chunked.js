@@ -5,11 +5,12 @@ var expect = require('chai').expect
 
 var toId = require('../../id').toId
 
+var Err = require('../../Err')
+
 var one = require('../helpers').one
 
 var defaults = require('./options')
-
-var Err = require('../../Err')
+var Total = require('./Total')
 
 defaults = extend({}, defaults,
 {
@@ -29,14 +30,6 @@ module.exports = function Paginator__Chunked (paginator_options)
 	expect(paginator_options.table, 'paginator target relation').a('function')
 
 	var table = paginator_options.table
-
-	paginator.total = function (response, count)
-	{
-		response.total = count
-		response.pages = Math.ceil(count / paginator_options.limit)
-
-		return response
-	}
 
 	paginator.paginate = function (queryset, options)
 	{
@@ -138,6 +131,10 @@ module.exports = function Paginator__Chunked (paginator_options)
 			default: throw Error('Invalid argument')
 		}
 	}
+
+
+	paginator.total = Total(paginator_options)
+
 
 	return paginator
 }

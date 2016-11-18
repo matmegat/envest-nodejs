@@ -4,8 +4,6 @@ var Err = require('../../Err')
 var expect = require('chai').expect
 var mime = require('mime')
 
-var validateId = require('../../id').validate
-
 var lwip = require('lwip')
 var round = require('lodash/round')
 
@@ -68,30 +66,34 @@ module.exports = function (db)
 
 	var static = db.static
 	var UpdateErr = Err('update_pic_error', 'Update Pic Error')
+
 	var WrongID = Err('wrong_id', 'Wrong ID')
+	var validate_id = require('../../id').validate(WrongID)
 
 	function update_on_model (getter, setter, emitter, validations)
 	{
-		return (file, id, target_user_id) =>
+		return (file, whom_id, target_user_id) =>
 		{
 			var new_pic
 			var old_pic
+
+			var id = whom_id
+			var is_admin = false
 
 			return Promise.resolve()
 			.then(() =>
 			{
 				if (target_user_id)
 				{
-					var validate_id = validateId(WrongID)
-
 					validate_id(target_user_id)
 
-					return ensure_can_upload(id, target_user_id)
+					return ensure_can_upload(whom_id, target_user_id)
 					.then(mode =>
 					{
 						if (mode === 'mode:admin')
 						{
 							id = target_user_id
+							is_admin = true
 						}
 
 						return db.investor.all.ensure(id)
@@ -146,7 +148,19 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				emitter(id, { user: [ ':user-id', id ] })
+				var notify_data =
+				{
+					by: 'investor',
+					user: [ ':user-id', id ]
+				}
+
+				if (is_admin)
+				{
+					notify_data.by = 'admin'
+					notify_data.admin = [ ':user-id', whom_id ]
+				}
+
+				emitter(id, notify_data)
 			})
 			.then(() =>
 			{
@@ -198,7 +212,7 @@ module.exports = function (db)
 			}
 			else if (is_investor)
 			{
-				if (! (whom_id === target_user_id))
+				if (whom_id !== target_user_id)
 				{
 					throw AdminOrOwnerRequired()
 				}

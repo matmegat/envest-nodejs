@@ -39,7 +39,6 @@ module.exports = function User (db, app)
 
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
-	var count = db.helpers.count
 
 	user.users_table    = knexed(knex, 'users')
 	user.email_confirms = knexed(knex, 'email_confirms')
@@ -703,19 +702,7 @@ module.exports = function User (db, app)
 		})
 
 		return paginator.paginate(queryset, options.paginator)
-		.then((users) =>
-		{
-			var response =
-			{
-				users: users
-			}
-
-			return count(count_queryset)
-			.then(count =>
-			{
-				return paginator.total(response, count)
-			})
-		})
+		.then(paginator.total.decorate('users', count_queryset))
 	}
 
 	function users_by_group (group)
@@ -833,9 +820,9 @@ module.exports = function User (db, app)
 
 			return change_name(trx, user_id, credentials)
 		})
-		.then(id =>
+		.then(() =>
 		{
-			return db.investor.all.is(id, trx)
+			return db.investor.all.is(user_id, trx)
 		})
 		.then(is_investor =>
 		{
@@ -843,17 +830,17 @@ module.exports = function User (db, app)
 			{
 				NameChangedI(user_id,
 				{
+					by: 'admin',
 					admin: [ ':user-id', whom_id ]
 				})
 			}
-			else
+
+			NameChangedU(
 			{
-				NameChangedU(
-				{
-					user: [ ':user-id', user_id ],
-					admin: [ ':user-id', whom_id ]
-				})
-			}
+				by: 'admin',
+				user: [ ':user-id', user_id ],
+				admin: [ ':user-id', whom_id ]
+			})
 		})
 	})
 

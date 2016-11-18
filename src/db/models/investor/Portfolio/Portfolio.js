@@ -460,6 +460,7 @@ module.exports = function Portfolio (db, investor)
 			{
 				return CashManaged(investor_id,
 				{
+					by: 'admin',
 					admin: [ ':user-id', whom_id ],
 					investor_id: [ ':user-id', investor_id ],
 				}, trx)

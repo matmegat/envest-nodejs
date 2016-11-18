@@ -85,7 +85,7 @@ module.exports = function Comments (db)
 		.where('feed_id', feed_id)
 	}
 
-	var NewFeedComment = Emitter('new_feed_comment')
+	var NewFeedComment = Emitter('new_feed_comment', { same_id: 'user' })
 	var validate_comment_length = validate.length(1200)
 
 	comments.create = function (data)
@@ -112,10 +112,14 @@ module.exports = function Comments (db)
 			return db.feed.byId(data.feed_id, data.user_id)
 			.then(feed_item =>
 			{
-				return NewFeedComment(feed_item.investor.id,
+				var target_id = feed_item.investor.id
+				var emitter_id = data.user_id
+
+				NewFeedComment(target_id,
 				{
 					feed_id: feed_item.id,
-					comment_id: comment_id
+					comment_id: comment_id,
+					user: [ ':user-id', emitter_id ]
 				})
 			})
 		})
