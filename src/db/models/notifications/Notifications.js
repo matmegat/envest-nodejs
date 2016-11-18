@@ -197,6 +197,8 @@ module.exports = function Notifications (db)
 
 		var count_queryset = queryset.clone()
 
+		queryset.orderBy('timestamp', 'desc')
+
 		return paginator.paginate(queryset, options)
 		.then(seq =>
 		{
