@@ -475,8 +475,11 @@ module.exports = function Portfolio (db, investor)
 	})
 
 	var paginator = PaginatorBooked()
+	var AdminOrOwnerRequired =
+		Err('admin_or_owner_required', 'Admin Or Investor-Owner Required')
 
-	portfolio.getCashOps = knexed.transact(knex, (trx, investor_id, options) =>
+	portfolio.getCashOps = knexed.transact(
+		knex, (trx, investor_id, whom_id, options) =>
 	{
 		var queryset = tradeops_table()
 		.where('investor_id', investor_id)
@@ -488,7 +491,16 @@ module.exports = function Portfolio (db, investor)
 			real_order_column: 'tradeops.timestamp',
 		})
 
-		return paginator.paginate(queryset, options.paginator)
+		return investor.getActionMode(whom_id, investor_id)
+		.then(mode =>
+		{
+			if (! mode)
+			{
+				throw AdminOrOwnerRequired()
+			}
+
+			return paginator.paginate(queryset, options.paginator)
+		})
 		.then(ops =>
 		{
 			var response =

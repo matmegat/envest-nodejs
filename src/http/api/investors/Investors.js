@@ -219,7 +219,7 @@ module.exports = function (db, http)
 	})
 
 	investors.express.get(
-		'/:id/cash-operations/', http.adminRequired, (rq, rs) =>
+		'/:id/cash-operations/', http.adminOrInvestorRequired, (rq, rs) =>
 	{
 		var options = {}
 
@@ -228,8 +228,11 @@ module.exports = function (db, http)
 			'page'
 		])
 
+		var investor_id = Number(rq.params.id)
+		var whom_id = rq.user.id
+
 		toss(rs, investors.model.portfolio.getCashOps(
-			Number(rq.params.id), options))
+			investor_id, whom_id, options))
 	})
 
 	return investors
