@@ -205,6 +205,8 @@ module.exports = function Notifications (db)
 
 		queryset.orderBy('timestamp', 'desc')
 
+		options.page || (options.page = 1)
+
 		return paginator.paginate(queryset, options)
 		.then(seq =>
 		{
