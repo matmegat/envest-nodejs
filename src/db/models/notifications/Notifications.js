@@ -37,7 +37,8 @@ module.exports = function Notifications (db)
 		{
 			var emit =
 			{
-				type: type
+				type: type,
+				target: 'investor'
 			}
 
 			if (! options.group) /* single */
@@ -61,6 +62,7 @@ module.exports = function Notifications (db)
 			{
 				expect(target_or_event).a('object')
 
+				emit.target = options.group
 				emit.group = options.group
 				emit.event = target_or_event
 
@@ -100,7 +102,9 @@ module.exports = function Notifications (db)
 			}
 
 			return notifications.table(trx)
-			.insert(knex.raw('(type, event, recipient_id) ?', [query_group]))
+			.insert(knex.raw(
+				'(type, target, event, recipient_id) ?', [ query_group ]
+			))
 			.then(noop)
 		})
 	}
@@ -134,7 +138,9 @@ module.exports = function Notifications (db)
 		if (groups.isAdmin(data.group) || groups.isInvestor(data.group))
 		{
 			return knex
-			.select(knex.raw('?, ?, user_id', [data.type, data.event]))
+			.select(knex.raw(
+				'?, ?, ?, user_id', [ data.type, data.target, data.event ]
+			))
 			.from(data.group)
 		}
 		else if (groups.isUser(data.group))
