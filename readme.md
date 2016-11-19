@@ -55,6 +55,6 @@ npm run db-rollback # CAREFUL; rollbacks last batch
 **Swagger** DOC: open in browser `/docs/`.
 
 Backend instances:
-* [dev /docs/](http://ec2-35-161-140-145.us-west-2.compute.amazonaws.com:8000/docs/)
-* [test /docs/](http://ec2-35-161-140-145.us-west-2.compute.amazonaws.com:8080/docs/)
-* [staging /docs/](http://ec2-35-161-140-145.us-west-2.compute.amazonaws.com/docs/)
+* [dev /docs/](ec2-35-163-203-21.us-west-2.compute.amazonaws.com:8000/docs/)
+* [test /docs/](ec2-35-163-203-21.us-west-2.compute.amazonaws.com:8080/docs/)
+* [staging /docs/](ec2-35-163-203-21.us-west-2.compute.amazonaws.com/docs/)
