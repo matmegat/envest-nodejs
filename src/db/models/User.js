@@ -223,7 +223,6 @@ module.exports = function User (db, app)
 				user_data.subscription = subscription
 
 				return get_total_payment_days(id)
-				
 			})
 			.then(total_payment_days =>
 			{

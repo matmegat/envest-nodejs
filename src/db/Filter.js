@@ -53,7 +53,7 @@ Filter.by.equal = Filter.by.operator('=')
 
 var validate_subs = validate.collection(['trial', 'standard', 'premium'])
 
-Filter.by.subscription = function (column)
+Filter.by.subscription = function ()
 {
 	return function (queryset, values)
 	{
@@ -64,7 +64,7 @@ Filter.by.subscription = function (column)
 
 		if (includes(values, 'trial'))
 		{
-			queryset.orWhere(function()
+			queryset.orWhere(function ()
 			{
 				this.whereRaw(
 					`created_at > ?`,
