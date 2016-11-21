@@ -13,7 +13,7 @@ var Notifications = require('./models/notifications/Notifications')
 var Static = require('./models/Static')
 var Feedback = require('./models/Feedback')
 var Pic = require('./models/Pic')
-var NetvestSubsc = require('./models/subscription/NetvestSubsc')
+var Subscription = require('./models/subscription/Subscription')
 var Symbols = require('./models/symbols/Symbols')
 var Watchlist = require('./models/watchlist/Watchlist')
 
@@ -86,7 +86,7 @@ module.exports = function name (app)
 
 	db.user = User(db, app)
 
-	db.subscr = NetvestSubsc(db, cfg.stripe, app.mail)
+	db.subscr = Subscription(db, cfg.stripe, app.mail)
 	db.auth  = Auth(db, app.mail)
 	db.admin = Admin(db)
 
