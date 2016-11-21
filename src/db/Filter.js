@@ -55,11 +55,14 @@ var validate_subs = validate.collection(['trial', 'standard', 'premium'])
 
 Filter.by.subscription = function (column)
 {
-	return function (queryset, value)
+	return function (queryset, values)
 	{
-		validate_subs(value)
+		values = values.split(',')
+		values[0] || (values = [ 'standard' ])
 
-		if (value === 'trial')
+		values.forEach(validate_subs)
+
+		if (includes(values, 'trial'))
 		{
 			queryset.orWhere(function()
 			{
@@ -71,7 +74,7 @@ Filter.by.subscription = function (column)
 			})
 		}
 
-		if (value === 'standard')
+		if (includes(values, 'standard'))
 		{
 			queryset.orWhere(function ()
 			{
@@ -83,7 +86,7 @@ Filter.by.subscription = function (column)
 			})
 		}
 
-		if (value === 'premium')
+		if (includes(values, 'premium'))
 		{
 			queryset.orWhere(function ()
 			{
