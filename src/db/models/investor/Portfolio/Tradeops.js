@@ -2,7 +2,6 @@
 
 var expect = require('chai').expect
 
-var extend = require('lodash/extend')
 var invoke = require('lodash/invokeMap')
 var moment = require('moment')
 
@@ -23,7 +22,6 @@ module.exports = function Tradeops (db, portfolio)
 	var knex = db.knex
 
 	var table = knexed(knex, 'tradeops')
-	var count = db.helpers.count
 
 	var tradeops = {}
 
