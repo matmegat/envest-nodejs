@@ -92,6 +92,22 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.getTotalPaymentDays = (user_id) =>
+	{
+		return netvest_subscr.getSubscription(user_id)
+		.then(subscr =>
+		{
+			var start_time = +new Date(subscr.start_time)
+			var end_time = +new Date(subscr.end_time)
+
+			return Math.floor((end_time - start_time) / 24 / 60 / 60 / 1000)
+		})
+		.catch(() =>
+		{
+			return 0
+		})
+	}
+
 	netvest_subscr.cancelSubscription = (user_id) =>
 	{
 		return netvest_subscr.table()
