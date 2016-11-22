@@ -2,6 +2,8 @@
 
 require('console-ultimate/global').replace()
 
+var show_slack = true
+
 var f = require('util').format
 var home = require('home').resolve
 
@@ -249,7 +251,10 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	rev()
 	.then(fullrev =>
 	{
-		/* return */ slack.success(env, fullrev)
+		if (show_slack)
+		{
+			/* return */ slack.success(env, fullrev)
+		}
 	})
 })
 .catch(error =>
@@ -257,9 +262,12 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	console.error(error)
 	console.error(error.stack)
 
-	slack.failure(env)
-	.then(() =>
+	if (show_slack)
 	{
-		process.exit(1)
-	})
+		return slack.failure(env)
+	}
+})
+.then(() =>
+{
+	process.exit(1)
 })
