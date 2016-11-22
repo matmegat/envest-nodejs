@@ -17,7 +17,7 @@ get:
     in: query
     type: string
     description: |
-      Subscription types [standard || trial || premium]
+      Subscription types (separated by commas) [standard || trial || premium]
 
   responses:
     200:
