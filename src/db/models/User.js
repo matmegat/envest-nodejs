@@ -41,7 +41,25 @@ module.exports = function User (db, app)
 	var oneMaybe = db.helpers.oneMaybe
 	var count = db.helpers.count
 
-	user.users_table    = knexed(knex, 'users')
+	user.users_table = knexed(knex, 'users')
+	user.users_table_only = (trx) =>
+	{
+		return user.users_table(trx)
+		.leftJoin(
+			'investors',
+			'users.id',
+			'investors.user_id'
+		)
+		.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+		)
+		.whereNull('investors.user_id')
+		.whereNull('admins.user_id')
+	}
+
+
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 
@@ -490,19 +508,17 @@ module.exports = function User (db, app)
 
 	user.usersSubscriptions = () =>
 	{
-		var queryset = user.users_table()
+		return user.users_table_only()
 		.leftJoin(
 			'subscriptions',
 			'users.id',
 			'subscriptions.user_id'
 		)
-
-		return get_only_users(queryset)
 	}
 
 	user.countByEmailConfirms = () =>
 	{
-		var queryset = user.users_table()
+		return user.users_table_only()
 		.select(
 			knex.raw(`
 				COUNT(email) as confirmed_users,
@@ -513,26 +529,7 @@ module.exports = function User (db, app)
 			'users.id',
 			'email_confirms.user_id'
 		)
-
-		return get_only_users(queryset)
 		.then(oneMaybe)
-	}
-
-	function get_only_users (queryset)
-	{
-		return queryset
-		.leftJoin(
-			'investors',
-			'users.id',
-			'investors.user_id'
-		)
-		.leftJoin(
-			'admins',
-			'users.id',
-			'admins.user_id'
-		)
-		.whereNull('investors.user_id')
-		.whereNull('admins.user_id')
 	}
 
 	function createFacebookUser (data, trx)
@@ -716,7 +713,7 @@ module.exports = function User (db, app)
 	{
 		if (user.groups.isUser(group))
 		{
-			return get_only_users(user.users_table())
+			return user.users_table_only()
 		}
 		else if (user.groups.isAdmin(group))
 		{
