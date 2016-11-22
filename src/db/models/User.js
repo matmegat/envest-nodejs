@@ -229,8 +229,7 @@ module.exports = function User (db, app)
 			})
 			.then(total_payment_days =>
 			{
-				user_data
-				.subscription
+				user_data.subscription
 				.total_payment_days = total_payment_days
 
 				return user_data

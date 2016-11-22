@@ -22,9 +22,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 
 	var count = db.helpers.count
 
+
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
-
 		return db.user.byId(user_id)
 		.then(user =>
 		{
