@@ -270,12 +270,16 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	console.error(error)
 	console.error(error.stack)
 
-	if (show_slack)
+	return Promise.resolve()
+	.then(() =>
 	{
-		return slack.failure(env)
-	}
-})
-.then(() =>
-{
-	process.exit(1)
+		if (show_slack)
+		{
+			return slack.failure(env)
+		}
+	})
+	.then(() =>
+	{
+		process.exit(1)
+	})
 })
