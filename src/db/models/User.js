@@ -491,16 +491,6 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.usersSubscriptions = () =>
-	{
-		return user.users_table_only()
-		.leftJoin(
-			'subscriptions',
-			'users.id',
-			'subscriptions.user_id'
-		)
-	}
-
 	user.countByEmailConfirms = () =>
 	{
 		return user.users_table_only()

@@ -205,16 +205,22 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.countBySubscriptions = () =>
 	{
 		var result = {}
-		var users_subscr_table = db.user.usersSubscriptions
 
-		return count(users_subscr_table()
+		var user_subscrs = db.user.users_table_only()
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+
+		return count(user_subscrs.clone()
 		.where('created_at', '>', moment().subtract(1, 'month'))
 		.whereNull('subscriptions.user_id'))
 		.then(trial_count =>
 		{
 			result.trial = trial_count
 
-			return count(users_subscr_table()
+			return count(user_subscrs.clone()
 			.where('created_at', '<=', moment().subtract(1, 'month'))
 			.whereNull('subscriptions.user_id'))
 		})
@@ -222,7 +228,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		{
 			result.standard = standard_count
 
-			return count(users_subscr_table()
+			return count(user_subscrs.clone()
 			.whereNotNull('subscriptions.user_id'))
 		})
 		.then(premium_count =>
