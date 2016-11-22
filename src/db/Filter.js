@@ -62,37 +62,41 @@ Filter.by.subscription = function ()
 
 		values.forEach(validate_subs)
 
-		if (includes(values, 'trial'))
+		queryset = queryset
+		.andWhere(function ()
 		{
-			queryset.orWhere(function ()
+			if (includes(values, 'trial'))
 			{
-				this.whereRaw(
-					`created_at > ?`,
-					[ moment().subtract(1, 'month') ]
-				)
-				this.whereNull('subscriptions.user_id')
-			})
-		}
+				this.orWhere(function ()
+				{
+					this.whereRaw(
+						`created_at > ?`,
+						[ moment().subtract(1, 'month') ]
+					)
+					this.whereNull('subscriptions.user_id')
+				})
+			}
 
-		if (includes(values, 'standard'))
-		{
-			queryset.orWhere(function ()
+			if (includes(values, 'standard'))
 			{
-				this.whereRaw(
-					`created_at <= ?`,
-					[ moment().subtract(1, 'month') ]
-				)
-				this.whereNull('subscriptions.user_id')
-			})
-		}
+				this.orWhere(function ()
+				{
+					this.whereRaw(
+						`created_at <= ?`,
+						[ moment().subtract(1, 'month') ]
+					)
+					this.whereNull('subscriptions.user_id')
+				})
+			}
 
-		if (includes(values, 'premium'))
-		{
-			queryset.orWhere(function ()
+			if (includes(values, 'premium'))
 			{
-				this.whereNotNull('subscriptions.user_id')
-			})
-		}
+				this.orWhere(function ()
+				{
+					this.whereNotNull('subscriptions.user_id')
+				})
+			}
+		})
 
 		return queryset
 		.leftJoin(
