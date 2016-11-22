@@ -63,7 +63,7 @@ Filter.by.subscription = function ()
 		values.forEach(validate_subs)
 
 		queryset = queryset
-		.andWhere(function ()
+		.where(function ()
 		{
 			if (includes(values, 'trial'))
 			{
