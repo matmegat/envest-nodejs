@@ -21,5 +21,8 @@ cp "${backup_sql}" "${backup_dir}"
 cp -r "static/images" "${backup_dir}/images"
 
 backup_name="netvest-${env}-${today}"
+backup_name_full="${backups_prefix}/${backup_name}.tar.gz"
 
-tar -zc -C "${backups_prefix}" -f "${backups_prefix}/${backup_name}.tar.gz" "${today}"
+tar -zc -C "${backups_prefix}" -f "${backup_name_full}" "${today}"
+
+echo "${backup_name_full}"
