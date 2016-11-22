@@ -8,13 +8,14 @@ module.exports = function Statistics (db, http)
 	var statistics = {}
 
 	var user = db.user
+	var subscr = db.subscr
 
 	statistics.express = Router()
 	statistics.express.use(http.adminRequired)
 
 	statistics.express.get('/subscriptions', (rq, rs) =>
 	{
-		toss(rs, user.countBySubscriptions())
+		toss(rs, subscr.countBySubscriptions())
 	})
 
 	statistics.express.get('/users-confirmed', (rq, rs) =>

@@ -51,18 +51,52 @@ Filter.by.operator = curry((operator, column) =>
 
 Filter.by.equal = Filter.by.operator('=')
 
-Filter.by.subscription = function (column)
+var validate_subs = validate.collection(['trial', 'standard', 'premium'])
+
+Filter.by.subscription = function ()
 {
 	return function (queryset, values)
 	{
 		values = values.split(',')
-		values[0] || (values = ['none'])
+		values[0] || (values = [ 'standard' ])
 
-		if (includes(values, 'none'))
+		values.forEach(validate_subs)
+
+		queryset = queryset
+		.where(function ()
 		{
-			queryset = queryset
-			.orWhereNull(column)
-		}
+			if (includes(values, 'trial'))
+			{
+				this.orWhere(function ()
+				{
+					this.whereRaw(
+						`created_at > ?`,
+						[ moment().subtract(1, 'month') ]
+					)
+					this.whereNull('subscriptions.user_id')
+				})
+			}
+
+			if (includes(values, 'standard'))
+			{
+				this.orWhere(function ()
+				{
+					this.whereRaw(
+						`created_at <= ?`,
+						[ moment().subtract(1, 'month') ]
+					)
+					this.whereNull('subscriptions.user_id')
+				})
+			}
+
+			if (includes(values, 'premium'))
+			{
+				this.orWhere(function ()
+				{
+					this.whereNotNull('subscriptions.user_id')
+				})
+			}
+		})
 
 		return queryset
 		.leftJoin(
@@ -70,7 +104,6 @@ Filter.by.subscription = function (column)
 			'users.id',
 			'subscriptions.user_id'
 		)
-		.whereIn(column, values)
 	}
 }
 

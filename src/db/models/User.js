@@ -27,8 +27,6 @@ var validateMany = require('../../id').validateMany
 
 var host_compose = require('../../host-compose')
 
-var moment = require('moment')
-
 module.exports = function User (db, app)
 {
 	var user = {}
@@ -40,7 +38,25 @@ module.exports = function User (db, app)
 	var one      = db.helpers.one
 	var oneMaybe = db.helpers.oneMaybe
 
-	user.users_table    = knexed(knex, 'users')
+	user.users_table = knexed(knex, 'users')
+	user.users_table_only = (trx) =>
+	{
+		return user.users_table(trx)
+		.leftJoin(
+			'investors',
+			'users.id',
+			'investors.user_id'
+		)
+		.leftJoin(
+			'admins',
+			'users.id',
+			'admins.user_id'
+		)
+		.whereNull('investors.user_id')
+		.whereNull('admins.user_id')
+	}
+
+
 	user.email_confirms = knexed(knex, 'email_confirms')
 	user.auth_facebook  = knexed(knex, 'auth_facebook')
 
@@ -133,21 +149,6 @@ module.exports = function User (db, app)
 				'admins.user_id AS admin_user_id',
 				'admins.parent AS parent',
 				'admins.can_intro AS can_intro',
-				knex.raw(`(select end_time
-					from subscriptions where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1)`),
-				knex.raw(`(select start_time
-					from subscriptions where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1)`),
-				knex.raw(`COALESCE(
-					(select type
-					from subscriptions
-					where user_id = users.id
-					and end_time > current_timestamp
-					ORDER BY end_time DESC limit 1),
-					'standard') AS type`),
 				knex.raw(`(select * from featured_investor
 					where investor_id = users.id)
 					is not null  as is_featured`)
@@ -192,13 +193,6 @@ module.exports = function User (db, app)
 				'created_at'
 			])
 
-			user_data.subscription = pick(result,
-			[
-				'type',
-				'start_time',
-				'end_time'
-			])
-
 			if (result.investor_user_id)
 			{
 				user_data.investor = pick(result,
@@ -223,55 +217,20 @@ module.exports = function User (db, app)
 				])
 			}
 
-			return get_total_payment_days(id)
-			.then((total_payment_days) =>
+			return db.subscr.getType(id)
+			.then(subscription =>
 			{
-				user_data
-				.subscription
+				user_data.subscription = subscription
+
+				return db.subscr.getTotalPaymentDays(id)
+			})
+			.then(total_payment_days =>
+			{
+				user_data.subscription
 				.total_payment_days = total_payment_days
 
 				return user_data
 			})
-		})
-	}
-
-	function get_total_payment_days (user_id)
-	{
-		var total_payment_days = 0
-
-		return knex('subscriptions')
-		.where('user_id', user_id)
-		.orderBy('start_time', 'desc')
-		.then((subscrs) =>
-		{
-			if (subscrs.length > 0)
-			{
-				subscrs.forEach((subscr, i) =>
-				{
-					var start_time = moment(subscr.start_time).valueOf()
-					var end_time = moment(subscr.end_time).valueOf()
-
-					var next_index = i + 1
-
-					if (next_index < subscrs.length)
-					{
-						var prev_subscr = subscrs[next_index]
-
-						var prev_end_time = moment(prev_subscr.end_time).valueOf()
-
-						if (start_time < prev_end_time)
-						{
-							end_time -= (prev_end_time - start_time)
-						}
-					}
-
-					var days = (end_time - start_time) / 24 / 60 / 60 / 1000
-
-					total_payment_days += Math.ceil(days)
-				})
-			}
-
-			return total_payment_days
 		})
 	}
 
@@ -488,26 +447,9 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.countBySubscriptions = () =>
-	{
-		var queryset = user.users_table()
-		.select(
-			knex.raw(`COALESCE(type, 'none') AS subscription`),
-			knex.raw(`COUNT(users.id) AS users`)
-		)
-		.leftJoin(
-			'subscriptions',
-			'users.id',
-			'subscriptions.user_id'
-		)
-		.groupBy('type')
-
-		return get_only_users(queryset)
-	}
-
 	user.countByEmailConfirms = () =>
 	{
-		var queryset = user.users_table()
+		return user.users_table_only()
 		.select(
 			knex.raw(`
 				COUNT(email) as confirmed_users,
@@ -518,26 +460,7 @@ module.exports = function User (db, app)
 			'users.id',
 			'email_confirms.user_id'
 		)
-
-		return get_only_users(queryset)
 		.then(oneMaybe)
-	}
-
-	function get_only_users (queryset)
-	{
-		return queryset
-		.leftJoin(
-			'investors',
-			'users.id',
-			'investors.user_id'
-		)
-		.leftJoin(
-			'admins',
-			'users.id',
-			'admins.user_id'
-		)
-		.whereNull('investors.user_id')
-		.whereNull('admins.user_id')
 	}
 
 	function createFacebookUser (data, trx)
@@ -704,19 +627,7 @@ module.exports = function User (db, app)
 	{
 		if (user.groups.isUser(group))
 		{
-			return user.users_table()
-			.leftJoin(
-				'admins',
-				'users.id',
-				'admins.user_id'
-			)
-			.leftJoin(
-				'investors',
-				'users.id',
-				'investors.user_id'
-			)
-			.whereNull('admins.user_id')
-			.whereNull('investors.user_id')
+			return user.users_table_only()
 		}
 		else if (user.groups.isAdmin(group))
 		{

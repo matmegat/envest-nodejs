@@ -20,9 +20,11 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
 
+	var count = db.helpers.count
+
+
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
-
 		return db.user.byId(user_id)
 		.then(user =>
 		{
@@ -90,6 +92,22 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.getTotalPaymentDays = (user_id) =>
+	{
+		return netvest_subscr.getSubscription(user_id)
+		.then(subscr =>
+		{
+			var start_time = +new Date(subscr.start_time)
+			var end_time = +new Date(subscr.end_time)
+
+			return Math.floor((end_time - start_time) / 24 / 60 / 60 / 1000)
+		})
+		.catch(() =>
+		{
+			return 0
+		})
+	}
+
 	netvest_subscr.cancelSubscription = (user_id) =>
 	{
 		return netvest_subscr.table()
@@ -126,6 +144,20 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
+	{
+		return netvest_subscr.table()
+		.where('stripe_subscriber_id', subscription_id)
+		.update({
+			end_time: moment(next_period_end * 1000)
+		})
+		.then(result =>
+		{
+			return { success: result === 1 }
+		})
+	}
+
+
 	netvest_subscr.isAble = (user_id) =>
 	{
 		return netvest_subscr
@@ -147,16 +179,79 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
+	netvest_subscr.getType = (user_id) =>
 	{
-		return netvest_subscr.table()
-		.where('stripe_subscriber_id', subscription_id)
-		.update({
-			end_time: moment(next_period_end * 1000)
-		})
-		.then(result =>
+		return netvest_subscr
+		.getSubscription(user_id)
+		.then(subscription =>
 		{
-			return { success: result === 1 }
+			return {
+				type: 'premium',
+				start_time: subscription.start_time,
+				end_time: subscription.end_time
+			}
+		})
+		.catch(() =>
+		{
+			return db.user.byId(user_id)
+			.then(user =>
+			{
+				var trial_end = moment(user.created_at).add(1, 'month')
+
+				if (moment().isBefore(trial_end))
+				{
+					return {
+						type: 'trial',
+						start_time: user.created_at,
+						end_time: trial_end
+					}
+				}
+				else
+				{
+					return {
+						type: 'standard',
+						start_time: user.created_at,
+						end_time: trial_end
+					}
+				}
+			})
+		})
+	}
+
+	netvest_subscr.countBySubscriptions = () =>
+	{
+		var result = {}
+
+		var user_subscrs = db.user.users_table_only()
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
+		)
+
+		return count(user_subscrs.clone()
+		.where('created_at', '>', moment().subtract(1, 'month'))
+		.whereNull('subscriptions.user_id'))
+		.then(trial_count =>
+		{
+			result.trial = trial_count
+
+			return count(user_subscrs.clone()
+			.where('created_at', '<=', moment().subtract(1, 'month'))
+			.whereNull('subscriptions.user_id'))
+		})
+		.then(standard_count =>
+		{
+			result.standard = standard_count
+
+			return count(user_subscrs.clone()
+			.whereNotNull('subscriptions.user_id'))
+		})
+		.then(premium_count =>
+		{
+			result.premium = premium_count
+
+			return result
 		})
 	}
 
