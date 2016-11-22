@@ -20,6 +20,8 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
 
+	var count = db.helpers.count
+
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
 
@@ -197,6 +199,37 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 					}
 				}
 			})
+		})
+	}
+
+	netvest_subscr.countBySubscriptions = () =>
+	{
+		var result = {}
+		var user_subscriptions_table = db.user.usersSubscriptions
+
+		return count(user_subscriptions_table()
+		.where('created_at', '>', moment().subtract(1, 'month'))
+		.whereNull('subscriptions.user_id'))
+		.then(trial_count =>
+		{
+			result.trial = trial_count
+
+			return count(user_subscriptions_table()
+			.where('created_at', '<=', moment().subtract(1, 'month'))
+			.whereNull('subscriptions.user_id'))
+		})
+		.then(standard_count =>
+		{
+			result.standard = standard_count
+
+			return count(user_subscriptions_table()
+			.whereNotNull('subscriptions.user_id'))
+		})
+		.then(premium_count =>
+		{
+			result.premium = premium_count
+
+			return result
 		})
 	}
 

@@ -488,63 +488,16 @@ module.exports = function User (db, app)
 		})
 	}
 
-	user.countBySubscriptions = () =>
+	user.usersSubscriptions = () =>
 	{
 		var queryset = user.users_table()
-
-		return queryset
-		.distinct(
-			knex.raw(`
-				(
-					SELECT COUNT(*)
-					FROM users
-					LEFT JOIN investors
-					ON users.id = investors.user_id
-					LEFT JOIN admins
-					ON users.id = admins.user_id
-					LEFT JOIN subscriptions
-					ON users.id = subscriptions.user_id
-					WHERE created_at > ?
-					AND subscriptions.user_id IS NULL
-					AND investors.user_id IS NULL
-					AND admins.user_id IS NULL
-				)
-				AS trial`, moment().subtract(1, 'month')
-			),
-			knex.raw(`
-				(
-					SELECT COUNT(*)
-					FROM users
-					LEFT JOIN investors
-					ON users.id = investors.user_id
-					LEFT JOIN admins
-					ON users.id = admins.user_id
-					LEFT JOIN subscriptions
-					ON users.id = subscriptions.user_id
-					WHERE created_at <= ?
-					AND subscriptions.user_id IS NULL
-					AND investors.user_id IS NULL
-					AND admins.user_id IS NULL
-				)
-				AS standard`, moment().subtract(1, 'month')
-			),
-			knex.raw(`
-				(
-					SELECT COUNT(*)
-					FROM users
-					LEFT JOIN investors
-					ON users.id = investors.user_id
-					LEFT JOIN admins
-					ON users.id = admins.user_id
-					LEFT JOIN subscriptions
-					ON users.id = subscriptions.user_id
-					WHERE subscriptions.user_id IS NOT NULL
-					AND investors.user_id IS NULL
-					AND admins.user_id IS NULL
-				)
-				AS premium`
-			)
+		.leftJoin(
+			'subscriptions',
+			'users.id',
+			'subscriptions.user_id'
 		)
+
+		return get_only_users(queryset)
 	}
 
 	user.countByEmailConfirms = () =>
