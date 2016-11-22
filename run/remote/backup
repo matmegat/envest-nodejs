@@ -10,10 +10,13 @@ backup_dir="${backups_prefix}/${today}"
 mkdir -p "${backups_prefix}"
 mkdir    "${backup_dir}"     # ensure it is not present
 
-env='local'
-#env="$(cat ENV)"
+# env='local'
+env="$(cat ENV)"
 
-# sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_dir}/db.sql"
+backup_sql="/tmp/db.sql"
+sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_sql}"
+sudo chown ubuntu:ubuntu "${backup_sql}"
+cp "${backup_sql}" "${backup_dir}"
 
 cp -r "static/images" "${backup_dir}/images"
 
