@@ -29,13 +29,14 @@ if (key)
 }
 
 var remote_config = get_env.remote(env) /* @shortcut */
-var remote = remote_config.remote
-var remote_with_user = 'ubuntu@' + remote
+var remote = require('./lib/remote')(env, remote_config.remote)
 
-ssh = partial(ssh, remote_with_user)
+ssh = partial(ssh, remote.with_user)
 
-ssh('echo 1')
-.then((x) =>
+ssh(`"cd ${remote.path()}; run/remote/backup"`)
+.then(cmd.util.stderr)
+.then(cmd.util.trim)
+.then(x =>
 {
 	console.dir(x)
 	console.info('OK')
