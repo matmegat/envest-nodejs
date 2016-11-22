@@ -150,6 +150,10 @@ get_env.confirm(remote_config, env) /* @shortcut */
 {
 	return scp(rootpath('package.json'), target())
 }))
+.then(outputify('copy run/remote', () =>
+{
+	return rsync_clean(rootpath('run/remote') + '/', target('run/remote'))
+}))
 .then(outputify('copy db/', () =>
 {
 	return rsync_clean(rootpath('db') + '/', target('db'))
