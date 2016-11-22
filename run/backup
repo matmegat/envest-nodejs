@@ -1,0 +1,47 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var get_env = require('./lib/get-env')
+var args = require('minimist')(process.argv.slice(2),
+{
+	string:
+	[
+		'env',
+		'key'
+	]
+})
+
+var env = get_env(args) /* @shortcut */
+
+var cmd = require('command-promise')
+var partial = require('lodash/partial')
+
+var ssh = partial(cmd, 'ssh')
+var scp = partial(cmd, 'scp')
+
+var key = args.key
+
+if (key)
+{
+	ssh = partial(ssh, [ '-i', key ])
+	scp = partial(scp, [ '-i', key ])
+}
+
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = remote_config.remote
+var remote_with_user = 'ubuntu@' + remote
+
+ssh = partial(ssh, remote_with_user)
+
+ssh('echo 1')
+.then((x) =>
+{
+	console.dir(x)
+	console.info('OK')
+})
+.catch(error =>
+{
+	console.error(error)
+	console.error(error.stack)
+})
