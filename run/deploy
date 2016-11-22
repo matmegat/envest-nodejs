@@ -152,7 +152,11 @@ get_env.confirm(remote_config, env) /* @shortcut */
 }))
 .then(outputify('copy run/remote', () =>
 {
-	return rsync_clean(rootpath('run/remote') + '/', target('run/remote'))
+	return ssh(f("'mkdir -p %s'", remote_rootpath('run/remote')))
+	.then(() =>
+	{
+		return rsync_clean(rootpath('run/remote') + '/', target('run/remote'))
+	})
 }))
 .then(outputify('copy db/', () =>
 {
