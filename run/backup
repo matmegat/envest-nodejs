@@ -36,9 +36,10 @@ ssh = partial(ssh, remote.with_user)
 ssh(`"cd ${remote.path()}; run/remote/backup"`)
 .then(cmd.util.stderr)
 .then(cmd.util.trim)
-.then(x =>
+.then(tar_path =>
 {
-	console.dir(x)
+	console.log(tar_path)
+	console.log(remote.target(tar_path))
 	console.info('OK')
 })
 .catch(error =>
