@@ -13,7 +13,7 @@ mkdir    "${backup_dir}"     # ensure it is not present
 # env='local'
 env="$(cat ENV)"
 
-backup_sql="/tmp/db.sql"
+backup_sql="/tmp/$(mktemp -u netvest-db.XXX.sql)"
 sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_sql}"
 sudo chown ubuntu:ubuntu "${backup_sql}"
 cp "${backup_sql}" "${backup_dir}"
