@@ -1,3 +1,22 @@
 #! /bin/sh
 
-echo 'backup'
+cd $(dirname $0); cd "../.."
+
+today=$(date +%Y-%m-%d)
+
+backups_prefix="var/backups"
+backup_dir="${backups_prefix}/${today}"
+
+mkdir -p "${backups_prefix}"
+mkdir    "${backup_dir}"     # ensure it is not present
+
+env='local'
+#env="$(cat ENV)"
+
+# sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_dir}/db.sql"
+
+cp -r "static/images" "${backup_dir}/images"
+
+backup_name="netvest-${env}-${today}"
+
+tar -zc -C "${backups_prefix}" -f "${backups_prefix}/${backup_name}.tar.gz" "${today}"
