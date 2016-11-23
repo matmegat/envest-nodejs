@@ -239,6 +239,8 @@ module.exports = function Tradeops (db, portfolio)
 
 		var count_queryset = queryset.clone()
 
+		queryset.orderBy('timestamp', 'desc')
+
 		return db.investor.getActionMode(whom_id, investor_id)
 		.then(mode =>
 		{
