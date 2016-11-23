@@ -81,7 +81,9 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 
 	op.equals = (other) =>
 	{
-		return op.op_data.type === other.op_data.type
+		return false
+		// TODO enable this if you need to allow to modify cash ops:
+		// return op.op_data.type === other.op_data.type
 	}
 
 	op.inspect = () =>
