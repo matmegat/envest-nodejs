@@ -5,6 +5,11 @@ var expect = require('chai').expect
 var mime = require('mime')
 
 var lwip = require('lwip')
+
+var imagemin = require('imagemin')
+var imageminJpegoptim = require('imagemin-jpegoptim')
+var imageminOptipng = require('imagemin-optipng')
+
 var round = require('lodash/round')
 
 module.exports = function (db)
@@ -268,7 +273,20 @@ function resize_img (img)
 					return rj(ResizeErr(err))
 				}
 
-				return rs(buffer)
+				return rs(
+					imagemin.buffer(buffer,
+					{
+						plugins:
+						[
+							imageminJpegoptim(
+							{
+								progressive: true,
+								max: 70
+							}),
+							imageminOptipng()
+						]
+					})
+				)
 			})
 		})
 	})
