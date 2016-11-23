@@ -180,6 +180,7 @@ module.exports = function Tradeops (db, portfolio)
 	tradeops.sequence = (trx, tradeop) =>
 	{
 		return sequential(trx, tradeop)
+		.orderBy('timestamp')
 		.then(rows => rows.map(load))
 	}
 
