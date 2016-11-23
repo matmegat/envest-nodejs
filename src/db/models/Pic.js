@@ -115,6 +115,10 @@ module.exports = function (db)
 			})
 			.then(buffer =>
 			{
+				return minify_img(buffer)
+			})
+			.then(buffer =>
+			{
 				file.buffer = buffer
 
 				return static.store(file)
@@ -187,6 +191,10 @@ module.exports = function (db)
 			})
 			.then(buffer =>
 			{
+				return minify_img(buffer)
+			})
+			.then(buffer =>
+			{
 				file.buffer = buffer
 
 				return static.store(file)
@@ -250,6 +258,22 @@ function get_scale (image)
 
 var ResizeErr = Err('resize_err', 'Resize Error')
 
+function minify_img (img_buffer)
+{
+	return imagemin.buffer(img_buffer,
+	{
+		plugins:
+		[
+			imageminJpegoptim(
+			{
+				progressive: true,
+				max: 70
+			}),
+			imageminOptipng()
+		]
+	})
+}
+
 function resize_img (img)
 {
 	return with_image(img)
@@ -273,20 +297,7 @@ function resize_img (img)
 					return rj(ResizeErr(err))
 				}
 
-				return rs(
-					imagemin.buffer(buffer,
-					{
-						plugins:
-						[
-							imageminJpegoptim(
-							{
-								progressive: true,
-								max: 70
-							}),
-							imageminOptipng()
-						]
-					})
-				)
+				return rs(buffer)
 			})
 		})
 	})
