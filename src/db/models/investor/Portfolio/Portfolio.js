@@ -338,7 +338,7 @@ module.exports = function Portfolio (db, investor)
 			}
 			else
 			{
-				console.trace(err.stack)
+				console.error(err)
 				throw PortfolioOpErr({ reason: err.message })
 			}
 		})
