@@ -90,6 +90,8 @@ module.exports = function Investor (db, mailer, app)
 	{
 		expect(data).property('admin_id')
 
+		data.email = data.email.toLowerCase()
+
 		return auth.registerWithPass(trx, data)
 		.then(id =>
 		{
