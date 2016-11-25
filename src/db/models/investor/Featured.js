@@ -20,9 +20,11 @@ module.exports = function Featured (db, investor)
 	expect(db, 'Featured depends on Notifications').property('notifications')
 	var Emitter = db.notifications.Emitter
 
-	var NewFeaturedInvestor = Emitter(
-	'new_featured_investor',
-	{ group: 'admins' })
+	var NewFeaturedInvestor = Emitter('new_featured_investor',
+	{
+		group: 'admins',
+		same_id: 'admin'
+	})
 
 	var WrongInvestorId = investor.all.WrongInvestorId
 
