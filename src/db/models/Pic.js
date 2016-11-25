@@ -157,19 +157,15 @@ module.exports = function (db)
 			})
 			.then(() =>
 			{
-				var notify_data =
-				{
-					by: 'investor',
-					user: [ ':user-id', id ]
-				}
-
 				if (is_admin)
 				{
-					notify_data.by = 'admin'
-					notify_data.admin = [ ':user-id', whom_id ]
+					emitter(id,
+					{
+						by: 'admin',
+						user:  [ ':user-id', id ],
+						admin: [ ':user-id', whom_id ]
+					})
 				}
-
-				emitter(id, notify_data)
 			})
 			.then(() =>
 			{
