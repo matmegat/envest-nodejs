@@ -45,5 +45,4 @@ ssh(`"cd ${remote.path()}; run/remote/backup"`)
 .catch(error =>
 {
 	console.error(error)
-	console.error(error.stack)
 })

@@ -1,5 +1,12 @@
 #! /bin/sh
 
+backup_exists ()
+{
+  (>&2 echo '*** Backup dir is already exists. Maybe backup is already done or failed.')
+  (>&2 echo '*** Remove dir manually and repeat process.')
+  exit 1
+}
+
 cd $(dirname $0); cd "../.."
 
 today=$(date +%Y-%m-%d)
@@ -8,7 +15,7 @@ backups_prefix="var/backups"
 backup_dir="${backups_prefix}/${today}"
 
 mkdir -p "${backups_prefix}"
-mkdir    "${backup_dir}"     # ensure it is not present
+mkdir    "${backup_dir}"     || backup_exists
 
 # env='local'
 env="$(cat ENV)"
