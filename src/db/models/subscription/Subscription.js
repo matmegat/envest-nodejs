@@ -75,6 +75,43 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
+	netvest_subscr.updateCard = function (user_id, card_data)
+	{
+		return netvest_subscr.table()
+		.where('user_id', user_id)
+		.then(subscription =>
+		{
+			if (subscription.length > 0)
+			{
+				return new Promise((rs, rj) =>
+				{
+					var old_customer_id = subscription[0].stripe_customer_id
+					netvest_subscr.stripe.customers.update(
+						old_customer_id,
+						{
+							source: card_data.source
+						},
+						(err) =>
+						{
+							if (err)
+							{
+								rj(StripeError())
+							}
+							else
+							{
+								rs({ success: true })
+							}
+						}
+					)
+				})
+			}
+			else
+			{
+				throw NoSubscription()
+			}
+		})
+	}
+
 	netvest_subscr.getSubscription = (user_id) =>
 	{
 		return netvest_subscr.table()

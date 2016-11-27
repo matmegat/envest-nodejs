@@ -24,6 +24,14 @@ module.exports = function Subscr (subscr_model)
 		toss(rs, subscr.model.addSubscription(rq.user.id, subscription_data))
 	})
 
+	subscr.express.post('/updatecard', authRequired, (rq, rs) =>
+	{
+		var card_data = {
+			source: rq.body.stripe_token
+		}
+		toss(rs, subscr.model.updateCard(rq.user.id, card_data))
+	})
+
 	subscr.express.get('/', authRequired, (rq, rs) =>
 	{
 		subscr.model.getSubscription(rq.user.id)
