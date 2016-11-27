@@ -2,6 +2,8 @@
 
 require('console-ultimate/global').replace()
 
+var rootpath = require('rootpath')(__dirname, '..')
+
 var get_env = require('./lib/get-env')
 var args = require('minimist')(process.argv.slice(2),
 {
@@ -38,8 +40,17 @@ ssh(`"cd ${remote.path()}; run/remote/backup"`)
 .then(cmd.util.trim)
 .then(tar_path =>
 {
-	console.log(tar_path)
-	console.log(remote.target(tar_path))
+	console.info('downloading. this may take a while…')
+	var to_backups = rootpath('backups/')
+
+	return cmd(`mkdir -p ${to_backups}`)
+	.then(() =>
+	{
+		return scp(remote.target(tar_path), to_backups)
+	})
+})
+.then(() =>
+{
 	console.info('OK')
 })
 .catch(error =>
