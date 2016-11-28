@@ -16,7 +16,7 @@ var validate = require('../../../../validate')
 var holdings_length = validate.length(Infinity, 1)
 
 
-module.exports = function NonTradeOp (investor_id, timestamp, op_data)
+module.exports = function InitHoldingsOp (investor_id, timestamp, op_data)
 {
 	var op = Op(investor_id, timestamp)
 
@@ -31,7 +31,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		validate.required(h.symbol, `holdings[${i}].symbol`)
 
 		validate.required(h.amount, `holdings[${i}].amount`)
-		validate.number.positive(h.amount, `holdings[${i}].amount`)
+		validate.number.nonNegative(h.amount, `holdings[${i}].amount`)
 
 		validate.required(h.price, `holdings[${i}].price`)
 		validate.number.nonNegative(h.price, `holdings[${i}].price`)

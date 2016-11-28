@@ -11,7 +11,7 @@ var wrap   = require('lodash/wrap')
 var Op       = require('./Op')
 var validate = require('../../../../validate')
 
-module.exports = function NonTradeOp (investor_id, timestamp, brokerage)
+module.exports = function InitBrokerageOp (investor_id, timestamp, brokerage)
 {
 	var op = Op(investor_id, timestamp)
 
