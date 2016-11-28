@@ -11,6 +11,6 @@ exports.down = function (knex)
 {
 	return knex.schema.table('subscriptions', (table) =>
 	{
-		table.dropColumn('string')
+		table.dropColumn('status')
 	})
 }
