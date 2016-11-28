@@ -37,20 +37,27 @@ module.exports = function Subscr (subscr_model)
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
 		{
-			subscr.model.stripe.customers.retrieve(
-				subscription.stripe_customer_id,
-				(err, customer) =>
-				{
-					if (err)
+			if (subscription.status === 'active')
+			{
+				subscr.model.stripe.customers.retrieve(
+					subscription.stripe_customer_id,
+					(err, customer) =>
 					{
-						return toss.err(rs, err)
-					}
+						if (err)
+						{
+							return toss.err(rs, err)
+						}
 
-					subscription.discount = customer.discount
-					subscription.subscription = customer.subscriptions.data[0]
-					toss(rs, subscription)
-				}
-			)
+						subscription.discount = customer.discount
+						subscription.subscription = customer.subscriptions.data[0]
+						toss(rs, subscription)
+					}
+				)
+			}
+			else
+			{
+				toss(rs, subscription)
+			}
 		})
 		.catch(toss.err(rs))
 	})

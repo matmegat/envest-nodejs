@@ -116,6 +116,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	{
 		return netvest_subscr.table()
 		.where('user_id', user_id)
+		.orderBy('id', 'desc')
 		.then(subscription =>
 		{
 			if (subscription.length > 0)
@@ -149,7 +150,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	{
 		return netvest_subscr.table()
 		.where('user_id', user_id)
-		.delete()
+		.update({
+			status: 'inactive'
+		})
 		.then(() =>
 		{ // send Trial Expired
 			return db.user.byId(user_id)
@@ -194,12 +197,15 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-
 	netvest_subscr.isAble = (user_id) =>
 	{
 		return netvest_subscr
 		.getSubscription(user_id)
-		.then(() => true)
+		.then((subscription) =>
+		{
+			var subscription_end = moment(subscription.end_time);
+			return moment().isBefore(subscription_end)
+		})
 		.catch(() =>
 		{
 			/* WORKAROUND:
