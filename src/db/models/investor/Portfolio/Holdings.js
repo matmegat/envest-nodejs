@@ -13,7 +13,8 @@ var validate = require('../../../validate')
 var Err = require('../../../../Err')
 
 var Symbl = require('../../symbols/Symbl')
-var RemoveHoldingsOp = require('./TradeOp/RemoveHoldingsOp')
+
+var InitHoldingsOp = require('./TradeOp/InitHoldingsOp')
 
 var XignCommonErr = Err('xignite_error', 'xIgnite failed')
 
@@ -460,8 +461,6 @@ module.exports = function Holdings (db, investor, portfolio)
 
 	holdings.removeBatch = function (whom_id, investor_id, holding_entries)
 	{
-		var timestamp = moment().utc()
-
 		return knex.transaction(function (trx)
 		{
 			return investor.getActionMode(whom_id, investor_id)
@@ -476,8 +475,29 @@ module.exports = function Holdings (db, investor, portfolio)
 			})
 			.then(() =>
 			{
-				var remove_holdings = RemoveHoldingsOp(
-					investor_id, timestamp, holding_entries)
+				validate.array(holding_entries, 'symbols')
+
+				var now = new Date
+
+				holding_entries = holding_entries.map(symbol =>
+				{
+					validate.required(symbol.symbol, 'symbol')
+
+					symbol = symbol.symbol
+
+					return {
+						symbol: symbol,
+						amount: 0,
+						price: 0,
+						timestamp: now
+					}
+				})
+
+				var remove_holdings = InitHoldingsOp(
+					investor_id,
+					new Date,
+					holding_entries
+				)
 
 				return db.investor.portfolio.apply(trx, remove_holdings)
 			})
