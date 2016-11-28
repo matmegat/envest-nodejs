@@ -16,7 +16,7 @@ var validate = require('../../../../validate')
 var holdings_length = validate.length(Infinity, 1)
 
 
-module.exports = function NonTradeOp (investor_id, timestamp, op_data)
+module.exports = function InitHoldingsOp (investor_id, timestamp, op_data)
 {
 	var op = Op(investor_id, timestamp)
 
