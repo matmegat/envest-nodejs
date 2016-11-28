@@ -79,7 +79,7 @@ module.exports = function Subscr (subscr_model)
 	subscr.express.post('/listen', (rq, rs) =>
 	{
 		subscr.model.stripe.events.retrieve(
-			rq.body.event_id,
+			rq.body.id,
 			(err, event) =>
 			{
 				if (err)
