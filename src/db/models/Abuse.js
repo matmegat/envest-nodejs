@@ -16,8 +16,7 @@ module.exports = function Abuse (db, comments, Emitter)
 
 	var CommentReport = Emitter('comments_reports',
 	{
-		group: 'admins',
-		same_id: 'admin'
+		group: 'admins'
 	})
 
 	abuse.create = function (user_id, comment_id)
