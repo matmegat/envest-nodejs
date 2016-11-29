@@ -268,14 +268,14 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		)
 
 		return count(user_subscrs.clone()
-		.where('created_at', '>', moment().subtract(1, 'month'))
+		.where('created_at', '>', moment().subtract(1, 'month').format())
 		.whereNull('subscriptions.user_id'))
 		.then(trial_count =>
 		{
 			result.trial = trial_count
 
 			return count(user_subscrs.clone()
-			.where('created_at', '<=', moment().subtract(1, 'month'))
+			.where('created_at', '<=', moment().subtract(1, 'month').format())
 			.whereRaw('subscriptions.user_id is null or end_time < now()'))
 		})
 		.then(standard_count =>
@@ -284,7 +284,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 
 			return count(user_subscrs.clone()
 			.whereNotNull('subscriptions.user_id')
-			.where('subscriptions.end_time', '>', moment()))
+			.where('subscriptions.end_time', '>', moment().format()))
 		})
 		.then(premium_count =>
 		{
