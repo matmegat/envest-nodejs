@@ -1,5 +1,6 @@
 
 var Router = require('express').Router
+var body_parser = require('body-parser')
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
@@ -9,6 +10,7 @@ module.exports = function Subscr (subscr_model)
 
 	subscr.model = subscr_model
 	subscr.express = Router()
+	subscr.express.use(body_parser.urlencoded({ extended: false }))
 
 	subscr.express.post('/activate', authRequired, (rq, rs) =>
 	{
@@ -24,25 +26,40 @@ module.exports = function Subscr (subscr_model)
 		toss(rs, subscr.model.addSubscription(rq.user.id, subscription_data))
 	})
 
+	subscr.express.post('/updatecard', authRequired, (rq, rs) =>
+	{
+		var card_data = {
+			source: rq.body.stripe_token
+		}
+		toss(rs, subscr.model.updateCard(rq.user.id, card_data))
+	})
+
 	subscr.express.get('/', authRequired, (rq, rs) =>
 	{
 		subscr.model.getSubscription(rq.user.id)
 		.then(subscription =>
 		{
-			subscr.model.stripe.customers.retrieve(
-				subscription.stripe_customer_id,
-				(err, customer) =>
-				{
-					if (err)
+			if (subscription.status === 'active')
+			{
+				subscr.model.stripe.customers.retrieve(
+					subscription.stripe_customer_id,
+					(err, customer) =>
 					{
-						return toss.err(rs, err)
-					}
+						if (err)
+						{
+							return toss.err(rs, err)
+						}
 
-					subscription.discount = customer.discount
-					subscription.subscription = customer.subscriptions.data[0]
-					toss(rs, subscription)
-				}
-			)
+						subscription.discount = customer.discount
+						subscription.subscription = customer.subscriptions.data[0]
+						toss(rs, subscription)
+					}
+				)
+			}
+			else
+			{
+				toss(rs, subscription)
+			}
 		})
 		.catch(toss.err(rs))
 	})
@@ -71,7 +88,7 @@ module.exports = function Subscr (subscr_model)
 	subscr.express.post('/listen', (rq, rs) =>
 	{
 		subscr.model.stripe.events.retrieve(
-			rq.body.event_id,
+			rq.body.id,
 			(err, event) =>
 			{
 				if (err)
