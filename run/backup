@@ -35,6 +35,7 @@ var remote = require('./lib/remote')(env, remote_config.remote)
 
 ssh = partial(ssh, remote.with_user)
 
+console.info('calling remote for backup…')
 ssh(`"cd ${remote.path()}; run/remote/backup"`)
 .then(cmd.util.stderr)
 .then(cmd.util.trim)
