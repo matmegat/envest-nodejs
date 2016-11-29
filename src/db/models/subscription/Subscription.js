@@ -11,6 +11,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	var netvest_subscr = {}
 
 	var knex = db.knex
+	var one = db.helpers.one
 
 	expect(db, 'Onboarding depends on Notifications').property('notifications')
 
@@ -77,38 +78,31 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 
 	netvest_subscr.updateCard = function (user_id, card_data)
 	{
-		return netvest_subscr.table()
-		.where('user_id', user_id)
+		return netvest_subscr
+		.getSubscription(user_id)
 		.then(subscription =>
 		{
-			if (subscription.length > 0)
+			return new Promise((rs, rj) =>
 			{
-				return new Promise((rs, rj) =>
-				{
-					var old_customer_id = subscription[0].stripe_customer_id
-					netvest_subscr.stripe.customers.update(
-						old_customer_id,
+				var old_customer_id = subscription.stripe_customer_id
+				netvest_subscr.stripe.customers.update(
+					old_customer_id,
+					{
+						source: card_data.source
+					},
+					(err) =>
+					{
+						if (err)
 						{
-							source: card_data.source
-						},
-						(err) =>
-						{
-							if (err)
-							{
-								rj(StripeError())
-							}
-							else
-							{
-								rs({ success: true })
-							}
+							rj(StripeError())
 						}
-					)
-				})
-			}
-			else
-			{
-				throw NoSubscription()
-			}
+						else
+						{
+							rs({ success: true })
+						}
+					}
+				)
+			})
 		})
 	}
 
@@ -117,16 +111,11 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		return netvest_subscr.table()
 		.where('user_id', user_id)
 		.orderBy('id', 'desc')
+		.then(Err.emptish(NoSubscription))
+		.then(one)
 		.then(subscription =>
 		{
-			if (subscription.length > 0)
-			{
-				return subscription[0]
-			}
-			else
-			{
-				throw NoSubscription()
-			}
+			return subscription
 		})
 	}
 
@@ -203,8 +192,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		.getSubscription(user_id)
 		.then((subscription) =>
 		{
-			var subscription_end = moment(subscription.end_time);
-			return moment().isBefore(subscription_end)
+			return moment().isBefore(subscription.end_time)
 		})
 		.catch(() =>
 		{
@@ -228,10 +216,21 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		.getSubscription(user_id)
 		.then(subscription =>
 		{
-			return {
-				type: 'premium',
-				start_time: subscription.start_time,
-				end_time: subscription.end_time
+			if (moment().isBefore(subscription.end_time))
+			{
+				return {
+					type: 'premium',
+					start_time: subscription.start_time,
+					end_time: subscription.end_time
+				}
+			}
+			else
+			{
+				return {
+					type: 'standard',
+					start_time: subscription.start_time,
+					end_time: subscription.end_time
+				}
 			}
 		})
 		.catch(() =>
@@ -281,14 +280,15 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 
 			return count(user_subscrs.clone()
 			.where('created_at', '<=', moment().subtract(1, 'month'))
-			.whereNull('subscriptions.user_id'))
+			.whereRaw('subscriptions.user_id is null or end_time < now()'))
 		})
 		.then(standard_count =>
 		{
 			result.standard = standard_count
 
 			return count(user_subscrs.clone()
-			.whereNotNull('subscriptions.user_id'))
+			.whereNotNull('subscriptions.user_id')
+			.where('subscriptions.end_time', '>', moment()))
 		})
 		.then(premium_count =>
 		{
