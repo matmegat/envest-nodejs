@@ -3,20 +3,15 @@ get:
     Get count of users of each subscription type
   responses:
     200:
-      description: Array of object with subscription title and count of users
+      description: Object with subscription title `trial || standard || premium` and count of users
       schema:
-        type: array
-        items:
-          type: object
-          title: Subscription
-          properties:
-            subscription:
-              type: string
-            users:
-              type: integer
-          required:
-          - subscription
-          - users
+        type: object
+        title: Subscription
+        properties:
+          subscription_title:
+            type: integer
+        required:
+        - subscription_title
     400:
       description: if something went wrong
       schema:
