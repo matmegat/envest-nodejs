@@ -278,6 +278,7 @@ var Feed = module.exports = function Feed (db)
 
 			queryset
 			.innerJoin('investors', 'investors.user_id', 'feed_items.investor_id')
+			.where('investors.is_public', true)
 
 			if (is_investor)
 			{
@@ -303,9 +304,18 @@ var Feed = module.exports = function Feed (db)
 						this.whereNot('feed_items.investor_id', user_id)
 					}
 				})
-			}
 
-			queryset.where('investors.is_public', true)
+				/* NET-1750 */
+				queryset.whereNot(function ()
+				{
+					this.where('feed_items.type', 'watchlist')
+					this.where(raw('feed_items.data'), '@>', { dir: 'removed' })
+					if (is_investor)
+					{
+						this.whereNot('feed_items.investor_id', user_id)
+					}
+				})
+			}
 
 			return subscr.isAble(user_id, 'multiple_investors')
 		})
