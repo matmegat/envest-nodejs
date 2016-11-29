@@ -51,7 +51,6 @@ module.exports = function Http (app)
 
 	http.express.use(cookie_parser())
 	http.express.use(body_parser.json({ limit: '256kb' }))
-	http.express.use(body_parser.urlencoded({ extended: false }))
 
 	CrossOrigin(app.cfg, http.express)
 

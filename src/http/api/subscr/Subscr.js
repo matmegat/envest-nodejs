@@ -1,5 +1,6 @@
 
 var Router = require('express').Router
+var body_parser = require('body-parser')
 var toss = require('../../toss')
 var authRequired = require('../../auth-required')
 
@@ -9,6 +10,7 @@ module.exports = function Subscr (subscr_model)
 
 	subscr.model = subscr_model
 	subscr.express = Router()
+	subscr.express.use(body_parser.urlencoded({ extended: false }))
 
 	subscr.express.post('/activate', authRequired, (rq, rs) =>
 	{
