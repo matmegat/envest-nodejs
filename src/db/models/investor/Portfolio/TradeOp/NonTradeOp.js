@@ -79,7 +79,7 @@ module.exports = function NonTradeOp (investor_id, timestamp, op_data)
 		.remove(trx, op.investor_id, op.timestamp)
 	}
 
-	op.equals = (other) =>
+	op.equals = (/* other */) =>
 	{
 		return false
 		// TODO enable this if you need to allow to modify cash ops:
