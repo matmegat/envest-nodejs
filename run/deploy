@@ -2,6 +2,8 @@
 
 require('console-ultimate/global').replace()
 
+var show_slack = true
+
 var f = require('util').format
 var home = require('home').resolve
 
@@ -49,11 +51,10 @@ if (key)
 
 
 var remote_config = get_env.remote(env) /* @shortcut */
-var remote = remote_config.remote
-var remote_with_user = 'ubuntu@' + remote
+var remote = require('./lib/remote')(env, remote_config.remote)
 
 
-ssh = partial(ssh, remote_with_user)
+ssh = partial(ssh, remote.with_user)
 rsync = partial(rsync, '--recursive')
 rsync_clean = partial(rsync, '--delete')
 
@@ -82,17 +83,6 @@ var rootpath = require('rootpath')(__dirname, '..')
 var merge = require('lodash').merge
 
 var tmp = require('rootpath')(require('os').tmpdir())
-
-
-function remote_rootpath (path)
-{
-	return 'netvest/' + env + '/' + (path || '')
-}
-
-function target (path)
-{
-	return remote_with_user + ':' + remote_rootpath(path)
-}
 
 
 var load  = fs.readJSON
@@ -130,7 +120,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 	write(tmp_env, env)
 
-	return scp(tmp_env, target('ENV'))
+	return scp(tmp_env, remote.target('ENV'))
 })
 .then(so =>
 {
@@ -142,31 +132,39 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 	write(tmp_rev, fullrev)
 
-	return scp(tmp_rev, target('REV'))
+	return scp(tmp_rev, remote.target('REV'))
 })
 .then(outputify('copy package.json', () =>
 {
-	return scp(rootpath('package.json'), target())
+	return scp(rootpath('package.json'), remote.target())
+}))
+.then(outputify('copy run/remote', () =>
+{
+	return ssh(f("'mkdir -p %s'", remote.path('run/remote')))
+	.then(() =>
+	{
+		return rsync_clean(rootpath('run/remote') + '/', remote.target('run/remote'))
+	})
 }))
 .then(outputify('copy db/', () =>
 {
-	return rsync_clean(rootpath('db') + '/', target('db'))
+	return rsync_clean(rootpath('db') + '/', remote.target('db'))
 }))
 .then(outputify('copy static/', () =>
 {
 	return rsync(
 		[ '--exclude', '/images' ],
 		rootpath('static') + '/',
-		target('static')
+		remote.target('static')
 	)
 }))
 .then(outputify('copy src/', () =>
 {
-	return rsync_clean(rootpath('src') + '/', target('src'))
+	return rsync_clean(rootpath('src') + '/', remote.target('src'))
 }))
 .then(() =>
 {
-	return ssh(f("'mkdir -p %s'", remote_rootpath('cfg/')))
+	return ssh(f("'mkdir -p %s'", remote.path('cfg/')))
 })
 .then(outputify('compile config, copy cfg/', () =>
 {
@@ -181,7 +179,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	var tmp_f = tmp('netvest-deploy-config.json')
 	dump(tmp_f, config)
 
-	return scp(tmp_f, target('cfg/config.json'))
+	return scp(tmp_f, remote.target('cfg/config.json'))
 	.then(() => config)
 }))
 .then(config =>
@@ -207,7 +205,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 		var tmp_f = tmp('netvest-deploy-nginx.conf')
 		write(tmp_f, rendered)
 
-		return scp(tmp_f, target('cfg/nginx.conf'))
+		return scp(tmp_f, remote.target('cfg/nginx.conf'))
 	})()
 	.then(outputify('put ref to nginx/conf.d', () =>
 	{
@@ -218,7 +216,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 		write(tmp_f, rendered)
 
-		var target_etc = `${remote_with_user}:/tmp/${tmp_f_local}`
+		var target_etc = `${remote.with_user}:/tmp/${tmp_f_local}`
 
 		return scp(tmp_f, target_etc)
 		.then(() =>
@@ -231,7 +229,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 })
 .then(() =>
 {
-	return ssh(f('"mkdir -p %s"', remote_rootpath('var/')))
+	return ssh(f('"mkdir -p %s"', remote.path('var/')))
 })
 .then(outputify('run remote', () =>
 {
@@ -239,7 +237,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 		f( '"cd %s;'
 		 + 'npm install --production --no-optional;'
 		 + 'npm start;'
-		 + 'sudo nginx -s reload || true;"', remote_rootpath()
+		 + 'sudo nginx -s reload || true;"', remote.path()
 	))
 }))
 .then(() =>
@@ -249,7 +247,10 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	rev()
 	.then(fullrev =>
 	{
-		/* return */ slack.success(env, fullrev)
+		if (show_slack)
+		{
+			/* return */ slack.success(env, fullrev)
+		}
 	})
 })
 .catch(error =>
@@ -257,7 +258,14 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	console.error(error)
 	console.error(error.stack)
 
-	slack.failure(env)
+	return Promise.resolve()
+	.then(() =>
+	{
+		if (show_slack)
+		{
+			return slack.failure(env)
+		}
+	})
 	.then(() =>
 	{
 		process.exit(1)

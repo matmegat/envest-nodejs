@@ -50,6 +50,13 @@ npm run db-migrate # runs a batch of new migrations
 npm run db-rollback # CAREFUL; rollbacks last batch
 ```
 
+### backup
+To snap backup to current machine use `backup` script:
+```sh
+run/backup --env=<env> --key=~/.ssh/WeezLabsDev.pem
+```
+Backup will be stored in local project's `backup/` dir.
+
 
 ## API
 **Swagger** DOC: open in browser `/docs/`.
