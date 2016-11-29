@@ -308,21 +308,6 @@ module.exports = function Portfolio (db, investor)
 	{
 		return grid.ir(trx, investor_id, 'day')
 		.then(it => [ it ])
-		.catch(err =>
-		{
-			if (Err.is(err))
-			{
-				console.error(err.code)
-				console.error(err.message)
-				console.error(err.data)
-			}
-			else
-			{
-				console.error(err.message)
-			}
-
-			return []
-		})
 	})
 
 
