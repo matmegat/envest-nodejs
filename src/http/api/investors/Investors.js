@@ -210,7 +210,7 @@ module.exports = function (db, http)
 
 	investors.express.post('/featured', http.adminRequired, (rq, rs) =>
 	{
-		toss(rs, investors.model.featured.set(rq.body.investor_id))
+		toss(rs, investors.model.featured.set(rq.body.investor_id, rq.user.id))
 	})
 
 	investors.express.get('/:id/chart/ir', http.adminRequired, (rq, rs) =>
