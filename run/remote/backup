@@ -32,4 +32,6 @@ backup_name_full="${backups_prefix}/${backup_name}.tar.gz"
 
 tar -zc -C "${backups_prefix}" -f "${backup_name_full}" "${today}"
 
+rm -rf "${backup_dir}"
+
 echo "${backup_name_full}"
