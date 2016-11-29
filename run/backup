@@ -48,6 +48,10 @@ ssh(`"cd ${remote.path()}; run/remote/backup"`)
 	{
 		return scp(remote.target(tar_path), to_backups)
 	})
+	.then(() =>
+	{
+		return ssh(`"rm ${remote.path(tar_path)}"`)
+	})
 })
 .then(() =>
 {
