@@ -589,7 +589,8 @@ module.exports = function User (db, app)
 		fallback_by: 'id'
 	})
 
-	var filter = Filter({
+	var filter = Filter(
+	{
 		query: Filter.by.query([]),
 		subscription: Filter.by.subscription('type')
 	})
@@ -732,7 +733,11 @@ module.exports = function User (db, app)
 	var Emitter = db.notifications.Emitter
 
 	var NameChangedI = Emitter('username_changed')
-	var NameChangedU = Emitter('username_changed', { group: 'admins' })
+	var NameChangedU = Emitter('username_changed',
+	{
+		group: 'admins',
+		same_id: 'user'
+	})
 
 	user.changeNameAs = knexed.transact(
 		knex, (trx, user_id, credentials, whom_id) =>
