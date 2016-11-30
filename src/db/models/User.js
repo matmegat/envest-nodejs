@@ -605,22 +605,41 @@ module.exports = function User (db, app)
 
 		queryset = filter(queryset, options.filter)
 
+		/* remove duplicates */
+		queryset
+		.distinct()
+		.select(
+			'users.id',
+			knex.raw('users.first_name COLLATE "C"'),
+			knex.raw('users.last_name COLLATE "C"'),
+			'users.pic',
+			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
+		)
+
 		var count_queryset = queryset.clone()
 
 		queryset = sorter.sort(queryset, options.sorter)
 
-		queryset
-		.select(
-			'users.id',
-			'users.first_name',
-			'users.last_name',
-			'users.pic',
-			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
-		)
-		.groupBy('users.id', 'email_confirms.new_email')
-
 		return paginator.paginate(queryset, options.paginator)
-		.then(paginator.total.decorate('users', count_queryset))
+		.then(response =>
+		{
+			response =
+			{
+				users: response
+			}
+
+			count_queryset = knex.select(
+				knex.raw('COUNT(*) FROM (?) AS q', count_queryset)
+			)
+
+			return count_queryset
+			.then(one)
+			.then(count => count.count)
+			.then(total =>
+			{
+				return paginator.total.only(response, total)
+			})
+		})
 	}
 
 	function users_by_group (group)
