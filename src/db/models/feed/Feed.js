@@ -280,6 +280,28 @@ var Feed = module.exports = function Feed (db)
 			.innerJoin('investors', 'investors.user_id', 'feed_items.investor_id')
 			.where('investors.is_public', true)
 
+			/* NET-1749 */
+			queryset.whereNot(function ()
+			{
+				this.where('feed_items.type', 'trade')
+				this.where(raw('feed_items.data'), '@>', { price: 0 })
+				if (is_investor)
+				{
+					this.whereNot('feed_items.investor_id', user_id)
+				}
+			})
+
+			/* NET-1750 */
+			queryset.whereNot(function ()
+			{
+				this.where('feed_items.type', 'watchlist')
+				this.where(raw('feed_items.data'), '@>', { dir: 'removed' })
+				if (is_investor)
+				{
+					this.whereNot('feed_items.investor_id', user_id)
+				}
+			})
+
 			if (is_investor)
 			{
 				queryset.where(function ()
@@ -290,31 +312,6 @@ var Feed = module.exports = function Feed (db)
 				})
 
 				return true
-			}
-
-			if (! is_admin)
-			{
-				/* NET-1749 */
-				queryset.whereNot(function ()
-				{
-					this.where('feed_items.type', 'trade')
-					this.where(raw('feed_items.data'), '@>', { price: 0 })
-					if (is_investor)
-					{
-						this.whereNot('feed_items.investor_id', user_id)
-					}
-				})
-
-				/* NET-1750 */
-				queryset.whereNot(function ()
-				{
-					this.where('feed_items.type', 'watchlist')
-					this.where(raw('feed_items.data'), '@>', { dir: 'removed' })
-					if (is_investor)
-					{
-						this.whereNot('feed_items.investor_id', user_id)
-					}
-				})
 			}
 
 			return subscr.isAble(user_id, 'multiple_investors')
