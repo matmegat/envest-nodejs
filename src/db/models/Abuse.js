@@ -41,7 +41,7 @@ module.exports = function Abuse (db, comments, Emitter)
 			{
 				return CommentReport(
 				{
-					user:      user_id,
+					user: [ ':user-id', user_id ],
 					comment_id: comment.id,
 					feed_id:    comment.feed_id
 				})
