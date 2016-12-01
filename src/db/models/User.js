@@ -611,8 +611,8 @@ module.exports = function User (db, app)
 		.distinct()
 		.select(
 			'users.id',
-			knex.raw('users.first_name COLLATE "C"'),
-			knex.raw('users.last_name COLLATE "C"'),
+			knex.raw('first_name COLLATE "C"'),
+			knex.raw('last_name COLLATE "C"'),
 			'users.pic',
 			knex.raw('COALESCE(users.email, email_confirms.new_email) AS email')
 		)
