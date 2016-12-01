@@ -534,9 +534,13 @@ function Holdings (investor_model, db)
 		}
 
 		decimal(row.price, `holdings[${i}].price`)
-		if (row.price <= 0)
+		if (row.price < 0)
 		{
-			throw WrongHoldingsFormat({ field: `holdings[${i}].price` })
+			throw WrongHoldingsFormat(
+			{
+				field: `holdings[${i}].price`,
+				reason: `Price less than zero`
+			})
 		}
 
 		validate.required(row.date, `holdings[${i}].date`)
