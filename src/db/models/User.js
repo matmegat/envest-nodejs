@@ -764,13 +764,15 @@ module.exports = function User (db, app)
 					admin: [ ':user-id', whom_id ]
 				})
 			}
-
-			NameChangedU(
+			else
 			{
-				by: 'admin',
-				user: [ ':user-id', user_id ],
-				admin: [ ':user-id', whom_id ]
-			})
+				NameChangedU(
+				{
+					by: 'admin',
+					user: [ ':user-id', user_id ],
+					admin: [ ':user-id', whom_id ]
+				})
+			}
 		})
 	})
 
