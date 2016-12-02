@@ -21,8 +21,6 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
 
-	var count = db.helpers.count
-
 
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
@@ -261,34 +259,52 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		var result = {}
 
 		var user_subscrs = db.user.users_table_only()
+		.distinct()
+		.select('users.id')
 		.leftJoin(
 			'subscriptions',
 			'users.id',
 			'subscriptions.user_id'
 		)
 
-		return count(user_subscrs.clone()
-		.where('created_at', '>', moment().subtract(1, 'month').format())
-		.whereNull('subscriptions.user_id'))
-		.then(trial_count =>
+		function get_count (queryset)
 		{
-			result.trial = trial_count
+			return knex.select(
+				knex.raw('COUNT(*) FROM (?) AS q', queryset)
+			)
+		}
 
-			return count(user_subscrs.clone()
-			.where('created_at', '<=', moment().subtract(1, 'month').format())
-			.whereRaw('subscriptions.user_id is null or end_time < now()'))
-		})
-		.then(standard_count =>
+		return get_count(
+			user_subscrs.clone()
+			.where('created_at', '>', moment().subtract(1, 'month').format())
+			.whereNull('subscriptions.user_id')
+		)
+		.then(one)
+		.then(trial =>
 		{
-			result.standard = standard_count
+			result.trial = trial.count
 
-			return count(user_subscrs.clone()
-			.whereNotNull('subscriptions.user_id')
-			.where('subscriptions.end_time', '>', moment().format()))
+			return get_count(
+				user_subscrs.clone()
+				.where('created_at', '<=', moment().subtract(1, 'month').format())
+				.whereRaw('subscriptions.user_id is null or end_time < now()')
+			)
 		})
-		.then(premium_count =>
+		.then(one)
+		.then(standard =>
 		{
-			result.premium = premium_count
+			result.standard = standard.count
+
+			return get_count(
+				user_subscrs.clone()
+				.whereNotNull('subscriptions.user_id')
+				.where('subscriptions.end_time', '>', moment().format())
+			)
+		})
+		.then(one)
+		.then(premium =>
+		{
+			result.premium = premium.count
 
 			return result
 		})
