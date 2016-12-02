@@ -278,7 +278,6 @@ var Feed = module.exports = function Feed (db)
 
 			queryset
 			.innerJoin('investors', 'investors.user_id', 'feed_items.investor_id')
-			.where('investors.is_public', true)
 
 			/* NET-1749 */
 			queryset.whereNot(function ()
@@ -313,6 +312,8 @@ var Feed = module.exports = function Feed (db)
 
 				return true
 			}
+
+			queryset.where('investors.is_public', true)
 
 			return subscr.isAble(user_id, 'multiple_investors')
 		})
