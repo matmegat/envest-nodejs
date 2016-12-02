@@ -16,7 +16,7 @@ var default_message =
 	text: '',
 	from_email: 'contact@netvest.com',
 	from_name: 'Netvest',
-	headers: {'Reply-To': 'contact@netvest.com'},
+	headers: { 'Reply-To': 'contact@netvest.com' },
 	merge: true,
 	merge_language: 'handlebars',
 	global_merge_vars: [],

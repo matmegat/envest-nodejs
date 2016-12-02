@@ -9,8 +9,6 @@ var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
 var noop   = require('lodash/noop')
 
-var expect = require('chai').expect
-
 var Password = require('./Password')
 
 var Groups = require('./Groups')
