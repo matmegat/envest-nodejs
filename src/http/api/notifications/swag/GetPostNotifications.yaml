@@ -5,6 +5,14 @@ get:
     in: query
     type: integer
     description: Page number
+  - name: type
+    in: query
+    type: string
+    description: filter notification by type. Avaialable types are
+      "pic_updated", "investor_reports", "pushed_to_public", "post_updated",
+      "new_featured_investor", "new_feed_comment", "username_changed",
+      "post_created", "comments_reports", "field_edited", "cash_managed",
+      "post_deleted", "csv_uploaded", "profile_pic_updated"
   responses:
     200:
       description: User notifications
