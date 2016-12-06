@@ -19,6 +19,11 @@ module.exports = function (db)
 			'page'
 		])
 
+		options.filter = pick(rq.query,
+		[
+			'type'
+		])
+
 		options.user_id    = rq.user.id
 		options.user_group = rq.user.group
 

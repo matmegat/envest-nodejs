@@ -12,6 +12,7 @@ var validateId = require('../../../id').validate
 var Paginator  = require('../../paginator/Booked')
 
 var Err = require('../../../Err')
+var Filter = require('../../Filter')
 
 var Evaluate = require('./Evaluate')
 
@@ -194,12 +195,17 @@ module.exports = function Notifications (db)
 		}
 	}
 
+	var filter = Filter({
+		type: Filter.by.equal('type')
+	})
 
 	notifications.list = function (options)
 	{
 		var queryset = notifications.table()
 		.where('recipient_id', options.user_id)
 		.andWhere('is_viewed', false)
+
+		queryset = filter(queryset, options.filter)
 
 		var count_queryset = queryset.clone()
 
