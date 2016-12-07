@@ -110,7 +110,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		.where('user_id', user_id)
 		.orderBy('id', 'desc')
 		.then(Err.emptish(NoSubscription))
-		.then(one)
+		.then((subscriptions) => subscriptions[0])
 	}
 
 	netvest_subscr.getTotalPaymentDays = (user_id) =>
