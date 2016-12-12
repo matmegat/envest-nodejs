@@ -124,7 +124,6 @@ module.exports = function Http (app)
 	mount(Feedback(app.db, app.cfg.feedback.email), 'feedback', 'feedback')
 	mount(Statistics(app.db, http), 'statistics', 'statistics')
 
-
 	http.express.use(internalError)
 
 	app.swagger = Swagger(app, http.express)

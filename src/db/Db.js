@@ -86,15 +86,15 @@ module.exports = function name (app)
 
 	db.user = User(db, app)
 
-	db.subscr = Subscription(db, cfg.stripe, app.mail)
-	db.auth  = Auth(db, app.mail)
+	db.subscr = Subscription(db, cfg.stripe, app.mmail)
+	db.auth  = Auth(db, app.mmail)
 	db.admin = Admin(db)
 
 	db.comments = Comments(db)
 
 	db.symbols = Symbols(db, app.cfg, app.log)
 
-	db.investor = Investor(db, app.mail, app)
+	db.investor = Investor(db, app.mmail, app)
 	db.watchlist = Watchlist(db)
 	db.feed = Feed(db)
 

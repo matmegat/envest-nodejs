@@ -9,8 +9,6 @@ var pick   = require('lodash/pick')
 var ends   = require('lodash/endsWith')
 var noop   = require('lodash/noop')
 
-var expect = require('chai').expect
-
 var Password = require('./Password')
 
 var Groups = require('./Groups')
@@ -31,7 +29,7 @@ module.exports = function User (db, app)
 {
 	var user = {}
 
-	var mailer = app.mail
+	var mailer = app.mmail
 
 	var knex = db.knex
 
@@ -305,14 +303,58 @@ module.exports = function User (db, app)
 		.then(() =>
 		{
 			return user.users_table(trx)
+			.select(
+				'first_name',
+				knex.raw(
+					'COALESCE(users.email, email_confirms.new_email) AS email')
+			)
+			.leftJoin(
+				'email_confirms',
+				'users.id',
+				'email_confirms.user_id'
+			)
 			.whereIn('id', ids)
-			.del()
+			.then(users =>
+			{
+				return user.users_table(trx)
+				.whereIn('id', ids)
+				.del()
+				.catch(Err.fromDb(
+					'featured_investor_investor_id_foreign',
+					RemoveFeatured)
+				)
+				.then(Err.falsy(user.NotFound))
+				.then(() =>
+				{
+					var email_queue = []
+
+					users.forEach(entry =>
+					{
+						var substs = extend({}, mailer.substs_defaults,
+						{
+							user_email: entry.email,
+							first_name: entry.first_name,
+							reason_text: 'DELETED',
+						})
+
+						var deleted_data = mailer.templates.userDeleted(substs)
+
+						email_queue.push(mailer.send(
+							'default',
+							extend({ to: entry.email }, deleted_data.user),
+							substs)
+						)
+						email_queue.push(mailer.send(
+							'default',
+							extend({ to: substs.contact_email }, deleted_data.admin),
+							substs)
+						)
+					})
+
+					return Promise.all(email_queue)
+				})
+			})
 		})
-		.catch(Err.fromDb(
-			'featured_investor_investor_id_foreign',
-			RemoveFeatured)
-		)
-		.then(Err.falsy(user.NotFound))
 		.then(noop)
 	})
 
@@ -498,28 +540,6 @@ module.exports = function User (db, app)
 		.del()
 	}
 
-	var email_templates =
-	{
-		user: function (host, user, code)
-		{
-			expect('host').to.be.a('string')
-			expect('email').to.be.a('string')
-			expect('code').to.be.a('string')
-
-			return {
-				to: user.email,
-				subject: 'Confirm Email',
-				html: `Hi, ${user.first_name} ${user.last_name}.`
-				+ `<br/><br/>`
-				+ `Please tap the link to confirm email: `
-				+ `<a href="http://${host}/confirm-email?code=`
-				+ `${code.toUpperCase()}" target="_blank">`
-				+ `Confirm Email</a><br>`
-				+ `Your email confirm code: <strong>${code.toUpperCase()}</strong>`
-			}
-		}
-	}
-
 	user.newEmailUpdate = function (trx, data)
 	{
 		data = extend({}, data, { new_email: data.new_email.toLowerCase() })
@@ -561,16 +581,19 @@ module.exports = function User (db, app)
 			{
 				var host = host_compose(app.cfg)
 
-				var mail_content = {}
 				var substs =
 				{
-					email_title: [ 'Confirm Email' ]
+					first_name: user_item.first_name,
+					host: host,
+					confirm_code: code
 				}
 
-				mail_content = email_templates.user(host, user_item, code)
+				var data = extend(
+					{ to: user_item.email },
+					mailer.templates.emailConfirm(substs)
+				)
 
-				return mailer.send('default', substs, mail_content)
-				.then(() => user_item.id, console.err)
+				return mailer.send('default', data, substs)
 			})
 		})
 	}

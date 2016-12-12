@@ -1,5 +1,6 @@
 
 var expect = require('chai').expect
+var extend = require('lodash/extend')
 var moment = require('moment')
 
 var knexed = require('../../knexed')
@@ -143,22 +144,17 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 			{
 				var substs =
 				{
-					email_title: [ 'Trial Expired' ],
+					first_name: user.first_name,
+					website_link: 'netvest.com',
+					feedback_link: 'netvest_link'
 				}
 
-				return mailer.send(`default`, substs,
-				{
-					to: user.email,
-					subject: `Trial Expired`,
-					// text: '',
-					html: `Hi, ${user.first_name} ${user.last_name}.` +
-						`<br/><br/>` +
-						`Your trial period has expired. ` +
-						`Now you can track only one investor. ` +
-						`Please visit our <a href="http://www.netvest.com">` +
-						`website</a> for premium subscription ` +
-						`to get full access to all the investors and insights.`
-				})
+				var data = extend(
+					{ to: user.email },
+					mailer.templates.trialExpired(substs)
+				)
+
+				return mailer.send('default', data, substs)
 			})
 		})
 		.then(result =>

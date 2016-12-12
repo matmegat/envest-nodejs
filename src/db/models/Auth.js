@@ -41,22 +41,18 @@ module.exports = function Auth (db, mailer)
 			})
 			.then(() =>
 			{
-				var substs =
+				var substs = extend({}, mailer.substs_defaults,
 				{
-					email_title: [ 'Welcome to Netvest' ],
-					first_name: [ userdata.first_name ],
-				}
-
-				return mailer.send('user_welcome', substs,
-				{
-					to: userdata.email,
-					subject: 'Welcome to Netvest',
-					html: `Hi, ${userdata.first_name} ${userdata.last_name}.` +
-						`<br/><br/>` +
-						`Welcome to Netvest.<br/>` +
-						`Check our <a href="http://www.netvest.com">` +
-						`website</a>, iOS and Android applications.`
+					email_title: `Welcome to Netvest`,
+					first_name: userdata.first_name,
 				})
+
+				var data = extend(
+					{ to: userdata.email },
+					mailer.templates.userWelcome(substs)
+				)
+
+				return mailer.send('default', data, substs)
 				.then(() => id, () => id)
 			})
 		})

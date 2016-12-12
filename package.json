@@ -79,9 +79,6 @@
     "composable-middleware":
       "^0.3",
 
-    "sendgrid":
-      "^2",
-
     "passport":
       "^0.3.2",
 
@@ -140,7 +137,10 @@
       "1.13.0",
 
     "csv-parse":
-      "^1.1"
+      "^1.1",
+
+    "mandrill-api":
+      "^1.0"
   },
 
   "devDependencies":
