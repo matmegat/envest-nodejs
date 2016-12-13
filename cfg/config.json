@@ -76,8 +76,8 @@
 
   "stripe":
   {
-    "secret_key": "sk_test_dwYOVs8ksV5k42u2zcJWQiw4",
-    "pub_key": "pk_test_PYBikGVhRueRB0vBKD9JZjvf"
+    "secret_key": "sk_live_gVA9ye2FYGpCLLTUtxvnXOMv",
+    "pub_key": "pk_live_1aMxVnxsug3oefpqH9IBmCEm"
   },
 
   "feedback":

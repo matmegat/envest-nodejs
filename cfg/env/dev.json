@@ -17,5 +17,11 @@
     "db": 2
   },
 
-  "nginx": true
+  "nginx": true,
+
+  "stripe":
+  {
+    "secret_key": "sk_test_dwYOVs8ksV5k42u2zcJWQiw41",
+    "pub_key": "pk_test_PYBikGVhRueRB0vBKD9JZjvf2"
+  }
 }
