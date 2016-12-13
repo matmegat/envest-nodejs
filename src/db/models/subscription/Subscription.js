@@ -73,11 +73,10 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 									db.user.byId(user_id)
 									.then(user =>
 									{
-										var substs =
+										var substs = extend({}, mailer.substs_defaults,
 										{
 											first_name: user.first_name,
-											host: 'www.netvest.com'
-										}
+										})
 
 										var data = extend(
 											{ to: user.email },

@@ -117,8 +117,8 @@ module.exports =
 			+ `We’re glad you joined us, ${substitutions.first_name}<br><br>`
 			+ `One last important step - if you haven’t already, `
 			+ `please download our mobile app `
-			+ `on <a href="${substitutions.ios_beta_app}">iOS</a> or `
-			+ `<a href="${substitutions.android_beta_app}">Android</a> now, `
+			+ `on <a href="${substitutions.itunes_link}">iOS</a> or `
+			+ `<a href="${substitutions.play_market_link}">Android</a> now, `
 			+ `which you can access using the same login information you use `
 			+ `for our website. Now you’ve got full access to the inner `
 			+ `workings of premiere personal investors.<br>`
