@@ -22,7 +22,6 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
 
-
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
 		return db.user.byId(user_id)
@@ -47,7 +46,6 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 					{
 						if (err)
 						{
-							console.log(err);
 							rj(StripeError())
 						}
 						else
