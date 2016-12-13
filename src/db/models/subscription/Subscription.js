@@ -47,6 +47,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 					{
 						if (err)
 						{
+							console.log(err);
 							rj(StripeError())
 						}
 						else
@@ -66,7 +67,30 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 							.insert(option, 'id')
 							.then(id =>
 							{
-								rs(id[0] > 0)
+								// send Paid Subscriber email
+								if (id[0] > 0)
+								{
+									db.user.byId(user_id)
+									.then(user =>
+									{
+										var substs =
+										{
+											first_name: user.first_name,
+											host: 'www.netvest.com'
+										}
+
+										var data = extend(
+											{ to: user.email },
+											mailer.templates.paidSubscriber(substs)
+										)
+
+										rs(mailer.send('default', data, substs))
+									})
+								}
+								else
+								{
+									rs({ success: false })
+								}
 							})
 						}
 					}
