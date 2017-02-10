@@ -8,8 +8,8 @@
 
   "pg":
   {
-    "database": "netvest_perf",
-    "password": "1d2z8yf2hkyy14i3"
+    "database": "envest_perf",
+    "password": "password"
   },
 
   "redis":
@@ -19,7 +19,7 @@
 
   "feedback":
   {
-    "email": "contact@netvest.com"
+    "email": "contact@envest.com"
   },
 
   "nginx": true

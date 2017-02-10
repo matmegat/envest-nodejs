@@ -28,9 +28,6 @@ var env = get_env(args) /* @shortcut */
 var cmd = require('command-promise')
 var partial = require('lodash/partial')
 
-// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/
-// ... ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
-
 var ssh = partial(cmd, 'ssh')
 var scp = partial(cmd, 'scp')
 
@@ -116,7 +113,7 @@ function rev ()
 get_env.confirm(remote_config, env) /* @shortcut */
 .then(() =>
 {
-	var tmp_env = tmp('netvest-ENV')
+	var tmp_env = tmp('envest-ENV')
 
 	write(tmp_env, env)
 
@@ -128,7 +125,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 })
 .then(fullrev =>
 {
-	var tmp_rev = tmp('netvest-REV')
+	var tmp_rev = tmp('envest-REV')
 
 	write(tmp_rev, fullrev)
 
@@ -176,7 +173,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 	/* exceptions */
 	config.cors = cenv.cors || base.cors
 
-	var tmp_f = tmp('netvest-deploy-config.json')
+	var tmp_f = tmp('envest-deploy-config.json')
 	dump(tmp_f, config)
 
 	return scp(tmp_f, remote.target('cfg/config.json'))
@@ -202,17 +199,17 @@ get_env.confirm(remote_config, env) /* @shortcut */
 			port_nginx: config.port_nginx
 		})
 
-		var tmp_f = tmp('netvest-deploy-nginx.conf')
+		var tmp_f = tmp('envest-deploy-nginx.conf')
 		write(tmp_f, rendered)
 
 		return scp(tmp_f, remote.target('cfg/nginx.conf'))
 	})()
 	.then(outputify('put ref to nginx/conf.d', () =>
 	{
-		var tmp_f_local = 'netvest-deploy-nginx-ref.conf'
+		var tmp_f_local = 'envest-deploy-nginx-ref.conf'
 		var tmp_f = tmp(tmp_f_local)
 
-		var rendered = `include /home/ubuntu/netvest/${env}/cfg/nginx.conf;\n`
+		var rendered = `include /home/ubuntu/envest/${env}/cfg/nginx.conf;\n`
 
 		write(tmp_f, rendered)
 
@@ -222,7 +219,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 		.then(() =>
 		{
 			var from = `/tmp/${tmp_f_local}`
-			var to = `/etc/nginx/conf.d/netvest-${env}.conf`
+			var to = `/etc/nginx/conf.d/envest-${env}.conf`
 			return ssh(`sudo mv ${from} ${to}`)
 		})
 	}))

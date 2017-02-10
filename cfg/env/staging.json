@@ -8,8 +8,8 @@
 
   "pg":
   {
-    "database": "netvest_staging",
-    "password": "ovjms3lmzf"
+    "database": "envest_staging",
+    "password": "password"
   },
 
   "redis":
@@ -25,10 +25,10 @@
       "http://localhost",
       "http://nevest.dev",
       "http://ec2-35-163-203-21.us-west-2.compute.amazonaws.com",
-      "http://dev.netvest.com",
-      "http://www.netvest.com",
-      "http://staging.netvest.com",
-      "http://netvest.com"
+      "http://dev.envest.com",
+      "http://www.envest.com",
+      "http://staging.envest.com",
+      "http://envest.com"
     ],
     "ports":
     [
@@ -38,7 +38,7 @@
 
   "feedback":
   {
-    "email": "contact@netvest.com"
+    "email": "contact@envest.com"
   },
 
   "nginx": true,

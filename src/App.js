@@ -34,7 +34,7 @@ module.exports = function App ()
 	})
 	.catch(error =>
 	{
-		console.error('NetVest backend init error:')
+		console.error('EnVest backend init error:')
 		console.error(error)
 		process.exit(1)
 	})

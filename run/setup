@@ -33,7 +33,7 @@ get_env.confirm(remote_config, env) /* @shortcut */
 
 	console.log('$', command)
 
-	command += ` -e "netvest_env=${env}"`
+	command += ` -e "envest_env=${env}"`
 
 	return confirm('apply?')
 	.then(so =>

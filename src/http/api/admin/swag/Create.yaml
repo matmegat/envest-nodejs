@@ -15,10 +15,10 @@ post:
           description: New admin mail
         first_name:
           type: string
-          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: First Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         last_name:
           type: string
-          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: Last Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
       required:
       - email
       - first_name

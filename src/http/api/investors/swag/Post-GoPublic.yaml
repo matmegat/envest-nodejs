@@ -1,5 +1,5 @@
 post:
-  description: Makes investor public [Onboarding Flow](https://weezlabs.atlassian.net/wiki/display/NET/Investor+On-Boarding)
+  description: Makes investor public [Onboarding Flow](https://matmegat.atlassian.net/wiki/display/NET/Investor+On-Boarding)
   parameters:
   - name: investor_id
     in: path
@@ -14,7 +14,7 @@ post:
     400:
       description: |
         **Error object** which follows
-        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+        [Error Protocol](https://matmegat.atlassian.net/wiki/display/NET/Errors)
 
       schema:
         $ref: ../../../swagger/Error.yaml

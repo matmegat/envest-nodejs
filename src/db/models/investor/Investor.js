@@ -168,7 +168,7 @@ module.exports = function Investor (db, mailer, app)
 				var host = host_compose(app.cfg)
 				var substs = extend({}, mailer.substs_defaults,
 				{
-					email_title: 'Welcome to Netvest',
+					email_title: 'Welcome to Envest',
 					first_name: data.first_name,
 					host: host,
 				})

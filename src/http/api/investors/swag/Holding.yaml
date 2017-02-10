@@ -11,7 +11,7 @@ properties:
   allocation:
     type: number
     description: |
-      Value / impact of Symbol on Investor Full Portfolio with Netvest
+      Value / impact of Symbol on Investor Full Portfolio with Envest
   symbol:
     $ref: ../../../swagger/Symbol.yaml
 required:

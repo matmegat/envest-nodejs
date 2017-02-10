@@ -8,8 +8,8 @@
 
   "pg":
   {
-    "database": "netvest_test",
-    "password": "ovjms3lmzf"
+    "database": "envest_test",
+    "password": "password"
   },
 
   "redis":

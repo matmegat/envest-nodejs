@@ -8,8 +8,8 @@
 
   "pg":
   {
-    "database": "netvest_prod",
-    "password": "0p92qpw913iejyvi"
+    "database": "envest_prod",
+    "password": "password"
   },
 
   "redis":
@@ -21,9 +21,9 @@
   {
     "hosts":
     [
-      "http://www.netvest.com",
-      "http://staging.netvest.com",
-      "http://netvest.com"
+      "http://www.envest.com",
+      "http://staging.envest.com",
+      "http://envest.com"
     ],
     "ports":
     [
@@ -33,7 +33,7 @@
 
   "feedback":
   {
-    "email": "contact@netvest.com"
+    "email": "contact@envest.com"
   },
 
   "nginx": true

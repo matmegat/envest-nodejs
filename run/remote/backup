@@ -20,14 +20,14 @@ mkdir    "${backup_dir}"     || backup_exists
 # env='local'
 env="$(cat ENV)"
 
-backup_sql="/tmp/$(mktemp -u netvest-db.XXX.sql)"
-sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_sql}"
+backup_sql="/tmp/$(mktemp -u envest-db.XXX.sql)"
+sudo su postgres -c "pg_dump envest_$(cat ENV) > ${backup_sql}"
 sudo chown ubuntu:ubuntu "${backup_sql}"
 cp "${backup_sql}" "${backup_dir}"
 
 cp -r "static/images" "${backup_dir}/images"
 
-backup_name="netvest-${env}-${today}"
+backup_name="envest-${env}-${today}"
 backup_name_full="${backups_prefix}/${backup_name}.tar.gz"
 
 tar -zc -C "${backups_prefix}" -f "${backup_name_full}" "${today}"

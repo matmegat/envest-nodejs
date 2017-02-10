@@ -6,13 +6,13 @@ get:
     type: integer
     description: |
       Get comments that are added before *max_id* (inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+      [guide](https://matmegat.atlassian.net/wiki/display/NET/pagination)
   - name: since_id
     in: query
     type: integer
     description: |
       Get comments greater than *since_id* (non inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+      [guide](https://matmegat.atlassian.net/wiki/display/NET/pagination)
   - name: feed_id
     description: Post (Feed Item) id
     in: query

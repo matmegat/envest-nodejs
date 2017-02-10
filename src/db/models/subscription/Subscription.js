@@ -7,9 +7,9 @@ var knexed = require('../../knexed')
 
 var Err = require('../../../Err')
 
-module.exports = function NetvestSubsc (db, cfg, mailer)
+module.exports = function EnvestSubsc (db, cfg, mailer)
 {
-	var netvest_subscr = {}
+	var envest_subscr = {}
 
 	var knex = db.knex
 	var one = db.helpers.one
@@ -19,10 +19,10 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	var NoSubscription = Err('no_subscription', 'No Subscription')
 	var StripeError = Err('stripe_error', 'Stripe API call failed')
 
-	netvest_subscr.table = knexed(knex, 'subscriptions')
-	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
+	envest_subscr.table = knexed(knex, 'subscriptions')
+	envest_subscr.stripe = require('stripe')(cfg.secret_key)
 
-	netvest_subscr.addSubscription = function (user_id, subscription_data)
+	envest_subscr.addSubscription = function (user_id, subscription_data)
 	{
 		return db.user.byId(user_id)
 		.then(user =>
@@ -40,7 +40,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 
 			return new Promise((rs, rj) =>
 			{
-				netvest_subscr.stripe.customers.create(
+				envest_subscr.stripe.customers.create(
 					subscription_data,
 					(err, customer) =>
 					{
@@ -61,7 +61,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 								.format('YYYY-MM-DD HH:mm:ss Z')
 							}
 
-							netvest_subscr.table()
+							envest_subscr.table()
 							.insert(option, 'id')
 							.then(id =>
 							{
@@ -96,16 +96,16 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.updateCard = function (user_id, card_data)
+	envest_subscr.updateCard = function (user_id, card_data)
 	{
-		return netvest_subscr
+		return envest_subscr
 		.getSubscription(user_id)
 		.then(subscription =>
 		{
 			return new Promise((rs, rj) =>
 			{
 				var old_customer_id = subscription.stripe_customer_id
-				netvest_subscr.stripe.customers.update(
+				envest_subscr.stripe.customers.update(
 					old_customer_id,
 					{
 						source: card_data.source
@@ -126,18 +126,18 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.getSubscription = (user_id) =>
+	envest_subscr.getSubscription = (user_id) =>
 	{
-		return netvest_subscr.table()
+		return envest_subscr.table()
 		.where('user_id', user_id)
 		.orderBy('id', 'desc')
 		.then(Err.emptish(NoSubscription))
 		.then((subscriptions) => subscriptions[0])
 	}
 
-	netvest_subscr.getTotalPaymentDays = (user_id) =>
+	envest_subscr.getTotalPaymentDays = (user_id) =>
 	{
-		return netvest_subscr.getSubscription(user_id)
+		return envest_subscr.getSubscription(user_id)
 		.then(subscr =>
 		{
 			var start_time = +new Date(subscr.start_time)
@@ -151,9 +151,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.cancelSubscription = (user_id) =>
+	envest_subscr.cancelSubscription = (user_id) =>
 	{
-		return netvest_subscr.table()
+		return envest_subscr.table()
 		.where('user_id', user_id)
 		.update({
 			status: 'inactive'
@@ -166,8 +166,8 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 				var substs =
 				{
 					first_name: user.first_name,
-					website_link: 'netvest.com',
-					feedback_link: 'netvest_link'
+					website_link: 'envest.com',
+					feedback_link: 'envest_link'
 				}
 
 				var data = extend(
@@ -184,9 +184,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.extendSubscription = (subscription_id, next_period_end) =>
+	envest_subscr.extendSubscription = (subscription_id, next_period_end) =>
 	{
-		return netvest_subscr.table()
+		return envest_subscr.table()
 		.where('stripe_subscriber_id', subscription_id)
 		.update({
 			end_time: moment(next_period_end * 1000)
@@ -197,9 +197,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.isAble = (user_id) =>
+	envest_subscr.isAble = (user_id) =>
 	{
-		return netvest_subscr
+		return envest_subscr
 		.getSubscription(user_id)
 		.then((subscription) =>
 		{
@@ -221,9 +221,9 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.getType = (user_id) =>
+	envest_subscr.getType = (user_id) =>
 	{
-		return netvest_subscr
+		return envest_subscr
 		.getSubscription(user_id)
 		.then(subscription =>
 		{
@@ -271,7 +271,7 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	netvest_subscr.countBySubscriptions = () =>
+	envest_subscr.countBySubscriptions = () =>
 	{
 		var result = {}
 
@@ -327,5 +327,5 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 		})
 	}
 
-	return netvest_subscr
+	return envest_subscr
 }

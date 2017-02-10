@@ -1,20 +1,20 @@
 post:
-  description: Creates new user of app [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+  description: Creates new user of app [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
   parameters:
   - name: payload
     in: body
     description: |
       JSON payload to log in.
-      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+      [Validations](https://matmegat.atlassian.net/wiki/display/NET/Validations) will be applied
     schema:
       type: object
       properties:
         first_name:
           type: string
-          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: First Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         last_name:
           type: string
-          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: Last Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         email:
           type: string
           description: Email

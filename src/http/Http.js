@@ -97,7 +97,7 @@ module.exports = function Http (app)
 
 	http.express.get(api_prefix, (rq, rs) =>
 	{
-		rs.send({ netvest: true })
+		rs.send({ envest: true })
 	})
 
 	function mount (subsystem, route, name)

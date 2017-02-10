@@ -11,9 +11,9 @@
     user:
       name: ubuntu
 
-  - name: create env's dir `{{ netvest_env }}`
+  - name: create env's dir `{{ envest_env }}`
     file:
-      path: '/home/ubuntu/netvest/{{ netvest_env }}'
+      path: '/home/ubuntu/envest/{{ envest_env }}'
       state: directory
       owner: ubuntu
       group: ubuntu

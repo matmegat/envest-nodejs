@@ -43,7 +43,7 @@ module.exports = function Auth (db, mailer)
 			{
 				var substs = extend({}, mailer.substs_defaults,
 				{
-					email_title: `Welcome to Netvest`,
+					email_title: `Welcome to Envest`,
 					first_name: userdata.first_name,
 				})
 

@@ -5,7 +5,7 @@ module.exports = (env, remote) =>
 
 	r.path = (path) =>
 	{
-		return 'netvest/' + env + '/' + (path || '')
+		return 'envest/' + env + '/' + (path || '')
 	}
 
 	r.with_user = 'ubuntu@' + remote

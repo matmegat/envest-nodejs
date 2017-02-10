@@ -10,13 +10,13 @@ var templates = require('./EmailTemplates')
 
 var default_message =
 {
-	subject: 'Netvest Mailer',
+	subject: 'Envest Mailer',
 	to: [],
 	html: '',
 	text: '',
-	from_email: 'contact@netvest.com',
-	from_name: 'Netvest',
-	headers: { 'Reply-To': 'contact@netvest.com' },
+	from_email: 'contact@envest.com',
+	from_name: 'Envest',
+	headers: { 'Reply-To': 'contact@envest.com' },
 	merge: true,
 	merge_language: 'handlebars',
 	global_merge_vars: [],

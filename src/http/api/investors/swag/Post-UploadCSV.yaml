@@ -15,7 +15,7 @@ post:
     format: binary
     description: |
       should follow
-      [format](https://distillery.atlassian.net/wiki/display/NET/CSV+rules)
+      [format](https://matmegat.atlassian.net/wiki/display/NET/CSV+rules)
   responses:
     200:
       description: History of Operation uploaded successfully
@@ -28,7 +28,7 @@ post:
     400:
       description: |
         **Error object** which follows
-        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+        [Error Protocol](https://matmegat.atlassian.net/wiki/display/NET/Errors)
 
       schema:
         $ref: ../../../swagger/Error.yaml

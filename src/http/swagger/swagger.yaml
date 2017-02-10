@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  title: NetVest backend
+  title: EnVest backend
   version: '0.1.0'
 
 schemes:

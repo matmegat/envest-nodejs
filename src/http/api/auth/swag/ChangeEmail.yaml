@@ -5,7 +5,7 @@ post:
     in: body
     description: |
       JSON payload to log in.
-      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+      [Validations](https://matmegat.atlassian.net/wiki/display/NET/Validations) will be applied
     schema:
       type: object
       properties:

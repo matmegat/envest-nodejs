@@ -34,7 +34,7 @@ post:
     400:
       description: |
         **Error object** which follows
-        [Error Protocol](https://distillery.atlassian.net/wiki/display/NET/Errors)
+        [Error Protocol](https://matmegat.atlassian.net/wiki/display/NET/Errors)
 
       schema:
         $ref: ../../../swagger/Error.yaml

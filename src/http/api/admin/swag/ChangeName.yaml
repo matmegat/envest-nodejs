@@ -11,10 +11,10 @@ post:
           description: Target user id
         first_name:
           type: string
-          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: First Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         last_name:
           type: string
-          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: Last Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
       required:
       - target_user_id
       - first_name

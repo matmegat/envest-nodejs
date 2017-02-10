@@ -9,13 +9,13 @@ get:
     type: number
     description: |
       Get feed items that are added before *max_id* (inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+      [guide](https://matmegat.atlassian.net/wiki/display/NET/pagination)
   - name: since_id
     in: query
     type: number
     description: |
       Get feed items greater than *since_id* (non inclusive) with applied sorting
-      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+      [guide](https://matmegat.atlassian.net/wiki/display/NET/pagination)
   - name: sort
     in: query
     type: string
@@ -52,7 +52,7 @@ get:
 
 post:
   description: |
-    Creates new Investor of app [Netvest Investor](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Investor)
+    Creates new Investor of app [Envest Investor](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Investor)
     NOTE: after creation Investor should use **change password** mechanism to
     get access to his account
   parameters:
@@ -64,10 +64,10 @@ post:
       properties:
         first_name:
           type: string
-          description: First Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: First Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         last_name:
           type: string
-          description: Last Name of [Netvest User](https://weezlabs.atlassian.net/wiki/display/NET/User+Roles+-+The+Netvest+User)
+          description: Last Name of [Envest User](https://matmegat.atlassian.net/wiki/display/NET/User+Roles+-+The+Envest+User)
         email:
           type: string
           description: Email
