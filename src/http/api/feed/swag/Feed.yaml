@@ -1,0 +1,17 @@
+type: object
+properties:
+  feed:
+    type: array
+    items:
+    - $ref: ./FeedItem.yaml
+  investors:
+    type: array
+    items:
+    - $ref: ../../investors/swag/Investor.yaml
+  total:
+    type: integer
+  pages:
+    type: integer
+required:
+- feed
+- investors

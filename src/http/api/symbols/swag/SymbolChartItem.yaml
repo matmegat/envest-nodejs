@@ -1,0 +1,24 @@
+type: object
+title: Chart Item Model
+properties:
+  period:
+    type: string
+    description: period name
+    enum:
+    - today
+    - ytd
+    - m1
+    - m6
+    - y1
+    - y5
+  points:
+    type: array
+    items:
+    - $ref: ./ChartPoint.yaml
+  utcOffset:
+    type: number
+    format: integer
+    description: UTC Offset to Exchange local time. Hours
+required:
+- period
+- points

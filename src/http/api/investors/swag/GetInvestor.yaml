@@ -1,0 +1,22 @@
+get:
+  description:
+    Get selected Investor.
+    User can get only public Investor,
+    Admin can get all Investors.
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investor ID
+    required: true
+  responses:
+    200:
+      description: Investor
+      schema:
+        $ref: ./Investor.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors

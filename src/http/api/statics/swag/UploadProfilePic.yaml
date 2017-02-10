@@ -1,0 +1,31 @@
+post:
+  description: Upload investor profile picture
+  consumes:
+  - application/x-www-form-urlencoded
+  parameters:
+  - name: profile_pic
+    description: |
+      Picture for investor background
+    in: formData
+    required: true
+    type: file
+    format: binary
+  - name: target_user_id
+    description: |
+      ID of target investor to set profile_pic
+    in: formData
+    type: number
+  responses:
+    200:
+      description: investor's background updated
+      schema:
+        type: object
+        properties:
+          hash:
+            type: string
+            description: uploaded profile_pic hash
+    400:
+      description: if something went wrong
+
+  tags:
+  - static

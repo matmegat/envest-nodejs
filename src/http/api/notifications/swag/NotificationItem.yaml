@@ -1,0 +1,32 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: Notification Id
+  timestamp:
+    type: string
+    format: date-time
+    description: Timestamp of notification
+  type:
+    type: string
+    description: Type of notification
+  target:
+    type: string
+    description: target user or group of notification,
+      values currently in use are `investor` and `admins`
+  event:
+    type: string
+    description: JSON object events
+  recipient_id:
+    type: integer
+    description: Recipient id
+  is_viewed:
+    type: boolean
+    description: Viewed flag
+required:
+- id
+- type
+- target
+- event
+- recipient_id
+- is_viewed

@@ -1,0 +1,21 @@
+type: object
+title: Holding Item Model
+properties:
+  amount:
+    type: number
+    format: integer
+    description: Amount of Symbols owned by Investor
+  price:
+    type: number
+    description: Calculated buy price
+  allocation:
+    type: number
+    description: |
+      Value / impact of Symbol on Investor Full Portfolio with Netvest
+  symbol:
+    $ref: ../../../swagger/Symbol.yaml
+required:
+- amount
+- price
+- allocation
+- symbol

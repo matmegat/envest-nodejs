@@ -1,0 +1,36 @@
+type: object
+description: '"Trade" type of event'
+allOf:
+- $ref: ./Event.yaml
+- type: object
+  properties:
+    data:
+      type: object
+      properties:
+        dir:
+          description: Type of trade operation
+          type: string
+          enum:
+          - sold
+          - bought
+        symbol:
+          $ref: ../../../swagger/Symbol.yaml
+        price:
+          type: number
+          format: float
+          minimum: 0
+        amount:
+          type: integer
+          minimum: 0
+        text:
+          type: string
+        risk:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+        motivations:
+          type: array
+          items:
+            type: string

@@ -1,0 +1,19 @@
+type: object
+title: Investor Portfolio Holding
+properties:
+  symbol:
+    $ref: ../../../swagger/Symbol.yaml
+  allocation:
+    type: number
+    description: |
+      **Indexed Portfolio Value**
+      Allocation of Stock (Symbol) in Investor's Portfolio
+  gain:
+    type: number
+    description: |
+      Gain / Loss on symbol. Calculated on whole period of symbol
+      owning. **MOCK DATA**
+required:
+- symbol
+- allocation
+- gain

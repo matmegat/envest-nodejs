@@ -1,0 +1,25 @@
+type: object
+title: Chart Series
+description: As Is from GET /symbols/{symbol}/chart
+properties:
+  period:
+    type: string
+  points:
+    type: array
+    items:
+      type: object
+      title: Chart point
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: point timestamp
+        value:
+          type: number
+          description: point value
+      required:
+      - timestamp
+      - value
+required:
+- period
+- points

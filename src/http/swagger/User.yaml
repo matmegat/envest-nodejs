@@ -1,0 +1,22 @@
+type: object
+title: User Model
+properties:
+  id:
+    type: integer
+  first_name:
+    type: string
+  last_name:
+    type: string
+  email:
+    type: string
+  pic:
+    type: string
+  access_token:
+    type: string
+required:
+- id
+- first_name
+- last_name
+- email
+- pic
+- access_token

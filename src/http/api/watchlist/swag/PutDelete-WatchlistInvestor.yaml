@@ -1,0 +1,55 @@
+put:
+  description: |
+    Put Symbol in Investors's Watchlist (watchlist limited to 500 item)
+  parameters:
+  - name: symbol_x
+    in: path
+    type: string
+    description: Symbol Full (GE.XNYS)
+    required: true
+
+  - name: payload
+    description: additional data (target_price)
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Additional
+      properties:
+        target_price:
+          type: integer
+          description: target_price for Investor action (buy/sell)
+          default: 1
+      required:
+      - target_price
+
+  responses:
+    200:
+      description: Symbol added
+      schema:
+        $ref: ./AddedSymbol.yaml
+
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+
+  tags:
+  - watchlist
+
+delete:
+  description: |
+    Delete Symbol from Investors's Watchlist
+  parameters:
+  - name: symbol_x
+    in: path
+    type: string
+    description: Symbol Full (GE.XNYS)
+    required: true
+
+  responses:
+    200:
+      description: Symbol removed
+
+  tags:
+  - watchlist

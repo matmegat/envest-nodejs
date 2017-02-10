@@ -1,0 +1,7 @@
+/.sublime
+/.idea
+/node_modules
+*.log
+
+/static/images/
+/backups/

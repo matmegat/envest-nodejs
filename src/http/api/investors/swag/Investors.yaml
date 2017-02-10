@@ -1,0 +1,18 @@
+type: object
+title: Investors Response
+properties:
+  investors:
+    type: array
+    title: Investors Model
+    items:
+    - $ref: ./Investor.yaml
+  total:
+    type: integer
+    description: Amount of investors
+  pages:
+    type: integer
+    description: Amount of pages
+required:
+- investors
+- total
+- pages

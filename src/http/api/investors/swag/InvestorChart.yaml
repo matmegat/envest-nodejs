@@ -1,0 +1,4 @@
+title: Investor perfomance Chart
+type: array
+items:
+- $ref: ./InvestorChartItem.yaml

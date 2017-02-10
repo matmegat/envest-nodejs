@@ -1,0 +1,16 @@
+{
+	"folders":
+	[
+		{
+			"path": "..",
+			"follow_symlinks": true,
+			"folder_exclude_patterns":
+			[
+				".sublime",
+				"node_modules",
+				"var",
+				"frontend"
+			]
+		}
+	]
+}

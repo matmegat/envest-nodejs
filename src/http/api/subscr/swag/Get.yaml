@@ -1,0 +1,13 @@
+get:
+  description: Retrieves current membership status
+  responses:
+    200:
+      description: Subscription Object
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - subscription

@@ -1,0 +1,53 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var rootpath = require('rootpath')(__dirname, '..')
+
+var cmd = require('command-promise')
+
+var args = require('minimist')(process.argv.slice(2),
+{
+	string:
+	[
+		'env',
+		'key'
+	]
+})
+
+var get_env = require('./lib/get-env')
+
+var env = get_env(args) /* @shortcut */
+
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = remote_config.remote
+
+var confirm = require('./lib/confirm')
+
+
+get_env.confirm(remote_config, env) /* @shortcut */
+.then(() =>
+{
+	var playbook = rootpath('infrastructure/playbook.yml')
+	var command = `ansible-playbook -i ${remote}, ${playbook}`
+
+	console.log('$', command)
+
+	command += ` -e "netvest_env=${env}"`
+
+	return confirm('apply?')
+	.then(so =>
+	{
+		if (so)
+		{
+			return cmd(command)
+			.then(cmd.util.stdout)
+			.then(stdout => process.stdout.write(stdout))
+		}
+		else
+		{
+			console.info('STOP')
+			process.exit(0)
+		}
+	})
+})

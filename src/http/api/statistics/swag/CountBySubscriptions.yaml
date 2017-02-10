@@ -1,0 +1,20 @@
+get:
+  description:
+    Get count of users of each subscription type
+  responses:
+    200:
+      description: Object with subscription title `trial || standard || premium` and count of users
+      schema:
+        type: object
+        title: Subscription
+        properties:
+          subscription_title:
+            type: integer
+        required:
+        - subscription_title
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - statistics

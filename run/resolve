@@ -1,0 +1,45 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var rootpath = require('rootpath')
+
+var Config = require('../src/Config')
+var Log = require('../src/Log')
+
+var redis = require('ioredis')
+var Cache = require('../src/db/Cache')
+var Symbols = require('../src/db/models/symbols/Symbols')
+
+
+var cfg = Config(rootpath(__dirname, '../cfg'))
+var log = Log()
+
+
+var db =
+{
+	helpers: require('../src/db/helpers'),
+	redis: redis(cfg.redis),
+	cache: null
+}
+db.cache = Cache(db.redis)
+
+
+var symbols = Symbols(db, cfg, log)
+
+var symbol = process.argv[2]
+
+if (! symbol)
+{
+	console.error('no symbol')
+	process.exit(1)
+}
+
+symbols.resolve(symbol)
+.then(console.dir, console.error)
+.then(() =>
+{
+	return symbols.quotes(symbol)
+})
+.then(console.dir, console.error)
+.then(process.exit)

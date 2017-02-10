@@ -1,0 +1,28 @@
+delete:
+  description: Delete post by investor
+  parameters:
+  - name: payload
+    description: |
+      JSON payload to delete post.
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        post_id:
+          type: integer
+          description: Post id to delete
+        soft_mode:
+          type: boolean
+          description: If need to remove trade post without trade revert
+      required:
+      - post_id
+  responses:
+    200:
+      description: Posting success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

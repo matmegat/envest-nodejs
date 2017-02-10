@@ -1,0 +1,34 @@
+post:
+  description: Subscribes the current user to stripe plan
+  parameters:
+  - name: payload
+    in: body
+    description: JSON payload to activated subscription.
+    required: true
+    schema:
+      type: object
+      title: Subscription Payload
+      properties:
+        plan:
+          type: string
+          description: Subscription plan
+        stripe_token:
+          type: string
+          description: Stripe token generated on front-end
+        coupon:
+          type: string
+          description: Promotion code for subscription
+      required:
+      - plan
+      - stripe_token
+  responses:
+    200:
+      description: Subscription successfully created
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - subscription

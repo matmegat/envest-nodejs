@@ -1,0 +1,54 @@
+get:
+  description: |
+    Get symbol info
+  parameters:
+  - name: symbol
+    in: path
+    type: string
+    description: Symbol ID `TICKER.EXCHANGE`
+    required: true
+  responses:
+    200:
+      description: Symbol fields
+      schema:
+        type: object
+        title: Symbol Info Model
+        properties:
+          prev_close:
+            type: number
+          low:
+            type: number
+          high:
+            type: number
+          volume:
+            type: integer
+          last:
+            type: number
+          percent_change_from_open:
+            type: number
+          market_cap:
+            type: number
+            description: Fundamental type – MarketCapitalization
+          one_year_low:
+            type: number
+            description: Fundamental type – LowPriceLast52Weeks
+          one_year_high:
+            type: number
+            description: Fundamental type – HighPriceLast52Weeks
+          dividend:
+            type: number
+            description: Fundamental type – DividendYieldDaily
+          currency:
+            type: string
+        required:
+        - prev_close
+        - low
+        - high
+        - volume
+        - currency
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - symbols

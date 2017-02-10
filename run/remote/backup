@@ -1,0 +1,37 @@
+#! /bin/sh
+
+backup_exists ()
+{
+  (>&2 echo '*** Backup dir is already exists. Maybe backup is already done or failed.')
+  (>&2 echo '*** Remove dir manually and repeat process.')
+  exit 1
+}
+
+cd $(dirname $0); cd "../.."
+
+today=$(date +%Y-%m-%d)
+
+backups_prefix="var/backups"
+backup_dir="${backups_prefix}/${today}"
+
+mkdir -p "${backups_prefix}"
+mkdir    "${backup_dir}"     || backup_exists
+
+# env='local'
+env="$(cat ENV)"
+
+backup_sql="/tmp/$(mktemp -u netvest-db.XXX.sql)"
+sudo su postgres -c "pg_dump netvest_$(cat ENV) > ${backup_sql}"
+sudo chown ubuntu:ubuntu "${backup_sql}"
+cp "${backup_sql}" "${backup_dir}"
+
+cp -r "static/images" "${backup_dir}/images"
+
+backup_name="netvest-${env}-${today}"
+backup_name_full="${backups_prefix}/${backup_name}.tar.gz"
+
+tar -zc -C "${backups_prefix}" -f "${backup_name_full}" "${today}"
+
+rm -rf "${backup_dir}"
+
+echo "${backup_name_full}"

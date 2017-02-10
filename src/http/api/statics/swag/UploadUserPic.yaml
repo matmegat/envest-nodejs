@@ -1,0 +1,31 @@
+post:
+  description: Upload user avatar
+  consumes:
+  - multipart/form-data
+  parameters:
+  - name: pic
+    description: |
+      Picture for user avatar
+    in: formData
+    required: true
+    type: file
+    format: binary
+  - name: target_user_id
+    description: |
+      ID of target investor to set profile_pic
+    in: formData
+    type: number
+  responses:
+    200:
+      description: user's avatar updated
+      schema:
+        type: object
+        properties:
+          hash:
+            type: string
+            description: uploaded pic hash
+    400:
+      description: if something went wrong
+
+  tags:
+  - static

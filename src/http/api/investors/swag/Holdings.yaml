@@ -1,0 +1,5 @@
+type: array
+title: Holdings Model
+description: Available for admin and Ivestor only
+items:
+- $ref: ./Holding.yaml

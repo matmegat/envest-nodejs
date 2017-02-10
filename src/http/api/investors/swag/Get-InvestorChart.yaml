@@ -1,0 +1,20 @@
+get:
+  description: |
+    Get Investor's Chart
+  parameters:
+  - name: investor_id
+    in: path
+    type: integer
+    description: Investors Id
+    required: true
+  responses:
+    200:
+      description: Investor Chart by resolutions.
+      schema:
+        $ref: ./InvestorChart.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - investors

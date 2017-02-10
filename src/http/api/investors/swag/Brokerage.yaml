@@ -1,0 +1,9 @@
+type: object
+title: Brokerage Model
+description: Available for admin and Ivestor only
+properties:
+  cash:
+    type: number
+    description: Real amount of brokerage value
+required:
+- cash

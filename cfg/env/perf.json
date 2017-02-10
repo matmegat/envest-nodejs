@@ -1,0 +1,26 @@
+{
+  "dev":  false,
+  "env": "perf",
+
+  "host": "ec2-52-11-126-122.us-west-2.compute.amazonaws.com",
+  "port": 1081,
+  "port_nginx": 80,
+
+  "pg":
+  {
+    "database": "netvest_perf",
+    "password": "1d2z8yf2hkyy14i3"
+  },
+
+  "redis":
+  {
+    "db": 1
+  },
+
+  "feedback":
+  {
+    "email": "contact@netvest.com"
+  },
+
+  "nginx": true
+}

@@ -1,0 +1,31 @@
+{
+  "dev":  true,
+  "env": "test",
+
+  "host": "ec2-35-163-203-21.us-west-2.compute.amazonaws.com",
+  "port": 8081,
+  "port_nginx": 8080,
+
+  "pg":
+  {
+    "database": "netvest_test",
+    "password": "ovjms3lmzf"
+  },
+
+  "redis":
+  {
+    "db": 0
+  },
+
+  "nginx": true,
+
+  "mandrill":
+  {
+    "defaults":
+    {
+      "ios_beta_app": "https://rink.hockeyapp.net/manage/apps/304936",
+      "android_beta_app": "https://rink.hockeyapp.net/manage/apps/314336",
+      "investor_panel_link": "ec2-35-161-140-145.us-west-2.compute.amazonaws.com:8080/admin/"
+    }
+  }
+}

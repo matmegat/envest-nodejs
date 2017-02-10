@@ -1,0 +1,27 @@
+{
+  "dev":  true,
+  "env": "dev",
+
+  "host": "ec2-35-163-203-21.us-west-2.compute.amazonaws.com",
+  "port": 8001,
+  "port_nginx": 8000,
+
+  "pg":
+  {
+    "database": "netvest_dev",
+    "password": "ovjms3lmzf"
+  },
+
+  "redis":
+  {
+    "db": 2
+  },
+
+  "nginx": true,
+
+  "stripe":
+  {
+    "secret_key": "sk_test_dwYOVs8ksV5k42u2zcJWQiw41",
+    "pub_key": "pk_test_PYBikGVhRueRB0vBKD9JZjvf2"
+  }
+}

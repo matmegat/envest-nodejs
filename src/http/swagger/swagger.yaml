@@ -1,0 +1,305 @@
+swagger: '2.0'
+info:
+  title: NetVest backend
+  version: '0.1.0'
+
+schemes:
+  - http
+  - https
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+paths:
+  '/feed':
+    $ref: ../api/feed/swag/GetFeed.yaml
+
+  '/feed/post':
+    $ref: ../api/feed/swag/FeedPost.yaml
+
+  '/feed/post/update':
+    $ref: ../api/feed/swag/FeedPostUpdate.yaml
+
+  '/feed/post-as':
+    $ref: ../api/feed/swag/FeedPostAs.yaml
+
+  '/feed/post-as/update':
+    $ref: ../api/feed/swag/FeedPostUpdateAs.yaml
+
+  '/feed/post/delete':
+    $ref: ../api/feed/swag/FeedPostDelete.yaml
+
+  '/feed/post-as/delete':
+    $ref: ../api/feed/swag/FeedPostDeleteAs.yaml
+
+  '/feed/{feed_id}':
+    $ref: ../api/feed/swag/FeedById.yaml
+
+  '/feed/counts':
+    $ref: ../api/feed/swag/FeedByCounts.yaml
+
+  '/feed/trades':
+    $ref: ../api/feed/swag/FeedByTrade.yaml
+
+  '/feed/updates':
+    $ref: ../api/feed/swag/FeedByUpdate.yaml
+
+  '/feed/by-watchlist':
+    $ref: ../api/feed/swag/FeedByWatchlist.yaml
+
+  '/feed/{feed_id}/comments':
+    $ref: ../api/feed/swag/GetPostFeedComments.yaml
+
+  '/auth/register':
+    $ref: ../api/auth/swag/Register.yaml
+
+  '/auth/login':
+    $ref: ../api/auth/swag/Login.yaml
+
+  '/auth/login/facebook':
+    $ref: ../api/auth/swag/LoginFacebook.yaml
+
+  '/auth/logout':
+    $ref: ../api/auth/swag/Logout.yaml
+
+  '/auth/confirm-email':
+    $ref: ../api/auth/swag/ConfirmEmail.yaml
+
+  '/auth/change-email':
+    $ref: ../api/auth/swag/ChangeEmail.yaml
+
+  '/admin/intro':
+    $ref: ../api/admin/swag/Intro.yaml
+
+  '/admin/create':
+    $ref: ../api/admin/swag/Create.yaml
+
+  '/admin/change-name':
+    $ref: ../api/admin/swag/ChangeName.yaml
+
+  '/comments':
+    $ref: ../api/comments/swag/GetPostComments.yaml
+
+  '/comments/{id}':
+    $ref: ../api/comments/swag/Remove.yaml
+
+  '/comments/abuse':
+    $ref: ../api/comments/swag/Abuse.yaml
+
+  '/notifications':
+    $ref: ../api/notifications/swag/GetPostNotifications.yaml
+
+  '/investors':
+    $ref: ../api/investors/swag/GetPostInvestors.yaml
+
+  '/investors/featured':
+    $ref: ../api/investors/swag/PostFeatured.yaml
+
+  '/investors/{investor_id}':
+    $ref: ../api/investors/swag/GetInvestor.yaml
+
+  '/investors/{investor_id}/chart':
+    $ref: ../api/investors/swag/Get-InvestorChart.yaml
+
+  '/investors/{investor_id}/chart/ir':
+    $ref: ../api/investors/swag/Get-InvestorIR.yaml
+
+  '/investors/{investor_id}/portfolio':
+    $ref: ../api/investors/swag/Get-InvestorPortfolio.yaml
+
+  '/investors/{investor_id}/field':
+    $ref: ../api/investors/swag/Field.yaml
+
+  '/investors/cash':
+    $ref: ../api/investors/swag/Cash.yaml
+
+  '/investors/cash-as':
+    $ref: ../api/investors/swag/CashAs.yaml
+
+  '/investors/{investor_id}/go-public':
+    $ref: ../api/investors/swag/Post-GoPublic.yaml
+
+  '/investors/{investor_id}/parse-csv':
+    $ref: ../api/investors/swag/Post-ParseCSV.yaml
+
+  '/investors/{investor_id}/upload-history':
+    $ref: ../api/investors/swag/Post-UploadCSV.yaml
+
+  '/investors/{investor_id}/cash-operations':
+    $ref: ../api/investors/swag/InvestorCashOps.yaml
+
+  '/investors/holdings/remove':
+    $ref: ../api/investors/swag/HoldingsRemove.yaml
+
+  '/watchlist':
+      $ref: ../api/watchlist/swag/WatchlistUser.yaml
+
+  '/watchlist/{symbol_x}':
+    $ref: ../api/watchlist/swag/PutDelete-WatchlistUser.yaml
+
+  '/watchlist/investor':
+    $ref: ../api/watchlist/swag/WatchlistInvestorOwn.yaml
+
+  '/watchlist/investor/by-id/{investor_id}':
+    $ref: ../api/watchlist/swag/WatchlistInvestor.yaml
+
+  '/watchlist/investor/{symbol_x}':
+   $ref: ../api/watchlist/swag/PutDelete-WatchlistInvestor.yaml
+
+  '/static/pic/{hash}':
+    $ref: ../api/statics/swag/GetPic.yaml
+
+  '/static/upload/pic':
+    $ref: ../api/statics/swag/UploadUserPic.yaml
+
+  '/static/upload/profile_pic':
+    $ref: ../api/statics/swag/UploadProfilePic.yaml
+
+  '/static/upload/post_pic':
+    $ref: ../api/statics/swag/UploadPostPic.yaml
+
+  '/users/current':
+    $ref: ../api/users/swag/UserCurrent.yaml
+
+  '/users/':
+    $ref: ../api/users/swag/UsersList.yaml
+
+  '/users/admins':
+    $ref: ../api/users/swag/AdminsList.yaml
+
+  '/users/change-name':
+    $ref: ../api/users/swag/ChangeName.yaml
+
+  '/users/{ids}':
+    $ref: ../api/users/swag/UsersRemove.yaml
+
+  '/feedback':
+    $ref: ../api/feedback/swag/Feedback.yaml
+
+  '/password/req-reset':
+    $ref: ../api/password/swag/ReqReset.yaml
+
+  '/password/reset':
+    $ref: ../api/password/swag/Reset.yaml
+
+  '/password/change':
+    $ref: ../api/password/swag/Change.yaml
+
+  '/subscr/':
+    $ref: ../api/subscr/swag/Get.yaml
+
+  '/subscr/activate':
+    $ref: ../api/subscr/swag/Activate.yaml
+
+  '/subscr/deactivate':
+    $ref: ../api/subscr/swag/Deactivate.yaml
+
+  '/promo/activate':
+    $ref: ../api/promo/swag/Activate.yaml
+
+  '/promo/remove':
+    $ref: ../api/promo/swag/Remove.yaml
+
+  '/promo/create':
+    $ref: ../api/promo/swag/Create.yaml
+
+  '/promo':
+    $ref: ../api/promo/swag/List.yaml
+
+  '/symbols/{symbol}/chart':
+    $ref: ../api/symbols/swag/Get-SymbolChart.yaml
+
+  '/symbols/{symbol}':
+    $ref: ../api/symbols/swag/Get-SymbolInfo.yaml
+
+  '/statistics/subscriptions':
+    $ref: ../api/statistics/swag/CountBySubscriptions.yaml
+
+  '/statistics/users-confirmed':
+    $ref: ../api/statistics/swag/CountByEmailConfirms.yaml
+
+definitions:
+
+  Feed:
+    $ref: ../api/feed/swag/Feed.yaml
+
+  FeedItem:
+    $ref: ../api/feed/swag/FeedItem.yaml
+
+  FeedCounts:
+    $ref: ../api/feed/swag/FeedCounts.yaml
+
+  Investor:
+    $ref: ../api/investors/swag/Investor.yaml
+
+  HistoricalReturns:
+    $ref: ../api/investors/swag/HistoricalReturns.yaml
+
+  HistoricalReturn:
+    $ref: ../api/investors/swag/HistoricalReturn.yaml
+
+  Holdings:
+    $ref: ../api/investors/swag/Holdings.yaml
+
+  Holding:
+    $ref: ../api/investors/swag/Holding.yaml
+
+  Brokerage:
+    $ref: ../api/investors/swag/Brokerage.yaml
+
+  Investors:
+    $ref: ../api/investors/swag/Investors.yaml
+
+  AddedSymbol:
+    $ref: ../api/watchlist/swag/AddedSymbol.yaml
+
+  Symbol:
+    $ref: ./Symbol.yaml
+
+  SymbolChart:
+    $ref: ../api/symbols/swag/SymbolChart.yaml
+
+  SymbolChartItem:
+    $ref: ../api/symbols/swag/SymbolChartItem.yaml
+
+  ChartPoint:
+    $ref: ../api/symbols/swag/ChartPoint.yaml
+
+  PortfolioHolding:
+    $ref: ../api/investors/swag/InvestorPortfolioHolding.yaml
+
+  Error:
+    $ref: ./Error.yaml
+
+  User:
+    $ref: ./User.yaml
+
+  UserFull:
+    $ref: ./UserFull.yaml
+
+  Users:
+    $ref: ../api/users/swag/Users.yaml
+
+  UsersItem:
+    $ref: ../api/users/swag/UsersItem.yaml
+
+  Comment:
+    $ref: ../api/comments/swag/Comment.yaml
+
+  CommentsItem:
+    $ref: ../api/comments/swag/CommentItem.yaml
+
+  CommentUser:
+    $ref: ../api/comments/swag/CommentUser.yaml
+
+  Notifications:
+    $ref: ../api/notifications/swag/Notifications.yaml
+
+  NotificationsItem:
+    $ref: ../api/notifications/swag/NotificationItem.yaml
+
+  PostChartPayload:
+    $ref: ../api/feed/swag/PostChartPayload.yaml

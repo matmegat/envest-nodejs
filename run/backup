@@ -1,0 +1,64 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var rootpath = require('rootpath')(__dirname, '..')
+
+var get_env = require('./lib/get-env')
+var args = require('minimist')(process.argv.slice(2),
+{
+	string:
+	[
+		'env',
+		'key'
+	]
+})
+
+var env = get_env(args) /* @shortcut */
+
+var cmd = require('command-promise')
+var partial = require('lodash/partial')
+
+var ssh = partial(cmd, 'ssh')
+var scp = partial(cmd, 'scp')
+
+var key = args.key
+
+if (key)
+{
+	ssh = partial(ssh, [ '-i', key ])
+	scp = partial(scp, [ '-i', key ])
+}
+
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = require('./lib/remote')(env, remote_config.remote)
+
+ssh = partial(ssh, remote.with_user)
+
+console.info('calling remote for backup…')
+ssh(`"cd ${remote.path()}; run/remote/backup"`)
+.then(cmd.util.stderr)
+.then(cmd.util.trim)
+.then(tar_path =>
+{
+	console.info('downloading. this may take a while…')
+	var to_backups = rootpath('backups/')
+
+	return cmd(`mkdir -p ${to_backups}`)
+	.then(() =>
+	{
+		return scp(remote.target(tar_path), to_backups)
+	})
+	.then(() =>
+	{
+		return ssh(`"rm ${remote.path(tar_path)}"`)
+	})
+})
+.then(() =>
+{
+	console.info('OK')
+})
+.catch(error =>
+{
+	console.error(error)
+})

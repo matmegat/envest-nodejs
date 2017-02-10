@@ -1,0 +1,12 @@
+get:
+  description: |
+    Get current authenticated User parameters.
+    Investor and admin fields are optional and
+    set if User is admin or investor
+  responses:
+    200:
+      description: Object with authenticated User's data
+      schema:
+        $ref: ./UserInfo.yaml
+  tags:
+  - users

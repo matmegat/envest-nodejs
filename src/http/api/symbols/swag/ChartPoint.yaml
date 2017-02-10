@@ -1,0 +1,12 @@
+type: object
+title: Chart Point
+properties:
+  timestamp:
+    type: string
+    format: datetime
+    description: ISO 8601 string. UTC time
+  value:
+    type: number
+required:
+- timestamp
+- value

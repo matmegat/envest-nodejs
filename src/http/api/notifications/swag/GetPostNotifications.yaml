@@ -1,0 +1,52 @@
+get:
+  description: Get user notifications
+  parameters:
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  - name: type
+    in: query
+    type: string
+    description: filter notification by type. Avaialable types are
+      "pic_updated", "investor_reports", "pushed_to_public", "post_updated",
+      "new_featured_investor", "new_feed_comment", "username_changed",
+      "post_created", "comments_reports", "field_edited", "cash_managed",
+      "post_deleted", "csv_uploaded", "profile_pic_updated"
+  responses:
+    200:
+      description: User notifications
+      schema:
+        $ref: ./Notifications.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - notifications
+post:
+  description: Set ids viewed notifications
+  parameters:
+  - name: payload
+    description: JSON payload to set ids viewed notifications
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Notification Payload
+      properties:
+        viewed_ids:
+          type: array
+          description: An array of id viewed notifications
+          default: [1,2,3]
+      required:
+      - viewed_ids
+  responses:
+    200:
+      description: the viewed flag is set
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - notifications

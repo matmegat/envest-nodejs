@@ -1,0 +1,44 @@
+post:
+  description: Activate promo code
+  parameters:
+  - name: payload
+    in: body
+    description: JSON payload to activate promo code.
+    required: true
+    schema:
+      type: object
+      title: Activate promo code Payload
+      properties:
+        code:
+          type: string
+          description: Promo code
+      required:
+      - code
+  responses:
+    200:
+      description: Promo code successfully activated
+      schema:
+        type: object
+        title: Subscription Model
+        description: |
+          Subscription info
+        properties:
+          user_id:
+            type: number
+            format: integer
+            description: User ID
+          type:
+            type: string
+            description: Subscription type
+          end_time:
+            type: string
+            format: date-time
+            description: Subscription expiration date
+    400:
+      description: |
+        **Error object** which follows
+        [Error Protocol](https://weezlabs.atlassian.net/wiki/display/NET/Errors)
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - promo

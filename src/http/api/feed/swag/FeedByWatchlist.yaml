@@ -1,0 +1,13 @@
+get:
+  description: Get Feed items by Symbols user got in his Watchlist
+  responses:
+    200:
+      description: Feed
+      schema:
+        $ref: ./Feed.yaml
+    400:
+      description: Handled Error
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

@@ -1,0 +1,12 @@
+type: object
+title: Historical Return Item
+properties:
+  year:
+    type: object
+    description: Year
+  percentage:
+    type: number
+    description: Investors Gain / Loss, percantage
+required:
+- year
+- percentage

@@ -1,0 +1,40 @@
+{
+  "dev":  false,
+  "env": "prod",
+
+  "host": "ec2-52-25-63-85.us-west-2.compute.amazonaws.com",
+  "port": 1081,
+  "port_nginx": 80,
+
+  "pg":
+  {
+    "database": "netvest_prod",
+    "password": "0p92qpw913iejyvi"
+  },
+
+  "redis":
+  {
+    "db": 1
+  },
+
+  "cors":
+  {
+    "hosts":
+    [
+      "http://www.netvest.com",
+      "http://staging.netvest.com",
+      "http://netvest.com"
+    ],
+    "ports":
+    [
+      80
+    ]
+  },
+
+  "feedback":
+  {
+    "email": "contact@netvest.com"
+  },
+
+  "nginx": true
+}

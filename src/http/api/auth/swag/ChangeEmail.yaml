@@ -1,0 +1,25 @@
+post:
+  description: Changes the email
+  parameters:
+  - name: payload
+    in: body
+    description: |
+      JSON payload to log in.
+      [Validations](https://weezlabs.atlassian.net/wiki/display/NET/Validations) will be applied
+    schema:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email
+      required:
+      - email
+  responses:
+    200:
+      description: email changed
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - auth

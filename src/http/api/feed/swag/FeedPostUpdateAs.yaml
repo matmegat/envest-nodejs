@@ -1,0 +1,88 @@
+post:
+  description: Update post by admin as an investor
+  parameters:
+  - name: payload
+    description: |
+      JSON payload to update post.
+      Trade_data, watchlist_data, update_data points
+      are description of one object after type property.
+      It should be named as `data` on payload
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        post_id:
+          type: integer
+          description: Post id to delete
+        trade_data:
+          type: object
+          description: Post properties
+          properties:
+            text:
+              type: string
+            risk:
+              type: string
+              enum:
+              - low
+              - medium
+              - high
+            motivations:
+              type: array
+              items:
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+        watchlist_data:
+          type: object
+          description: Post properties
+          properties:
+            text:
+              type: string
+            motivations:
+              type: array
+              items:
+                type: object
+                description: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+        update_data:
+          type: object
+          description: |
+            Post properties
+            Set null for pic or chart to delete
+          properties:
+            symbols:
+              type: array
+              items:
+                type: string
+                description: Symbol ticker.exchange
+            title:
+              type: string
+              description: Update title
+            text: 
+              type: string
+              description: Update description
+            pic:
+              type: string
+              description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
+      required:
+      - data
+  responses:
+    200:
+      description: Updating success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

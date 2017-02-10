@@ -1,0 +1,34 @@
+get:
+  description: Get selected Feed Item by type 'trade'
+  parameters:
+  - name: max_id
+    in: query
+    type: integer
+    description: |
+      Get feed items that are added before *max_id* (inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: since_id
+    in: query
+    type: integer
+    description: |
+      Get feed items greater than *since_id* (non inclusive) with applied sorting
+      [guide](https://weezlabs.atlassian.net/wiki/display/NET/pagination)
+  - name: page
+    in: query
+    type: integer
+    description: Page number
+  - name: investor
+    in: query
+    type: integer
+    description: Investor Id
+  responses:
+    200:
+      description: Feed
+      schema:
+        $ref: ./Feed.yaml
+    400:
+      description: Handled Error
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

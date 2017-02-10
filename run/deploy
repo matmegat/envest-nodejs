@@ -1,0 +1,273 @@
+#! /usr/bin/env node
+
+require('console-ultimate/global').replace()
+
+var show_slack = true
+
+var f = require('util').format
+var home = require('home').resolve
+
+var fs = require('fs-sync')
+var read  = fs.read
+var write = fs.write
+
+var get_env = require('./lib/get-env')
+var slack = require('./lib/slack')
+
+var args = require('minimist')(process.argv.slice(2),
+{
+	string:
+	[
+		'env',
+		'key'
+	]
+})
+
+var env = get_env(args) /* @shortcut */
+
+var cmd = require('command-promise')
+var partial = require('lodash/partial')
+
+// rsync -v -r --delete -e "ssh -i ${HOME}/.ssh/WeezLabsDev.pem" db/
+// ... ubuntu@ec2-52-38-31-214.us-west-2.compute.amazonaws.com:/home/ubuntu/netvest/dev/db
+
+var ssh = partial(cmd, 'ssh')
+var scp = partial(cmd, 'scp')
+
+var rsync = partial(cmd, 'rsync')
+
+var key = args.key
+
+if (key)
+{
+	ssh = partial(ssh, [ '-i', key ])
+	scp = partial(scp, [ '-i', key ])
+
+	var fkey = home(key)
+	fkey = f('"ssh -i %s"', fkey)
+
+	rsync = partial(rsync, [ '-e', fkey ])
+}
+
+
+var remote_config = get_env.remote(env) /* @shortcut */
+var remote = require('./lib/remote')(env, remote_config.remote)
+
+
+ssh = partial(ssh, remote.with_user)
+rsync = partial(rsync, '--recursive')
+rsync_clean = partial(rsync, '--delete')
+
+function outputify (name, fn)
+{
+	return function ()
+	{
+		console.info('START', name)
+
+		var r = new Promise(rs =>
+		{
+			rs(fn.apply(this, arguments))
+		})
+
+		return r.then(() =>
+		{
+			console.info('READY', name)
+
+			return r
+		})
+	}
+}
+
+
+var rootpath = require('rootpath')(__dirname, '..')
+var merge = require('lodash').merge
+
+var tmp = require('rootpath')(require('os').tmpdir())
+
+
+var load  = fs.readJSON
+
+function dump (path, config)
+{
+	config = JSON.stringify(config, null, '  ')
+
+	write(path, config)
+}
+
+
+function rev ()
+{
+	return cmd('git describe --always --long --abbrev=16 --dirty')
+	.then(cmd.util.stdout)
+	.then(cmd.util.trim)
+	.then(rev =>
+	{
+		return cmd("git log --pretty='[%an] %s' -1")
+		.then(cmd.util.stdout)
+		.then(cmd.util.trim)
+		.then(logmsg =>
+		{
+			return rev + ' ' + logmsg
+		})
+	})
+}
+
+
+get_env.confirm(remote_config, env) /* @shortcut */
+.then(() =>
+{
+	var tmp_env = tmp('netvest-ENV')
+
+	write(tmp_env, env)
+
+	return scp(tmp_env, remote.target('ENV'))
+})
+.then(so =>
+{
+	return rev()
+})
+.then(fullrev =>
+{
+	var tmp_rev = tmp('netvest-REV')
+
+	write(tmp_rev, fullrev)
+
+	return scp(tmp_rev, remote.target('REV'))
+})
+.then(outputify('copy package.json', () =>
+{
+	return scp(rootpath('package.json'), remote.target())
+}))
+.then(outputify('copy run/remote', () =>
+{
+	return ssh(f("'mkdir -p %s'", remote.path('run/remote')))
+	.then(() =>
+	{
+		return rsync_clean(rootpath('run/remote') + '/', remote.target('run/remote'))
+	})
+}))
+.then(outputify('copy db/', () =>
+{
+	return rsync_clean(rootpath('db') + '/', remote.target('db'))
+}))
+.then(outputify('copy static/', () =>
+{
+	return rsync(
+		[ '--exclude', '/images' ],
+		rootpath('static') + '/',
+		remote.target('static')
+	)
+}))
+.then(outputify('copy src/', () =>
+{
+	return rsync_clean(rootpath('src') + '/', remote.target('src'))
+}))
+.then(() =>
+{
+	return ssh(f("'mkdir -p %s'", remote.path('cfg/')))
+})
+.then(outputify('compile config, copy cfg/', () =>
+{
+	var base = load(rootpath('cfg/config.json'))
+	var cenv = load(rootpath('cfg/env', env + '.json'))
+
+	var config = merge({}, base, cenv)
+
+	/* exceptions */
+	config.cors = cenv.cors || base.cors
+
+	var tmp_f = tmp('netvest-deploy-config.json')
+	dump(tmp_f, config)
+
+	return scp(tmp_f, remote.target('cfg/config.json'))
+	.then(() => config)
+}))
+.then(config =>
+{
+	if (! config.nginx)
+	{
+		return
+	}
+
+	return outputify('compile nginx config, copy cfg/', () =>
+	{
+		var render = require('mustache').render
+
+		var template = read(rootpath('cfg/env/_nginx.conf'))
+
+		var rendered = render(template,
+		{
+			env:  env,
+			port: config.port,
+			port_nginx: config.port_nginx
+		})
+
+		var tmp_f = tmp('netvest-deploy-nginx.conf')
+		write(tmp_f, rendered)
+
+		return scp(tmp_f, remote.target('cfg/nginx.conf'))
+	})()
+	.then(outputify('put ref to nginx/conf.d', () =>
+	{
+		var tmp_f_local = 'netvest-deploy-nginx-ref.conf'
+		var tmp_f = tmp(tmp_f_local)
+
+		var rendered = `include /home/ubuntu/netvest/${env}/cfg/nginx.conf;\n`
+
+		write(tmp_f, rendered)
+
+		var target_etc = `${remote.with_user}:/tmp/${tmp_f_local}`
+
+		return scp(tmp_f, target_etc)
+		.then(() =>
+		{
+			var from = `/tmp/${tmp_f_local}`
+			var to = `/etc/nginx/conf.d/netvest-${env}.conf`
+			return ssh(`sudo mv ${from} ${to}`)
+		})
+	}))
+})
+.then(() =>
+{
+	return ssh(f('"mkdir -p %s"', remote.path('var/')))
+})
+.then(outputify('run remote', () =>
+{
+	return ssh(
+		f( '"cd %s;'
+		 + 'npm install --production --no-optional;'
+		 + 'npm start;'
+		 + 'sudo nginx -s reload || true;"', remote.path()
+	))
+}))
+.then(() =>
+{
+	console.info('OK')
+
+	rev()
+	.then(fullrev =>
+	{
+		if (show_slack)
+		{
+			/* return */ slack.success(env, fullrev)
+		}
+	})
+})
+.catch(error =>
+{
+	console.error(error)
+	console.error(error.stack)
+
+	return Promise.resolve()
+	.then(() =>
+	{
+		if (show_slack)
+		{
+			return slack.failure(env)
+		}
+	})
+	.then(() =>
+	{
+		process.exit(1)
+	})
+})

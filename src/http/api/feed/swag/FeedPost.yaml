@@ -1,0 +1,150 @@
+post:
+  description: Create post by investor
+  parameters:
+  - name: payload
+    description: |
+      JSON payload to make post.
+      Trade_data, watchlist_data, update_data points
+      are description of one object after type property.
+      It should be named as `data` on payload
+    in: body
+    required: true
+    schema:
+      type: object
+      title: Post model
+      properties:
+        type:
+          type: string
+          description: Post type trade / watchlist / update
+        date:
+          type: string
+          format: date-time
+          description: Post date
+        data:
+          type: object
+          description: '= **oneOf**(TradeData, WatchlistData, UpdateData)'
+        TradeData:
+          type: object
+          title: data = TradeData
+          properties:
+            dir:
+              description: Type of trade operation
+              type: string
+              enum:
+              - sold
+              - bought
+            symbol:
+              type: string
+              description: Symbol ticker.exchange
+            price:
+              type: number
+              format: float
+              minimum: 0
+            amount:
+              type: integer
+              minimum: 0
+            text:
+              type: string
+            risk:
+              type: string
+              enum:
+              - low
+              - medium
+              - high
+            motivations:
+              type: array
+              description: Motivation
+              items:
+                type: object
+                title: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+                required:
+                - id
+                - text
+          required:
+          - dir
+          - symbol
+          - price
+          - amount
+          - text
+          - risk
+          - motivations
+        WatchlistData:
+          type: object
+          title: data = WatchlistData
+          properties:
+            dir:
+              description: Type of watchlist operation
+              type: string
+              enum:
+              - added
+              - removed
+            symbol:
+              type: string
+              description: Symbol ticker.exchange
+            target_price:
+              type: number
+              format: float
+              minimum: 0
+            text:
+              type: string
+            motivations:
+              type: array
+              description: Motivation
+              items:
+                type: object
+                title: Motivation
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+                required:
+                - id
+                - text
+          required:
+          - dir
+          - symbol
+          - target_price
+          - text
+          - motivations
+        UpdateData:
+          type: object
+          title: data = UpdateData
+          properties:
+            symbols:
+              type: array
+              items:
+                type: string
+                description: Symbol ticker.exchange
+            title:
+              type: string
+              description: Update title
+            text:
+              type: string
+              description: Update description
+            pic:
+              type: string
+              description: Update post picture hash
+            chart:
+              $ref: ./PostChartPayload.yaml
+          required:
+          - symbols
+          - title
+          - text
+      required:
+      - type
+      - data
+  responses:
+    200:
+      description: Posting success
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - feed

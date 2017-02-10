@@ -1,0 +1,30 @@
+post:
+  description: Reset the password
+  parameters:
+  - name: payload
+    in: body
+    description: |
+      JSON payload with password reset code
+    schema:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code change password
+        new_pass:
+          type: string
+          description: New password
+      required:
+      - code
+      - new_pass
+  responses:
+    200:
+      description: Password changed
+      schema:
+        $ref: ../../../swagger/UserFull.yaml
+    400:
+      description: if something went wrong
+      schema:
+        $ref: ../../../swagger/Error.yaml
+  tags:
+  - password
