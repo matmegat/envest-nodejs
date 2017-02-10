@@ -109,6 +109,72 @@ module.exports =
 		}
 	},
 
+	paidSubscriber: (substitutions) =>
+	{
+		return {
+			subject: 'Welcome to Netvest',
+			html: `<strong>Welcome to Netvest</strong><br><br>`
+			+ `We’re glad you joined us, ${substitutions.first_name}<br><br>`
+			+ `One last important step - if you haven’t already, `
+			+ `please download our mobile app `
+			+ `on <a href="${substitutions.itunes_link}">iOS</a> or `
+			+ `<a href="${substitutions.play_market_link}">Android</a> now, `
+			+ `which you can access using the same login information you use `
+			+ `for our website. Now you’ve got full access to the inner `
+			+ `workings of premiere personal investors.<br>`
+			+ `Below is some important information about your subscription `
+			+ `plan, which you should keep handy for future reference.`
+			+ `<br><br><br>`
+			+ `<i>The following acknowledges the terms of your recurring payment `
+			+ `for your subscription to our website, `
+			+ `<a href="https://${substitutions.host}">www.netvest.com</a> and`
+			+ ` mobile application (collectively, the “Services”). Further `
+			+ `information regarding the Services is found in our `
+			+ `<a href="https://${substitutions.host}/terms-of-use">Terms of `
+			+ `Use</a> and `
+			+ `<a href="https://${substitutions.host}/privacy-policy">Privacy `
+			+ `Policy</a>. Please retain a copy of this acknowledgment for `
+			+ `future reference, as it explains the terms of the billing and `
+			+ `cancellation procedures for our Services.</i><br><br>`
+			+ `<i>By subscribing to the Services after your trial period and desi`
+			+ `nating a payment method for the Services, you authorize Netvest`
+			+ ` to charge you a monthly subscription fee at the then current `
+			+ `rate. We may adjust the subscription fee for our Services at an`
+			+ `y time after providing at least 30 days notice to you by email.`
+			+ ` We will automatically charge you the subscription fee each mon`
+			+ `th on your renewal date until you cancel your subscription. If `
+			+ `you wish to review your renewal date or any other details regar`
+			+ `ding your subscription please visit our website www.netvest.com`
+			+ `, login to your account and click on “My Account.” You may also`
+			+ ` edit your payment method for the Services and access other inf`
+			+ `ormation regarding your subscription at that link.</i>`
+			+ `<br><br>`
+			+ `<i>You may cancel the Services at any time, and you will continue `
+			+ `to have access to the Services through the end of your monthly `
+			+ `billing period. Please note that payments are not refundable `
+			+ `and there are no refunds or credits for partially used subscrip`
+			+ `tion periods. To cancel, please login to your account on the `
+			+ `Website and click on “My Account” and follow the instructions `
+			+ `for cancellation. If you do not make monthly payments when due,`
+			+ ` your access to the Services will also be terminated, except fo`
+			+ `r the informational portion of the Website accessible to the ge`
+			+ `neral public.</i>`
+			+ `<br><br>`
+			+ `<i>Please keep in mind that Netvest is designed for educational pu`
+			+ `rposes only and does not constitute investment advice. Please `
+			+ `see our Terms of Use for more information regarding your use `
+			+ `and access to the Services.</i>`
+			+ `<br><br>`
+			+ `<i>If you have any questions regarding the Services or your subscr`
+			+ `iption, including how to cancel your subscription to the Servic`
+			+ `es, please contact us at <a href="mailto:contact@netvest.com">`
+			+ `contact@netvest.com</a>.</i>`
+			+ `<br><br>`
+			+ `Invest on!<br>`
+			+ `Team Netvest`
+		}
+	},
+
 	feedback: (substitutions) =>
 	{
 		return {

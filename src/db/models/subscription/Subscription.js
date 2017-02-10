@@ -22,7 +22,6 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 	netvest_subscr.table = knexed(knex, 'subscriptions')
 	netvest_subscr.stripe = require('stripe')(cfg.secret_key)
 
-
 	netvest_subscr.addSubscription = function (user_id, subscription_data)
 	{
 		return db.user.byId(user_id)
@@ -66,7 +65,29 @@ module.exports = function NetvestSubsc (db, cfg, mailer)
 							.insert(option, 'id')
 							.then(id =>
 							{
-								rs(id[0] > 0)
+								// send Paid Subscriber email
+								if (id[0] > 0)
+								{
+									db.user.byId(user_id)
+									.then(user =>
+									{
+										var substs = extend({}, mailer.substs_defaults,
+										{
+											first_name: user.first_name,
+										})
+
+										var data = extend(
+											{ to: user.email },
+											mailer.templates.paidSubscriber(substs)
+										)
+
+										rs(mailer.send('default', data, substs))
+									})
+								}
+								else
+								{
+									rs({ success: false })
+								}
 							})
 						}
 					}
